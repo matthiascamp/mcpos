@@ -270,6 +270,10 @@ INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, color, bg_color,
   ('btn-bags',    'REUSABLE BAGS 15c', 'fixed_price', 0.15, '#fff', '#409850', 27, 'grid', 1, 5, 0, 1, 1, NULL),
   ('btn-deli',    'DELI',              'section',     0,    '#fff', '#a868b8', 28, 'grid', 1, 5, 1, 1, 1, 'Deli');
 
+-- Numpad display (row 2-5, col 3)
+INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span) VALUES
+  ('np-display', '',           'num_display', '#00cc00', '#111111', 29, 'grid', 1, 2, 3, 1, 4);
+
 -- Numpad buttons (rows 2-5, cols 4-8)
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, category_filter) VALUES
   ('np-7',     '7',          'digit',     '#000', '#ffffff', 30, 'grid', 1, 2, 4, 1, 1, '7'),

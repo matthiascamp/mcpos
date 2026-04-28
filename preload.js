@@ -11,6 +11,11 @@ contextBridge.exposeInMainWorld('pos', {
   upsertCategory:     (c)     => ipcRenderer.invoke('db:categories:upsert', c),
   deleteProduct:      (id)     => ipcRenderer.invoke('db:products:delete', id),
 
+  // Specials
+  getSpecials:        ()      => ipcRenderer.invoke('db:specials:getAll'),
+  upsertSpecial:      (s)     => ipcRenderer.invoke('db:specials:upsert', s),
+  deleteSpecial:      (id)    => ipcRenderer.invoke('db:specials:delete', id),
+
   // Deals
   getDeals:           ()       => ipcRenderer.invoke('db:deals:getAll'),
   getActiveDeals:     ()       => ipcRenderer.invoke('db:deals:getActive'),
@@ -22,6 +27,7 @@ contextBridge.exposeInMainWorld('pos', {
   // Transactions
   saveTransaction:    (txn)   => ipcRenderer.invoke('db:transaction:save', txn),
   voidTransaction:    (id)    => ipcRenderer.invoke('db:transaction:void', id),
+  refundTransaction:  (id)    => ipcRenderer.invoke('db:transaction:refund', id),
   getParkedSales:     ()      => ipcRenderer.invoke('db:transaction:getParked'),
   getTransactionItems:(id)    => ipcRenderer.invoke('db:transaction:getItems', id),
   getTransactionPayments:(id) => ipcRenderer.invoke('db:transaction:getPayments', id),
@@ -31,6 +37,7 @@ contextBridge.exposeInMainWorld('pos', {
   // Staff
   staffLogin:         (pin)   => ipcRenderer.invoke('db:staff:login', pin),
   getStaff:           ()      => ipcRenderer.invoke('db:staff:getAll'),
+  getStaffWithPin:    (id)    => ipcRenderer.invoke('db:staff:getWithPin', id),
   upsertStaff:        (s)    => ipcRenderer.invoke('db:staff:upsert', s),
 
   // Settings
@@ -48,6 +55,8 @@ contextBridge.exposeInMainWorld('pos', {
   salesByHour:        (date)  => ipcRenderer.invoke('db:reports:salesByHour', date),
   salesByMethod:      (date)  => ipcRenderer.invoke('db:reports:salesByMethod', date),
   salesByCategory:    (date)  => ipcRenderer.invoke('db:reports:salesByCategory', date),
+  voidRefundCount:    (date)  => ipcRenderer.invoke('db:reports:voidRefundCount', date),
+  zReport:            (date)  => ipcRenderer.invoke('db:reports:zReport', date),
 
   // Keyboard Layout
   getKeyboardButtons: ()      => ipcRenderer.invoke('db:keyboard:getAll'),

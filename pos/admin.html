@@ -177,77 +177,92 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* Grid keyboard editor cells */
+    /* ── Keyboard Layout Editor ───────────────────────────────── */
+    .kb-editor { display: grid; grid-template-columns: 1fr 320px; gap: 16px; align-items: start; }
+    .kb-grid-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; overflow-x: auto; }
+    .kb-grid-outer { display: flex; gap: 0; }
+    .kb-row-headers { display: flex; flex-direction: column; gap: 3px; padding-top: 24px; }
+    .kb-row-hdr { height: 56px; width: 22px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--text-dim); font-weight: 600; }
+    .kb-col-headers { display: flex; gap: 3px; margin-left: 22px; margin-bottom: 2px; }
+    .kb-col-hdr { flex: 1; text-align: center; font-size: 10px; color: var(--text-dim); font-weight: 600; min-width: 0; }
+    #kbGrid { display: grid; gap: 3px; min-width: 500px; flex: 1; }
+
     .kb-cell {
-      min-height: 0;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 13px;
-      text-align: center;
-      line-height: 1.2;
-      cursor: pointer;
-      transition: outline .15s, transform .15s;
-      position: relative;
-      user-select: none;
-      padding: 6px;
-      word-break: break-word;
+      height: 56px; min-height: 0; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center; flex-direction: column;
+      font-weight: 700; font-size: 11px; text-align: center; line-height: 1.15;
+      cursor: pointer; position: relative; user-select: none;
+      padding: 3px 4px; word-break: break-word; overflow: hidden;
+      border: 1px solid rgba(0,0,0,.15);
+      transition: outline .12s;
     }
-    .kb-cell:hover { outline: 2px solid var(--green); outline-offset: 2px; }
-    .kb-cell.selected { outline: 3px solid #3b82f6; outline-offset: 2px; transform: scale(1.03); }
+    .kb-cell:hover { outline: 2px solid var(--green); outline-offset: 1px; }
+    .kb-cell.selected { outline: 3px solid #3b82f6; outline-offset: 1px; z-index: 2; }
+    .kb-cell img { width: 20px; height: 20px; border-radius: 3px; object-fit: cover; }
+    .kb-cell .kb-cell-type {
+      position: absolute; top: 2px; right: 3px;
+      font-size: 7px; font-weight: 600; opacity: .6; text-transform: uppercase; letter-spacing: .3px;
+    }
+    .kb-cell .kb-cell-price { font-size: 9px; font-weight: 400; opacity: .75; margin-top: 1px; }
+
     .kb-cell.empty-cell {
-      border: 2px dashed var(--border);
-      background: transparent;
-      color: var(--text-dim);
-      font-weight: 400;
-      font-size: 20px;
+      border: 1px dashed var(--border); background: rgba(255,255,255,.02);
+      color: var(--text-dim); font-weight: 400; font-size: 16px; opacity: .5;
     }
-    .kb-cell.empty-cell:hover { border-color: var(--green); color: var(--green); }
-    .kb-cell.empty-cell.sel-highlight { border-color: #3b82f6; background: rgba(59,130,246,.12); color: #3b82f6; }
-    .kb-cell.dragging { opacity: 0.4; }
-    .kb-cell.drag-over { outline: 3px dashed var(--green); outline-offset: 2px; }
+    .kb-cell.empty-cell:hover { border-color: var(--green); color: var(--green); opacity: 1; }
+    .kb-cell.empty-cell.sel-highlight { border-color: #3b82f6; background: rgba(59,130,246,.15); color: #3b82f6; opacity: 1; }
+    .kb-cell.dragging { opacity: .3; }
+    .kb-cell.drag-over { outline: 3px dashed var(--green); outline-offset: 1px; }
+
+    /* Drag size tooltip */
+    .kb-drag-tooltip {
+      position: fixed; background: #3b82f6; color: #fff; font-size: 11px; font-weight: 700;
+      padding: 3px 8px; border-radius: 4px; pointer-events: none; z-index: 999; display: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,.3);
+    }
+
+    /* ── Right sidebar: edit panel + products ───────────────── */
+    .kb-sidebar { display: flex; flex-direction: column; gap: 12px; }
+    .kb-edit-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 16px; display: none;
+    }
+    .kb-edit-card.active { display: block; }
+    .kb-edit-card h3 { font-size: 14px; margin: 0 0 12px; display: flex; align-items: center; justify-content: space-between; }
+    .kb-edit-card .kb-field { margin-bottom: 10px; }
+    .kb-edit-card .kb-field label { display: block; font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 3px; font-weight: 600; letter-spacing: .5px; }
+    .kb-edit-card .kb-field input,
+    .kb-edit-card .kb-field select {
+      width: 100%; padding: 7px 10px; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--surface2); color: var(--text); font-size: 13px; outline: none;
+    }
+    .kb-edit-card .kb-field input:focus,
+    .kb-edit-card .kb-field select:focus { border-color: var(--green); }
+    .kb-edit-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .kb-edit-row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .kb-color-row { display: flex; gap: 8px; align-items: end; }
+    .kb-color-row input[type="color"] { width: 40px; height: 34px; border: 1px solid var(--border); border-radius: 6px; padding: 2px; cursor: pointer; background: var(--surface2); }
+    .kb-color-row .kb-color-label { font-size: 10px; color: var(--text-dim); text-align: center; margin-top: 2px; }
+    .kb-preview-bar { display: flex; align-items: center; gap: 10px; margin: 10px 0; padding: 10px; background: var(--surface2); border-radius: 6px; }
+    .kb-preview-bar .kb-live { width: 80px; height: 46px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 11px; text-align: center; line-height: 1.15; border: 1px solid rgba(255,255,255,.1); flex-shrink: 0; }
+    .kb-preview-bar .kb-pos-info { font-size: 11px; color: var(--text-dim); flex: 1; }
+    .kb-edit-actions { display: flex; gap: 6px; margin-top: 12px; }
+    .kb-edit-actions .btn { font-size: 12px; padding: 8px 16px; }
 
     .kb-product-sidebar {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px;
-      max-height: 450px;
-      display: flex;
-      flex-direction: column;
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 12px; max-height: 350px; display: flex; flex-direction: column;
     }
-    .kb-product-sidebar input { margin-bottom: 8px; }
+    .kb-product-sidebar h3 { font-size: 13px; margin: 0 0 8px; color: var(--text-dim); }
+    .kb-product-sidebar input { margin-bottom: 6px; padding: 7px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-size: 12px; outline: none; }
     .kb-prod-list { overflow-y: auto; flex: 1; }
     .kb-prod-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 8px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 13px;
-      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 6px; padding: 5px 6px;
+      border-radius: 4px; cursor: pointer; font-size: 12px;
     }
     .kb-prod-item:hover { background: var(--surface2); }
     .kb-prod-item.sel-highlight { background: rgba(59,130,246,.15); outline: 1px solid #3b82f6; }
-    .kb-prod-item .prod-price { margin-left: auto; color: var(--green); font-weight: 600; font-size: 12px; }
-    .kb-cell .kb-cell-type {
-      position: absolute;
-      top: 3px;
-      right: 5px;
-      font-size: 8px;
-      font-weight: 500;
-      opacity: 0.7;
-      text-transform: uppercase;
-    }
-    .kb-cell .kb-cell-price {
-      font-size: 10px;
-      font-weight: 400;
-      opacity: 0.8;
-      margin-top: 2px;
-    }
+    .kb-prod-item .prod-price { margin-left: auto; color: var(--green); font-weight: 600; font-size: 11px; }
 
     /* Toast */
     .toast {
@@ -289,12 +304,15 @@
 <body>
 
   <nav class="nav">
+    <img src="logo.png" alt="Crisp on Creek" style="width:32px;height:32px;object-fit:contain;margin-right:4px;flex-shrink:0">
     <a href="#" class="active" data-tab="dashboard">Dashboard</a>
     <a href="#" data-tab="transactions">Transactions</a>
     <a href="#" data-tab="products">Products</a>
     <a href="#" data-tab="staff">Staff</a>
     <a href="#" data-tab="deals">Deals</a>
+    <a href="#" data-tab="specials">Specials</a>
     <a href="#" data-tab="cashdrawer">Cash Drawer</a>
+    <a href="#" data-tab="zreport">Z Report</a>
     <a href="#" data-tab="keyboard">Keyboard</a>
     <a href="#" data-tab="hardware">Hardware</a>
     <a href="#" data-tab="import">Import</a>
@@ -328,12 +346,20 @@
           <div class="stat-value" id="statTxns">0</div>
         </div>
         <div class="stat-card">
+          <div class="stat-label">Avg Transaction</div>
+          <div class="stat-value" id="statAvg">$0.00</div>
+        </div>
+        <div class="stat-card">
           <div class="stat-label">GST Collected</div>
           <div class="stat-value" id="statTax">$0.00</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Discounts</div>
           <div class="stat-value" id="statDisc">$0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Voids / Refunds</div>
+          <div class="stat-value" id="statVoids" style="font-size:20px">0 / 0</div>
         </div>
       </div>
 
@@ -369,6 +395,30 @@
     <!-- ── Products ───────────────────────────────────────────────── -->
     <div class="tab-content" id="tab-products">
       <h1>Products</h1>
+
+      <!-- Category Management -->
+      <div class="section" style="margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <h2 style="margin:0;cursor:pointer" id="catToggleHeader">Categories <span style="font-size:12px;color:var(--text-dim)" id="catToggleArrow">&#9654;</span></h2>
+          <button class="btn btn-green" style="padding:5px 12px;font-size:12px" id="addCatBtn">+ Category</button>
+        </div>
+        <div id="catSection" style="display:none">
+          <table>
+            <thead><tr><th>Name</th><th>Colour</th><th>Sort Order</th><th>Products</th><th style="width:120px"></th></tr></thead>
+            <tbody id="catTable"></tbody>
+          </table>
+          <div id="catEditArea" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+            <div class="form-row">
+              <div class="form-field"><label>Name</label><input type="text" id="catName"></div>
+              <div class="form-field" style="flex:0 0 100px"><label>Colour</label><input type="color" id="catColour" value="#10b981"></div>
+              <div class="form-field" style="flex:0 0 100px"><label>Sort Order</label><input type="number" id="catSort" value="0" min="0"></div>
+              <button class="btn btn-green" id="saveCatBtn" style="height:42px">Save</button>
+              <button class="btn btn-outline" id="cancelCatBtn" style="height:42px">Cancel</button>
+            </div>
+            <input type="hidden" id="catEditId">
+          </div>
+        </div>
+      </div>
 
       <div class="section" id="lowStockPanel" style="display:none;border-color:var(--amber);margin-bottom:16px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
@@ -436,10 +486,20 @@
     <div class="tab-content" id="tab-staff">
       <h1>Staff</h1>
       <div class="section">
-        <h2>Add / Edit Staff</h2>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <h2 style="margin:0">Staff Members</h2>
+          <button class="btn btn-green" id="addStaffBtn">+ Add Staff</button>
+        </div>
+        <table>
+          <thead><tr><th>Name</th><th>Role</th><th>Status</th><th style="width:160px"></th></tr></thead>
+          <tbody id="staffTable"></tbody>
+        </table>
+      </div>
+      <div class="section" id="staffEditPanel" style="display:none">
+        <h2 id="staffEditTitle">Add Staff</h2>
         <div class="form-row">
           <div class="form-field"><label>Name</label><input type="text" id="staffName"></div>
-          <div class="form-field"><label>PIN</label><input type="text" id="staffPin" maxlength="6"></div>
+          <div class="form-field"><label>PIN (4-6 digits)</label><input type="text" id="staffPin" maxlength="6"></div>
           <div class="form-field">
             <label>Role</label>
             <select id="staffRole">
@@ -448,12 +508,13 @@
               <option value="admin">Admin</option>
             </select>
           </div>
-          <button class="btn btn-green" id="saveStaffBtn">Save</button>
         </div>
-        <table>
-          <thead><tr><th>Name</th><th>Role</th><th>Status</th></tr></thead>
-          <tbody id="staffTable"></tbody>
-        </table>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn btn-green" id="saveStaffBtn">Save</button>
+          <button class="btn btn-outline" id="cancelStaffBtn">Cancel</button>
+          <button class="btn" style="background:var(--red);color:#fff;margin-left:auto;display:none" id="toggleStaffBtn">Deactivate</button>
+        </div>
+        <input type="hidden" id="staffEditId">
       </div>
     </div>
 
@@ -526,9 +587,54 @@
       </div>
     </div>
 
+    <!-- ── Specials ──────────────────────────────────────────────── -->
+    <div class="tab-content" id="tab-specials">
+      <h1>Price Specials</h1>
+      <div class="section">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <h2 style="margin:0">Active &amp; Upcoming Specials</h2>
+          <button class="btn btn-green" id="addSpecialBtn">+ New Special</button>
+        </div>
+        <table>
+          <thead><tr><th>Product</th><th>Normal Price</th><th>Special Price</th><th>Start</th><th>End</th><th>Status</th><th style="width:120px"></th></tr></thead>
+          <tbody id="specialsTable"></tbody>
+        </table>
+      </div>
+      <div class="section" id="specialEditPanel" style="display:none">
+        <h2 id="specialEditTitle">New Special</h2>
+        <div class="form-row">
+          <div class="form-field" style="flex:2">
+            <label>Product</label>
+            <input type="text" id="specProductSearch" placeholder="Search product...">
+            <div id="specProductResults" style="max-height:120px;overflow-y:auto;margin-top:4px"></div>
+            <div id="specProductSelected" style="margin-top:4px;font-weight:600"></div>
+          </div>
+          <div class="form-field"><label>Special Price ($)</label><input type="number" id="specPrice" step="0.01" min="0"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-field"><label>Start Date (optional)</label><input type="date" id="specStart"></div>
+          <div class="form-field"><label>End Date (optional)</label><input type="date" id="specEnd"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn btn-green" id="saveSpecialBtn">Save</button>
+          <button class="btn btn-outline" id="cancelSpecialBtn">Cancel</button>
+          <button class="btn" style="background:var(--red);color:#fff;margin-left:auto;display:none" id="deleteSpecialBtn">Delete</button>
+        </div>
+        <input type="hidden" id="specEditId">
+        <input type="hidden" id="specProductId">
+      </div>
+    </div>
+
     <!-- ── Transactions ──────────────────────────────────────────── -->
     <div class="tab-content" id="tab-transactions">
       <h1>Transaction History</h1>
+      <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin-bottom:16px" id="txnSummaryStats">
+        <div class="stat-card"><div class="stat-label">Total Sales</div><div class="stat-value green" id="txnSumSales">$0.00</div></div>
+        <div class="stat-card"><div class="stat-label">Transactions</div><div class="stat-value" id="txnSumCount">0</div></div>
+        <div class="stat-card"><div class="stat-label">Avg Sale</div><div class="stat-value" id="txnSumAvg">$0.00</div></div>
+        <div class="stat-card"><div class="stat-label">Voided</div><div class="stat-value" id="txnSumVoids">0</div></div>
+        <div class="stat-card"><div class="stat-label">Refunded</div><div class="stat-value" id="txnSumRefunds">0</div></div>
+      </div>
       <div class="section">
         <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:end">
           <div class="form-field" style="flex:0 0 140px"><label>From</label><input type="date" id="txnDateFrom"></div>
@@ -544,6 +650,7 @@
             </select>
           </div>
           <button class="btn btn-green" id="txnSearchBtn">Search</button>
+          <button class="btn btn-outline" id="txnExportBtn" style="padding:10px 16px">Export CSV</button>
         </div>
         <table>
           <thead><tr><th>Date/Time</th><th>ID</th><th>Staff</th><th>Items</th><th>Total</th><th>Status</th><th style="width:120px"></th></tr></thead>
@@ -597,129 +704,190 @@
       </div>
     </div>
 
+    <!-- ── Z Report ─────────────────────────────────────────────── -->
+    <div class="tab-content" id="tab-zreport">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+        <h1 style="margin:0">End-of-Day Z Report</h1>
+        <input type="date" id="zDate" style="padding:8px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:14px">
+        <button class="btn btn-green" id="zGenerate">Generate</button>
+        <button class="btn btn-outline" id="zPrint">Print Report</button>
+      </div>
+      <div id="zReportContent" style="display:none">
+        <div id="zReportPrintable">
+          <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:16px">
+            <div class="stat-card"><div class="stat-label">Net Sales</div><div class="stat-value green" id="zSales">$0.00</div></div>
+            <div class="stat-card"><div class="stat-label">Transactions</div><div class="stat-value" id="zTxns">0</div></div>
+            <div class="stat-card"><div class="stat-label">Avg Transaction</div><div class="stat-value" id="zAvg">$0.00</div></div>
+            <div class="stat-card"><div class="stat-label">GST Collected</div><div class="stat-value" id="zTax">$0.00</div></div>
+            <div class="stat-card"><div class="stat-label">Discounts</div><div class="stat-value" id="zDisc">$0.00</div></div>
+            <div class="stat-card"><div class="stat-label">Voids</div><div class="stat-value" id="zVoids">0</div></div>
+            <div class="stat-card"><div class="stat-label">Refunds</div><div class="stat-value" id="zRefunds">0</div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+            <div class="section" style="padding:16px">
+              <h2 style="margin-bottom:10px">Payment Methods</h2>
+              <div id="zMethods"></div>
+              <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+                <div style="display:flex;justify-content:space-between;font-weight:700;font-size:14px"><span>Total Tendered</span><span id="zMethodTotal"></span></div>
+              </div>
+            </div>
+            <div class="section" style="padding:16px">
+              <h2 style="margin-bottom:10px">Cash Drawer</h2>
+              <div id="zDrawer"></div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="section" style="padding:16px">
+              <h2 style="margin-bottom:10px">Sales by Category</h2>
+              <div id="zCategories"></div>
+            </div>
+            <div class="section" style="padding:16px">
+              <h2 style="margin-bottom:10px">Sales by Hour</h2>
+              <div id="zHourly"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ── Keyboard Layout ───────────────────────────────────────── -->
     <div class="tab-content" id="tab-keyboard">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap">
-        <h1 style="margin:0;flex-shrink:0">Page Layout Editor</h1>
-        <div id="pageTabs" style="display:flex;gap:4px;align-items:center;margin-left:8px"></div>
-        <button class="btn btn-green" style="padding:5px 12px;font-size:12px" id="addPageBtn">+ Page</button>
-        <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-          <span style="color:var(--text-dim);font-size:12px">Grid:</span>
-          <select id="gridCols" style="padding:4px 8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12px">
-            <option value="6">6 col</option><option value="8">8 col</option><option value="10" selected>10 col</option><option value="12">12 col</option>
-          </select>
-          <select id="gridRows" style="padding:4px 8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12px">
-            <option value="5">5 row</option><option value="7" selected>7 row</option><option value="8">8 row</option><option value="10">10 row</option>
-          </select>
-          <button class="btn btn-outline" style="padding:4px 10px;font-size:11px" id="deletePageBtn">Delete Page</button>
+      <!-- Toolbar -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+        <h1 style="margin:0;font-size:20px">Keyboard Layout</h1>
+        <div id="pageTabs" style="display:flex;gap:3px;align-items:center;margin-left:6px"></div>
+        <button class="btn btn-outline" style="padding:4px 10px;font-size:11px" id="addPageBtn">+ Page</button>
+        <div style="flex:1"></div>
+        <span style="color:var(--text-dim);font-size:11px">Columns</span>
+        <select id="gridCols" style="padding:3px 6px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12px">
+          <option value="6">6</option><option value="8">8</option><option value="10" selected>10</option><option value="12">12</option>
+        </select>
+        <span style="color:var(--text-dim);font-size:11px">Rows</span>
+        <select id="gridRows" style="padding:3px 6px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12px">
+          <option value="5">5</option><option value="7" selected>7</option><option value="8">8</option><option value="10">10</option>
+        </select>
+        <button class="btn" style="padding:4px 10px;font-size:11px;background:var(--red);color:#fff" id="deletePageBtn">Delete Page</button>
+      </div>
+
+      <!-- Main editor: grid + sidebar -->
+      <div class="kb-editor">
+        <div class="kb-grid-wrap">
+          <div class="kb-col-headers" id="kbColHeaders"></div>
+          <div class="kb-grid-outer">
+            <div class="kb-row-headers" id="kbRowHeaders"></div>
+            <div id="kbGrid"></div>
+          </div>
+          <p style="color:var(--text-dim);font-size:10px;margin-top:8px;opacity:.7">Click empty cell to add button. Drag across empty cells for multi-cell. Drag buttons to move.</p>
+        </div>
+
+        <div class="kb-sidebar">
+          <!-- Edit panel (shows when editing) -->
+          <div class="kb-edit-card" id="kbEditPanel">
+            <h3>
+              <span id="kbEditTitle">New Button</span>
+              <button class="btn btn-outline" style="padding:2px 8px;font-size:10px" id="kbCloseEdit">&times;</button>
+            </h3>
+            <div style="font-size:10px;color:var(--text-dim);margin:-8px 0 10px" id="kbCellInfo">Row 0, Col 0</div>
+
+            <div class="kb-field"><label>Label</label><input type="text" id="kbLabel" placeholder="Button text"></div>
+
+            <div class="kb-edit-row">
+              <div class="kb-field">
+                <label>Type</label>
+                <select id="kbType">
+                  <optgroup label="Product">
+                    <option value="open_price">Open Price</option>
+                    <option value="fixed_price">Fixed Price</option>
+                    <option value="section">Category Section</option>
+                    <option value="nav">Nav (filtered)</option>
+                  </optgroup>
+                  <optgroup label="Register">
+                    <option value="void">Void</option>
+                    <option value="return">Return</option>
+                    <option value="hold">Hold Sale</option>
+                    <option value="nosale">No Sale</option>
+                    <option value="supervisor">Supervisor</option>
+                    <option value="lock">Lock</option>
+                    <option value="reprint">Reprint</option>
+                    <option value="pricecheck">Price Check</option>
+                    <option value="errcorrect">Error Correct</option>
+                    <option value="recall">Recall Sale</option>
+                    <option value="pctdiscount">% Discount</option>
+                    <option value="pctone">% One Item</option>
+                    <option value="movedrawer">Move Drawer</option>
+                    <option value="ubereats">Uber Eats</option>
+                    <option value="viewor">View Or</option>
+                  </optgroup>
+                  <optgroup label="Numpad">
+                    <option value="digit">Digit</option>
+                    <option value="clear">Clear</option>
+                    <option value="qtyx">QTY X</option>
+                    <option value="codeenter">Code Enter</option>
+                    <option value="num_display">LCD Display</option>
+                  </optgroup>
+                  <optgroup label="Payment">
+                    <option value="subtotal">Sub Total</option>
+                    <option value="pay_cash">Pay Cash</option>
+                    <option value="pay_card">Pay Card</option>
+                    <option value="park">Park Sale</option>
+                  </optgroup>
+                  <optgroup label="Navigation">
+                    <option value="page_link">Go To Page</option>
+                    <option value="back_home">Back Home</option>
+                  </optgroup>
+                </select>
+              </div>
+              <div class="kb-field"><label>Price</label><input type="number" id="kbPrice" step="0.01" min="0" value="0"></div>
+            </div>
+
+            <div class="kb-edit-row">
+              <div class="kb-field">
+                <label>Category / Value</label>
+                <input type="text" id="kbCatFilter" list="kbCatList" placeholder="e.g. Fruit">
+                <datalist id="kbCatList"></datalist>
+              </div>
+              <div class="kb-field"><label>Alpha Range</label><input type="text" id="kbAlphaRange" placeholder="A-M"></div>
+            </div>
+
+            <div class="kb-color-row" style="margin-bottom:10px">
+              <div style="text-align:center"><input type="color" id="kbBgColor" value="#409850"><div class="kb-color-label">BG</div></div>
+              <div style="text-align:center"><input type="color" id="kbColor" value="#ffffff"><div class="kb-color-label">Text</div></div>
+              <div class="kb-field" style="flex:1"><label>Col Span</label><input type="number" id="kbColSpan" value="1" min="1" max="12"></div>
+              <div class="kb-field" style="flex:1"><label>Row Span</label><input type="number" id="kbRowSpan" value="1" min="1" max="10"></div>
+            </div>
+
+            <div class="kb-preview-bar">
+              <div class="kb-live" id="kbLivePreview">Button</div>
+              <div class="kb-pos-info">
+                <div style="font-size:10px;margin-bottom:2px">Image (optional)</div>
+                <input type="file" id="kbImageFile" accept="image/*" style="font-size:10px;width:100%">
+                <div id="kbImagePreview" style="margin-top:3px"></div>
+              </div>
+            </div>
+
+            <div class="kb-edit-actions">
+              <button class="btn btn-green" id="kbSaveBtn">Save</button>
+              <button class="btn btn-outline" id="kbCancelBtn">Cancel</button>
+              <button class="btn" style="background:var(--red);color:#fff;margin-left:auto" id="kbDeleteBtn">Delete</button>
+            </div>
+            <input type="hidden" id="kbEditId">
+            <input type="hidden" id="kbImageData">
+          </div>
+
+          <!-- Product picker (always visible) -->
+          <div class="kb-product-sidebar">
+            <h3>Products</h3>
+            <input type="text" id="kbProductSearch" placeholder="Search products...">
+            <div class="kb-prod-list" id="kbProductList">
+              <p style="color:var(--text-dim);font-size:11px;padding:6px">Loading...</p>
+            </div>
+            <p style="color:var(--text-dim);font-size:9px;margin-top:4px">Select product, then click empty cell</p>
+          </div>
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 240px;gap:12px;align-items:start">
-        <div class="section" style="padding:12px;overflow-x:auto">
-          <p style="color:var(--text-dim);font-size:11px;margin-bottom:8px">Click to edit. Drag across empty cells to create a multi-cell button. Drag existing buttons to move them.</p>
-          <div id="kbGrid" style="display:grid;gap:4px;min-width:600px;position:relative"></div>
-        </div>
-
-        <div class="kb-product-sidebar">
-          <h2 style="margin:0 0 8px 0;font-size:14px">Products</h2>
-          <input type="text" id="kbProductSearch" placeholder="Search products..." style="padding:7px 10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px">
-          <div class="kb-prod-list" id="kbProductList">
-            <p style="color:var(--text-dim);font-size:12px;padding:8px">Load the keyboard tab to see products here</p>
-          </div>
-          <p style="color:var(--text-dim);font-size:10px;margin-top:6px">Click a product, then click an empty cell to place it</p>
-        </div>
-      </div>
-
-      <div class="section" id="kbEditPanel" style="display:none;padding:16px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <h2 style="margin:0" id="kbEditTitle">Edit Button</h2>
-          <div style="display:flex;gap:6px;align-items:center">
-            <span style="font-size:11px;color:var(--text-dim)" id="kbCellInfo"></span>
-            <button class="btn btn-outline" style="padding:4px 12px;font-size:12px" id="kbCloseEdit">Close</button>
-          </div>
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-          <div class="form-field"><label>Label</label><input type="text" id="kbLabel" placeholder="Button text"></div>
-          <div class="form-field">
-            <label>Function</label>
-            <select id="kbType">
-              <optgroup label="Product">
-                <option value="open_price">Open Price (cashier enters $)</option>
-                <option value="fixed_price">Fixed Price (set amount)</option>
-                <option value="section">Section (open category)</option>
-                <option value="nav">Navigation (filtered view)</option>
-              </optgroup>
-              <optgroup label="Register Functions">
-                <option value="void">Void Last Item</option>
-                <option value="return">Return</option>
-                <option value="hold">Hold / Park Sale</option>
-                <option value="nosale">No Sale (open drawer)</option>
-                <option value="supervisor">Supervisor Only</option>
-                <option value="lock">Lock Register</option>
-                <option value="reprint">Reprint Receipt</option>
-                <option value="pricecheck">Price Check</option>
-                <option value="errcorrect">Error Correct</option>
-                <option value="recall">Recall Parked Sale</option>
-                <option value="pctdiscount">% Discount (whole sale)</option>
-                <option value="pctone">% One Item Discount</option>
-                <option value="movedrawer">Move Drawer</option>
-                <option value="ubereats">Uber Eats Adjust</option>
-                <option value="viewor">View Or...</option>
-              </optgroup>
-              <optgroup label="Numpad">
-                <option value="digit">Digit (0-9, 00)</option>
-                <option value="clear">Clear</option>
-                <option value="qtyx">QTY X (quantity)</option>
-                <option value="codeenter">Code Enter (PLU lookup)</option>
-              </optgroup>
-              <optgroup label="Payment">
-                <option value="subtotal">Sub Total / Pay Cash</option>
-                <option value="pay_cash">Pay Cash</option>
-                <option value="pay_card">Pay Card / EFTPOS</option>
-                <option value="park">Park Sale</option>
-              </optgroup>
-              <optgroup label="Navigation">
-                <option value="page_link">Go To Page</option>
-                <option value="back_home">Back to Home</option>
-              </optgroup>
-            </select>
-          </div>
-          <div class="form-field" id="kbCatFilterField">
-            <label>Category / Value</label>
-            <input type="text" id="kbCatFilter" list="kbCatList" placeholder="e.g. Flowers, Fruit, __all__, 7">
-            <datalist id="kbCatList"></datalist>
-          </div>
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;gap:10px;margin-top:10px">
-          <div class="form-field"><label>Alpha Range</label><input type="text" id="kbAlphaRange" placeholder="e.g. A-M"></div>
-          <div class="form-field"><label>Price ($)</label><input type="number" id="kbPrice" step="0.01" min="0"></div>
-          <div class="form-field"><label>BG Color</label><input type="color" id="kbBgColor" value="#409850"></div>
-          <div class="form-field"><label>Text Color</label><input type="color" id="kbColor" value="#ffffff"></div>
-          <div class="form-field"><label>Col Span</label><input type="number" id="kbColSpan" value="1" min="1" max="10"></div>
-          <div class="form-field"><label>Row Span</label><input type="number" id="kbRowSpan" value="1" min="1" max="5"></div>
-        </div>
-
-        <div style="display:flex;gap:10px;margin-top:10px;align-items:end">
-          <div class="form-field" style="flex:0 0 auto">
-            <label>Image</label>
-            <input type="file" id="kbImageFile" accept="image/*" style="width:200px">
-            <div id="kbImagePreview" style="margin-top:4px"></div>
-          </div>
-          <div style="flex:1"></div>
-          <div id="kbLivePreview" style="width:100px;height:60px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;text-align:center;line-height:1.2;flex-shrink:0;border:1px solid var(--border)"></div>
-        </div>
-
-        <div style="display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
-          <button class="btn btn-green" id="kbSaveBtn" style="padding:10px 28px">Save Button</button>
-          <button class="btn btn-outline" id="kbCancelBtn">Cancel</button>
-          <button class="btn" style="background:var(--red);color:#fff;margin-left:auto;padding:10px 20px" id="kbDeleteBtn">Delete Button</button>
-        </div>
-        <input type="hidden" id="kbEditId">
-        <input type="hidden" id="kbImageData">
-      </div>
+      <!-- Drag size tooltip -->
+      <div class="kb-drag-tooltip" id="kbDragTooltip"></div>
     </div>
 
     <!-- ── Hardware ────────────────────────────────────────────────── -->
@@ -874,7 +1042,9 @@
         if (a.dataset.tab === 'products') loadProducts()
         if (a.dataset.tab === 'staff') loadStaff()
         if (a.dataset.tab === 'deals') loadDeals()
+        if (a.dataset.tab === 'specials') loadSpecials()
         if (a.dataset.tab === 'cashdrawer') loadCashDrawer()
+        if (a.dataset.tab === 'zreport') initZReport()
         if (a.dataset.tab === 'keyboard') loadKeyboard()
         if (a.dataset.tab === 'hardware') loadHardware()
         if (a.dataset.tab === 'settings') loadSettings()
@@ -910,18 +1080,25 @@
 
     async function loadDashboard() {
       const date = dashboardDate
-      const [summary, top, hourly, methods, categories] = await Promise.all([
+      const [summary, top, hourly, methods, categories, voidRefund] = await Promise.all([
         window.pos.dailySummary(date),
         window.pos.topProducts(date),
         window.pos.salesByHour(date),
         window.pos.salesByMethod(date),
-        window.pos.salesByCategory(date)
+        window.pos.salesByCategory(date),
+        window.pos.voidRefundCount(date)
       ])
 
-      $('#statSales').textContent = money(summary?.total_sales || 0)
-      $('#statTxns').textContent = summary?.txn_count || 0
+      const totalSales = summary?.total_sales || 0
+      const txnCount = summary?.txn_count || 0
+      $('#statSales').textContent = money(totalSales)
+      $('#statTxns').textContent = txnCount
+      $('#statAvg').textContent = txnCount > 0 ? money(totalSales / txnCount) : '$0.00'
       $('#statTax').textContent = money(summary?.total_tax || 0)
       $('#statDisc').textContent = money(summary?.total_discounts || 0)
+      const vc = voidRefund?.void_count || 0, rc = voidRefund?.refund_count || 0
+      $('#statVoids').textContent = `${vc} / ${rc}`
+      if (rc > 0) $('#statVoids').innerHTML = `${vc} / ${rc} <span style="font-size:12px;color:var(--text-dim)">(${money(voidRefund?.refund_total || 0)})</span>`
 
       // Hourly chart
       const maxHourly = Math.max(...hourly.map(h => h.total), 1)
@@ -1134,33 +1311,164 @@
       $('#productEditPanel').style.display = 'none'
     })
 
+    // ── Categories ─────────────────────────────────────────────────
+
+    let catExpanded = false
+
+    $('#catToggleHeader').addEventListener('click', () => {
+      catExpanded = !catExpanded
+      $('#catSection').style.display = catExpanded ? 'block' : 'none'
+      $('#catToggleArrow').innerHTML = catExpanded ? '&#9660;' : '&#9654;'
+      if (catExpanded) loadCategories()
+    })
+
+    async function loadCategories () {
+      const cats = await window.pos.getCategories()
+      // Count products per category
+      const allProds = await window.pos.searchProducts('')
+      const countMap = {}
+      for (const p of allProds) { countMap[p.category_id] = (countMap[p.category_id] || 0) + 1 }
+
+      $('#catTable').innerHTML = cats.map(c => `<tr>
+        <td>${esc(c.name)}</td>
+        <td><span style="display:inline-block;width:20px;height:20px;border-radius:4px;background:${esc(c.colour || '#10b981')};vertical-align:middle"></span> ${esc(c.colour || '#10b981')}</td>
+        <td>${c.sort_order || 0}</td>
+        <td>${countMap[c.id] || 0}</td>
+        <td><button class="btn btn-outline" style="padding:3px 10px;font-size:11px" data-edit-cat="${esc(c.id)}">Edit</button></td>
+      </tr>`).join('') || '<tr><td colspan="5" style="color:var(--text-dim)">No categories</td></tr>'
+    }
+
+    $('#catTable').addEventListener('click', e => {
+      const btn = e.target.closest('[data-edit-cat]')
+      if (!btn) return
+      const cat = productCategories.find(c => c.id === btn.dataset.editCat)
+      if (cat) openCatEdit(cat)
+    })
+
+    $('#addCatBtn').addEventListener('click', () => {
+      if (!catExpanded) { catExpanded = true; $('#catSection').style.display = 'block'; $('#catToggleArrow').innerHTML = '&#9660;'; loadCategories() }
+      openCatEdit(null)
+    })
+
+    function openCatEdit (cat) {
+      if (cat) {
+        $('#catEditId').value = cat.id
+        $('#catName').value = cat.name
+        $('#catColour').value = cat.colour || '#10b981'
+        $('#catSort').value = cat.sort_order || 0
+      } else {
+        $('#catEditId').value = ''
+        $('#catName').value = ''
+        $('#catColour').value = '#10b981'
+        $('#catSort').value = productCategories.length
+      }
+      $('#catEditArea').style.display = 'block'
+      $('#catName').focus()
+    }
+
+    $('#saveCatBtn').addEventListener('click', async () => {
+      const name = $('#catName').value.trim()
+      if (!name) { showToast('Category name is required', 'error'); return }
+      await window.pos.upsertCategory({
+        id: $('#catEditId').value || undefined,
+        name,
+        colour: $('#catColour').value,
+        sort_order: parseInt($('#catSort').value) || 0
+      })
+      showToast(`Category "${name}" saved`, 'success')
+      $('#catEditArea').style.display = 'none'
+      productCategories = await window.pos.getCategories()
+      loadCategories()
+    })
+
+    $('#cancelCatBtn').addEventListener('click', () => { $('#catEditArea').style.display = 'none' })
+
     // ── Staff ───────────────────────────────────────────────────────
 
+    let staffCache = []
+
     async function loadStaff() {
-      const staff = await window.pos.getStaff()
-      $('#staffTable').innerHTML = staff.map(s => `
+      staffCache = await window.pos.getStaff()
+      $('#staffTable').innerHTML = staffCache.map(s => `
         <tr>
           <td>${esc(s.name)}</td>
-          <td>${esc(s.role)}</td>
+          <td style="text-transform:capitalize">${esc(s.role)}</td>
           <td><span class="badge ${s.active ? 'badge-green' : 'badge-red'}">${s.active ? 'Active' : 'Inactive'}</span></td>
+          <td><button class="btn btn-outline" style="padding:3px 10px;font-size:11px" data-edit-staff="${esc(s.id)}">Edit</button></td>
         </tr>
       `).join('')
+    }
+
+    $('#staffTable').addEventListener('click', e => {
+      const btn = e.target.closest('[data-edit-staff]')
+      if (!btn) return
+      const s = staffCache.find(st => st.id === btn.dataset.editStaff)
+      if (s) openStaffEdit(s)
+    })
+
+    $('#addStaffBtn').addEventListener('click', () => openStaffEdit(null))
+
+    function openStaffEdit (s) {
+      if (s) {
+        $('#staffEditTitle').textContent = 'Edit Staff'
+        $('#staffEditId').value = s.id
+        $('#staffName').value = s.name
+        $('#staffPin').value = ''
+        $('#staffRole').value = s.role
+        $('#toggleStaffBtn').style.display = 'inline-block'
+        $('#toggleStaffBtn').textContent = s.active ? 'Deactivate' : 'Reactivate'
+        $('#toggleStaffBtn').style.background = s.active ? 'var(--red)' : 'var(--green)'
+        $('#toggleStaffBtn').dataset.active = s.active ? '1' : '0'
+      } else {
+        $('#staffEditTitle').textContent = 'Add Staff'
+        $('#staffEditId').value = ''
+        $('#staffName').value = ''
+        $('#staffPin').value = ''
+        $('#staffRole').value = 'cashier'
+        $('#toggleStaffBtn').style.display = 'none'
+      }
+      $('#staffEditPanel').style.display = 'block'
+      $('#staffName').focus()
     }
 
     $('#saveStaffBtn').addEventListener('click', async () => {
       const name = $('#staffName').value.trim()
       const pin = $('#staffPin').value.trim()
       const role = $('#staffRole').value
+      const editId = $('#staffEditId').value
 
-      if (!name || !pin || pin.length < 4) {
-        showToast('Name and PIN (4+ digits) are required', 'error')
-        return
+      if (!name) { showToast('Name is required', 'error'); return }
+      if (!editId && (!pin || pin.length < 4)) { showToast('PIN (4+ digits) is required for new staff', 'error'); return }
+      if (pin && pin.length < 4) { showToast('PIN must be at least 4 digits', 'error'); return }
+
+      const data = { name, role }
+      if (editId) data.id = editId
+      if (pin) data.pin = pin
+
+      // Preserve existing pin if editing and no new pin entered
+      if (editId && !pin) {
+        const existing = await window.pos.getStaffWithPin(editId)
+        if (existing) data.pin = existing.pin || '0000'
       }
 
-      await window.pos.upsertStaff({ name, pin, role })
+      await window.pos.upsertStaff(data)
       showToast(`Staff "${name}" saved`, 'success')
-      $('#staffName').value = ''
-      $('#staffPin').value = ''
+      $('#staffEditPanel').style.display = 'none'
+      loadStaff()
+    })
+
+    $('#cancelStaffBtn').addEventListener('click', () => { $('#staffEditPanel').style.display = 'none' })
+
+    $('#toggleStaffBtn').addEventListener('click', async () => {
+      const id = $('#staffEditId').value
+      if (!id) return
+      const s = staffCache.find(st => st.id === id)
+      if (!s) return
+      const full = await window.pos.getStaffWithPin(id)
+      const newActive = !s.active
+      await window.pos.upsertStaff({ id: s.id, name: s.name, pin: full?.pin || '0000', role: s.role, active: newActive })
+      showToast(`${s.name} ${newActive ? 'reactivated' : 'deactivated'}`, 'success')
+      $('#staffEditPanel').style.display = 'none'
       loadStaff()
     })
 
@@ -1321,6 +1629,133 @@
 
     $('#dCancelBtn').addEventListener('click', () => { $('#dealEditPanel').style.display = 'none' })
 
+    // ── Specials ────────────────────────────────────────────────────
+
+    async function loadSpecials () {
+      const specials = await window.pos.getSpecials()
+      const today = new Date().toISOString().slice(0, 10)
+      $('#specialsTable').innerHTML = specials.length ? specials.map(s => {
+        const isActive = s.active && (!s.start_date || s.start_date <= today) && (!s.end_date || s.end_date >= today)
+        const isFuture = s.active && s.start_date && s.start_date > today
+        const isExpired = s.end_date && s.end_date < today
+        let badge = ''
+        if (isActive) badge = '<span class="badge badge-green">Active</span>'
+        else if (isFuture) badge = '<span class="badge badge-amber">Upcoming</span>'
+        else if (isExpired) badge = '<span class="badge badge-red">Expired</span>'
+        else badge = '<span class="badge badge-red">Inactive</span>'
+        return `<tr>
+          <td>${esc(s.product_name)}</td>
+          <td>${money(s.product_price)}</td>
+          <td style="color:var(--green);font-weight:700">${money(s.special_price)}</td>
+          <td>${s.start_date || '-'}</td>
+          <td>${s.end_date || '-'}</td>
+          <td>${badge}</td>
+          <td>
+            <button class="btn btn-outline" style="padding:3px 10px;font-size:11px" data-edit-spec="${esc(s.id)}">Edit</button>
+            <button class="btn" style="padding:3px 10px;font-size:11px;background:var(--red);color:#fff" data-del-spec="${esc(s.id)}">Del</button>
+          </td>
+        </tr>`
+      }).join('') : '<tr><td colspan="7" style="color:var(--text-dim)">No specials — click "+ New Special" to create one</td></tr>'
+    }
+
+    let specProductId = null
+
+    $('#specialsTable').addEventListener('click', async e => {
+      const editBtn = e.target.closest('[data-edit-spec]')
+      const delBtn = e.target.closest('[data-del-spec]')
+      if (editBtn) {
+        const specials = await window.pos.getSpecials()
+        const sp = specials.find(s => s.id === editBtn.dataset.editSpec)
+        if (sp) openSpecialEdit(sp)
+      }
+      if (delBtn) {
+        if (!confirm('Delete this special?')) return
+        await window.pos.deleteSpecial(delBtn.dataset.delSpec)
+        showToast('Special deleted', 'success')
+        loadSpecials()
+      }
+    })
+
+    $('#addSpecialBtn').addEventListener('click', () => openSpecialEdit(null))
+
+    function openSpecialEdit (sp) {
+      if (sp) {
+        $('#specialEditTitle').textContent = 'Edit Special'
+        $('#specEditId').value = sp.id
+        $('#specProductId').value = sp.product_id
+        specProductId = sp.product_id
+        $('#specProductSelected').textContent = sp.product_name
+        $('#specProductSearch').value = ''
+        $('#specPrice').value = sp.special_price
+        $('#specStart').value = sp.start_date || ''
+        $('#specEnd').value = sp.end_date || ''
+        $('#deleteSpecialBtn').style.display = 'inline-block'
+      } else {
+        $('#specialEditTitle').textContent = 'New Special'
+        $('#specEditId').value = ''
+        $('#specProductId').value = ''
+        specProductId = null
+        $('#specProductSelected').textContent = ''
+        $('#specProductSearch').value = ''
+        $('#specPrice').value = ''
+        $('#specStart').value = ''
+        $('#specEnd').value = ''
+        $('#deleteSpecialBtn').style.display = 'none'
+      }
+      $('#specProductResults').innerHTML = ''
+      $('#specialEditPanel').style.display = 'block'
+    }
+
+    $('#specProductSearch').addEventListener('input', debounce(async () => {
+      const q = $('#specProductSearch').value.trim()
+      if (q.length < 2) { $('#specProductResults').innerHTML = ''; return }
+      const results = await window.pos.searchProducts(q)
+      $('#specProductResults').innerHTML = results.slice(0, 8).map(p =>
+        `<div style="padding:5px 8px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;display:flex;justify-content:space-between" data-spec-prod="${esc(p.id)}" data-spec-name="${esc(p.name)}" data-spec-price="${p.price}">
+          <span>${esc(p.name)}</span><span style="color:var(--text-dim)">${money(p.price)}</span>
+        </div>`
+      ).join('')
+    }, 250))
+
+    $('#specProductResults').addEventListener('click', e => {
+      const row = e.target.closest('[data-spec-prod]')
+      if (!row) return
+      specProductId = row.dataset.specProd
+      $('#specProductId').value = specProductId
+      $('#specProductSelected').textContent = `${row.dataset.specName} (${money(parseFloat(row.dataset.specPrice))})`
+      $('#specProductSearch').value = ''
+      $('#specProductResults').innerHTML = ''
+    })
+
+    $('#saveSpecialBtn').addEventListener('click', async () => {
+      const productId = $('#specProductId').value
+      const price = parseFloat($('#specPrice').value)
+      if (!productId) { showToast('Select a product', 'error'); return }
+      if (!price || price <= 0) { showToast('Enter a special price', 'error'); return }
+      await window.pos.upsertSpecial({
+        id: $('#specEditId').value || undefined,
+        product_id: productId,
+        special_price: price,
+        start_date: $('#specStart').value || null,
+        end_date: $('#specEnd').value || null,
+        active: true
+      })
+      showToast('Special saved', 'success')
+      $('#specialEditPanel').style.display = 'none'
+      loadSpecials()
+    })
+
+    $('#cancelSpecialBtn').addEventListener('click', () => { $('#specialEditPanel').style.display = 'none' })
+
+    $('#deleteSpecialBtn').addEventListener('click', async () => {
+      const id = $('#specEditId').value
+      if (!id || !confirm('Delete this special?')) return
+      await window.pos.deleteSpecial(id)
+      showToast('Special deleted', 'success')
+      $('#specialEditPanel').style.display = 'none'
+      loadSpecials()
+    })
+
     // ── Transactions ────────────────────────────────────────────────
 
     function initTxnDates () {
@@ -1341,9 +1776,25 @@
         status: $('#txnStatus').value || null
       }
       const txns = await window.pos.searchTransactions(opts)
+      // Summary stats
+      const completed = txns.filter(t => t.status === 'completed')
+      const totalSales = completed.reduce((s, t) => s + (t.total || 0), 0)
+      const voided = txns.filter(t => t.status === 'voided').length
+      const refunded = txns.filter(t => t.status === 'refunded').length
+      $('#txnSumSales').textContent = money(totalSales)
+      $('#txnSumCount').textContent = completed.length
+      $('#txnSumAvg').textContent = completed.length ? money(totalSales / completed.length) : '$0.00'
+      $('#txnSumVoids').textContent = voided
+      $('#txnSumRefunds').textContent = refunded
+
       const statusColors = { completed: 'badge-green', voided: 'badge-red', refunded: 'badge-amber', parked: 'badge-amber' }
       $('#txnTable').innerHTML = txns.length ? txns.map(t => {
         const dt = new Date(t.created_at + 'Z')
+        const actions = [`<button class="btn btn-outline" style="padding:2px 8px;font-size:11px" data-txn-view="${esc(t.id)}">View</button>`]
+        if (t.status === 'completed') {
+          actions.push(`<button class="btn" style="padding:2px 8px;font-size:11px;background:var(--red);color:#fff" data-txn-void="${esc(t.id)}">Void</button>`)
+          actions.push(`<button class="btn" style="padding:2px 8px;font-size:11px;background:#e07020;color:#fff" data-txn-refund="${esc(t.id)}">Refund</button>`)
+        }
         return `<tr>
           <td>${dt.toLocaleDateString('en-AU')} ${dt.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })}</td>
           <td style="font-family:monospace;font-size:11px">${esc((t.id || '').substring(0, 8))}</td>
@@ -1351,10 +1802,7 @@
           <td>${t.item_count || 0}</td>
           <td>${money(t.total)}</td>
           <td><span class="badge ${statusColors[t.status] || ''}">${esc(t.status)}</span></td>
-          <td style="display:flex;gap:4px">
-            <button class="btn btn-outline" style="padding:2px 8px;font-size:11px" data-txn-view="${esc(t.id)}">View</button>
-            ${t.status === 'completed' ? `<button class="btn" style="padding:2px 8px;font-size:11px;background:var(--red);color:#fff" data-txn-void="${esc(t.id)}">Void</button>` : ''}
-          </td>
+          <td style="display:flex;gap:4px">${actions.join('')}</td>
         </tr>`
       }).join('') : '<tr><td colspan="7" style="color:var(--text-dim)">No transactions found</td></tr>'
     }
@@ -1364,6 +1812,7 @@
     $('#txnTable').addEventListener('click', async e => {
       const viewBtn = e.target.closest('[data-txn-view]')
       const voidBtn = e.target.closest('[data-txn-void]')
+      const refundBtn = e.target.closest('[data-txn-refund]')
       if (viewBtn) {
         const txnId = viewBtn.dataset.txnView
         const [items, payments] = await Promise.all([
@@ -1392,9 +1841,50 @@
         showToast('Transaction voided', 'success')
         searchTransactions()
       }
+      if (refundBtn) {
+        if (!confirm('Mark this transaction as refunded?')) return
+        await window.pos.refundTransaction(refundBtn.dataset.txnRefund)
+        showToast('Transaction refunded', 'success')
+        searchTransactions()
+      }
     })
 
     $('#txnDetailClose').addEventListener('click', () => { $('#txnDetailPanel').style.display = 'none' })
+
+    $('#txnExportBtn').addEventListener('click', async () => {
+      const opts = {
+        dateFrom: $('#txnDateFrom').value || null,
+        dateTo: $('#txnDateTo').value || null,
+        status: $('#txnStatus').value || null
+      }
+      const txns = await window.pos.searchTransactions(opts)
+      if (!txns.length) { showToast('No transactions to export', 'info'); return }
+      const header = 'Date,Time,ID,Staff,Items,Subtotal,Tax,Discount,Total,Status'
+      const rows = txns.map(t => {
+        const dt = new Date(t.created_at + 'Z')
+        return [
+          dt.toLocaleDateString('en-AU'),
+          dt.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          t.id,
+          (t.staff_name || '').replace(/,/g, ' '),
+          t.item_count || 0,
+          (t.subtotal || 0).toFixed(2),
+          (t.tax || 0).toFixed(2),
+          (t.discount || 0).toFixed(2),
+          (t.total || 0).toFixed(2),
+          t.status
+        ].join(',')
+      })
+      const csv = [header, ...rows].join('\n')
+      const blob = new Blob([csv], { type: 'text/csv' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `transactions_${opts.dateFrom || 'all'}_${opts.dateTo || 'all'}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+      showToast(`Exported ${txns.length} transactions`, 'success')
+    })
 
     // ── Cash Drawer ─────────────────────────────────────────────────
 
@@ -1579,6 +2069,84 @@
       showToast('Supabase credentials saved - restart app to connect', 'success')
     })
 
+    // ── Z Report ────────────────────────────────────────────────────
+
+    function initZReport () {
+      if (!$('#zDate').value) $('#zDate').value = new Date().toISOString().slice(0, 10)
+    }
+
+    $('#zGenerate').addEventListener('click', async () => {
+      const date = $('#zDate').value
+      if (!date) { showToast('Select a date', 'error'); return }
+      const r = await window.pos.zReport(date)
+      const s = r.summary || {}
+      const tc = s.txn_count || 0, ts = s.total_sales || 0
+      $('#zSales').textContent = money(ts)
+      $('#zTxns').textContent = tc
+      $('#zAvg').textContent = tc > 0 ? money(ts / tc) : '$0.00'
+      $('#zTax').textContent = money(s.total_tax || 0)
+      $('#zDisc').textContent = money(s.total_discounts || 0)
+      $('#zVoids').textContent = r.voids || 0
+      $('#zRefunds').textContent = r.refunds.count > 0 ? `${r.refunds.count} (${money(r.refunds.total)})` : '0'
+
+      // Payment methods
+      const totalPay = r.methods.reduce((s, m) => s + m.total, 0)
+      $('#zMethods').innerHTML = r.methods.length ? r.methods.map(m =>
+        `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:14px">
+          <span style="text-transform:capitalize">${esc(m.method)} (${m.txn_count} txn)</span><span style="font-weight:600">${money(m.total)}</span>
+        </div>`
+      ).join('') : '<p style="color:var(--text-dim)">No payments</p>'
+      $('#zMethodTotal').textContent = money(totalPay)
+
+      // Drawer
+      const dw = r.drawer || {}
+      $('#zDrawer').innerHTML = `
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:14px"><span>Opening Float</span><span>${money(dw.float_total || 0)}</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:14px"><span>Cash Sales</span><span style="color:var(--green)">${money(dw.cash_sales || 0)}</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:14px"><span>Cash Drops</span><span>${money(dw.drops || 0)}</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:14px"><span>Pickups</span><span>-${money(dw.pickups || 0)}</span></div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:16px;font-weight:700"><span>Expected in Drawer</span><span style="color:var(--green)">${money(dw.expected || 0)}</span></div>
+      `
+
+      // Categories
+      $('#zCategories').innerHTML = r.categories.length ? r.categories.map(c =>
+        `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:13px">
+          <span>${esc(c.category)}</span><span style="color:var(--text-dim)">${money(c.total)} (${c.qty} items)</span>
+        </div>`
+      ).join('') : '<p style="color:var(--text-dim)">No sales</p>'
+
+      // Hourly
+      $('#zHourly').innerHTML = r.hourly.length ? r.hourly.map(h =>
+        `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:13px">
+          <span>${parseInt(h.hour) > 12 ? (parseInt(h.hour) - 12) + 'pm' : parseInt(h.hour) + 'am'}</span>
+          <span style="color:var(--text-dim)">${h.cnt} txn — ${money(h.total)}</span>
+        </div>`
+      ).join('') : '<p style="color:var(--text-dim)">No sales</p>'
+
+      $('#zReportContent').style.display = 'block'
+    })
+
+    $('#zPrint').addEventListener('click', () => {
+      const content = $('#zReportPrintable')
+      if (!content || !$('#zReportContent').style.display || $('#zReportContent').style.display === 'none') {
+        showToast('Generate a report first', 'info'); return
+      }
+      const win = window.open('', '_blank', 'width=800,height=600')
+      win.document.write(`<html><head><title>Z Report - ${$('#zDate').value}</title>
+        <style>body{font-family:sans-serif;padding:20px;color:#333}
+        .stat-card{border:1px solid #ddd;padding:12px;border-radius:6px}
+        .stat-label{font-size:11px;color:#888;margin-bottom:2px}
+        .stat-value{font-size:22px;font-weight:700}
+        .stat-value.green{color:#059669}
+        .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+        .section{border:1px solid #ddd;border-radius:6px;padding:14px;margin-bottom:12px}
+        h1{font-size:20px;margin-bottom:4px}h2{font-size:14px;color:#666;margin-bottom:8px}
+        @media print{body{padding:0}.section{break-inside:avoid}}</style>
+      </head><body><h1>Z Report</h1><p style="color:#888;margin-bottom:16px">${$('#zDate').value}</p>${content.innerHTML}</body></html>`)
+      win.document.close()
+      setTimeout(() => { win.print() }, 300)
+    })
+
     // ── Page Layout Editor (Unified Grid) ─────────────────────────
 
     let kbButtons = []
@@ -1588,11 +2156,23 @@
     let selectedBtnId = null
     let dragSrcId = null
     let allPages = [1]
-
     let kbProductCache = []
     let kbSelectedProduct = null
+    let isDragSelecting = false
+    let dragSelStart = null
+    let dragSelCurrent = null
+    let dragSelJustFinished = false
+    let activeSelRange = null
+
+    // ── Load & Init ────────────────────────────────────────────────
 
     async function loadKeyboard () {
+      // Load saved grid dimensions
+      const savedCols = await window.pos.getSetting('keyboard_grid_cols')
+      const savedRows = await window.pos.getSetting('keyboard_grid_rows')
+      if (savedCols) { gridCols = parseInt(savedCols); $('#gridCols').value = gridCols }
+      if (savedRows) { gridRows = parseInt(savedRows); $('#gridRows').value = gridRows }
+
       kbButtons = await window.pos.getAllButtons()
       const pageRows = await window.pos.getPages()
       allPages = pageRows.length ? pageRows.map(p => p.page) : [1]
@@ -1602,8 +2182,7 @@
       closeEditPanel()
 
       const cats = await window.pos.getCategories()
-      $('#kbCatList').innerHTML = cats.map(c => `<option value="${esc(c.name)}">`).join('') +
-        '<option value="__all__">'
+      $('#kbCatList').innerHTML = cats.map(c => `<option value="${esc(c.name)}">`).join('') + '<option value="__all__">'
 
       kbProductCache = await window.pos.searchProducts('')
       renderKbProducts(kbProductCache)
@@ -1611,46 +2190,39 @@
 
     function renderKbProducts (products) {
       const list = $('#kbProductList')
-      if (!products.length) {
-        list.innerHTML = '<p style="color:var(--text-dim);font-size:12px;padding:8px">No products found</p>'
-        return
-      }
-      list.innerHTML = products.slice(0, 100).map(p => `
+      if (!products.length) { list.innerHTML = '<p style="color:var(--text-dim);font-size:11px;padding:6px">No products found</p>'; return }
+      list.innerHTML = products.slice(0, 80).map(p => `
         <div class="kb-prod-item${kbSelectedProduct && kbSelectedProduct.id === p.id ? ' sel-highlight' : ''}"
              data-prod-id="${esc(p.id)}" data-prod-name="${esc(p.name)}" data-prod-price="${p.price}">
           <span>${esc(p.name)}</span>
           <span class="prod-price">$${(p.price || 0).toFixed(2)}</span>
-        </div>
-      `).join('')
+        </div>`).join('')
     }
 
     $('#kbProductSearch').addEventListener('input', debounce(async () => {
       const q = $('#kbProductSearch').value.trim()
-      const results = q ? await window.pos.searchProducts(q) : kbProductCache
-      renderKbProducts(results)
+      renderKbProducts(q ? await window.pos.searchProducts(q) : kbProductCache)
     }, 250))
 
     $('#kbProductList').addEventListener('click', e => {
       const item = e.target.closest('.kb-prod-item')
       if (!item) return
       const id = item.dataset.prodId
-      const name = item.dataset.prodName
-      const price = parseFloat(item.dataset.prodPrice) || 0
-
       if (kbSelectedProduct && kbSelectedProduct.id === id) {
         kbSelectedProduct = null
         $$('.kb-prod-item').forEach(el => el.classList.remove('sel-highlight'))
         return
       }
-
-      kbSelectedProduct = { id, name, price }
+      kbSelectedProduct = { id, name: item.dataset.prodName, price: parseFloat(item.dataset.prodPrice) || 0 }
       $$('.kb-prod-item').forEach(el => el.classList.remove('sel-highlight'))
       item.classList.add('sel-highlight')
     })
 
+    // ── Page Management ─────────────────────────────────────────���──
+
     function renderPageTabs () {
       $('#pageTabs').innerHTML = allPages.map(p =>
-        `<button class="btn ${p === currentPage ? 'btn-green' : 'btn-outline'}" style="padding:5px 14px;font-size:12px" data-page="${p}">Page ${p}</button>`
+        `<button class="btn ${p === currentPage ? 'btn-green' : 'btn-outline'}" style="padding:4px 12px;font-size:11px" data-page="${p}">Page ${p}</button>`
       ).join('')
     }
 
@@ -1658,18 +2230,14 @@
       const btn = e.target.closest('[data-page]')
       if (!btn) return
       currentPage = parseInt(btn.dataset.page)
-      renderPageTabs()
-      renderGrid()
-      closeEditPanel()
+      renderPageTabs(); renderGrid(); closeEditPanel()
     })
 
-    $('#addPageBtn').addEventListener('click', async () => {
+    $('#addPageBtn').addEventListener('click', () => {
       const newPage = Math.max(...allPages, 0) + 1
-      allPages.push(newPage)
-      currentPage = newPage
-      renderPageTabs()
-      renderGrid()
-      showToast(`Page ${newPage} created - add buttons to it`, 'success')
+      allPages.push(newPage); currentPage = newPage
+      renderPageTabs(); renderGrid()
+      showToast(`Page ${newPage} created`, 'success')
     })
 
     $('#deletePageBtn').addEventListener('click', async () => {
@@ -1679,21 +2247,35 @@
       kbButtons = await window.pos.getAllButtons()
       allPages = allPages.filter(p => p !== currentPage)
       currentPage = allPages[0] || 1
-      renderPageTabs()
-      renderGrid()
-      closeEditPanel()
+      renderPageTabs(); renderGrid(); closeEditPanel()
       showToast('Page deleted', 'success')
     })
 
-    $('#gridCols').addEventListener('change', e => { gridCols = parseInt(e.target.value); renderGrid() })
-    $('#gridRows').addEventListener('change', e => { gridRows = parseInt(e.target.value); renderGrid() })
+    $('#gridCols').addEventListener('change', async e => {
+      gridCols = parseInt(e.target.value)
+      await window.pos.setSetting('keyboard_grid_cols', String(gridCols))
+      renderGrid()
+    })
+    $('#gridRows').addEventListener('change', async e => {
+      gridRows = parseInt(e.target.value)
+      await window.pos.setSetting('keyboard_grid_rows', String(gridRows))
+      renderGrid()
+    })
 
     // ── Grid Rendering ─────────────────────────────────────────────
 
     function renderGrid () {
+      // Column headers
+      const colHdr = $('#kbColHeaders')
+      colHdr.innerHTML = Array.from({ length: gridCols }, (_, i) => `<div class="kb-col-hdr">${i}</div>`).join('')
+      colHdr.style.gridTemplateColumns = `repeat(${gridCols}, 1fr)`
+
+      // Row headers
+      $('#kbRowHeaders').innerHTML = Array.from({ length: gridRows }, (_, i) => `<div class="kb-row-hdr">${i}</div>`).join('')
+
       const grid = $('#kbGrid')
       grid.style.gridTemplateColumns = `repeat(${gridCols}, 1fr)`
-      grid.style.gridTemplateRows = `repeat(${gridRows}, 60px)`
+      grid.style.gridTemplateRows = `repeat(${gridRows}, 56px)`
 
       const pageButtons = kbButtons.filter(b => (b.page || 1) === currentPage && b.active)
       const occupied = new Set()
@@ -1703,11 +2285,9 @@
         const r = b.grid_row || 0, c = b.grid_col || 0
         const rs = b.row_span || 1, cs = b.col_span || 1
         cellMap[`${r}-${c}`] = b
-        for (let dr = 0; dr < rs; dr++) {
-          for (let dc = 0; dc < cs; dc++) {
+        for (let dr = 0; dr < rs; dr++)
+          for (let dc = 0; dc < cs; dc++)
             occupied.add(`${r + dr}-${c + dc}`)
-          }
-        }
       }
 
       let html = ''
@@ -1715,24 +2295,31 @@
         for (let c = 0; c < gridCols; c++) {
           const key = `${r}-${c}`
           const btn = cellMap[key]
-
           if (btn) {
             const cs = btn.col_span || 1, rs = btn.row_span || 1
             const sel = btn.id === selectedBtnId ? ' selected' : ''
             html += `<div class="kb-cell${sel}" data-id="${esc(btn.id)}" data-row="${r}" data-col="${c}" draggable="true"
-              style="background:${esc(btn.bg_color)};color:${esc(btn.color)};grid-column:${c + 1}/span ${cs};grid-row:${r + 1}/span ${rs}">
+              style="background:${esc(btn.bg_color)};color:${esc(btn.color)};grid-column:${c+1}/span ${cs};grid-row:${r+1}/span ${rs}">
               <span class="kb-cell-type">${typeLabel(btn.type)}</span>
-              ${btn.image ? `<img src="${btn.image}" style="width:24px;height:24px;border-radius:3px;object-fit:cover">` : ''}
+              ${btn.image ? `<img src="${btn.image}">` : ''}
               ${esc(btn.label)}
               ${btn.price > 0 ? `<div class="kb-cell-price">$${btn.price.toFixed(2)}</div>` : ''}
             </div>`
           } else if (!occupied.has(key)) {
             html += `<div class="kb-cell empty-cell" data-row="${r}" data-col="${c}"
-              style="grid-column:${c + 1};grid-row:${r + 1}">+</div>`
+              style="grid-column:${c+1};grid-row:${r+1}">+</div>`
           }
         }
       }
       grid.innerHTML = html
+
+      if (activeSelRange) {
+        const { r0, r1, c0, c1 } = activeSelRange
+        for (const cell of $$('#kbGrid .empty-cell')) {
+          const cr = parseInt(cell.dataset.row), cc = parseInt(cell.dataset.col)
+          if (cr >= r0 && cr <= r1 && cc >= c0 && cc <= c1) cell.classList.add('sel-highlight')
+        }
+      }
     }
 
     function typeLabel (type) {
@@ -1741,7 +2328,7 @@
         reprint:'rpt', pricecheck:'chk', errcorrect:'err', recall:'rcl', pctdiscount:'%',
         pctone:'%1', movedrawer:'drw', ubereats:'ube', viewor:'...', digit:'#',
         clear:'clr', qtyx:'qty', codeenter:'plu', subtotal:'sub', pay_cash:'pay',
-        pay_card:'card', park:'park', page_link:'pg', back_home:'home' }
+        pay_card:'card', park:'park', page_link:'pg', back_home:'home', num_display:'LCD' }
       return map[type] || type
     }
 
@@ -1778,8 +2365,7 @@
       e.dataTransfer.effectAllowed = 'move'
     })
     $('#kbGrid').addEventListener('dragover', e => {
-      e.preventDefault()
-      e.dataTransfer.dropEffect = 'move'
+      e.preventDefault(); e.dataTransfer.dropEffect = 'move'
       const cell = e.target.closest('.kb-cell')
       if (cell) cell.classList.add('drag-over')
     })
@@ -1792,12 +2378,9 @@
       $$('#kbGrid .drag-over').forEach(c => c.classList.remove('drag-over'))
       const target = e.target.closest('.kb-cell')
       if (!target || !dragSrcId) return
-
       const srcBtn = kbButtons.find(b => b.id === dragSrcId)
       if (!srcBtn) return
-      const tgtRow = parseInt(target.dataset.row)
-      const tgtCol = parseInt(target.dataset.col)
-      const tgtId = target.dataset.id
+      const tgtRow = parseInt(target.dataset.row), tgtCol = parseInt(target.dataset.col), tgtId = target.dataset.id
 
       if (tgtId && tgtId !== dragSrcId) {
         const tgtBtn = kbButtons.find(b => b.id === tgtId)
@@ -1809,7 +2392,6 @@
       } else if (!tgtId) {
         await window.pos.upsertButton({ ...srcBtn, grid_row: tgtRow, grid_col: tgtCol })
       }
-
       dragSrcId = null
       kbButtons = await window.pos.getAllButtons()
       renderGrid()
@@ -1822,11 +2404,6 @@
 
     // ── Drag-Select Empty Cells ────────────────────────────────────
 
-    let isDragSelecting = false
-    let dragSelStart = null
-    let dragSelCurrent = null
-    let dragSelJustFinished = false
-
     function getGridCellFromPoint (x, y) {
       const els = document.elementsFromPoint(x, y)
       const cell = els.find(el => el.classList && el.classList.contains('empty-cell'))
@@ -1836,31 +2413,35 @@
 
     function getOccupiedSet () {
       const pageButtons = kbButtons.filter(b => (b.page || 1) === currentPage && b.active)
-      const occupied = new Set()
+      const occ = new Set()
       for (const b of pageButtons) {
         const r = b.grid_row || 0, c = b.grid_col || 0
-        const rs = b.row_span || 1, cs = b.col_span || 1
-        for (let dr = 0; dr < rs; dr++)
-          for (let dc = 0; dc < cs; dc++)
-            occupied.add(`${r + dr}-${c + dc}`)
+        for (let dr = 0; dr < (b.row_span || 1); dr++)
+          for (let dc = 0; dc < (b.col_span || 1); dc++)
+            occ.add(`${r + dr}-${c + dc}`)
       }
-      return occupied
+      return occ
     }
 
     function updateSelectionHighlight () {
       $$('#kbGrid .empty-cell').forEach(c => c.classList.remove('sel-highlight'))
       if (!dragSelStart || !dragSelCurrent) return
-
-      const r0 = Math.min(dragSelStart.row, dragSelCurrent.row)
-      const r1 = Math.max(dragSelStart.row, dragSelCurrent.row)
-      const c0 = Math.min(dragSelStart.col, dragSelCurrent.col)
-      const c1 = Math.max(dragSelStart.col, dragSelCurrent.col)
-
+      const r0 = Math.min(dragSelStart.row, dragSelCurrent.row), r1 = Math.max(dragSelStart.row, dragSelCurrent.row)
+      const c0 = Math.min(dragSelStart.col, dragSelCurrent.col), c1 = Math.max(dragSelStart.col, dragSelCurrent.col)
       for (const cell of $$('#kbGrid .empty-cell')) {
         const cr = parseInt(cell.dataset.row), cc = parseInt(cell.dataset.col)
-        if (cr >= r0 && cr <= r1 && cc >= c0 && cc <= c1) {
-          cell.classList.add('sel-highlight')
-        }
+        if (cr >= r0 && cr <= r1 && cc >= c0 && cc <= c1) cell.classList.add('sel-highlight')
+      }
+      // Show size tooltip
+      const tt = $('#kbDragTooltip')
+      const cols = c1 - c0 + 1, rows = r1 - r0 + 1
+      if (cols > 1 || rows > 1) {
+        tt.textContent = `${cols} × ${rows}`
+        tt.style.display = 'block'
+        tt.style.left = (event.clientX + 14) + 'px'
+        tt.style.top = (event.clientY - 10) + 'px'
+      } else {
+        tt.style.display = 'none'
       }
     }
 
@@ -1878,21 +2459,17 @@
     document.addEventListener('mousemove', e => {
       if (!isDragSelecting) return
       const pt = getGridCellFromPoint(e.clientX, e.clientY)
-      if (pt) {
-        dragSelCurrent = pt
-        updateSelectionHighlight()
-      }
+      if (pt) { dragSelCurrent = pt; updateSelectionHighlight() }
     })
 
     document.addEventListener('mouseup', e => {
       if (!isDragSelecting) return
       isDragSelecting = false
+      $('#kbDragTooltip').style.display = 'none'
       if (!dragSelStart || !dragSelCurrent) return
 
-      const r0 = Math.min(dragSelStart.row, dragSelCurrent.row)
-      const r1 = Math.max(dragSelStart.row, dragSelCurrent.row)
-      const c0 = Math.min(dragSelStart.col, dragSelCurrent.col)
-      const c1 = Math.max(dragSelStart.col, dragSelCurrent.col)
+      const r0 = Math.min(dragSelStart.row, dragSelCurrent.row), r1 = Math.max(dragSelStart.row, dragSelCurrent.row)
+      const c0 = Math.min(dragSelStart.col, dragSelCurrent.col), c1 = Math.max(dragSelStart.col, dragSelCurrent.col)
 
       const occupied = getOccupiedSet()
       let allFree = true
@@ -1900,26 +2477,23 @@
         for (let cc = c0; cc <= c1; cc++)
           if (occupied.has(`${rr}-${cc}`)) allFree = false
 
-      $$('#kbGrid .empty-cell').forEach(c => c.classList.remove('sel-highlight'))
-
       if (!allFree) {
+        $$('#kbGrid .empty-cell').forEach(c => c.classList.remove('sel-highlight'))
         showToast('Selection overlaps an existing button', 'error')
         return
       }
 
-      const colSpan = c1 - c0 + 1
-      const rowSpan = r1 - r0 + 1
-
+      const colSpan = c1 - c0 + 1, rowSpan = r1 - r0 + 1
       dragSelJustFinished = true
       setTimeout(() => { dragSelJustFinished = false }, 0)
+      activeSelRange = { r0, r1, c0, c1 }
 
       openNewButton(r0, c0)
       $('#kbColSpan').value = colSpan
       $('#kbRowSpan').value = rowSpan
-      $('#kbCellInfo').textContent = `Row ${r0}, Col ${c0}, Span ${colSpan}x${rowSpan} - Page ${currentPage}`
+      $('#kbCellInfo').textContent = `Row ${r0}, Col ${c0} — ${colSpan}×${rowSpan} — Page ${currentPage}`
 
-      dragSelStart = null
-      dragSelCurrent = null
+      dragSelStart = null; dragSelCurrent = null
     })
 
     // ── Edit Panel ─────────────────────────────────────────────────
@@ -1928,8 +2502,7 @@
       selectedBtnId = id
       const btn = kbButtons.find(b => b.id === id)
       if (!btn) return
-      renderGrid()
-      openEditPanel(btn)
+      renderGrid(); openEditPanel(btn)
     }
 
     function openNewButton (row, col) {
@@ -1948,8 +2521,8 @@
       $('#kbImagePreview').innerHTML = ''
       $('#kbDeleteBtn').style.display = 'none'
       $('#kbEditTitle').textContent = 'New Button'
-      $('#kbCellInfo').textContent = `Row ${row}, Col ${col} - Page ${currentPage}`
-      $('#kbEditPanel').style.display = 'block'
+      $('#kbCellInfo').textContent = `Row ${row}, Col ${col} — Page ${currentPage}`
+      $('#kbEditPanel').classList.add('active')
       $('#kbEditPanel').dataset.row = row
       $('#kbEditPanel').dataset.col = col
       updateLivePreview()
@@ -1967,11 +2540,11 @@
       $('#kbColSpan').value = btn.col_span || 1
       $('#kbRowSpan').value = btn.row_span || 1
       $('#kbImageData').value = btn.image || ''
-      $('#kbImagePreview').innerHTML = btn.image ? `<img src="${btn.image}" style="width:48px;height:48px;border-radius:8px;object-fit:cover">` : ''
+      $('#kbImagePreview').innerHTML = btn.image ? `<img src="${btn.image}" style="width:36px;height:36px;border-radius:6px;object-fit:cover">` : ''
       $('#kbDeleteBtn').style.display = 'inline-block'
       $('#kbEditTitle').textContent = `Edit: ${btn.label}`
-      $('#kbCellInfo').textContent = `Row ${btn.grid_row}, Col ${btn.grid_col}, Span ${btn.col_span||1}x${btn.row_span||1} - Page ${btn.page||1}`
-      $('#kbEditPanel').style.display = 'block'
+      $('#kbCellInfo').textContent = `Row ${btn.grid_row}, Col ${btn.grid_col} — ${btn.col_span||1}×${btn.row_span||1} — Page ${btn.page||1}`
+      $('#kbEditPanel').classList.add('active')
       $('#kbEditPanel').dataset.row = btn.grid_row || 0
       $('#kbEditPanel').dataset.col = btn.grid_col || 0
       updateLivePreview()
@@ -1979,7 +2552,8 @@
 
     function closeEditPanel () {
       selectedBtnId = null
-      $('#kbEditPanel').style.display = 'none'
+      activeSelRange = null
+      $('#kbEditPanel').classList.remove('active')
       renderGrid()
     }
 
@@ -2012,7 +2586,7 @@
           canvas.getContext('2d').drawImage(img, 0, 0, w, h)
           const dataUrl = canvas.toDataURL('image/jpeg', 0.8)
           $('#kbImageData').value = dataUrl
-          $('#kbImagePreview').innerHTML = `<img src="${dataUrl}" style="width:48px;height:48px;border-radius:8px;object-fit:cover">`
+          $('#kbImagePreview').innerHTML = `<img src="${dataUrl}" style="width:36px;height:36px;border-radius:6px;object-fit:cover">`
         }
         img.src = ev.target.result
       }
@@ -2043,8 +2617,7 @@
       await window.pos.upsertButton(btn)
       showToast('Button saved', 'success')
       kbButtons = await window.pos.getAllButtons()
-      renderGrid()
-      closeEditPanel()
+      renderGrid(); closeEditPanel()
     })
 
     $('#kbDeleteBtn').addEventListener('click', async () => {
@@ -2053,8 +2626,7 @@
       await window.pos.deleteButton(id)
       showToast('Button deleted', 'success')
       kbButtons = await window.pos.getAllButtons()
-      renderGrid()
-      closeEditPanel()
+      renderGrid(); closeEditPanel()
     })
 
 

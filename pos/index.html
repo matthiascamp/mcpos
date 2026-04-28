@@ -8,20 +8,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow:hidden}
-body{font-family:'Inter',system-ui,sans-serif;background:#d8d4cc;color:#000;display:flex;flex-direction:column;user-select:none;font-size:13px;-webkit-font-smoothing:antialiased}
+html,body{height:100%;overflow:hidden;touch-action:manipulation}
+body{font-family:'Inter',system-ui,sans-serif;background:#d8d4cc;color:#000;display:flex;flex-direction:column;user-select:none;font-size:13px;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:rgba(0,0,0,.08)}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#aaa;border-radius:3px}
 
 /* ═══ Status Bar ═══════════════════════════════════════════════════ */
 .status-bar{height:42px;background:#2a2a2a;display:flex;align-items:center;padding:0 6px;gap:6px;flex-shrink:0;border-bottom:1px solid #444}
 .status-left{display:flex;align-items:center;gap:8px;flex:1}
 .store-name{color:#ccc;font-family:'Playfair Display',serif;font-weight:700;font-size:12px;white-space:nowrap}
-.scan-input{width:180px;padding:5px 8px;border:1px solid #555;border-radius:3px;background:#1a1a1a;color:#ccc;font-size:12px;outline:none;font-family:inherit}
+.scan-input{width:180px;padding:8px 10px;border:1px solid #555;border-radius:4px;background:#1a1a1a;color:#ccc;font-size:13px;outline:none;font-family:inherit;min-height:36px}
 .scan-input:focus{border-color:#00cc00;background:#111}
 .scan-input::placeholder{color:#555}
 .staff-info{color:#888;font-size:10px;white-space:nowrap}
-.admin-link{color:#777;text-decoration:none;font-size:9px;padding:2px 6px;border:1px solid #555;border-radius:3px}
-.admin-link:hover{color:#fff;border-color:#888}
+.admin-link{color:#777;text-decoration:none;font-size:10px;padding:6px 10px;border:1px solid #555;border-radius:4px;min-height:32px;display:inline-flex;align-items:center}
+.admin-link:hover,.admin-link:active{color:#fff;border-color:#888}
 .sync-info{display:flex;align-items:center;gap:3px;color:#666;font-size:9px}
 .sync-dot{width:5px;height:5px;border-radius:50%;background:#4a4}.sync-dot.offline{background:#a44}
 .status-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
@@ -40,74 +40,58 @@ body{font-family:'Inter',system-ui,sans-serif;background:#d8d4cc;color:#000;disp
 .cart-header-left{display:flex;align-items:center;gap:5px}
 .cart-title{font-weight:700;font-size:11px;color:#444}
 .cart-count{background:#555;color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px}
-.cart-clear{background:none;border:none;color:#aaa;cursor:pointer;font-size:9px;font-family:inherit}.cart-clear:hover{color:#c00}
+.cart-clear{background:none;border:1px solid #ddd;border-radius:4px;color:#888;cursor:pointer;font-size:11px;font-family:inherit;padding:6px 10px;min-height:32px}.cart-clear:active{color:#c00;background:#fee}
 .cart-items{flex:1;overflow-y:auto}
-.cart-item{display:flex;align-items:center;padding:4px 8px;gap:4px;border-bottom:1px solid #f0f0f0;font-size:11px}
-.cart-item:hover{background:#f8f8f0}
+.cart-item{display:flex;align-items:center;padding:6px 8px;gap:6px;border-bottom:1px solid #f0f0f0;font-size:11px;min-height:44px}
+.cart-item:active{background:#f8f8f0}
 .cart-item-info{flex:1;min-width:0}
 .cart-item-name{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cart-item-meta{font-size:9px;color:#888;margin-top:1px;display:flex;gap:3px;align-items:center}
 .meta-special{color:#c44;font-weight:700;font-size:8px;background:rgba(200,60,60,.08);padding:0 3px;border-radius:2px}
 .cart-item-price{font-weight:700;color:#222;min-width:44px;text-align:right}
-.cart-item-qty{display:flex;align-items:center;gap:1px}
-.qty-btn{width:20px;height:20px;border-radius:3px;border:1px solid #ddd;background:#f8f8f8;color:#555;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit}
-.qty-btn:hover{background:#eee;border-color:#999}
-.qty-btn.remove:hover{background:#fee;border-color:#c44;color:#c44}
-.qty-val{font-size:10px;font-weight:700;min-width:14px;text-align:center}
+.cart-item-qty{display:flex;align-items:center;gap:2px}
+.qty-btn{width:36px;height:36px;border-radius:4px;border:1px solid #ddd;background:#f8f8f8;color:#555;font-size:16px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit}
+.qty-btn:active{background:#eee;border-color:#999}
+.qty-btn.remove{color:#c44;border-color:#ecc}
+.qty-btn.remove:active{background:#fee;border-color:#c44}
+.qty-val{font-size:11px;font-weight:700;min-width:18px;text-align:center}
 .cart-empty{flex:1;display:flex;align-items:center;justify-content:center;color:#bbb;font-size:12px}
 .cart-totals{padding:5px 8px;border-top:1px solid #ddd;background:#f5f5f5;flex-shrink:0}
 .total-row{display:flex;justify-content:space-between;padding:1px 0;font-size:10px;color:#888}
 .total-row.grand{padding:4px 0 1px;border-top:1px solid #ccc;margin-top:2px}
 .total-row.grand span:first-child{font-weight:700;font-size:12px;color:#333}
 .total-amount{font-family:'Playfair Display',serif;font-size:16px;font-weight:800;color:#222}
-.cart-actions{padding:5px 8px;display:flex;flex-direction:column;gap:3px;flex-shrink:0}
-.action-row{display:flex;gap:3px}
-.action-btn{padding:8px;border-radius:3px;border:none;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;flex:1;min-height:32px}
-.action-btn:active:not(:disabled){filter:brightness(.9)}
+.cart-actions{padding:6px 8px;display:flex;flex-direction:column;gap:4px;flex-shrink:0}
+.action-row{display:flex;gap:4px}
+.action-btn{padding:10px;border-radius:4px;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;flex:1;min-height:44px}
+.action-btn:active:not(:disabled){filter:brightness(.85)}
 .btn-pay{background:#2d6a4f;color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.1)}
-.btn-pay:hover:not(:disabled){background:#1b4332}.btn-pay:disabled{opacity:.3;cursor:not-allowed}
+.btn-pay:active:not(:disabled){background:#1b4332}.btn-pay:disabled{opacity:.3;cursor:not-allowed}
 .btn-card{background:#e0e0e0;color:#333;border:1px solid #bbb}
-.btn-card:hover:not(:disabled){background:#d0d0d0}.btn-card:disabled{opacity:.3;cursor:not-allowed}
-.btn-park{background:#fff;color:#666;border:1px solid #ccc}.btn-park:hover{background:#f0f0f0}
+.btn-card:active:not(:disabled){background:#ccc}.btn-card:disabled{opacity:.3;cursor:not-allowed}
+.btn-park{background:#fff;color:#666;border:1px solid #ccc}.btn-park:active{background:#eee}
 
 /* ═══ Keyboard Panel (RIGHT — all buttons) ════════════════════════ */
 .keyboard-panel{flex:1;display:flex;flex-direction:column;overflow:hidden}
 
 .keyboard-home{flex:1;display:flex;flex-direction:column;padding:3px;gap:3px}
 
-/* Function Area: 2 rows + PRICE CHECK spanning both */
-.func-area{display:flex;gap:3px;flex-shrink:0}
-.func-left{flex:1;display:flex;flex-direction:column;gap:3px}
-.func-row{display:flex;gap:3px}
-.func-btn{flex:1;border:1px solid #999;background:#ddd;padding:2px 3px;font-weight:700;font-size:11px;cursor:pointer;text-align:center;line-height:1.15;min-height:42px;border-radius:2px;font-family:inherit;transition:filter .08s}
-.func-btn:active{filter:brightness(.8)}
-.func-small{flex:.5;font-size:9px}
-.func-void{background:#4466aa;color:#fff;font-size:16px;flex:1.4}
-.func-yellow{background:#d8a820;color:#000}
-.func-orange{background:#e07020;color:#fff}
-.func-price-check{width:88px;border:1px solid #999;background:#ddd;font-weight:700;font-size:13px;cursor:pointer;text-align:center;line-height:1.2;border-radius:2px;font-family:inherit;flex-shrink:0;display:flex;align-items:center;justify-content:center}
-.func-price-check:active{filter:brightness(.8)}
+/* Dynamic POS grid from keyboard_buttons DB */
+.pos-grid{flex:1;display:grid;gap:3px;padding:0}
+.pos-grid-btn{border:1px solid rgba(0,0,0,.25);border-radius:2px;font-weight:700;font-size:11px;cursor:pointer;text-align:center;line-height:1.15;font-family:inherit;transition:filter .08s;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:2px 3px;word-break:break-word;position:relative;overflow:hidden;user-select:none}
+.pos-grid-btn:active{filter:brightness(.8)}
+.pos-grid-btn img{width:20px;height:20px;border-radius:3px;object-fit:cover}
+.pos-grid-btn.digit-btn{font-size:28px;background:#fff;color:#000;border-color:#999}
+.pos-grid-btn.digit-btn.num-action{font-size:12px;font-weight:800;background:#eee}
+.pos-grid-btn.digit-btn.num-orange{background:#e07020;color:#fff;font-size:14px}
+.pos-grid-btn.num-display-cell{background:#111;color:#00cc00;font-family:'Courier New',monospace;font-size:20px;font-weight:700;text-align:right;justify-content:flex-end;padding:2px 10px;border:1px solid #555;cursor:default}
+.pos-grid-btn.num-display-cell.qty-mode{color:#ff8800}
+.pos-grid-btn.empty-cell{background:transparent;border-color:transparent;cursor:default}
 
-/* Mid Area: Departments + Numpad */
-.mid-area{flex:1;display:flex;gap:3px;padding-top:3px}
-
-/* Department Grid */
-.dept-grid{width:32%;display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px}
-.dept-btn{border:1px solid #777;padding:3px;font-weight:700;font-size:11px;cursor:pointer;text-align:center;line-height:1.15;border-radius:2px;color:#fff;font-family:inherit;transition:filter .08s;display:flex;align-items:center;justify-content:center}
-.dept-btn:active{filter:brightness(.8)}
-.dept-spacer{background:transparent !important;border-color:transparent !important;cursor:default !important}
-
-/* Numpad */
-.numpad-section{flex:1;display:flex;flex-direction:column;gap:3px}
-.num-display{height:30px;background:#111;color:#00cc00;font-family:'Courier New',monospace;font-size:20px;font-weight:700;text-align:right;padding:2px 10px;border:1px solid #555;border-radius:2px;line-height:26px;flex-shrink:0;overflow:hidden}
-.num-display.qty-mode{color:#ff8800}
-.numpad-grid{flex:1;display:grid;grid-template-columns:1fr 1fr 1fr 1.15fr;gap:3px}
-.num-btn{border:1px solid #999;background:#fff;font-weight:700;font-size:28px;cursor:pointer;text-align:center;line-height:1.1;border-radius:2px;font-family:inherit;transition:filter .08s;display:flex;align-items:center;justify-content:center}
-.num-btn:active{filter:brightness(.85)}
-.num-action{font-size:12px;font-weight:800;background:#eee}
-.num-orange{background:#e07020;color:#fff;font-size:14px}
-.num-barcode{background:#fff;font-size:7px;letter-spacing:3px;color:#000;cursor:default;overflow:hidden}
-.num-empty{background:transparent;border-color:transparent;cursor:default}
+/* Page tabs at bottom of keyboard */
+.pos-page-tabs{display:flex;gap:3px;flex-shrink:0;padding:2px 0}
+.pos-page-tab{flex:1;padding:6px;border:1px solid #888;border-radius:2px;font-weight:700;font-size:12px;cursor:pointer;text-align:center;background:#ddd;color:#333;font-family:inherit}
+.pos-page-tab.active{background:#2d6a4f;color:#fff;border-color:#1b4332}
 
 /* ═══ Section View ════════════════════════════════════════════════ */
 .section-view{flex:1;display:flex;flex-direction:column}
@@ -154,18 +138,18 @@ body{font-family:'Inter',system-ui,sans-serif;background:#d8d4cc;color:#000;disp
 .tendered-row input{flex:1;padding:10px;border-radius:6px;border:1px solid #ccc;background:#f8f8f8;color:#222;font-size:1.3rem;font-weight:700;text-align:right;outline:none;font-family:'Playfair Display',serif}
 .tendered-row input:focus{border-color:#2d6a4f;box-shadow:0 0 0 2px rgba(45,106,79,.15)}
 .quick-cash{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px}
-.quick-cash button{padding:10px;border-radius:6px;border:1px solid #ccc;background:#f0f0f0;color:#333;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;min-height:40px}
-.quick-cash button:hover{background:#e0e0e0}.quick-cash button:active{filter:brightness(.92)}
+.quick-cash button{padding:12px;border-radius:6px;border:1px solid #ccc;background:#f0f0f0;color:#333;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;min-height:48px}
+.quick-cash button:active{background:#d8d8d8;filter:brightness(.92)}
 .change-display{text-align:center;font-size:16px;margin-bottom:14px;min-height:24px;font-weight:700;font-family:'Playfair Display',serif}
 .change-display.positive{color:#2d6a4f}.change-display.short{color:#c44}
 .modal-actions{display:flex;gap:6px}
-.modal-actions button{flex:1;padding:12px;border-radius:6px;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;min-height:42px}
-.modal-cancel{background:#eee;color:#666;border:1px solid #ccc !important}.modal-cancel:hover{background:#ddd}
-.modal-confirm{background:#2d6a4f;color:#fff}.modal-confirm:hover:not(:disabled){background:#1b4332}.modal-confirm:disabled{opacity:.3;cursor:not-allowed}
+.modal-actions button{flex:1;padding:14px;border-radius:6px;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;min-height:48px}
+.modal-cancel{background:#eee;color:#666;border:1px solid #ccc !important}.modal-cancel:active{background:#d5d5d5}
+.modal-confirm{background:#2d6a4f;color:#fff}.modal-confirm:active:not(:disabled){background:#1b4332}.modal-confirm:disabled{opacity:.3;cursor:not-allowed}
 
 .numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px}
-.numpad button{padding:12px;border-radius:6px;border:1px solid #ccc;background:#f0f0f0;color:#333;font-size:1.1rem;font-weight:600;cursor:pointer;font-family:inherit;min-height:46px}
-.numpad button:hover{background:#e0e0e0}.numpad button:active{filter:brightness(.92)}
+.numpad button{padding:14px;border-radius:6px;border:1px solid #ccc;background:#f0f0f0;color:#333;font-size:1.2rem;font-weight:600;cursor:pointer;font-family:inherit;min-height:52px}
+.numpad button:active{background:#d8d8d8;filter:brightness(.92)}
 .price-display{font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:800;text-align:center;color:#222;margin-bottom:4px;letter-spacing:-1px}
 .price-subtitle{text-align:center;color:#888;margin-bottom:14px;font-size:12px}
 .weight-input{font-family:'Playfair Display',serif;font-size:2rem;font-weight:800;text-align:center;color:#222;margin-bottom:4px}
@@ -174,13 +158,13 @@ body{font-family:'Inter',system-ui,sans-serif;background:#d8d4cc;color:#000;disp
 /* ═══ PIN Login ═══════════════════════════════════════════════════ */
 .login-overlay{position:fixed;inset:0;background:linear-gradient(160deg,#e8e4dc 0%,#d8d4cc 50%,#c8c4bc 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200}
 .login-overlay.hidden{display:none}
-.login-logo{width:56px;height:56px;background:#2d6a4f;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:800;color:#fff;margin-bottom:12px;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.login-logo{width:120px;height:120px;margin-bottom:12px;object-fit:contain;filter:drop-shadow(0 4px 12px rgba(0,0,0,.25))}
 .login-store{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:800;color:#333;margin-bottom:4px}
 .login-subtitle{color:#888;margin-bottom:28px;font-size:13px}
 .pin-display{font-size:2rem;letter-spacing:14px;margin-bottom:20px;min-height:40px;color:#333;font-weight:700}
 .pin-pad{display:grid;grid-template-columns:repeat(3,76px);gap:7px}
 .pin-btn{width:76px;height:60px;border-radius:8px;border:1px solid #bbb;background:#fff;color:#333;font-size:1.2rem;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 2px 6px rgba(0,0,0,.06)}
-.pin-btn:hover{background:#f0f0f0}.pin-btn:active{filter:brightness(.92)}
+.pin-btn:active{background:#e4e4e4;filter:brightness(.92)}
 .pin-btn.enter{background:#2d6a4f;color:#fff;border-color:#1b4332}.pin-btn.clear{color:#888;font-size:12px;font-weight:600}
 .login-error{margin-top:16px;color:#c44;font-size:13px;min-height:20px;font-weight:500}
 
@@ -188,7 +172,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#d8d4cc;color:#000;disp
 .sale-complete{position:fixed;inset:0;background:rgba(0,0,0,.4);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:150}
 .sale-complete.show{display:flex}
 .sale-complete-inner{text-align:center;animation:popIn .3s cubic-bezier(.34,1.56,.64,1)}
-.sale-check{width:72px;height:72px;border-radius:50%;background:#2d6a4f;display:flex;align-items:center;justify-content:center;font-size:2rem;color:#fff;margin:0 auto 14px;box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.sale-check{width:80px;height:80px;margin:0 auto 14px;object-fit:contain;filter:drop-shadow(0 8px 24px rgba(0,0,0,.3))}
 .sale-complete-text{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:#333;margin-bottom:4px}
 .sale-complete-change{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:800;color:#222}
 @keyframes popIn{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
@@ -200,10 +184,48 @@ body{font-family:'Inter',system-ui,sans-serif;background:#d8d4cc;color:#000;disp
 .mode-banner.return-mode{background:#c44;color:#fff}
 .mode-banner.supervisor-mode{background:#d8a820;color:#000}
 .meta-deal{color:#2d6a4f;font-weight:700;font-size:8px;background:rgba(45,106,79,.1);padding:0 3px;border-radius:2px}
+
+/* QTY multiplier floating badge */
+.qty-badge{position:fixed;top:50px;right:20px;background:#e07020;color:#fff;font-weight:800;font-size:18px;padding:8px 18px;border-radius:8px;z-index:90;box-shadow:0 4px 16px rgba(0,0,0,.3);animation:popIn .2s ease-out;display:none}
+.qty-badge.show{display:block}
+
+/* Sale complete enhanced */
+.sale-summary{background:rgba(255,255,255,.95);border-radius:12px;padding:24px 32px;min-width:320px;box-shadow:0 16px 64px rgba(0,0,0,.4)}
+.sale-summary-items{font-size:12px;color:#666;margin-bottom:8px}
+.sale-summary-row{display:flex;justify-content:space-between;padding:3px 0;font-size:13px}
+.sale-summary-row.total{border-top:2px solid #ddd;margin-top:6px;padding-top:8px;font-weight:800;font-size:16px;color:#222}
+.sale-summary-method{display:inline-block;background:#e8f5e9;color:#2d6a4f;padding:3px 10px;border-radius:4px;font-size:12px;font-weight:600;margin-top:6px}
+.sale-summary-method.card{background:#e3f2fd;color:#1565c0}
+
+/* Cart delete button (swipe alternative — tap X) */
+.cart-item-delete{width:28px;height:28px;border:none;background:#fee;color:#c44;border-radius:4px;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.cart-item-delete:active{background:#fcc}
+
+/* Recent items drawer */
+.recent-drawer{position:absolute;top:44px;left:0;width:300px;background:#fff;border:1px solid #ccc;border-radius:0 0 6px 6px;box-shadow:0 8px 24px rgba(0,0,0,.15);z-index:50;max-height:260px;overflow-y:auto;display:none}
+.recent-drawer.show{display:block}
+.recent-item{padding:8px 10px;border-bottom:1px solid #f0f0f0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:12px;min-height:40px}
+.recent-item:active{background:#f0f8f0}
+.recent-item-name{font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recent-item-price{font-weight:700;color:#2d6a4f;margin-left:8px;white-space:nowrap}
+.recent-header{padding:6px 10px;font-size:10px;font-weight:700;color:#888;background:#f8f8f8;border-bottom:1px solid #eee;display:flex;justify-content:space-between}
+
+/* Return quick date buttons */
+.return-quick-dates{display:flex;gap:6px;margin-bottom:10px}
+.return-quick-dates button{flex:1;padding:8px;border:1px solid #ccc;border-radius:6px;background:#f0f0f0;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;min-height:40px}
+.return-quick-dates button:active{background:#ddd}
+.return-quick-dates button.active{background:#2d6a4f;color:#fff;border-color:#1b4332}
+
+/* Cash modal numpad */
+.cash-numpad{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:12px}
+.cash-numpad button{padding:12px;border-radius:6px;border:1px solid #ccc;background:#f0f0f0;color:#333;font-size:1.1rem;font-weight:600;cursor:pointer;font-family:inherit;min-height:48px}
+.cash-numpad button:active{background:#d8d8d8}
+.cash-numpad button.cash-np-clear{background:#fee;color:#c44;border-color:#ecc}
+.cash-numpad button.cash-np-enter{background:#2d6a4f;color:#fff;border-color:#1b4332}
 .total-row.discount-row span{color:#c44;font-weight:600}
 .recall-list{max-height:300px;overflow-y:auto}
 .recall-item{padding:10px 12px;border-bottom:1px solid #eee;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
-.recall-item:hover{background:#f8f8f0}
+.recall-item:active{background:#f8f8f0}
 .recall-info{font-size:12px;color:#888}
 .recall-total{font-weight:700;font-size:14px}
 .pricecheck-result{text-align:center;padding:16px;font-size:14px}
@@ -211,13 +233,28 @@ body{font-family:'Inter',system-ui,sans-serif;background:#d8d4cc;color:#000;disp
 .pricecheck-result .pc-price{font-family:'Playfair Display',serif;font-weight:800;font-size:2rem;color:#2d6a4f}
 .pricecheck-result .pc-special{color:#c44;font-size:14px;margin-top:4px}
 .pricecheck-result .pc-stock{color:#888;font-size:12px;margin-top:4px}
+.split-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:6px;font-size:12px;font-weight:600;margin:2px}
+.split-badge.cash{background:rgba(45,106,79,.12);color:#2d6a4f}
+.split-badge.card{background:rgba(59,130,246,.12);color:#3b82f6}
+.split-badge .split-remove{cursor:pointer;opacity:.6;font-size:14px;padding:4px}.split-badge .split-remove:active{opacity:1}
+
+/* Return Lookup */
+.return-txn-list{max-height:240px;overflow-y:auto;margin-bottom:12px}
+.return-txn{padding:8px 12px;border-bottom:1px solid #eee;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.return-txn:active{background:#fff0f0}
+.return-txn-info{font-size:11px;color:#888}
+.return-txn-total{font-weight:700}
+.return-items-list{max-height:280px;overflow-y:auto}
+.return-item-row{padding:10px 12px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:10px;min-height:44px}
+.return-item-row label{flex:1;cursor:pointer;display:flex;justify-content:space-between;font-size:13px;padding:4px 0}
+.return-item-row input[type=checkbox]{width:24px;height:24px;cursor:pointer;flex-shrink:0}
 </style>
 </head>
 <body>
 
 <!-- ═══ PIN Login ═══════════════════════════════════════════════════ -->
 <div class="login-overlay" id="loginOverlay">
-  <div class="login-logo">C</div>
+  <img src="logo.png" class="login-logo" alt="Crisp on Creek">
   <div class="login-store">Crisp on Creek</div>
   <div class="login-subtitle">Enter your PIN to start</div>
   <div class="pin-display" id="pinDisplay"></div>
@@ -233,11 +270,18 @@ body{font-family:'Inter',system-ui,sans-serif;background:#d8d4cc;color:#000;disp
 <!-- ═══ Status Bar ═════════════════════════════════════════════════ -->
 <div class="status-bar">
   <div class="status-left">
+    <img src="logo.png" alt="" style="width:28px;height:28px;object-fit:contain;flex-shrink:0">
     <span class="store-name">Crisp on Creek</span>
-    <input type="text" id="searchInput" class="scan-input" placeholder="Scan barcode..." autofocus>
+    <div style="position:relative">
+      <input type="text" id="searchInput" class="scan-input" placeholder="Scan barcode..." autofocus>
+      <div class="recent-drawer" id="recentDrawer">
+        <div class="recent-header"><span>Recent Items</span><span style="cursor:pointer" id="recentClose">&times;</span></div>
+        <div id="recentList"></div>
+      </div>
+    </div>
     <span class="staff-info" id="staffBadge">Not logged in</span>
     <a href="admin.html" class="admin-link">Admin</a>
-    <button onclick="window.pos.exitFullscreen()" style="background:none;border:1px solid rgba(255,255,255,.3);color:#fff;padding:3px 8px;border-radius:4px;font-size:11px;cursor:pointer" title="Exit fullscreen (F11)">Exit FS</button>
+    <button onclick="window.pos.exitFullscreen()" style="background:none;border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 10px;border-radius:4px;font-size:11px;cursor:pointer;min-height:32px" title="Exit fullscreen (F11)">Exit FS</button>
     <div class="sync-info"><span class="sync-dot" id="syncDot"></span><span id="syncLabel">Online</span></div>
   </div>
   <div class="status-right">
@@ -250,6 +294,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#d8d4cc;color:#000;disp
   </div>
 </div>
 
+<div class="qty-badge" id="qtyBadge"></div>
 <div class="mode-banner return-mode" id="returnBanner">RETURN MODE — Items will be refunded</div>
 <div class="mode-banner supervisor-mode" id="supervisorBanner">SUPERVISOR MODE</div>
 
@@ -281,58 +326,10 @@ body{font-family:'Inter',system-ui,sans-serif;background:#d8d4cc;color:#000;disp
   <!-- RIGHT: Keyboard Panel (all buttons) -->
   <div class="keyboard-panel">
 
-    <!-- Keyboard Home View -->
+    <!-- Keyboard Home View — dynamic grid from DB -->
     <div class="keyboard-home" id="keyboardView">
-      <!-- Function Area: rows + PRICE CHECK -->
-      <div class="func-area">
-        <div class="func-left">
-          <div class="func-row">
-            <button class="func-btn func-small" data-action="lock">&#128274;</button>
-            <button class="func-btn" data-action="supervisor">SUPERVISOR<br>ONLY</button>
-            <button class="func-btn" data-action="return">RETURN</button>
-            <button class="func-btn func-void" data-action="void">VOID</button>
-            <button class="func-btn" data-action="hold">Hold Sale</button>
-            <button class="func-btn" data-action="nosale">NO SALE</button>
-            <button class="func-btn" data-action="viewor">VIEW<br>OR...</button>
-          </div>
-          <div class="func-row">
-            <button class="func-btn func-small" data-action="reprint">REPRINT</button>
-            <button class="func-btn func-yellow" data-action="pctdiscount">% DISCOUNT</button>
-            <button class="func-btn func-yellow" data-action="pctone">% ONE ITEM</button>
-            <button class="func-btn func-orange" data-action="movedrawer">MOVE<br>DRAWER</button>
-            <button class="func-btn" data-action="errcorrect">ERROR<br>CORRECT</button>
-            <button class="func-btn" data-action="recall">Recall Sale</button>
-            <button class="func-btn" data-action="ubereats">UBER EATS<br>ADJUST</button>
-          </div>
-        </div>
-        <button class="func-price-check" data-action="pricecheck">PRICE<br>CHECK</button>
-      </div>
-
-      <!-- Mid Area: Dept + Numpad -->
-      <div class="mid-area">
-        <div class="dept-grid" id="deptGrid"></div>
-        <div class="numpad-section">
-          <div class="num-display" id="numDisplay"></div>
-          <div class="numpad-grid">
-            <button class="num-btn" data-val="7">7</button>
-            <button class="num-btn" data-val="8">8</button>
-            <button class="num-btn" data-val="9">9</button>
-            <button class="num-btn num-action num-orange" data-action="qtyx">QTY X</button>
-            <button class="num-btn" data-val="4">4</button>
-            <button class="num-btn" data-val="5">5</button>
-            <button class="num-btn" data-val="6">6</button>
-            <button class="num-btn num-action" data-action="clear">CLEAR</button>
-            <button class="num-btn" data-val="1">1</button>
-            <button class="num-btn" data-val="2">2</button>
-            <button class="num-btn" data-val="3">3</button>
-            <button class="num-btn num-barcode">&#9612;&#9615;&#9612;&#9615;&#9612;&#9615;&#9612;</button>
-            <button class="num-btn" data-val="0">0</button>
-            <button class="num-btn" data-val="00">00</button>
-            <button class="num-btn num-empty"></button>
-            <button class="num-btn num-action" data-action="codeenter">CODE<br>ENTER</button>
-          </div>
-        </div>
-      </div>
+      <div class="pos-grid" id="posGrid"></div>
+      <div class="pos-page-tabs" id="posPageTabs"></div>
     </div>
 
     <!-- Section View (products) -->
@@ -349,8 +346,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#d8d4cc;color:#000;disp
   </div>
 </div>
 
-<!-- ═══ Bottom Bar ═════════════════════════════════════════════════ -->
-<div class="bottom-bar" id="bottomBar"></div>
+<!-- Bottom bar removed — now part of the keyboard grid -->
 
 <!-- ═══ Footer ═════════════════════════════════════════════════════ -->
 <div class="pos-footer">
@@ -361,13 +357,26 @@ body{font-family:'Inter',system-ui,sans-serif;background:#d8d4cc;color:#000;disp
 </div>
 
 <!-- ═══ Cash Modal ═════════════════════════════════════════════════ -->
-<div class="modal-overlay" id="cashModal"><div class="modal">
-  <h2>Cash Payment</h2>
+<div class="modal-overlay" id="cashModal"><div class="modal" style="width:440px">
+  <h2 id="cashModalTitle">Cash Payment</h2>
   <div class="modal-total" id="cashModalTotal">$0.00</div>
-  <div class="tendered-row"><label>Tendered</label><input type="number" id="cashTendered" step="0.05" min="0"></div>
+  <div id="splitPayments" style="margin-bottom:10px"></div>
+  <div id="splitRemaining" style="text-align:center;font-size:13px;color:#888;margin-bottom:8px"></div>
+  <div class="tendered-row"><label>Tendered</label><input type="text" id="cashTendered" inputmode="none" readonly placeholder="Tap amount below"></div>
   <div class="quick-cash" id="quickCash"><button data-amt="exact">Exact</button><button data-amt="5">$5</button><button data-amt="10">$10</button><button data-amt="20">$20</button><button data-amt="50">$50</button><button data-amt="100">$100</button></div>
+  <div class="cash-numpad" id="cashNumpad">
+    <button data-cv="7">7</button><button data-cv="8">8</button><button data-cv="9">9</button><button data-cv="C" class="cash-np-clear">C</button>
+    <button data-cv="4">4</button><button data-cv="5">5</button><button data-cv="6">6</button><button data-cv="00">00</button>
+    <button data-cv="1">1</button><button data-cv="2">2</button><button data-cv="3">3</button><button data-cv="0">0</button>
+    <button data-cv=".">.</button><button data-cv="back" style="font-size:14px">&larr;</button><button data-cv="OK" class="cash-np-enter" style="grid-column:span 2">ENTER</button>
+  </div>
   <div class="change-display" id="changeDisplay"></div>
-  <div class="modal-actions"><button class="modal-cancel" id="cashCancel">Cancel</button><button class="modal-confirm" id="cashConfirm" disabled>Complete Sale</button></div>
+  <div id="changeBreakdown" style="display:none;text-align:center;margin-bottom:10px;font-size:11px;color:#666"></div>
+  <div class="modal-actions">
+    <button class="modal-cancel" id="cashCancel">Cancel</button>
+    <button class="modal-confirm" style="background:#3b82f6" id="splitCardBtn">Split: Card</button>
+    <button class="modal-confirm" id="cashConfirm" disabled>Complete Sale</button>
+  </div>
 </div></div>
 
 <!-- ═══ Open Price Modal ═══════════════════════════════════════════ -->
@@ -463,7 +472,70 @@ body{font-family:'Inter',system-ui,sans-serif;background:#d8d4cc;color:#000;disp
   <div class="modal-actions"><button class="modal-cancel" id="uberCancel">Cancel</button><button class="modal-confirm" id="uberConfirm">Apply Adjustment</button></div>
 </div></div>
 
-<div class="sale-complete" id="saleComplete"><div class="sale-complete-inner"><div class="sale-check">&#x2713;</div><div class="sale-complete-text">Sale Complete</div><div class="sale-complete-change" id="saleChangeDisplay"></div></div></div>
+<!-- ═══ Return Lookup Modal ════════════════════════════════════════ -->
+<div class="modal-overlay" id="returnLookupModal"><div class="modal" style="width:520px">
+  <h2 id="returnLookupTitle">Return — Find Receipt</h2>
+  <div id="returnTxnListView">
+    <div class="return-quick-dates" id="returnQuickDates">
+      <button data-days="0" class="active">Today</button>
+      <button data-days="1">Yesterday</button>
+      <button data-days="7">Last 7 Days</button>
+    </div>
+    <div style="margin-bottom:10px"><input type="text" id="returnSearchInput" placeholder="Or type a date (YYYY-MM-DD)..." style="width:100%;padding:8px;border-radius:6px;border:1px solid #ccc;font-size:13px;outline:none"></div>
+    <div class="return-txn-list" id="returnTxnList"><div style="text-align:center;color:#888;padding:20px">Loading...</div></div>
+  </div>
+  <div id="returnItemsView" style="display:none">
+    <div style="margin-bottom:8px;font-weight:600;font-size:13px" id="returnItemsHeader"></div>
+    <div class="return-items-list" id="returnItemsList"></div>
+  </div>
+  <div class="modal-actions" style="margin-top:12px">
+    <button class="modal-cancel" id="returnLookupCancel">Cancel</button>
+    <button class="modal-confirm" id="returnLookupConfirm" style="display:none">Return Selected</button>
+    <button class="modal-cancel" id="returnLookupBack" style="display:none">Back</button>
+  </div>
+</div></div>
+
+<!-- ═══ Reprint Modal ═════════════════════════════════════════════ -->
+<div class="modal-overlay" id="reprintModal"><div class="modal" style="width:420px">
+  <h2>Reprint Receipt</h2>
+  <div class="recall-list" id="reprintList"></div>
+  <div class="modal-actions" style="margin-top:12px"><button class="modal-cancel" id="reprintClose">Close</button></div>
+</div></div>
+
+<!-- ═══ Cash Drawer Modal ══════════════════════════════════════════ -->
+<div class="modal-overlay" id="drawerModal"><div class="modal" style="width:480px">
+  <h2>Cash Drawer</h2>
+  <div id="drawerSummary" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+    <div style="background:#f0f0f0;padding:10px;border-radius:6px;text-align:center"><div style="font-size:10px;color:#888">Float</div><div style="font-weight:700;font-size:16px" id="drawerFloat">$0.00</div></div>
+    <div style="background:#f0f0f0;padding:10px;border-radius:6px;text-align:center"><div style="font-size:10px;color:#888">Cash Sales</div><div style="font-weight:700;font-size:16px" id="drawerSales">$0.00</div></div>
+    <div style="background:#f0f0f0;padding:10px;border-radius:6px;text-align:center"><div style="font-size:10px;color:#888">Pickups</div><div style="font-weight:700;font-size:16px;color:#c44" id="drawerPickups">$0.00</div></div>
+    <div style="background:#f0f0f0;padding:10px;border-radius:6px;text-align:center"><div style="font-size:10px;color:#888">Drops</div><div style="font-weight:700;font-size:16px;color:#2d6a4f" id="drawerDrops">$0.00</div></div>
+  </div>
+  <div style="text-align:center;padding:8px;background:#e8f5e9;border-radius:6px;margin-bottom:14px"><span style="font-size:11px;color:#666">Expected in Drawer:</span> <strong style="font-size:18px;color:#2d6a4f" id="drawerExpected">$0.00</strong></div>
+  <div style="display:flex;gap:6px;margin-bottom:12px">
+    <button class="action-btn" style="background:#2d6a4f;color:#fff" id="drawerFloatBtn">Set Float</button>
+    <button class="action-btn" style="background:#e07020;color:#fff" id="drawerPickupBtn">Pickup</button>
+    <button class="action-btn" style="background:#3b82f6;color:#fff" id="drawerDropBtn">Drop</button>
+  </div>
+  <div id="drawerInputArea" style="display:none">
+    <div style="font-weight:600;font-size:13px;margin-bottom:6px" id="drawerInputLabel">Amount</div>
+    <div class="tendered-row"><label>$</label><input type="number" id="drawerAmount" step="0.05" min="0" placeholder="0.00"></div>
+    <div class="tendered-row" style="margin-top:6px"><label>Note</label><input type="text" id="drawerNote" placeholder="Optional note..." style="flex:1;padding:10px;border-radius:6px;border:1px solid #ccc;font-size:13px;outline:none"></div>
+    <div class="modal-actions" style="margin-top:10px">
+      <button class="modal-cancel" id="drawerInputCancel">Cancel</button>
+      <button class="modal-confirm" id="drawerInputConfirm">Confirm</button>
+    </div>
+  </div>
+  <div id="drawerLog" style="max-height:160px;overflow-y:auto;border-top:1px solid #eee;margin-top:10px;padding-top:8px"></div>
+  <div class="modal-actions" style="margin-top:12px" id="drawerMainActions"><button class="modal-cancel" id="drawerClose">Close</button></div>
+</div></div>
+
+<div class="sale-complete" id="saleComplete"><div class="sale-complete-inner sale-summary">
+  <img src="logo.png" class="sale-check" alt="">
+  <div class="sale-complete-text" id="saleCompleteTitle">Sale Complete</div>
+  <div id="saleSummaryBody"></div>
+  <div class="sale-complete-change" id="saleChangeDisplay"></div>
+</div></div>
 
 <script type="module">
 import { Cart } from './js/cart.js'
@@ -476,8 +548,10 @@ let allCategories = [], activeDeals = []
 let sectionStack = [], currentGroups = {}
 let numBuf = '', qtyMultiplier = 1
 let returnMode = false, supervisorMode = false, supervisorTimer = null
-let lastCompletedTxn = null, pcFoundProduct = null
+let lastCompletedTxns = [], pcFoundProduct = null
 let payProcessing = false
+let recentItems = []
+let cashNumBuf = ''
 
 const si = $('#searchInput')
 
@@ -545,172 +619,262 @@ $('#pinPad').addEventListener('click', async e => {
   $('#pinDisplay').textContent = '●'.repeat(pinBuf.length)
 })
 
-// ═══ Numpad ════════════════════════════════════════════════════════
+// ═══ Dynamic POS Keyboard Grid ═════════════════════════════════════
+const FUNC_TYPES = new Set(['void','return','hold','nosale','supervisor','lock','reprint','pricecheck','errcorrect','recall','pctdiscount','pctone','movedrawer','ubereats','viewor'])
+const NUMPAD_TYPES = new Set(['digit','clear','qtyx','codeenter'])
+const DEPT_TYPES = new Set(['section','open_price','fixed_price','price_change'])
+const NAV_TYPES = new Set(['nav','subtotal','page_link','back_home'])
+const PAY_TYPES = new Set(['pay_cash','pay_card','park'])
+let posCurrentPage = 1
+let posAllButtons = []
+let posGridCols = 10
+let posGridRows = 7
+
 function updateNumDisplay () {
-  const d = $('#numDisplay')
+  const d = document.querySelector('.num-display-cell')
+  if (!d) return
   if (qtyMultiplier > 1) { d.textContent = `QTY ×${qtyMultiplier}`; d.classList.add('qty-mode') }
   else { d.textContent = numBuf || ''; d.classList.remove('qty-mode') }
 }
 
-$('.numpad-grid').addEventListener('click', async e => {
-  const btn = e.target.closest('.num-btn')
-  if (!btn) return
-  const val = btn.dataset.val
-  if (val !== undefined && val !== '') { numBuf += val; updateNumDisplay(); return }
-  const action = btn.dataset.action
-  if (!action) return
-  if (action === 'clear') {
-    numBuf = ''; qtyMultiplier = 1
-    if (returnMode) { returnMode = false; $('#returnBanner').classList.remove('active') }
-    updateNumDisplay()
-  } else if (action === 'qtyx') {
-    const qty = parseInt(numBuf)
-    if (qty > 0) { qtyMultiplier = qty; numBuf = ''; updateNumDisplay(); showToast(`Next item × ${qtyMultiplier}`, 'info') }
-  } else if (action === 'codeenter') {
-    if (!numBuf) return
-    try {
-      const p = await window.pos.getProductByBarcode(numBuf)
-      if (p) addToCart(p); else showToast(`Code "${numBuf}" not found`, 'error')
-    } catch (e2) { showToast('Lookup failed', 'error') }
-    numBuf = ''; updateNumDisplay()
+async function renderPosKeyboard () {
+  posAllButtons = await window.pos.getAllButtons()
+
+  // Read grid dimensions from settings (same as admin editor saves)
+  const savedCols = await window.pos.getSetting('keyboard_grid_cols')
+  const savedRows = await window.pos.getSetting('keyboard_grid_rows')
+  if (savedCols) posGridCols = parseInt(savedCols)
+  if (savedRows) posGridRows = parseInt(savedRows)
+
+  const pages = [...new Set(posAllButtons.filter(b => b.active).map(b => b.page || 1))].sort((a, b) => a - b)
+
+  const tabsEl = $('#posPageTabs')
+  if (pages.length > 1) {
+    tabsEl.innerHTML = pages.map(p =>
+      `<button class="pos-page-tab${p === posCurrentPage ? ' active' : ''}" data-page="${p}">Page ${p}</button>`
+    ).join('')
+    tabsEl.style.display = 'flex'
+  } else {
+    tabsEl.innerHTML = ''
+    tabsEl.style.display = 'none'
   }
-})
 
-// ═══ Function Buttons ══════════════════════════════════════════════
-document.querySelectorAll('.func-btn, .func-price-check').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    const action = btn.dataset.action
-    switch (action) {
-      case 'void': case 'errcorrect':
-        if (!cart.isEmpty) {
-          const idx = cart.items.length - 1
-          const name = cart.items[idx].name
-          cart.removeItem(idx)
-          showToast(`Voided: ${name}`, 'info')
-        } else showToast('Nothing to void', 'info')
-        break
+  renderPosGrid()
+}
 
-      case 'hold':
-        if (cart.isEmpty) { showToast('Nothing to hold', 'info'); return }
-        try {
-          const txnP = cart.toTransaction(currentStaff?.id, [])
-          txnP.status = 'parked'
-          const r = await window.pos.saveTransaction(txnP)
-          cart.clear(); clearCartLocal()
-          showToast(`Sale held (#${r.id.substring(0,6)})`, 'info')
-        } catch (e2) { showToast('Failed to hold sale', 'error') }
-        break
+function renderPosGrid () {
+  const grid = $('#posGrid')
+  const pageButtons = posAllButtons.filter(b => (b.page || 1) === posCurrentPage && b.active)
 
-      case 'recall':
-        showRecallModal()
-        break
+  // Use the same fixed grid dimensions as admin editor
+  grid.style.gridTemplateColumns = `repeat(${posGridCols}, 1fr)`
+  grid.style.gridTemplateRows = `repeat(${posGridRows}, 1fr)`
 
-      case 'nosale': case 'movedrawer':
-        try {
-          await window.pos.openDrawer()
-          await window.pos.logCashDrawer({ staff_id: currentStaff?.id, action: 'open', note: action === 'nosale' ? 'No Sale' : 'Move Drawer' })
-        } catch (_) {}
-        showToast('Drawer opened', 'info')
-        break
+  const occupied = new Set()
+  const cellMap = {}
+  for (const b of pageButtons) {
+    const r = b.grid_row || 0, c = b.grid_col || 0
+    const rs = b.row_span || 1, cs = b.col_span || 1
+    cellMap[`${r}-${c}`] = b
+    for (let dr = 0; dr < rs; dr++)
+      for (let dc = 0; dc < cs; dc++)
+        occupied.add(`${r + dr}-${c + dc}`)
+  }
 
-      case 'pricecheck':
-        showPriceCheckModal()
-        break
-
-      case 'return':
-        returnMode = !returnMode
-        if (returnMode) { $('#returnBanner').classList.add('active'); showToast('Return mode ON', 'info') }
-        else { $('#returnBanner').classList.remove('active'); showToast('Return mode OFF', 'info') }
-        break
-
-      case 'pctdiscount':
-        showDiscountModal('sale')
-        break
-
-      case 'pctone':
-        showDiscountModal('item')
-        break
-
-      case 'supervisor':
-        showSupervisorModal()
-        break
-
-      case 'lock':
-        showLogin()
-        break
-
-      case 'reprint':
-        if (lastCompletedTxn) {
-          try { await window.pos.printReceipt(lastCompletedTxn) } catch (_) {}
-          showToast('Receipt reprinted', 'info')
-        } else showToast('No receipt to reprint', 'info')
-        break
-
-      case 'ubereats':
-        showUberModal()
-        break
-
-      case 'viewor':
-        showToast('View options not configured', 'info')
-        break
+  let html = ''
+  for (let r = 0; r < posGridRows; r++) {
+    for (let c = 0; c < posGridCols; c++) {
+      const key = `${r}-${c}`
+      const btn = cellMap[key]
+      if (btn) {
+        const cs = btn.col_span || 1, rs = btn.row_span || 1
+        const gridStyle = `grid-column:${c+1}/span ${cs};grid-row:${r+1}/span ${rs}`
+        html += renderPosButton(btn, gridStyle)
+      } else if (!occupied.has(key)) {
+        html += `<div class="pos-grid-btn empty-cell" style="grid-column:${c+1};grid-row:${r+1}"></div>`
+      }
     }
-  })
-})
-
-// ═══ Department Buttons ════════════════════════════════════════════
-const DEPT_TYPES = new Set(['section', 'open_price', 'fixed_price', 'price_change'])
-const NAV_TYPES = new Set(['nav', 'subtotal'])
-
-async function renderDeptGrid () {
-  const allBtns = await window.pos.getKeyboardButtons()
-  const mainBtns = allBtns.filter(b => b.position === 'main' || (b.position === 'grid' && DEPT_TYPES.has(b.type)))
-    .sort((a, b) => a.sort_order - b.sort_order)
-  const grid = $('#deptGrid')
-  const cols = 3, rows = Math.ceil(Math.max(mainBtns.length, cols) / cols)
-  const cells = new Array(rows * cols).fill(null)
-  mainBtns.forEach((b, i) => { if (i < cells.length) cells[i] = b })
-  grid.innerHTML = cells.map(b => {
-    if (!b) return '<div class="dept-btn dept-spacer"></div>'
-    return `<button class="dept-btn" style="background:${esc(b.bg_color)};color:${esc(b.color)}"
-      data-type="${esc(b.type)}" data-cat="${esc(b.category_filter || '')}"
-      data-label2="${esc(b.label)}" data-price="${b.price || 0}">${esc(b.label)}</button>`
-  }).join('')
+  }
+  grid.innerHTML = html
+  updateNumDisplay()
 }
 
-async function renderBottomBar () {
-  const allBtns = await window.pos.getKeyboardButtons()
-  const navBtns = allBtns.filter(b => b.position === 'bottom' || (b.position === 'grid' && NAV_TYPES.has(b.type)))
-    .filter(b => b.type !== 'subtotal').sort((a, b) => a.sort_order - b.sort_order)
-  const bar = $('#bottomBar')
-  const colorMap = { '#484848': 'nav-dark', '#b0b0b0': 'nav-small', '#c8a828': 'nav-gold', '#409850': 'nav-green' }
-  bar.innerHTML = navBtns.map(b => {
-    const cls = colorMap[b.bg_color] || 'nav-small'
-    return `<button class="nav-btn ${cls}" style="background:${esc(b.bg_color)};color:${esc(b.color)}"
-      data-type="${esc(b.type)}" data-cat="${esc(b.category_filter || '')}"
-      data-alpha="${esc(b.alpha_range || '')}">${esc(b.label)}</button>`
-  }).join('') + '<button class="nav-btn nav-red" data-action="subtotal">SUB<br>TOTAL</button>'
+function renderPosButton (btn, gridStyle) {
+  const type = btn.type
+  const bg = esc(btn.bg_color || '#ddd')
+  const color = esc(btn.color || '#000')
+  const label = esc(btn.label || '')
+  const imgHtml = btn.image ? `<img src="${btn.image}" alt="">` : ''
+
+  // Numpad display — not a button but an indicator cell
+  if (type === 'num_display') {
+    return `<div class="pos-grid-btn num-display-cell" style="${gridStyle}">${numBuf || ''}</div>`
+  }
+
+  // Numpad digit/action buttons
+  if (NUMPAD_TYPES.has(type)) {
+    let extra = 'digit-btn'
+    if (type === 'clear' || type === 'codeenter') extra += ' num-action'
+    if (type === 'qtyx') extra += ' num-action num-orange'
+    const digitVal = btn.category_filter || btn.label || ''
+    const dataAttr = type === 'digit' ? `data-val="${esc(digitVal)}"` : `data-action="${type}"`
+    return `<div class="pos-grid-btn ${extra}" ${dataAttr} style="${gridStyle};background:${bg};color:${color}">${imgHtml}${label.replace(/\\n/g,'<br>')}</div>`
+  }
+
+  // All other buttons
+  return `<div class="pos-grid-btn" data-type="${esc(type)}" data-cat="${esc(btn.category_filter || '')}"
+    data-alpha="${esc(btn.alpha_range || '')}" data-label2="${label}" data-price="${btn.price || 0}"
+    data-action="${esc(type)}" data-page-link="${btn.parent_id || ''}"
+    style="${gridStyle};background:${bg};color:${color}">${imgHtml}${label.replace(/\\n/g,'<br>')}</div>`
 }
 
-$('#deptGrid').addEventListener('click', async e => {
-  const btn = e.target.closest('.dept-btn')
-  if (!btn || btn.classList.contains('dept-spacer')) return
+// ═══ Unified Grid Click Handler ════════════════════════════════════
+$('#posGrid').addEventListener('click', async e => {
+  const btn = e.target.closest('.pos-grid-btn')
+  if (!btn || btn.classList.contains('empty-cell') || btn.classList.contains('num-display-cell')) return
   const type = btn.dataset.type
-  if (type === 'section') await navigateToSection(btn.dataset.cat)
-  else if (type === 'open_price') showOpenPriceModal(btn.dataset.label2 || btn.textContent.trim(), 0)
-  else if (type === 'fixed_price') {
-    const price = parseFloat(btn.dataset.price), label = btn.dataset.label2 || btn.textContent.trim()
-    addToCart({ id: 'FIXED_' + Date.now(), name: label, price, active_price: price, unit: 'each', tax_rate: 0.10, is_special: false })
+  const action = btn.dataset.action
+  const val = btn.dataset.val
+
+  // Numpad digits
+  if (val !== undefined && val !== '') {
+    numBuf += val; updateNumDisplay(); return
+  }
+
+  // Numpad actions
+  if (action && NUMPAD_TYPES.has(action) && !type) {
+    if (action === 'clear') {
+      numBuf = ''; qtyMultiplier = 1
+      if (returnMode) { returnMode = false; $('#returnBanner').classList.remove('active') }
+      updateNumDisplay(); updateQtyBadge()
+    } else if (action === 'qtyx') {
+      const qty = parseInt(numBuf)
+      if (qty > 0) { qtyMultiplier = qty; numBuf = ''; updateNumDisplay(); updateQtyBadge(); showToast(`Next item × ${qtyMultiplier}`, 'info') }
+    } else if (action === 'codeenter') {
+      if (!numBuf) return
+      try {
+        const p = await window.pos.getProductByBarcode(numBuf)
+        if (p) addToCart(p); else showToast(`Code "${numBuf}" not found`, 'error')
+      } catch (e2) { showToast('Lookup failed', 'error') }
+      numBuf = ''; updateNumDisplay()
+    }
+    return
+  }
+
+  // Register function buttons
+  if (FUNC_TYPES.has(type)) { await handleFuncButton(type); return }
+
+  // Department / product buttons
+  if (DEPT_TYPES.has(type)) {
+    if (type === 'section') await navigateToSection(btn.dataset.cat)
+    else if (type === 'open_price') showOpenPriceModal(btn.dataset.label2 || btn.textContent.trim(), 0)
+    else if (type === 'fixed_price') {
+      const price = parseFloat(btn.dataset.price), label2 = btn.dataset.label2 || btn.textContent.trim()
+      addToCart({ id: 'FIXED_' + Date.now(), name: label2, price, active_price: price, unit: 'each', tax_rate: 0.10, is_special: false })
+    }
+    return
+  }
+
+  // Navigation buttons
+  if (type === 'nav') { await navigateToNav(btn.dataset.cat, btn.dataset.alpha); return }
+  if (type === 'subtotal') { if (cart.isEmpty) { showToast('Cart is empty', 'info'); return }; showCashModal(); return }
+  if (type === 'page_link') {
+    const targetPage = parseInt(btn.dataset.pageLink) || 2
+    posCurrentPage = targetPage; renderPosGrid(); return
+  }
+  if (type === 'back_home') { posCurrentPage = 1; renderPosGrid(); return }
+
+  // Payment buttons
+  if (type === 'pay_cash') { if (cart.isEmpty) { showToast('Cart is empty', 'info'); return }; showCashModal(); return }
+  if (type === 'pay_card') { if (cart.isEmpty) { showToast('Cart is empty', 'info'); return }; $('#btnCard').click(); return }
+  if (type === 'park') {
+    if (cart.isEmpty) { showToast('Nothing to hold', 'info'); return }
+    try {
+      const txnP = cart.toTransaction(currentStaff?.id, [])
+      txnP.status = 'parked'
+      const r = await window.pos.saveTransaction(txnP)
+      cart.clear(); clearCartLocal()
+      showToast(`Sale held (#${r.id.substring(0,6)})`, 'info')
+    } catch (e2) { showToast('Failed to hold sale', 'error') }
+    return
   }
 })
 
-$('#bottomBar').addEventListener('click', async e => {
-  const btn = e.target.closest('.nav-btn'); if (!btn) return
-  const action = btn.dataset.action
-  if (action === 'subtotal') { if (cart.isEmpty) { showToast('Cart is empty', 'info'); return }; showCashModal(); return }
-  const type = btn.dataset.type
-  if (type === 'nav') await navigateToNav(btn.dataset.cat, btn.dataset.alpha)
-  else if (type === 'section') await navigateToSection(btn.dataset.cat)
+// Page tab click
+$('#posPageTabs').addEventListener('click', e => {
+  const tab = e.target.closest('.pos-page-tab')
+  if (!tab) return
+  posCurrentPage = parseInt(tab.dataset.page) || 1
+  renderPosKeyboard()
 })
+
+async function handleFuncButton (action) {
+  switch (action) {
+    case 'void': case 'errcorrect':
+      if (!cart.isEmpty) {
+        const idx = cart.items.length - 1
+        const name = cart.items[idx].name
+        cart.removeItem(idx)
+        showToast(`Voided: ${name}`, 'info')
+      } else showToast('Nothing to void', 'info')
+      break
+    case 'hold':
+      if (cart.isEmpty) { showToast('Nothing to hold', 'info'); return }
+      try {
+        const txnP = cart.toTransaction(currentStaff?.id, [])
+        txnP.status = 'parked'
+        const r = await window.pos.saveTransaction(txnP)
+        cart.clear(); clearCartLocal()
+        showToast(`Sale held (#${r.id.substring(0,6)})`, 'info')
+      } catch (e2) { showToast('Failed to hold sale', 'error') }
+      break
+    case 'recall': showRecallModal(); break
+    case 'nosale':
+      try {
+        await window.pos.openDrawer()
+        await window.pos.logCashDrawer({ staff_id: currentStaff?.id, action: 'open', note: 'No Sale' })
+      } catch (_) {}
+      showToast('Drawer opened', 'info')
+      break
+    case 'movedrawer': showDrawerModal(); break
+    case 'pricecheck': showPriceCheckModal(); break
+    case 'return':
+      if (cart.isEmpty) { showReturnLookupModal() }
+      else {
+        returnMode = !returnMode
+        if (returnMode) { $('#returnBanner').classList.add('active'); showToast('Return mode ON — next items will be negative', 'info') }
+        else { $('#returnBanner').classList.remove('active'); showToast('Return mode OFF', 'info') }
+      }
+      break
+    case 'pctdiscount':
+      if (numBuf) { applyQuickDiscount('sale', numBuf); numBuf = ''; updateNumDisplay() }
+      else showDiscountModal('sale')
+      break
+    case 'pctone':
+      if (numBuf) { applyQuickDiscount('item', numBuf); numBuf = ''; updateNumDisplay() }
+      else showDiscountModal('item')
+      break
+    case 'supervisor': showSupervisorModal(); break
+    case 'lock':
+      if (returnMode) { returnMode = false; $('#returnBanner').classList.remove('active') }
+      if (supervisorMode) { supervisorMode = false; $('#supervisorBanner').classList.remove('active'); if (supervisorTimer) clearTimeout(supervisorTimer) }
+      numBuf = ''; qtyMultiplier = 1; updateNumDisplay()
+      closeAllModals()
+      showLogin()
+      break
+    case 'reprint':
+      if (lastCompletedTxns.length === 0) { showToast('No receipts to reprint', 'info'); break }
+      if (lastCompletedTxns.length === 1) {
+        try { await window.pos.printReceipt(lastCompletedTxns[0]) } catch (_) {}
+        showToast('Receipt reprinted', 'info')
+      } else {
+        showReprintModal()
+      }
+      break
+    case 'ubereats': showUberModal(); break
+    case 'viewor': showToast('View options not configured', 'info'); break
+  }
+}
 
 // ═══ View Switching ═══════════════════════════════════════════════
 function showKeyboardView () { $('#keyboardView').style.display = 'flex'; $('#sectionView').style.display = 'none'; refocus() }
@@ -814,6 +978,38 @@ $('#productGrid').addEventListener('click', async e => {
 })
 
 // ═══ Add to Cart ══════════════════════════════════════════════════
+function trackRecent (product) {
+  recentItems = recentItems.filter(r => r.id !== product.id)
+  recentItems.unshift({ id: product.id, name: product.name, price: product.active_price ?? product.price, unit: product.unit })
+  if (recentItems.length > 12) recentItems.length = 12
+  try { localStorage.setItem('crisp_recent', JSON.stringify(recentItems)) } catch (_) {}
+}
+function loadRecent () {
+  try { recentItems = JSON.parse(localStorage.getItem('crisp_recent') || '[]') } catch (_) { recentItems = [] }
+}
+function showRecentDrawer () {
+  if (!recentItems.length) return
+  $('#recentList').innerHTML = recentItems.map(r =>
+    `<div class="recent-item" data-id="${esc(r.id)}"><span class="recent-item-name">${esc(r.name)}</span><span class="recent-item-price">${money(r.price)}${r.unit !== 'each' ? '/' + r.unit : ''}</span></div>`
+  ).join('')
+  $('#recentDrawer').classList.add('show')
+}
+$('#recentList').addEventListener('click', async e => {
+  const item = e.target.closest('.recent-item'); if (!item) return
+  $('#recentDrawer').classList.remove('show')
+  const p = await window.pos.getProductById(item.dataset.id)
+  if (p) addToCart(p); else showToast('Product no longer available', 'error')
+})
+$('#recentClose').addEventListener('click', () => $('#recentDrawer').classList.remove('show'))
+si.addEventListener('focus', () => { if (!si.value && recentItems.length) showRecentDrawer() })
+si.addEventListener('blur', () => setTimeout(() => $('#recentDrawer').classList.remove('show'), 200))
+
+function updateQtyBadge () {
+  const badge = $('#qtyBadge')
+  if (qtyMultiplier > 1) { badge.textContent = `QTY ×${qtyMultiplier}`; badge.classList.add('show') }
+  else badge.classList.remove('show')
+}
+
 function addToCart (product) {
   if (product.unit === 'kg' || product.unit === '100g') {
     pendingWeightProduct = product; showWeightModal(product); return
@@ -821,8 +1017,9 @@ function addToCart (product) {
   const qty = returnMode ? -qtyMultiplier : qtyMultiplier
   cart.addProduct(product, qty)
   applyDeals()
+  trackRecent(product)
   showToast(`${product.name}${Math.abs(qtyMultiplier) > 1 ? ' ×' + Math.abs(qtyMultiplier) : ''}${returnMode ? ' (return)' : ''} added`, 'success')
-  qtyMultiplier = 1; numBuf = ''; updateNumDisplay()
+  qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); updateQtyBadge()
   si.value = ''; refocus()
 }
 
@@ -830,7 +1027,7 @@ function addToCart (product) {
 si.addEventListener('input', debounce(async () => {
   const q = si.value.trim(); if (q.length < 2) return
   const results = await window.pos.searchProducts(q)
-  pushSection(`Search: "${q}"`, () => {
+  pushSection(`Search: "${q}" (${results.length} result${results.length !== 1 ? 's' : ''})`, () => {
     const grid = $('#productGrid')
     if (!results.length) { grid.innerHTML = `<div class="no-items">No results for "${esc(q)}"</div>`; return }
     grid.innerHTML = results.map(p => `
@@ -905,12 +1102,34 @@ let wBuf = '0'
 function showWeightModal (p) {
   wBuf = '0'; $('#weightDisplay').textContent = '0'
   $('#weightUnit').textContent = p.unit === '100g' ? 'x 100g' : 'kg'
-  $('#weightModalTitle').textContent = p.name; $('#weightModal').classList.add('show')
+  $('#weightModalTitle').textContent = p.name
+  updateWeightPreview(p)
+  $('#weightModal').classList.add('show')
+}
+function updateWeightPreview (p) {
+  const w = parseFloat(wBuf) || 0
+  const price = p.active_price ?? p.price
+  const total = p.unit === '100g' ? w * price : w * price
+  const unit = $('#weightUnit')
+  if (w > 0) {
+    unit.textContent = `${p.unit === '100g' ? 'x 100g' : 'kg'} @ ${money(price)}/${p.unit} = ${money(total)}`
+  } else {
+    unit.textContent = p.unit === '100g' ? 'x 100g' : 'kg'
+  }
 }
 $('#weightPad').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return; const v = b.dataset.val
-  if (v === 'C') wBuf = '0'; else if (v === '.') { if (!wBuf.includes('.')) wBuf += '.' } else wBuf = wBuf === '0' ? v : wBuf + v
+  if (v === 'C') wBuf = '0'
+  else if (v === '.') { if (!wBuf.includes('.')) wBuf += '.' }
+  else {
+    // Prevent multiple decimal points from bad input
+    wBuf = wBuf === '0' ? v : wBuf + v
+    // Validate — max 2 decimal places
+    const parts = wBuf.split('.')
+    if (parts[1] && parts[1].length > 2) wBuf = wBuf.slice(0, -1)
+  }
   $('#weightDisplay').textContent = wBuf
+  if (pendingWeightProduct) updateWeightPreview(pendingWeightProduct)
 })
 $('#weightConfirm').addEventListener('click', () => {
   const q = parseFloat(wBuf); if (!q || q <= 0 || !pendingWeightProduct) return
@@ -926,7 +1145,7 @@ $('#weightCancel').addEventListener('click', () => { $('#weightModal').classList
 cart.onChange = () => { renderCart(); updateTotals(); saveCartLocal() }
 function renderCart () {
   const c = $('#cartItems')
-  if (cart.isEmpty) { c.innerHTML = '<div class="cart-empty">Scan or tap products</div>'; return }
+  if (cart.isEmpty) { c.innerHTML = '<div class="cart-empty" style="flex-direction:column;gap:4px"><span style="font-size:20px;opacity:.4">&#128722;</span><span>Scan barcode or tap a product</span></div>'; return }
   c.innerHTML = cart.items.map((item, i) => {
     const qStr = item.unit === 'each' ? Math.abs(item.qty) : Math.abs(item.qty).toFixed(2) + item.unit
     const isReturn = item.qty < 0
@@ -938,10 +1157,13 @@ function renderCart () {
       `${item.discount > 0 ? `<span style="color:#c44;font-size:8px">-${money(item.discount)}</span>` : ''}` +
       `</div></div>` +
       `<div class="cart-item-qty"><button class="qty-btn remove" data-action="minus" data-index="${i}">−</button><span class="qty-val">${qStr}</span><button class="qty-btn" data-action="plus" data-index="${i}">+</button></div>` +
-      `<div class="cart-item-price">${money(item.line_total)}</div></div>`
+      `<div class="cart-item-price">${money(item.line_total)}</div>` +
+      `<button class="cart-item-delete" data-delete="${i}" title="Remove">&times;</button></div>`
   }).join(''); c.scrollTop = c.scrollHeight
 }
 $('#cartItems').addEventListener('click', e => {
+  const del = e.target.closest('.cart-item-delete')
+  if (del) { const i = parseInt(del.dataset.delete); if (cart.items[i]) { showToast(`Removed: ${cart.items[i].name}`, 'info'); cart.removeItem(i); applyDeals() } return }
   const b = e.target.closest('.qty-btn'); if (!b) return
   const i = parseInt(b.dataset.index), item = cart.items[i]; if (!item) return
   const step = item.unit === 'each' ? 1 : 0.1
@@ -963,13 +1185,48 @@ function updateTotals () {
   $('#sectionPrice').textContent = money(cart.total)
 }
 
+let clearConfirmTimer = null
 $('#cartClear').addEventListener('click', () => {
-  if (!cart.isEmpty) { cart.clear(); clearCartLocal(); showToast('Cart cleared', 'info') }
+  if (cart.isEmpty) return
+  if (clearConfirmTimer) {
+    clearTimeout(clearConfirmTimer); clearConfirmTimer = null
+    cart.clear(); clearCartLocal(); showToast('Cart cleared', 'info')
+    $('#cartClear').textContent = 'Clear All'; $('#cartClear').style.background = ''
+  } else {
+    $('#cartClear').textContent = 'Tap again to clear'
+    $('#cartClear').style.background = '#fdd'
+    clearConfirmTimer = setTimeout(() => {
+      clearConfirmTimer = null; $('#cartClear').textContent = 'Clear All'; $('#cartClear').style.background = ''
+    }, 2500)
+  }
 })
 
-function showSaleComplete (ch) {
-  $('#saleChangeDisplay').textContent = ch > 0 ? `Change: ${money(ch)}` : ''
-  $('#saleComplete').classList.add('show'); setTimeout(() => $('#saleComplete').classList.remove('show'), 2000)
+function showSaleComplete (ch, txnData) {
+  const title = $('#saleCompleteTitle')
+  const body = $('#saleSummaryBody')
+  const change = $('#saleChangeDisplay')
+
+  if (returnMode || (txnData && txnData.status === 'refunded')) {
+    title.textContent = 'Refund Complete'
+    title.style.color = '#c44'
+  } else {
+    title.textContent = 'Sale Complete'
+    title.style.color = '#333'
+  }
+
+  let html = ''
+  if (txnData) {
+    const itemCount = txnData.items.reduce((s, i) => s + Math.abs(i.qty), 0)
+    html += `<div class="sale-summary-items">${Math.round(itemCount)} item${itemCount !== 1 ? 's' : ''}</div>`
+    html += `<div class="sale-summary-row total"><span>Total</span><span>${money(Math.abs(txnData.total))}</span></div>`
+    for (const p of txnData.payments) {
+      html += `<span class="sale-summary-method ${p.method === 'card' ? 'card' : ''}">${p.method.toUpperCase()} ${money(p.amount)}</span> `
+    }
+  }
+  body.innerHTML = html
+  change.textContent = ch > 0 ? `Change: ${money(ch)}` : ''
+  $('#saleComplete').classList.add('show')
+  setTimeout(() => $('#saleComplete').classList.remove('show'), 3000)
 }
 
 // ═══ Deal Auto-Application ════════════════════════════════════════
@@ -1071,9 +1328,14 @@ $('#recallList').addEventListener('click', async e => {
     const items = await window.pos.getTransactionItems(txnId)
     cart.clear()
     for (const ti of items) {
+      let unit = 'each', taxRate = 0.10
+      if (ti.product_id) {
+        const prod = await window.pos.getProductById(ti.product_id)
+        if (prod) { unit = prod.unit || 'each'; taxRate = prod.tax_rate ?? 0.10 }
+      }
       cart.items.push({
-        product_id: ti.product_id, name: ti.name, qty: ti.qty, unit: 'each',
-        unit_price: ti.unit_price, tax_rate: 0.10, discount: ti.discount || 0,
+        product_id: ti.product_id, name: ti.name, qty: ti.qty, unit,
+        unit_price: ti.unit_price, tax_rate: taxRate, discount: ti.discount || 0,
         line_total: ti.line_total, tax: ti.tax || 0, is_special: false, deal_id: null, deal_name: null
       })
     }
@@ -1084,6 +1346,27 @@ $('#recallList').addEventListener('click', async e => {
   $('#recallModal').classList.remove('show'); refocus()
 })
 $('#recallCancel').addEventListener('click', () => { $('#recallModal').classList.remove('show'); refocus() })
+
+// ═══ Quick Discount (from numpad) ═════════════════════════════════
+function applyQuickDiscount (target, pctStr) {
+  const pct = parseFloat(pctStr)
+  if (!pct || pct <= 0 || pct > 100) { showToast('Invalid %', 'error'); return }
+  if (cart.isEmpty) { showToast('No items', 'info'); return }
+  if (target === 'sale') {
+    for (let i = 0; i < cart.items.length; i++) {
+      const item = cart.items[i]
+      const amt = +(item.qty * item.unit_price * pct / 100).toFixed(2)
+      cart.setItemDiscount(i, amt)
+    }
+    showToast(`${pct}% discount applied to all items`, 'success')
+  } else {
+    const idx = cart.items.length - 1
+    const item = cart.items[idx]
+    const amt = +(item.qty * item.unit_price * pct / 100).toFixed(2)
+    cart.setItemDiscount(idx, amt)
+    showToast(`${pct}% discount on ${item.name}`, 'success')
+  }
+}
 
 // ═══ Discount Modal ═══════════════════════════════════════════════
 let discountBuf = '', discountTarget = 'sale'
@@ -1196,64 +1479,233 @@ $('#uberConfirm').addEventListener('click', () => {
 })
 $('#uberCancel').addEventListener('click', () => { $('#uberModal').classList.remove('show'); refocus() })
 
-// ═══ Cash Payment ══════════════════════════════════════════════════
+// ═══ Return Lookup Modal ══════════════════════════════════════════
+let returnTxnItems = [], returnTxnId = null
+
+async function showReturnLookupModal () {
+  returnTxnId = null; returnTxnItems = []
+  $('#returnTxnListView').style.display = 'block'
+  $('#returnItemsView').style.display = 'none'
+  $('#returnLookupConfirm').style.display = 'none'
+  $('#returnLookupBack').style.display = 'none'
+  $('#returnSearchInput').value = ''
+  $('#returnLookupModal').classList.add('show')
+  await loadReturnTransactions()
+  setTimeout(() => $('#returnSearchInput').focus(), 100)
+}
+
+async function loadReturnTransactions (dateStr) {
+  const date = dateStr || new Date().toISOString().slice(0, 10)
+  const txns = await window.pos.searchTransactions({ dateFrom: date, dateTo: date, status: 'completed' })
+  const list = $('#returnTxnList')
+  if (!txns.length) { list.innerHTML = '<div style="text-align:center;color:#888;padding:20px">No completed sales found</div>'; return }
+  list.innerHTML = txns.map(t => `<div class="return-txn" data-id="${esc(t.id)}">
+    <div><div style="font-weight:600">${t.item_count} item(s)${t.staff_name ? ' — ' + esc(t.staff_name) : ''}</div>
+    <div class="return-txn-info">#${t.id.substring(0,8)} &middot; ${new Date(t.created_at + 'Z').toLocaleString('en-AU')}</div></div>
+    <div class="return-txn-total">${money(t.total)}</div>
+  </div>`).join('')
+}
+
+$('#returnSearchInput').addEventListener('keydown', async e => {
+  if (e.key !== 'Enter') return
+  e.preventDefault()
+  const q = $('#returnSearchInput').value.trim()
+  await loadReturnTransactions(q || undefined)
+})
+
+$('#returnTxnList').addEventListener('click', async e => {
+  const row = e.target.closest('.return-txn'); if (!row) return
+  returnTxnId = row.dataset.id
+  const items = await window.pos.getTransactionItems(returnTxnId)
+  returnTxnItems = items
+  $('#returnItemsHeader').textContent = `Select items to return (#${returnTxnId.substring(0,8)}):`
+  $('#returnItemsList').innerHTML = items.map((ti, i) => {
+    const qStr = ti.qty !== 1 ? `${ti.qty} × ${money(ti.unit_price)}` : money(ti.unit_price)
+    return `<div class="return-item-row"><input type="checkbox" id="retItem${i}" data-index="${i}" checked>
+      <label for="retItem${i}"><span>${esc(ti.name)} (${qStr})</span><span>${money(ti.line_total)}</span></label></div>`
+  }).join('')
+  $('#returnTxnListView').style.display = 'none'
+  $('#returnItemsView').style.display = 'block'
+  $('#returnLookupConfirm').style.display = 'inline-block'
+  $('#returnLookupBack').style.display = 'inline-block'
+})
+
+$('#returnLookupBack').addEventListener('click', () => {
+  $('#returnTxnListView').style.display = 'block'
+  $('#returnItemsView').style.display = 'none'
+  $('#returnLookupConfirm').style.display = 'none'
+  $('#returnLookupBack').style.display = 'none'
+})
+
+$('#returnLookupConfirm').addEventListener('click', async () => {
+  const checks = $$('#returnItemsList input[type=checkbox]:checked')
+  if (!checks.length) { showToast('Select at least one item', 'error'); return }
+  cart.clear()
+  for (const cb of checks) {
+    const ti = returnTxnItems[parseInt(cb.dataset.index)]
+    if (!ti) continue
+    let unit = 'each', taxRate = 0.10
+    if (ti.product_id) {
+      const prod = await window.pos.getProductById(ti.product_id)
+      if (prod) { unit = prod.unit || 'each'; taxRate = prod.tax_rate ?? 0.10 }
+    }
+    cart.items.push({
+      product_id: ti.product_id, name: ti.name, qty: -Math.abs(ti.qty), unit,
+      unit_price: ti.unit_price, tax_rate: taxRate, discount: 0,
+      line_total: 0, tax: 0, is_special: false, deal_id: null, deal_name: null
+    })
+    cart._recalcItem(cart.items[cart.items.length - 1])
+  }
+  returnMode = true
+  $('#returnBanner').classList.add('active')
+  cart._notify()
+  $('#returnLookupModal').classList.remove('show')
+  showToast(`${checks.length} item(s) added for return`, 'info')
+  refocus()
+})
+
+$('#returnLookupCancel').addEventListener('click', () => { $('#returnLookupModal').classList.remove('show'); refocus() })
+
+// ═══ Cash Payment (with split payment support) ═══════════════════
+let pendingPayments = []
+
+function getRemaining () {
+  const paid = pendingPayments.reduce((s, p) => s + p.amount, 0)
+  return +(Math.abs(cart.total) - paid).toFixed(2)
+}
+
+function renderSplitPayments () {
+  const sp = $('#splitPayments')
+  if (!pendingPayments.length) { sp.innerHTML = ''; $('#splitRemaining').textContent = ''; return }
+  sp.innerHTML = pendingPayments.map((p, i) => `<span class="split-badge ${p.method}">
+    ${p.method.toUpperCase()} ${money(p.amount)} <span class="split-remove" data-split-remove="${i}">&times;</span>
+  </span>`).join('')
+  const rem = getRemaining()
+  $('#splitRemaining').textContent = rem > 0 ? `Remaining: ${money(rem)}` : 'Fully paid'
+}
+
 function showCashModal () {
   if (cart.isEmpty) return
+  pendingPayments = []
   const total = cart.total
-  $('#cashModalTotal').textContent = money(Math.abs(total))
-  if (total < 0) { $('#cashModalTotal').textContent = `REFUND ${money(Math.abs(total))}` }
-  $('#cashTendered').value = ''; $('#changeDisplay').textContent = ''; $('#cashConfirm').disabled = true
+  const isRefund = total < 0
+  $('#cashModalTitle').textContent = isRefund ? 'Refund' : 'Payment'
+  $('#cashModalTotal').textContent = isRefund ? `REFUND ${money(Math.abs(total))}` : money(Math.abs(total))
+  cashNumBuf = ''; $('#cashTendered').value = ''; $('#changeDisplay').textContent = ''; $('#changeBreakdown').style.display = 'none'; $('#cashConfirm').disabled = true
+  $('#splitCardBtn').style.display = isRefund ? 'none' : 'inline-block'
+  renderSplitPayments()
   $('#cashModal').classList.add('show'); setTimeout(() => $('#cashTendered').focus(), 100)
 }
+
 $('#btnPay').addEventListener('click', showCashModal)
-$('#cashTendered').addEventListener('input', () => {
-  const t = parseFloat($('#cashTendered').value) || 0
-  const total = Math.abs(cart.total)
-  const d = $('#changeDisplay')
-  if (cart.total < 0) {
-    d.textContent = `Give back: ${money(total)}`; d.className = 'change-display short'
-    $('#cashConfirm').disabled = false
-  } else {
-    const ch = t - total
-    if (!t) { d.textContent = ''; d.className = 'change-display' }
-    else if (ch >= 0) { d.textContent = `Change: ${money(ch)}`; d.className = 'change-display positive' }
-    else { d.textContent = `Short: ${money(Math.abs(ch))}`; d.className = 'change-display short' }
-    $('#cashConfirm').disabled = t < total
-  }
-})
-$('#quickCash').addEventListener('click', e => {
-  const b = e.target.closest('button'); if (!b) return
-  $('#cashTendered').value = b.dataset.amt === 'exact' ? Math.abs(cart.total).toFixed(2) : b.dataset.amt
+
+$('#splitPayments').addEventListener('click', e => {
+  const rm = e.target.closest('[data-split-remove]')
+  if (!rm) return
+  pendingPayments.splice(parseInt(rm.dataset.splitRemove), 1)
+  renderSplitPayments()
   $('#cashTendered').dispatchEvent(new Event('input'))
 })
+
+$('#splitCardBtn').addEventListener('click', () => {
+  const remaining = getRemaining()
+  if (remaining <= 0) { showToast('Already fully paid', 'info'); return }
+  pendingPayments.push({ method: 'card', amount: remaining, reference: 'EFTPOS' })
+  renderSplitPayments()
+  $('#cashTendered').value = ''
+  $('#cashTendered').dispatchEvent(new Event('input'))
+})
+
+function changeBreakdown (amount) {
+  if (amount <= 0) { $('#changeBreakdown').style.display = 'none'; return }
+  const denoms = [
+    { val: 100, label: '$100' }, { val: 50, label: '$50' }, { val: 20, label: '$20' },
+    { val: 10, label: '$10' }, { val: 5, label: '$5' }, { val: 2, label: '$2' },
+    { val: 1, label: '$1' }, { val: 0.50, label: '50c' }, { val: 0.20, label: '20c' },
+    { val: 0.10, label: '10c' }, { val: 0.05, label: '5c' }
+  ]
+  let rem = Math.round(amount * 100) / 100
+  const parts = []
+  for (const d of denoms) {
+    const count = Math.floor(rem / d.val + 0.001)
+    if (count > 0) { parts.push(`${count}×${d.label}`); rem = Math.round((rem - count * d.val) * 100) / 100 }
+  }
+  const el = $('#changeBreakdown')
+  if (parts.length) { el.textContent = parts.join('  '); el.style.display = 'block' }
+  else el.style.display = 'none'
+}
+
+$('#cashTendered').addEventListener('input', () => {
+  const t = parseFloat($('#cashTendered').value) || 0
+  const remaining = getRemaining()
+  const d = $('#changeDisplay')
+  if (cart.total < 0) {
+    d.textContent = `Give back: ${money(Math.abs(cart.total))}`; d.className = 'change-display short'
+    changeBreakdown(Math.abs(cart.total))
+    $('#cashConfirm').disabled = false
+  } else if (remaining <= 0) {
+    d.textContent = 'Paid in full'; d.className = 'change-display positive'
+    changeBreakdown(0)
+    $('#cashConfirm').disabled = false
+  } else {
+    const ch = t - remaining
+    if (!t) { d.textContent = ''; d.className = 'change-display'; changeBreakdown(0) }
+    else if (ch >= 0) { d.textContent = `Change: ${money(ch)}`; d.className = 'change-display positive'; changeBreakdown(ch) }
+    else { d.textContent = `Short: ${money(Math.abs(ch))}`; d.className = 'change-display short'; changeBreakdown(0) }
+    $('#cashConfirm').disabled = t < remaining
+  }
+})
+
+$('#quickCash').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return
+  const remaining = getRemaining()
+  cashNumBuf = b.dataset.amt === 'exact' ? remaining.toFixed(2) : b.dataset.amt
+  $('#cashTendered').value = cashNumBuf
+  $('#cashTendered').dispatchEvent(new Event('input'))
+})
+
 $('#cashConfirm').addEventListener('click', async () => {
   if (payProcessing) return; payProcessing = true
   try {
-    const t = parseFloat($('#cashTendered').value) || 0, ch = Math.max(0, t - Math.abs(cart.total))
+    const remaining = getRemaining()
+    const tendered = parseFloat($('#cashTendered').value) || 0
+    const cashAmount = Math.min(tendered, remaining > 0 ? remaining : 0)
+    const ch = remaining > 0 ? Math.max(0, tendered - remaining) : 0
+
+    // Build final payments list
+    const payments = [...pendingPayments]
+    if (cashAmount > 0 || !payments.length) {
+      payments.push({ method: 'cash', amount: remaining > 0 ? remaining : Math.abs(cart.total) })
+    }
+
     const status = returnMode ? 'refunded' : 'completed'
-    const txn = cart.toTransaction(currentStaff?.id, [{ method: 'cash', amount: Math.abs(cart.total) }])
+    const txn = cart.toTransaction(currentStaff?.id, payments)
     txn.status = status
     const r = await window.pos.saveTransaction(txn)
     const s = await window.pos.getAllSettings()
-    lastCompletedTxn = {
+    const receiptData = {
       storeName: s.store_name || 'Crisp on Creek', storeAddress: s.store_address || '',
       storePhone: s.store_phone || '', storeAbn: s.store_abn || '',
       header: s.receipt_header || '', date: new Date().toLocaleString('en-AU'),
       txnId: r.id, staffName: currentStaff?.name || '', registerId: s.register_id || 'LANE01',
       items: txn.items, subtotal: txn.subtotal, tax: txn.tax, discount: txn.discount, total: txn.total,
-      payments: txn.payments, change: ch, footer: s.receipt_footer || 'Thank you!'
+      payments: txn.payments, change: ch, status, footer: s.receipt_footer || 'Thank you!'
     }
-    try { await window.pos.printReceipt(lastCompletedTxn) } catch (_) {}
-    try { await window.pos.openDrawer() } catch (_) {}
-    cart.clear(); clearCartLocal()
+    lastCompletedTxns.unshift(receiptData)
+    if (lastCompletedTxns.length > 10) lastCompletedTxns.length = 10
+    try { await window.pos.printReceipt(receiptData) } catch (_) {}
+    const hasCash = payments.some(p => p.method === 'cash')
+    if (hasCash) { try { await window.pos.openDrawer() } catch (_) {} }
+    cart.clear(); clearCartLocal(); pendingPayments = []
     if (returnMode) { returnMode = false; $('#returnBanner').classList.remove('active') }
     if (supervisorMode) { supervisorMode = false; $('#supervisorBanner').classList.remove('active'); if (supervisorTimer) clearTimeout(supervisorTimer) }
     $('#cashModal').classList.remove('show')
-    showSaleComplete(ch); refocus(); pushPending().catch(() => {})
+    showSaleComplete(ch, receiptData); refocus(); pushPending().catch(() => {})
   } catch (e2) { showToast('Payment failed: ' + e2.message, 'error') }
   payProcessing = false
 })
-$('#cashCancel').addEventListener('click', () => { $('#cashModal').classList.remove('show'); refocus() })
+
+$('#cashCancel').addEventListener('click', () => { pendingPayments = []; $('#cashModal').classList.remove('show'); refocus() })
 
 // ═══ Card / Park ══════════════════════════════════════════════════
 $('#btnCard').addEventListener('click', async () => {
@@ -1265,19 +1717,21 @@ $('#btnCard').addEventListener('click', async () => {
     txn.status = status
     const r = await window.pos.saveTransaction(txn)
     const s = await window.pos.getAllSettings()
-    lastCompletedTxn = {
+    const receiptData = {
       storeName: s.store_name || 'Crisp on Creek', storeAddress: s.store_address || '',
       storePhone: s.store_phone || '', storeAbn: s.store_abn || '',
       header: s.receipt_header || '', date: new Date().toLocaleString('en-AU'),
       txnId: r.id, staffName: currentStaff?.name || '', registerId: s.register_id || 'LANE01',
       items: txn.items, subtotal: txn.subtotal, tax: txn.tax, discount: txn.discount, total: txn.total,
-      payments: txn.payments, change: 0, footer: s.receipt_footer || 'Thank you!'
+      payments: txn.payments, change: 0, status, footer: s.receipt_footer || 'Thank you!'
     }
-    try { await window.pos.printReceipt(lastCompletedTxn) } catch (_) {}
+    lastCompletedTxns.unshift(receiptData)
+    if (lastCompletedTxns.length > 10) lastCompletedTxns.length = 10
+    try { await window.pos.printReceipt(receiptData) } catch (_) {}
     cart.clear(); clearCartLocal()
     if (returnMode) { returnMode = false; $('#returnBanner').classList.remove('active') }
     if (supervisorMode) { supervisorMode = false; $('#supervisorBanner').classList.remove('active') }
-    showSaleComplete(0); refocus(); pushPending().catch(() => {})
+    showSaleComplete(0, receiptData); refocus(); pushPending().catch(() => {})
   } catch (e2) { showToast('Card payment failed', 'error') }
   payProcessing = false
 })
@@ -1287,6 +1741,73 @@ $('#btnPark').addEventListener('click', async () => {
   await window.pos.saveTransaction(txn); cart.clear(); clearCartLocal()
   showToast('Transaction parked', 'info'); refocus()
 })
+
+// ═══ Reprint Modal ═══════════════════════════════════════════════
+function showReprintModal () {
+  $('#reprintList').innerHTML = lastCompletedTxns.map((t, i) => {
+    const itemCount = t.items.reduce((s, it) => s + Math.abs(it.qty), 0)
+    const method = t.payments.map(p => p.method.toUpperCase()).join('+')
+    return `<div class="recall-item" data-reprint="${i}">
+      <div><div style="font-weight:600">${Math.round(itemCount)} item(s) — ${method}</div>
+      <div class="recall-info">#${t.txnId.substring(0,8)} &middot; ${t.date}</div></div>
+      <div class="recall-total">${money(Math.abs(t.total))}</div>
+    </div>`
+  }).join('')
+  $('#reprintModal').classList.add('show')
+}
+$('#reprintList').addEventListener('click', async e => {
+  const item = e.target.closest('[data-reprint]'); if (!item) return
+  const idx = parseInt(item.dataset.reprint)
+  const receipt = lastCompletedTxns[idx]
+  if (receipt) {
+    try { await window.pos.printReceipt(receipt) } catch (_) {}
+    showToast('Receipt reprinted', 'info')
+  }
+  $('#reprintModal').classList.remove('show'); refocus()
+})
+$('#reprintClose').addEventListener('click', () => { $('#reprintModal').classList.remove('show'); refocus() })
+
+// ═══ Cash Modal Numpad ═══════════════════════════════════════════
+$('#cashNumpad').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return
+  const v = b.dataset.cv
+  const input = $('#cashTendered')
+  if (v === 'C') { cashNumBuf = ''; input.value = '' }
+  else if (v === 'back') { cashNumBuf = cashNumBuf.slice(0, -1); input.value = cashNumBuf }
+  else if (v === 'OK') { /* just trigger recalc */ }
+  else if (v === '.') { if (!cashNumBuf.includes('.')) { cashNumBuf += '.'; input.value = cashNumBuf } }
+  else { cashNumBuf += v; input.value = cashNumBuf }
+  input.dispatchEvent(new Event('input'))
+})
+
+// ═══ Return Quick Date Buttons ═══════════════════════════════════
+$('#returnQuickDates').addEventListener('click', async e => {
+  const b = e.target.closest('button'); if (!b) return
+  const days = parseInt(b.dataset.days)
+  $$('#returnQuickDates button').forEach(x => x.classList.remove('active'))
+  b.classList.add('active')
+  const today = new Date()
+  if (days === 0) {
+    await loadReturnTransactions(today.toISOString().slice(0, 10))
+  } else if (days === 1) {
+    const yest = new Date(today); yest.setDate(yest.getDate() - 1)
+    await loadReturnTransactions(yest.toISOString().slice(0, 10))
+  } else {
+    const from = new Date(today); from.setDate(from.getDate() - days)
+    await loadReturnTransactionsRange(from.toISOString().slice(0, 10), today.toISOString().slice(0, 10))
+  }
+})
+
+async function loadReturnTransactionsRange (fromDate, toDate) {
+  const txns = await window.pos.searchTransactions({ dateFrom: fromDate, dateTo: toDate, status: 'completed' })
+  const list = $('#returnTxnList')
+  if (!txns.length) { list.innerHTML = '<div style="text-align:center;color:#888;padding:20px">No completed sales found</div>'; return }
+  list.innerHTML = txns.map(t => `<div class="return-txn" data-id="${esc(t.id)}">
+    <div><div style="font-weight:600">${t.item_count} item(s)${t.staff_name ? ' — ' + esc(t.staff_name) : ''}</div>
+    <div class="return-txn-info">#${t.id.substring(0,8)} &middot; ${new Date(t.created_at + 'Z').toLocaleString('en-AU')}</div></div>
+    <div class="return-txn-total">${money(t.total)}</div>
+  </div>`).join('')
+}
 
 // ═══ Keyboard Shortcuts ═══════════════════════════════════════════
 document.addEventListener('keydown', e => {
@@ -1323,14 +1844,87 @@ document.addEventListener('click', e => {
   if (e.target === document.body || e.target.classList.contains('keyboard-home') || e.target.classList.contains('main-row')) refocus()
 })
 
+// ═══ Cash Drawer Management ═══════════════════════════════════════
+let drawerAction = ''
+
+async function showDrawerModal () {
+  drawerAction = ''
+  $('#drawerInputArea').style.display = 'none'
+  $('#drawerMainActions').style.display = 'flex'
+  await refreshDrawerSummary()
+  await refreshDrawerLog()
+  $('#drawerModal').classList.add('show')
+}
+
+async function refreshDrawerSummary () {
+  const s = await window.pos.getCashDrawerSummary()
+  $('#drawerFloat').textContent = money(s.float)
+  $('#drawerSales').textContent = money(s.cash_sales)
+  $('#drawerPickups').textContent = money(s.pickups)
+  $('#drawerDrops').textContent = money(s.drops)
+  $('#drawerExpected').textContent = money(s.expected)
+}
+
+async function refreshDrawerLog () {
+  const log = await window.pos.getCashDrawerLog()
+  const el = $('#drawerLog')
+  if (!log.length) { el.innerHTML = '<div style="text-align:center;color:#aaa;font-size:11px;padding:8px">No drawer activity today</div>'; return }
+  el.innerHTML = log.slice(0, 20).map(e => {
+    const time = new Date(e.created_at + 'Z').toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })
+    const color = e.action === 'pickup' ? '#c44' : e.action === 'float' ? '#2d6a4f' : e.action === 'drop' ? '#3b82f6' : '#888'
+    return `<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:11px;border-bottom:1px solid #f5f5f5">
+      <span><span style="color:${color};font-weight:700;text-transform:uppercase">${esc(e.action)}</span> ${e.note ? '— ' + esc(e.note) : ''}</span>
+      <span style="font-weight:600">${money(e.amount)} <span style="color:#aaa">${time}</span></span>
+    </div>`
+  }).join('')
+}
+
+$('#drawerFloatBtn').addEventListener('click', () => { drawerAction = 'float'; showDrawerInput('Set Float Amount') })
+$('#drawerPickupBtn').addEventListener('click', () => { drawerAction = 'pickup'; showDrawerInput('Pickup Amount') })
+$('#drawerDropBtn').addEventListener('click', () => { drawerAction = 'drop'; showDrawerInput('Drop Amount') })
+
+function showDrawerInput (label) {
+  $('#drawerInputLabel').textContent = label
+  $('#drawerAmount').value = ''
+  $('#drawerNote').value = ''
+  $('#drawerInputArea').style.display = 'block'
+  $('#drawerMainActions').style.display = 'none'
+  setTimeout(() => $('#drawerAmount').focus(), 50)
+}
+
+$('#drawerInputCancel').addEventListener('click', () => {
+  $('#drawerInputArea').style.display = 'none'
+  $('#drawerMainActions').style.display = 'flex'
+})
+
+$('#drawerInputConfirm').addEventListener('click', async () => {
+  const amt = parseFloat($('#drawerAmount').value) || 0
+  if (amt <= 0) { showToast('Enter a valid amount', 'error'); return }
+  const note = $('#drawerNote').value.trim()
+  await window.pos.logCashDrawer({
+    staff_id: currentStaff?.id,
+    action: drawerAction,
+    amount: amt,
+    note: note || drawerAction.charAt(0).toUpperCase() + drawerAction.slice(1)
+  })
+  try { await window.pos.openDrawer() } catch (_) {}
+  showToast(`${drawerAction.charAt(0).toUpperCase() + drawerAction.slice(1)}: ${money(amt)}`, 'success')
+  $('#drawerInputArea').style.display = 'none'
+  $('#drawerMainActions').style.display = 'flex'
+  await refreshDrawerSummary()
+  await refreshDrawerLog()
+})
+
+$('#drawerClose').addEventListener('click', () => { $('#drawerModal').classList.remove('show'); refocus() })
+
 // ═══ Init ══════════════════════════════════════════════════════════
 async function init () {
   try {
     allCategories = await window.pos.getCategories()
-    await renderDeptGrid()
-    await renderBottomBar()
+    await renderPosKeyboard()
     await loadDeals()
     updateTotals()
+    loadRecent()
     restoreCartLocal()
     const url = await window.pos.getSetting('supabase_url')
     const key = await window.pos.getSetting('supabase_anon_key')

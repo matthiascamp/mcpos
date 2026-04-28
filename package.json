@@ -5,14 +5,55 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "dev": "electron . --dev"
+    "dev": "electron . --dev",
+    "build": "electron-builder --win",
+    "build:portable": "electron-builder --win portable",
+    "build:installer": "electron-builder --win nsis"
   },
   "dependencies": {
     "sql.js": "^1.11.0",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
-    "electron": "^33.2.0"
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.crisponcreek.pos",
+    "productName": "Crisp POS",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "package.json",
+      "pos/**",
+      "db/**",
+      "node_modules/**"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "build/icon.png"
+    },
+    "portable": {
+      "artifactName": "CrispPOS-${version}.exe"
+    },
+    "nsis": {
+      "oneClick": true,
+      "artifactName": "CrispPOS-Setup-${version}.exe"
+    },
+    "extraResources": [
+      {
+        "from": "node_modules/sql.js/dist/sql-wasm.wasm",
+        "to": "sql-wasm.wasm"
+      }
+    ]
   },
   "author": "Matthias Campbell",
   "license": "MIT"

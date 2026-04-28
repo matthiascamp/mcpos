@@ -34,6 +34,7 @@ async function initDatabase() {
     "ALTER TABLE keyboard_buttons ADD COLUMN grid_col INTEGER DEFAULT 0",
     "ALTER TABLE keyboard_buttons ADD COLUMN col_span INTEGER DEFAULT 1",
     "ALTER TABLE keyboard_buttons ADD COLUMN row_span INTEGER DEFAULT 1",
+    "INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span) VALUES ('np-display', '', 'num_display', '#00cc00', '#111111', 29, 'grid', 1, 2, 3, 1, 4)",
   ]
   for (const m of migrations) {
     try { db.run(m) } catch (_) {}
@@ -93,6 +94,7 @@ function createWindow() {
     fullscreen: !process.argv.includes('--dev'),
     kiosk: !process.argv.includes('--dev'),
     autoHideMenuBar: true,
+    icon: path.join(__dirname, 'pos', 'logo.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -249,6 +251,33 @@ function setupIPC() {
     `, [id])
   })
 
+  // ── Specials ──────────────────────────────────────────────────────────────
+
+  ipcMain.handle('db:specials:getAll', () => {
+    return dbAll(`
+      SELECT s.*, p.name as product_name, p.price as product_price, p.barcode
+      FROM specials s
+      JOIN products p ON p.id = s.product_id
+      ORDER BY s.active DESC, p.name
+    `)
+  })
+
+  ipcMain.handle('db:specials:upsert', (_e, spec) => {
+    const id = spec.id || uuid()
+    dbRun(`
+      INSERT OR REPLACE INTO specials (id, product_id, special_price, start_date, end_date, active, updated_at)
+      VALUES (?1, ?2, ?3, ?4, ?5, ?6, datetime('now'))
+    `, [id, spec.product_id, spec.special_price, spec.start_date || null,
+        spec.end_date || null, spec.active !== false ? 1 : 0])
+    queueSync('specials', id, spec.id ? 'update' : 'insert')
+    return { id }
+  })
+
+  ipcMain.handle('db:specials:delete', (_e, id) => {
+    dbRun("DELETE FROM specials WHERE id = ?1", [id])
+    return true
+  })
+
   // ── Deals ─────────────────────────────────────────────────────────────────
 
   ipcMain.handle('db:deals:getAll', () => {
@@ -340,6 +369,18 @@ function setupIPC() {
       }
     }
     dbRun("UPDATE transactions SET status = 'voided' WHERE id = ?1", [txnId])
+    queueSync('transactions', txnId, 'update')
+    return true
+  })
+
+  ipcMain.handle('db:transaction:refund', (_e, txnId) => {
+    const items = dbAll("SELECT product_id, qty FROM transaction_items WHERE transaction_id = ?1", [txnId])
+    for (const item of items) {
+      if (item.product_id) {
+        dbRun("UPDATE products SET stock_qty = stock_qty + ?1 WHERE id = ?2 AND track_stock = 1", [item.qty, item.product_id])
+      }
+    }
+    dbRun("UPDATE transactions SET status = 'refunded' WHERE id = ?1", [txnId])
     queueSync('transactions', txnId, 'update')
     return true
   })
@@ -499,6 +540,10 @@ function setupIPC() {
     return dbAll("SELECT id, name, role, active FROM staff ORDER BY name")
   })
 
+  ipcMain.handle('db:staff:getWithPin', (_e, id) => {
+    return dbGet("SELECT id, name, pin, role, active FROM staff WHERE id = ?1", [id])
+  })
+
   ipcMain.handle('db:staff:upsert', (_e, s) => {
     const id = s.id || uuid()
     dbRun(`
@@ -552,6 +597,61 @@ function setupIPC() {
       WHERE status = 'completed'
         AND date(created_at) = ?1
     `, [date || new Date().toISOString().slice(0, 10)])
+  })
+
+  ipcMain.handle('db:reports:voidRefundCount', (_e, date) => {
+    return dbGet(`
+      SELECT
+        COALESCE(SUM(CASE WHEN status='voided' THEN 1 ELSE 0 END), 0) as void_count,
+        COALESCE(SUM(CASE WHEN status='refunded' THEN 1 ELSE 0 END), 0) as refund_count,
+        COALESCE(SUM(CASE WHEN status='refunded' THEN total ELSE 0 END), 0) as refund_total
+      FROM transactions
+      WHERE date(created_at) = ?1
+    `, [date || new Date().toISOString().slice(0, 10)])
+  })
+
+  ipcMain.handle('db:reports:zReport', (_e, date) => {
+    const d = date || new Date().toISOString().slice(0, 10)
+    const summary = dbGet(`
+      SELECT COUNT(*) as txn_count, COALESCE(SUM(total),0) as total_sales,
+        COALESCE(SUM(tax),0) as total_tax, COALESCE(SUM(discount),0) as total_discounts
+      FROM transactions WHERE status='completed' AND date(created_at)=?1
+    `, [d])
+    const voids = dbGet(`SELECT COUNT(*) as cnt FROM transactions WHERE status='voided' AND date(created_at)=?1`, [d])
+    const refunds = dbGet(`
+      SELECT COUNT(*) as cnt, COALESCE(SUM(ABS(total)),0) as total
+      FROM transactions WHERE status='refunded' AND date(created_at)=?1
+    `, [d])
+    const methods = dbAll(`
+      SELECT p.method, COUNT(DISTINCT p.transaction_id) as txn_count, COALESCE(SUM(p.amount),0) as total
+      FROM payments p JOIN transactions t ON t.id=p.transaction_id
+      WHERE t.status='completed' AND date(t.created_at)=?1 GROUP BY p.method
+    `, [d])
+    const categories = dbAll(`
+      SELECT COALESCE(c.name,'Other') as category, SUM(ti.line_total) as total, SUM(ti.qty) as qty
+      FROM transaction_items ti JOIN transactions t ON t.id=ti.transaction_id
+      LEFT JOIN products p ON p.id=ti.product_id LEFT JOIN categories c ON c.id=p.category_id
+      WHERE t.status='completed' AND date(t.created_at)=?1 GROUP BY c.name ORDER BY total DESC
+    `, [d])
+    const hourly = dbAll(`
+      SELECT strftime('%H',created_at) as hour, COUNT(*) as cnt, COALESCE(SUM(total),0) as total
+      FROM transactions WHERE status='completed' AND date(created_at)=?1 GROUP BY hour ORDER BY hour
+    `, [d])
+    const drawer = dbGet(`
+      SELECT COALESCE(SUM(CASE WHEN action='float' THEN amount ELSE 0 END),0) as float_total,
+        COALESCE(SUM(CASE WHEN action='pickup' THEN amount ELSE 0 END),0) as pickups,
+        COALESCE(SUM(CASE WHEN action='drop' THEN amount ELSE 0 END),0) as drops
+      FROM cash_drawer WHERE date(created_at)=?1
+    `, [d])
+    const cashSales = methods.find(m => m.method === 'cash')?.total || 0
+    return {
+      date: d, summary, voids: voids?.cnt || 0,
+      refunds: { count: refunds?.cnt || 0, total: refunds?.total || 0 },
+      methods, categories, hourly, drawer: {
+        ...drawer, cash_sales: cashSales,
+        expected: (drawer?.float_total || 0) + cashSales + (drawer?.drops || 0) - (drawer?.pickups || 0)
+      }
+    }
   })
 
   ipcMain.handle('db:reports:topProducts', (_e, date) => {

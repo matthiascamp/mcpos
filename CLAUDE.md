@@ -454,15 +454,15 @@ body
 | NO SALE | `nosale` | Open cash drawer via `window.pos.openDrawer()` |
 | MOVE DRAWER | `movedrawer` | Open cash drawer |
 | PRICE CHECK | `pricecheck` | Show price change modal for last item |
-| RECALL SALE | `recall` | Recall a parked transaction (coming soon) |
-| LOCK | `lock` | Lock register, show login overlay (coming soon) |
-| SUPERVISOR | `supervisor` | Supervisor mode (coming soon) |
-| REPRINT | `reprint` | Reprint last receipt (coming soon) |
-| RETURN | `return` | Return mode (coming soon) |
-| % DISCOUNT | `pctdiscount` | % off whole sale (coming soon) |
-| % ONE ITEM | `pctone` | % off one item (coming soon) |
-| UBER EATS ADJ | `ubereats` | Uber Eats adjustment (coming soon) |
-| VIEW OR... | `viewor` | View options (coming soon) |
+| RECALL SALE | `recall` | Show list of parked/held transactions, click to restore into cart |
+| LOCK | `lock` | Lock register (clears return/supervisor mode), show PIN login overlay |
+| SUPERVISOR | `supervisor` | Prompt for manager/admin PIN, enables supervisor mode for 60s |
+| REPRINT | `reprint` | Reprint last completed receipt via ESC/POS |
+| RETURN | `return` | If cart empty: show return-by-receipt lookup (select items from past transaction). If cart has items: toggle return mode (next scans negative) |
+| % DISCOUNT | `pctdiscount` | % off whole sale — numpad shortcut: type number then press button to skip modal |
+| % ONE ITEM | `pctone` | % off last item — numpad shortcut: type number then press button to skip modal |
+| UBER EATS ADJ | `ubereats` | Add 30% markup to current sale total as line item |
+| VIEW OR... | `viewor` | View options (not configured) |
 
 ### Register Keyboard Shortcuts
 
