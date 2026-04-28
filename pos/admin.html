@@ -1,0 +1,2144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crisp POS — Admin</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    :root {
+      --green:      #10b981;
+      --green-dark: #059669;
+      --red:        #ef4444;
+      --blue:       #3b82f6;
+      --amber:      #f59e0b;
+      --bg:         #0f1117;
+      --surface:    #1a1d27;
+      --surface2:   #242833;
+      --border:     #2d3242;
+      --text:       #f1f5f9;
+      --text-dim:   #8892a8;
+      --radius:     10px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .nav {
+      display: flex;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 16px;
+    }
+
+    .nav a {
+      padding: 14px 20px;
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      border-bottom: 2px solid transparent;
+    }
+    .nav a:hover { color: var(--text); }
+    .nav a.active { color: var(--green); border-bottom-color: var(--green); }
+
+    .nav-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-right a { font-size: 13px; }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    h1 { font-size: 22px; margin-bottom: 20px; }
+    h2 { font-size: 18px; margin-bottom: 16px; color: var(--text-dim); }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .stat-label { font-size: 13px; color: var(--text-dim); margin-bottom: 4px; }
+    .stat-value { font-size: 28px; font-weight: 700; }
+    .stat-value.green { color: var(--green); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+    th { color: var(--text-dim); font-weight: 500; font-size: 12px; text-transform: uppercase; }
+
+    .badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    .badge-green { background: rgba(16,185,129,0.15); color: var(--green); }
+    .badge-amber { background: rgba(245,158,11,0.15); color: var(--amber); }
+    .badge-red   { background: rgba(239,68,68,0.15); color: var(--red); }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-green { background: var(--green); color: #000; }
+    .btn-blue  { background: var(--blue); color: #fff; }
+    .btn-outline { background: none; border: 1px solid var(--border); color: var(--text); }
+    .btn:hover { opacity: 0.9; }
+
+    .form-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      align-items: end;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .form-field label {
+      font-size: 12px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+    }
+
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+      padding: 10px 12px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+    }
+    .form-field input:focus,
+    .form-field select:focus {
+      border-color: var(--green);
+    }
+
+    .import-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .import-zone:hover { border-color: var(--green); }
+    .import-zone.dragover { border-color: var(--green); background: rgba(16,185,129,0.05); }
+
+    .import-zone p { color: var(--text-dim); margin-top: 8px; font-size: 14px; }
+
+    .hidden { display: none !important; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Grid keyboard editor cells */
+    .kb-cell {
+      min-height: 0;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      text-align: center;
+      line-height: 1.2;
+      cursor: pointer;
+      transition: outline .15s, transform .15s;
+      position: relative;
+      user-select: none;
+      padding: 6px;
+      word-break: break-word;
+    }
+    .kb-cell:hover { outline: 2px solid var(--green); outline-offset: 2px; }
+    .kb-cell.selected { outline: 3px solid #3b82f6; outline-offset: 2px; transform: scale(1.03); }
+    .kb-cell.empty-cell {
+      border: 2px dashed var(--border);
+      background: transparent;
+      color: var(--text-dim);
+      font-weight: 400;
+      font-size: 20px;
+    }
+    .kb-cell.empty-cell:hover { border-color: var(--green); color: var(--green); }
+    .kb-cell.empty-cell.sel-highlight { border-color: #3b82f6; background: rgba(59,130,246,.12); color: #3b82f6; }
+    .kb-cell.dragging { opacity: 0.4; }
+    .kb-cell.drag-over { outline: 3px dashed var(--green); outline-offset: 2px; }
+
+    .kb-product-sidebar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      max-height: 450px;
+      display: flex;
+      flex-direction: column;
+    }
+    .kb-product-sidebar input { margin-bottom: 8px; }
+    .kb-prod-list { overflow-y: auto; flex: 1; }
+    .kb-prod-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      border-bottom: 1px solid var(--border);
+    }
+    .kb-prod-item:hover { background: var(--surface2); }
+    .kb-prod-item.sel-highlight { background: rgba(59,130,246,.15); outline: 1px solid #3b82f6; }
+    .kb-prod-item .prod-price { margin-left: auto; color: var(--green); font-weight: 600; font-size: 12px; }
+    .kb-cell .kb-cell-type {
+      position: absolute;
+      top: 3px;
+      right: 5px;
+      font-size: 8px;
+      font-weight: 500;
+      opacity: 0.7;
+      text-transform: uppercase;
+    }
+    .kb-cell .kb-cell-price {
+      font-size: 10px;
+      font-weight: 400;
+      opacity: 0.8;
+      margin-top: 2px;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(14px);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      opacity: 0;
+      transition: all .3s ease;
+      z-index: 300;
+      box-shadow: 0 4px 20px rgba(0,0,0,.3);
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast-info { background: #484848; color: #fff; }
+    .toast-success { background: var(--green); color: #000; }
+    .toast-error { background: var(--red); color: #fff; }
+
+    /* Loading state */
+    .loading::after {
+      content: '';
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--text-dim);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a href="#" class="active" data-tab="dashboard">Dashboard</a>
+    <a href="#" data-tab="transactions">Transactions</a>
+    <a href="#" data-tab="products">Products</a>
+    <a href="#" data-tab="staff">Staff</a>
+    <a href="#" data-tab="deals">Deals</a>
+    <a href="#" data-tab="cashdrawer">Cash Drawer</a>
+    <a href="#" data-tab="keyboard">Keyboard</a>
+    <a href="#" data-tab="hardware">Hardware</a>
+    <a href="#" data-tab="import">Import</a>
+    <a href="#" data-tab="settings">Settings</a>
+    <div class="nav-right">
+      <a href="index.html">Back to Register</a>
+      <button onclick="window.pos.exitFullscreen()" style="background:none;border:1px solid var(--border);color:var(--text-dim);padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer" title="Exit fullscreen (F11)">Exit FS</button>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <!-- ── Dashboard ──────────────────────────────────────────────── -->
+    <div class="tab-content active" id="tab-dashboard">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+        <h1 style="margin:0">Dashboard</h1>
+        <input type="date" id="dashDate" style="padding:8px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:14px">
+        <button class="btn btn-outline" id="dashPrev" style="padding:6px 12px;font-size:18px">&larr;</button>
+        <button class="btn btn-outline" id="dashNext" style="padding:6px 12px;font-size:18px">&rarr;</button>
+        <button class="btn btn-outline" id="dashToday" style="padding:6px 14px">Today</button>
+        <span id="dashDayLabel" style="color:var(--text-dim);font-size:14px"></span>
+      </div>
+
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+          <div class="stat-label">Sales</div>
+          <div class="stat-value green" id="statSales">$0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Transactions</div>
+          <div class="stat-value" id="statTxns">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">GST Collected</div>
+          <div class="stat-value" id="statTax">$0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Discounts</div>
+          <div class="stat-value" id="statDisc">$0.00</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+        <div class="section" style="padding:16px">
+          <h2 style="margin-bottom:12px">Sales by Hour</h2>
+          <div id="hourlyChart" style="height:200px;display:flex;align-items:flex-end;gap:2px;padding-top:8px"></div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-dim);margin-top:4px">
+            <span>6am</span><span>9am</span><span>12pm</span><span>3pm</span><span>6pm</span><span>9pm</span>
+          </div>
+        </div>
+        <div class="section" style="padding:16px">
+          <h2 style="margin-bottom:12px">Payment Methods</h2>
+          <div id="paymentBreakdown"></div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="section" style="padding:16px">
+          <h2 style="margin-bottom:12px">Sales by Category</h2>
+          <div id="categoryBreakdown"></div>
+        </div>
+        <div class="section" style="padding:16px">
+          <h2 style="margin-bottom:12px">Top Products</h2>
+          <table>
+            <thead><tr><th>Product</th><th>Qty</th><th>Revenue</th></tr></thead>
+            <tbody id="topProductsTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Products ───────────────────────────────────────────────── -->
+    <div class="tab-content" id="tab-products">
+      <h1>Products</h1>
+
+      <div class="section" id="lowStockPanel" style="display:none;border-color:var(--amber);margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <span style="color:var(--amber);font-size:18px;font-weight:700">&#9888;</span>
+          <h2 style="margin:0;color:var(--amber)">Low Stock Alerts</h2>
+        </div>
+        <table>
+          <thead><tr><th>Product</th><th>Category</th><th>Stock</th><th style="width:200px">Quick Adjust</th></tr></thead>
+          <tbody id="lowStockTable"></tbody>
+        </table>
+      </div>
+
+      <div class="section">
+        <div class="form-row">
+          <div class="form-field" style="flex:2">
+            <input type="text" id="productSearch" placeholder="Search products...">
+          </div>
+          <button class="btn btn-green" id="addProductBtn">+ Add Product</button>
+        </div>
+        <table>
+          <thead><tr><th>Name</th><th>Barcode</th><th>Category</th><th>Price</th><th>Unit</th><th>Stock</th><th style="width:80px"></th></tr></thead>
+          <tbody id="productsTable"></tbody>
+        </table>
+      </div>
+
+      <div class="section" id="productEditPanel" style="display:none">
+        <h2 id="productEditTitle">Edit Product</h2>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+          <div class="form-field"><label>Name</label><input type="text" id="pName"></div>
+          <div class="form-field"><label>Barcode</label><input type="text" id="pBarcode"></div>
+          <div class="form-field"><label>PLU</label><input type="text" id="pPlu"></div>
+          <div class="form-field">
+            <label>Category</label>
+            <select id="pCategory"><option value="">— None —</option></select>
+          </div>
+          <div class="form-field"><label>Sell Price ($)</label><input type="number" id="pPrice" step="0.01" min="0"></div>
+          <div class="form-field"><label>Cost Price ($)</label><input type="number" id="pCost" step="0.01" min="0"></div>
+          <div class="form-field">
+            <label>Unit</label>
+            <select id="pUnit">
+              <option value="each">Each</option>
+              <option value="kg">Per kg</option>
+              <option value="100g">Per 100g</option>
+              <option value="litre">Per litre</option>
+            </select>
+          </div>
+          <div class="form-field"><label>Tax Rate</label><input type="number" id="pTax" step="0.01" value="0.10"></div>
+          <div class="form-field">
+            <label>Track Stock</label>
+            <select id="pTrackStock"><option value="0">No</option><option value="1">Yes</option></select>
+          </div>
+          <div class="form-field"><label>Stock Qty</label><input type="number" id="pStockQty" step="0.01" value="0"></div>
+          <div class="form-field"><label>Image URL</label><input type="text" id="pImageUrl" placeholder="optional"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:14px">
+          <button class="btn btn-green" id="pSaveBtn">Save Product</button>
+          <button class="btn btn-outline" id="pCancelBtn">Cancel</button>
+          <button class="btn" style="background:var(--red);color:#fff;margin-left:auto" id="pDeleteBtn">Delete</button>
+        </div>
+        <input type="hidden" id="pEditId">
+      </div>
+    </div>
+
+    <!-- ── Staff ──────────────────────────────────────────────────── -->
+    <div class="tab-content" id="tab-staff">
+      <h1>Staff</h1>
+      <div class="section">
+        <h2>Add / Edit Staff</h2>
+        <div class="form-row">
+          <div class="form-field"><label>Name</label><input type="text" id="staffName"></div>
+          <div class="form-field"><label>PIN</label><input type="text" id="staffPin" maxlength="6"></div>
+          <div class="form-field">
+            <label>Role</label>
+            <select id="staffRole">
+              <option value="cashier">Cashier</option>
+              <option value="manager">Manager</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <button class="btn btn-green" id="saveStaffBtn">Save</button>
+        </div>
+        <table>
+          <thead><tr><th>Name</th><th>Role</th><th>Status</th></tr></thead>
+          <tbody id="staffTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Deals ─────────────────────────────────────────────────── -->
+    <div class="tab-content" id="tab-deals">
+      <h1>Deals &amp; Specials</h1>
+      <div class="section">
+        <div class="form-row">
+          <button class="btn btn-green" id="addDealBtn">+ New Deal</button>
+        </div>
+        <table>
+          <thead><tr><th>Name</th><th>Type</th><th>Details</th><th>Products</th><th>Status</th><th style="width:80px"></th></tr></thead>
+          <tbody id="dealsTable"></tbody>
+        </table>
+      </div>
+
+      <div class="section" id="dealEditPanel" style="display:none">
+        <h2 id="dealEditTitle">New Deal</h2>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="form-field"><label>Deal Name</label><input type="text" id="dName" placeholder="e.g. Apples 2 for $4"></div>
+          <div class="form-field">
+            <label>Deal Type</label>
+            <select id="dType">
+              <option value="multi_buy">Multi-buy (X for $Y)</option>
+              <option value="buy_x_get_y">Buy X Get Y Free</option>
+              <option value="discount_pct">% Off</option>
+              <option value="discount_amt">$ Off</option>
+              <option value="combo">Combo Deal</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="dealConfigArea" style="margin-top:10px">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px" id="multiBuyConfig">
+            <div class="form-field"><label>Buy Qty</label><input type="number" id="dBuyQty" min="1" value="2"></div>
+            <div class="form-field"><label>For Price ($)</label><input type="number" id="dForPrice" step="0.01" min="0" value="4.00"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;display:none" id="bxgyConfig">
+            <div class="form-field"><label>Buy Qty</label><input type="number" id="dBxgyBuy" min="1" value="2"></div>
+            <div class="form-field"><label>Get Free Qty</label><input type="number" id="dBxgyGet" min="1" value="1"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr;gap:10px;display:none" id="pctConfig">
+            <div class="form-field"><label>Discount %</label><input type="number" id="dDiscPct" min="0" max="100" value="10"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr;gap:10px;display:none" id="amtConfig">
+            <div class="form-field"><label>Discount $</label><input type="number" id="dDiscAmt" step="0.01" min="0" value="1.00"></div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+          <div class="form-field"><label>Start Date (optional)</label><input type="date" id="dStartDate"></div>
+          <div class="form-field"><label>End Date (optional)</label><input type="date" id="dEndDate"></div>
+        </div>
+
+        <div style="margin-top:14px">
+          <label style="font-size:12px;color:var(--text-dim);text-transform:uppercase;display:block;margin-bottom:6px">Products in this deal</label>
+          <div class="form-row">
+            <div class="form-field" style="flex:2"><input type="text" id="dealProductSearch" placeholder="Search products to add..."></div>
+          </div>
+          <div id="dealProductResults" style="max-height:150px;overflow-y:auto;margin-bottom:8px"></div>
+          <div id="dealProductList" style="display:flex;flex-wrap:wrap;gap:6px;min-height:30px"></div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+          <button class="btn btn-green" id="dSaveBtn">Save Deal</button>
+          <button class="btn btn-outline" id="dCancelBtn">Cancel</button>
+          <button class="btn" style="background:var(--red);color:#fff;margin-left:auto" id="dDeleteBtn">Delete Deal</button>
+        </div>
+        <input type="hidden" id="dEditId">
+      </div>
+    </div>
+
+    <!-- ── Transactions ──────────────────────────────────────────── -->
+    <div class="tab-content" id="tab-transactions">
+      <h1>Transaction History</h1>
+      <div class="section">
+        <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:end">
+          <div class="form-field" style="flex:0 0 140px"><label>From</label><input type="date" id="txnDateFrom"></div>
+          <div class="form-field" style="flex:0 0 140px"><label>To</label><input type="date" id="txnDateTo"></div>
+          <div class="form-field" style="flex:0 0 140px">
+            <label>Status</label>
+            <select id="txnStatus">
+              <option value="">All</option>
+              <option value="completed">Completed</option>
+              <option value="voided">Voided</option>
+              <option value="refunded">Refunded</option>
+              <option value="parked">Parked</option>
+            </select>
+          </div>
+          <button class="btn btn-green" id="txnSearchBtn">Search</button>
+        </div>
+        <table>
+          <thead><tr><th>Date/Time</th><th>ID</th><th>Staff</th><th>Items</th><th>Total</th><th>Status</th><th style="width:120px"></th></tr></thead>
+          <tbody id="txnTable"><tr><td colspan="7" style="color:var(--text-dim)">Select dates and click Search</td></tr></tbody>
+        </table>
+      </div>
+      <div class="section" id="txnDetailPanel" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <h2 id="txnDetailTitle" style="margin:0">Transaction Detail</h2>
+          <button class="btn btn-outline" id="txnDetailClose" style="padding:4px 14px;font-size:12px">Close</button>
+        </div>
+        <table>
+          <thead><tr><th>Product</th><th>Qty</th><th>Unit Price</th><th>Discount</th><th>Line Total</th></tr></thead>
+          <tbody id="txnItemsTable"></tbody>
+        </table>
+        <div style="margin-top:12px" id="txnPaymentsArea"></div>
+      </div>
+    </div>
+
+    <!-- ── Cash Drawer ────────────────────────────────────────────── -->
+    <div class="tab-content" id="tab-cashdrawer">
+      <h1>Cash Drawer Management</h1>
+      <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-bottom:20px">
+        <div class="stat-card"><div class="stat-label">Current Float</div><div class="stat-value green" id="cdFloat">$0.00</div></div>
+        <div class="stat-card"><div class="stat-label">Cash Sales Today</div><div class="stat-value" id="cdCashSales">$0.00</div></div>
+        <div class="stat-card"><div class="stat-label">Expected in Drawer</div><div class="stat-value" id="cdExpected">$0.00</div></div>
+      </div>
+      <div class="section">
+        <h2>Record Action</h2>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
+          <div class="form-field" style="flex:0 0 160px">
+            <label>Action</label>
+            <select id="cdAction">
+              <option value="float">Open Float</option>
+              <option value="pickup">Cash Pickup</option>
+              <option value="drop">Cash Drop</option>
+              <option value="close">Close / End of Day</option>
+            </select>
+          </div>
+          <div class="form-field" style="flex:0 0 120px"><label>Amount ($)</label><input type="number" id="cdAmount" step="0.05" min="0" value="0"></div>
+          <div class="form-field" style="flex:1"><label>Note</label><input type="text" id="cdNote" placeholder="Optional note"></div>
+          <button class="btn btn-green" id="cdSubmit" style="height:42px">Record</button>
+        </div>
+      </div>
+      <div class="section" style="margin-top:20px">
+        <h2>Drawer Log (Today)</h2>
+        <table>
+          <thead><tr><th>Time</th><th>Action</th><th>Amount</th><th>Staff</th><th>Note</th></tr></thead>
+          <tbody id="cdLogTable"><tr><td colspan="5" style="color:var(--text-dim)">No entries today</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Keyboard Layout ───────────────────────────────────────── -->
+    <div class="tab-content" id="tab-keyboard">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap">
+        <h1 style="margin:0;flex-shrink:0">Page Layout Editor</h1>
+        <div id="pageTabs" style="display:flex;gap:4px;align-items:center;margin-left:8px"></div>
+        <button class="btn btn-green" style="padding:5px 12px;font-size:12px" id="addPageBtn">+ Page</button>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+          <span style="color:var(--text-dim);font-size:12px">Grid:</span>
+          <select id="gridCols" style="padding:4px 8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12px">
+            <option value="6">6 col</option><option value="8">8 col</option><option value="10" selected>10 col</option><option value="12">12 col</option>
+          </select>
+          <select id="gridRows" style="padding:4px 8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12px">
+            <option value="5">5 row</option><option value="7" selected>7 row</option><option value="8">8 row</option><option value="10">10 row</option>
+          </select>
+          <button class="btn btn-outline" style="padding:4px 10px;font-size:11px" id="deletePageBtn">Delete Page</button>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 240px;gap:12px;align-items:start">
+        <div class="section" style="padding:12px;overflow-x:auto">
+          <p style="color:var(--text-dim);font-size:11px;margin-bottom:8px">Click to edit. Drag across empty cells to create a multi-cell button. Drag existing buttons to move them.</p>
+          <div id="kbGrid" style="display:grid;gap:4px;min-width:600px;position:relative"></div>
+        </div>
+
+        <div class="kb-product-sidebar">
+          <h2 style="margin:0 0 8px 0;font-size:14px">Products</h2>
+          <input type="text" id="kbProductSearch" placeholder="Search products..." style="padding:7px 10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px">
+          <div class="kb-prod-list" id="kbProductList">
+            <p style="color:var(--text-dim);font-size:12px;padding:8px">Load the keyboard tab to see products here</p>
+          </div>
+          <p style="color:var(--text-dim);font-size:10px;margin-top:6px">Click a product, then click an empty cell to place it</p>
+        </div>
+      </div>
+
+      <div class="section" id="kbEditPanel" style="display:none;padding:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <h2 style="margin:0" id="kbEditTitle">Edit Button</h2>
+          <div style="display:flex;gap:6px;align-items:center">
+            <span style="font-size:11px;color:var(--text-dim)" id="kbCellInfo"></span>
+            <button class="btn btn-outline" style="padding:4px 12px;font-size:12px" id="kbCloseEdit">Close</button>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+          <div class="form-field"><label>Label</label><input type="text" id="kbLabel" placeholder="Button text"></div>
+          <div class="form-field">
+            <label>Function</label>
+            <select id="kbType">
+              <optgroup label="Product">
+                <option value="open_price">Open Price (cashier enters $)</option>
+                <option value="fixed_price">Fixed Price (set amount)</option>
+                <option value="section">Section (open category)</option>
+                <option value="nav">Navigation (filtered view)</option>
+              </optgroup>
+              <optgroup label="Register Functions">
+                <option value="void">Void Last Item</option>
+                <option value="return">Return</option>
+                <option value="hold">Hold / Park Sale</option>
+                <option value="nosale">No Sale (open drawer)</option>
+                <option value="supervisor">Supervisor Only</option>
+                <option value="lock">Lock Register</option>
+                <option value="reprint">Reprint Receipt</option>
+                <option value="pricecheck">Price Check</option>
+                <option value="errcorrect">Error Correct</option>
+                <option value="recall">Recall Parked Sale</option>
+                <option value="pctdiscount">% Discount (whole sale)</option>
+                <option value="pctone">% One Item Discount</option>
+                <option value="movedrawer">Move Drawer</option>
+                <option value="ubereats">Uber Eats Adjust</option>
+                <option value="viewor">View Or...</option>
+              </optgroup>
+              <optgroup label="Numpad">
+                <option value="digit">Digit (0-9, 00)</option>
+                <option value="clear">Clear</option>
+                <option value="qtyx">QTY X (quantity)</option>
+                <option value="codeenter">Code Enter (PLU lookup)</option>
+              </optgroup>
+              <optgroup label="Payment">
+                <option value="subtotal">Sub Total / Pay Cash</option>
+                <option value="pay_cash">Pay Cash</option>
+                <option value="pay_card">Pay Card / EFTPOS</option>
+                <option value="park">Park Sale</option>
+              </optgroup>
+              <optgroup label="Navigation">
+                <option value="page_link">Go To Page</option>
+                <option value="back_home">Back to Home</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="form-field" id="kbCatFilterField">
+            <label>Category / Value</label>
+            <input type="text" id="kbCatFilter" list="kbCatList" placeholder="e.g. Flowers, Fruit, __all__, 7">
+            <datalist id="kbCatList"></datalist>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;gap:10px;margin-top:10px">
+          <div class="form-field"><label>Alpha Range</label><input type="text" id="kbAlphaRange" placeholder="e.g. A-M"></div>
+          <div class="form-field"><label>Price ($)</label><input type="number" id="kbPrice" step="0.01" min="0"></div>
+          <div class="form-field"><label>BG Color</label><input type="color" id="kbBgColor" value="#409850"></div>
+          <div class="form-field"><label>Text Color</label><input type="color" id="kbColor" value="#ffffff"></div>
+          <div class="form-field"><label>Col Span</label><input type="number" id="kbColSpan" value="1" min="1" max="10"></div>
+          <div class="form-field"><label>Row Span</label><input type="number" id="kbRowSpan" value="1" min="1" max="5"></div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:10px;align-items:end">
+          <div class="form-field" style="flex:0 0 auto">
+            <label>Image</label>
+            <input type="file" id="kbImageFile" accept="image/*" style="width:200px">
+            <div id="kbImagePreview" style="margin-top:4px"></div>
+          </div>
+          <div style="flex:1"></div>
+          <div id="kbLivePreview" style="width:100px;height:60px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;text-align:center;line-height:1.2;flex-shrink:0;border:1px solid var(--border)"></div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+          <button class="btn btn-green" id="kbSaveBtn" style="padding:10px 28px">Save Button</button>
+          <button class="btn btn-outline" id="kbCancelBtn">Cancel</button>
+          <button class="btn" style="background:var(--red);color:#fff;margin-left:auto;padding:10px 20px" id="kbDeleteBtn">Delete Button</button>
+        </div>
+        <input type="hidden" id="kbEditId">
+        <input type="hidden" id="kbImageData">
+      </div>
+    </div>
+
+    <!-- ── Hardware ────────────────────────────────────────────────── -->
+    <div class="tab-content" id="tab-hardware">
+      <h1>Hardware Devices</h1>
+      <p style="color:var(--text-dim);font-size:14px;margin-bottom:20px">
+        Probe connected USB devices to detect receipt printer, cash drawer, barcode scanner, and scale.
+      </p>
+
+      <div style="margin-bottom:16px">
+        <button class="btn btn-green" id="probeBtn" style="padding:12px 28px;font-size:15px">Probe All Devices</button>
+        <span id="probeStatus" style="margin-left:12px;color:var(--text-dim);font-size:13px"></span>
+      </div>
+
+      <div class="stats-grid" style="grid-template-columns:repeat(auto-fit, minmax(260px, 1fr))">
+        <div class="stat-card" id="hwPrinter">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <div id="dotPrinter" style="width:12px;height:12px;border-radius:50%;background:#555;flex-shrink:0"></div>
+            <div class="stat-label" style="margin:0;font-size:15px;font-weight:600;color:var(--text)">Receipt Printer</div>
+          </div>
+          <div style="font-size:13px;color:var(--text-dim)" id="printerInfo">Not probed yet</div>
+        </div>
+        <div class="stat-card" id="hwDrawer">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <div id="dotDrawerHw" style="width:12px;height:12px;border-radius:50%;background:#555;flex-shrink:0"></div>
+            <div class="stat-label" style="margin:0;font-size:15px;font-weight:600;color:var(--text)">Cash Drawer</div>
+          </div>
+          <div style="font-size:13px;color:var(--text-dim)" id="drawerInfo">Not probed yet</div>
+          <div style="font-size:11px;color:var(--text-dim);margin-top:4px">Usually triggered via printer (DK port or ESC/POS pulse)</div>
+        </div>
+        <div class="stat-card" id="hwScanner">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <div id="dotScanner" style="width:12px;height:12px;border-radius:50%;background:#555;flex-shrink:0"></div>
+            <div class="stat-label" style="margin:0;font-size:15px;font-weight:600;color:var(--text)">Barcode Scanner</div>
+          </div>
+          <div style="font-size:13px;color:var(--text-dim)" id="scannerInfo">Not probed yet</div>
+          <div style="font-size:11px;color:var(--text-dim);margin-top:4px">HID keyboard — scan a barcode in the box below to test:</div>
+          <input type="text" id="scannerTest" placeholder="Scan barcode here..." style="margin-top:6px;padding:8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:14px;width:100%">
+          <div id="scannerResult" style="margin-top:4px;font-size:12px;min-height:18px"></div>
+        </div>
+        <div class="stat-card" id="hwScale">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <div id="dotScale" style="width:12px;height:12px;border-radius:50%;background:#555;flex-shrink:0"></div>
+            <div class="stat-label" style="margin:0;font-size:15px;font-weight:600;color:var(--text)">Scale</div>
+          </div>
+          <div style="font-size:13px;color:var(--text-dim)" id="scaleInfo">Not probed yet</div>
+          <div style="font-size:11px;color:var(--text-dim);margin-top:4px">Serial or USB scale (CAS, Mettler-Toledo, etc.)</div>
+        </div>
+      </div>
+
+      <div class="section" style="margin-top:20px">
+        <h2>USB Devices Detected</h2>
+        <table>
+          <thead><tr><th>Vendor ID</th><th>Product ID</th><th>Manufacturer</th><th>Product</th><th>Class</th></tr></thead>
+          <tbody id="usbDeviceTable"><tr><td colspan="5" style="color:var(--text-dim)">Click "Probe All Devices" to scan</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Import ─────────────────────────────────────────────────── -->
+    <div class="tab-content" id="tab-import">
+      <h1>Import Products</h1>
+      <div class="section">
+        <h2>Import from Crisp on Creek Website</h2>
+        <p style="color:var(--text-dim);margin-bottom:16px;font-size:14px;">
+          Import your existing products from your website's products.json file.
+          This will load all products and categories from your current Profit Track data.
+        </p>
+        <div class="form-row">
+          <div class="form-field">
+            <label>products.json URL or paste JSON</label>
+            <textarea id="importJson" rows="6" placeholder='Paste products.json content or enter URL like: https://matthiascamp.github.io/crisponcreek/products.json'></textarea>
+          </div>
+        </div>
+        <button class="btn btn-green" id="importBtn">Import Products</button>
+        <div id="importResult" style="margin-top:12px;font-size:14px;"></div>
+      </div>
+
+      <div class="section">
+        <h2>Import from CSV</h2>
+        <div class="import-zone" id="csvDropzone">
+          <div style="font-size:24px;opacity:0.4;">CSV</div>
+          <p>Drop a CSV file here or click to upload</p>
+          <p style="font-size:12px;">Expected columns: name, barcode, price, category, unit</p>
+        </div>
+        <input type="file" id="csvFile" accept=".csv" class="hidden">
+      </div>
+    </div>
+
+    <!-- ── Settings ───────────────────────────────────────────────── -->
+    <div class="tab-content" id="tab-settings">
+      <h1>Settings</h1>
+      <div class="section">
+        <h2>Store Details</h2>
+        <div class="form-row">
+          <div class="form-field"><label>Store Name</label><input type="text" id="setStoreName"></div>
+          <div class="form-field"><label>ABN</label><input type="text" id="setStoreAbn"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-field"><label>Address</label><input type="text" id="setStoreAddr"></div>
+          <div class="form-field"><label>Phone</label><input type="text" id="setStorePhone"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-field"><label>Register ID</label><input type="text" id="setRegisterId"></div>
+        </div>
+        <button class="btn btn-green" id="saveSettingsBtn" style="margin-top:8px;">Save Settings</button>
+      </div>
+
+      <div class="section">
+        <h2>Receipt</h2>
+        <div class="form-row">
+          <div class="form-field"><label>Header Text</label><textarea id="setReceiptHeader" rows="3"></textarea></div>
+        </div>
+        <div class="form-row">
+          <div class="form-field"><label>Footer Text</label><textarea id="setReceiptFooter" rows="2"></textarea></div>
+        </div>
+        <button class="btn btn-green" id="saveReceiptBtn">Save Receipt Settings</button>
+      </div>
+
+      <div class="section">
+        <h2>Supabase Cloud Sync</h2>
+        <p style="color:var(--text-dim);margin-bottom:12px;font-size:14px;">
+          Connect to Supabase for cloud backup and multi-register sync.
+        </p>
+        <div class="form-row">
+          <div class="form-field"><label>Supabase URL</label><input type="text" id="setSupaUrl" placeholder="https://your-project.supabase.co"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-field"><label>Anon Key</label><input type="text" id="setSupaKey" placeholder="eyJ..."></div>
+        </div>
+        <button class="btn btn-blue" id="saveSupaBtn">Save & Connect</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module">
+    import { esc, $, $$, money, showToast, debounce } from './js/ui.js'
+
+    // ── Tab Navigation ──────────────────────────────────────────────
+
+    $$('.nav a[data-tab]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault()
+        $$('.nav a').forEach(n => n.classList.remove('active'))
+        a.classList.add('active')
+        $$('.tab-content').forEach(t => t.classList.remove('active'))
+        $(`#tab-${a.dataset.tab}`).classList.add('active')
+
+        if (a.dataset.tab === 'dashboard') loadDashboard()
+        if (a.dataset.tab === 'transactions') loadTransactions()
+        if (a.dataset.tab === 'products') loadProducts()
+        if (a.dataset.tab === 'staff') loadStaff()
+        if (a.dataset.tab === 'deals') loadDeals()
+        if (a.dataset.tab === 'cashdrawer') loadCashDrawer()
+        if (a.dataset.tab === 'keyboard') loadKeyboard()
+        if (a.dataset.tab === 'hardware') loadHardware()
+        if (a.dataset.tab === 'settings') loadSettings()
+      })
+    })
+
+    // ── Dashboard ───────────────────────────────────────────────────
+
+    let dashboardDate = new Date().toISOString().slice(0, 10)
+    $('#dashDate').value = dashboardDate
+
+    function setDashDate (d) {
+      dashboardDate = d
+      $('#dashDate').value = d
+      const dt = new Date(d + 'T12:00:00')
+      const dayName = dt.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+      $('#dashDayLabel').textContent = d === new Date().toISOString().slice(0, 10) ? `Today - ${dayName}` : dayName
+      loadDashboard()
+    }
+
+    $('#dashDate').addEventListener('change', () => setDashDate($('#dashDate').value))
+    $('#dashPrev').addEventListener('click', () => {
+      const d = new Date(dashboardDate + 'T12:00:00')
+      d.setDate(d.getDate() - 1)
+      setDashDate(d.toISOString().slice(0, 10))
+    })
+    $('#dashNext').addEventListener('click', () => {
+      const d = new Date(dashboardDate + 'T12:00:00')
+      d.setDate(d.getDate() + 1)
+      setDashDate(d.toISOString().slice(0, 10))
+    })
+    $('#dashToday').addEventListener('click', () => setDashDate(new Date().toISOString().slice(0, 10)))
+
+    async function loadDashboard() {
+      const date = dashboardDate
+      const [summary, top, hourly, methods, categories] = await Promise.all([
+        window.pos.dailySummary(date),
+        window.pos.topProducts(date),
+        window.pos.salesByHour(date),
+        window.pos.salesByMethod(date),
+        window.pos.salesByCategory(date)
+      ])
+
+      $('#statSales').textContent = money(summary?.total_sales || 0)
+      $('#statTxns').textContent = summary?.txn_count || 0
+      $('#statTax').textContent = money(summary?.total_tax || 0)
+      $('#statDisc').textContent = money(summary?.total_discounts || 0)
+
+      // Hourly chart
+      const maxHourly = Math.max(...hourly.map(h => h.total), 1)
+      const hourMap = Object.fromEntries(hourly.map(h => [parseInt(h.hour), h]))
+      let chartHtml = ''
+      for (let h = 6; h <= 21; h++) {
+        const data = hourMap[h]
+        const val = data ? data.total : 0
+        const pct = Math.max((val / maxHourly) * 100, val > 0 ? 4 : 0)
+        const label = val > 0 ? money(val) : ''
+        chartHtml += `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
+          <span style="font-size:8px;color:var(--text-dim);margin-bottom:2px">${label}</span>
+          <div style="width:100%;height:${pct}%;background:var(--green);border-radius:3px 3px 0 0;min-height:${val > 0 ? '2px' : '0'}"></div>
+        </div>`
+      }
+      $('#hourlyChart').innerHTML = chartHtml
+
+      // Payment methods
+      if (methods.length) {
+        const totalPay = methods.reduce((s, m) => s + m.total, 0) || 1
+        const payColors = { cash: 'var(--green)', card: 'var(--blue)', eftpos: 'var(--blue)', account: 'var(--amber)' }
+        $('#paymentBreakdown').innerHTML = methods.map(m => {
+          const pct = ((m.total / totalPay) * 100).toFixed(1)
+          const barColor = payColors[m.method] || '#10b981'
+          return `<div style="margin-bottom:10px">
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px">
+              <span style="text-transform:capitalize">${esc(m.method)}</span>
+              <span>${money(m.total)} (${pct}%) - ${m.txn_count} txn</span>
+            </div>
+            <div style="height:8px;background:var(--surface2);border-radius:4px;overflow:hidden">
+              <div style="height:100%;width:${pct}%;background:${barColor};border-radius:4px"></div>
+            </div>
+          </div>`
+        }).join('')
+      } else {
+        $('#paymentBreakdown').innerHTML = '<p style="color:var(--text-dim);font-size:13px">No payments recorded</p>'
+      }
+
+      // Category breakdown
+      if (categories.length) {
+        const totalCat = categories.reduce((s, c) => s + c.total, 0) || 1
+        $('#categoryBreakdown').innerHTML = categories.slice(0, 10).map(c => {
+          const pct = ((c.total / totalCat) * 100).toFixed(1)
+          return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:13px">
+            <span>${esc(c.category)}</span>
+            <span style="color:var(--text-dim)">${money(c.total)} (${c.qty} items)</span>
+          </div>`
+        }).join('')
+      } else {
+        $('#categoryBreakdown').innerHTML = '<p style="color:var(--text-dim);font-size:13px">No sales data</p>'
+      }
+
+      // Top products
+      $('#topProductsTable').innerHTML = top.map(p => `
+        <tr>
+          <td>${esc(p.name)}</td>
+          <td>${p.total_qty}</td>
+          <td>${money(p.total_revenue)}</td>
+        </tr>
+      `).join('') || '<tr><td colspan="3" style="color:var(--text-dim)">No sales yet</td></tr>'
+    }
+
+    // ── Products ────────────────────────────────────────────────────
+
+    let productCategories = []
+
+    async function loadProducts(query) {
+      const products = query
+        ? await window.pos.searchProducts(query)
+        : await window.pos.searchProducts('')
+
+      productCategories = await window.pos.getCategories()
+      const catMap = Object.fromEntries(productCategories.map(c => [c.id, c.name]))
+
+      $('#productsTable').innerHTML = products.map(p => {
+        const stockLow = p.track_stock && p.stock_qty <= 5
+        return `<tr data-id="${esc(p.id)}" style="cursor:pointer">
+          <td>${esc(p.name)}</td>
+          <td>${esc(p.barcode || '-')}</td>
+          <td>${esc(catMap[p.category_id] || '-')}</td>
+          <td>${money(p.active_price ?? p.price)}</td>
+          <td>${esc(p.unit)}</td>
+          <td>${p.track_stock ? `<span style="${stockLow ? 'color:var(--red);font-weight:700' : ''}">${p.stock_qty}</span>` : '-'}</td>
+          <td><button class="btn btn-outline" style="padding:3px 10px;font-size:11px" data-edit="${esc(p.id)}">Edit</button></td>
+        </tr>`
+      }).join('') || '<tr><td colspan="7" style="color:var(--text-dim)">No products found</td></tr>'
+
+      // Low stock alerts
+      try {
+        const lowStock = await window.pos.getLowStock()
+        if (lowStock.length) {
+          $('#lowStockPanel').style.display = 'block'
+          $('#lowStockTable').innerHTML = lowStock.map(p => `<tr>
+            <td>${esc(p.name)}</td>
+            <td>${esc(p.category_name || '-')}</td>
+            <td><span style="color:${p.stock_qty <= 0 ? 'var(--red)' : 'var(--amber)'};font-weight:700">${p.stock_qty}</span></td>
+            <td>
+              <div style="display:flex;gap:4px;align-items:center">
+                <input type="number" value="10" min="1" style="width:60px;padding:4px 6px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12px" data-stock-input="${esc(p.id)}">
+                <button class="btn btn-green" style="padding:4px 10px;font-size:11px" data-stock-add="${esc(p.id)}">+ Add</button>
+              </div>
+            </td>
+          </tr>`).join('')
+        } else {
+          $('#lowStockPanel').style.display = 'none'
+        }
+      } catch (_) {}
+    }
+
+    $('#lowStockTable').addEventListener('click', async e => {
+      const btn = e.target.closest('[data-stock-add]')
+      if (!btn) return
+      const id = btn.dataset.stockAdd
+      const input = $(`[data-stock-input="${id}"]`)
+      const qty = parseFloat(input?.value) || 0
+      if (qty <= 0) { showToast('Enter a quantity', 'error'); return }
+      await window.pos.adjustStock(id, qty, 'Manual adjustment')
+      showToast(`Stock +${qty} added`, 'success')
+      loadProducts($('#productSearch').value)
+    })
+
+    $('#productSearch').addEventListener('input', debounce(() => {
+      loadProducts($('#productSearch').value)
+    }, 300))
+
+    $('#productsTable').addEventListener('click', async e => {
+      const btn = e.target.closest('[data-edit]')
+      if (!btn) return
+      const p = await window.pos.getProductById(btn.dataset.edit)
+      if (p) openProductEdit(p)
+    })
+
+    $('#addProductBtn').addEventListener('click', () => {
+      openProductEdit(null)
+    })
+
+    function openProductEdit (p) {
+      const cats = productCategories
+      $('#pCategory').innerHTML = '<option value="">- None -</option>' +
+        cats.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('')
+
+      if (p) {
+        $('#productEditTitle').textContent = 'Edit Product'
+        $('#pEditId').value = p.id
+        $('#pName').value = p.name
+        $('#pBarcode').value = p.barcode || ''
+        $('#pPlu').value = p.plu || ''
+        $('#pCategory').value = p.category_id || ''
+        $('#pPrice').value = p.price
+        $('#pCost').value = p.cost_price || 0
+        $('#pUnit').value = p.unit || 'each'
+        $('#pTax').value = p.tax_rate ?? 0.10
+        $('#pTrackStock').value = p.track_stock ? '1' : '0'
+        $('#pStockQty').value = p.stock_qty || 0
+        $('#pImageUrl').value = p.image_url || ''
+        $('#pDeleteBtn').style.display = 'inline-block'
+      } else {
+        $('#productEditTitle').textContent = 'Add Product'
+        $('#pEditId').value = ''
+        $('#pName').value = ''
+        $('#pBarcode').value = ''
+        $('#pPlu').value = ''
+        $('#pCategory').value = ''
+        $('#pPrice').value = ''
+        $('#pCost').value = '0'
+        $('#pUnit').value = 'each'
+        $('#pTax').value = '0.10'
+        $('#pTrackStock').value = '0'
+        $('#pStockQty').value = '0'
+        $('#pImageUrl').value = ''
+        $('#pDeleteBtn').style.display = 'none'
+      }
+      $('#productEditPanel').style.display = 'block'
+      $('#pName').focus()
+    }
+
+    $('#pSaveBtn').addEventListener('click', async () => {
+      const name = $('#pName').value.trim()
+      if (!name) { showToast('Product name is required', 'error'); return }
+      const product = {
+        id: $('#pEditId').value || undefined,
+        name,
+        barcode: $('#pBarcode').value.trim() || null,
+        plu: $('#pPlu').value.trim() || null,
+        category_id: $('#pCategory').value || null,
+        price: parseFloat($('#pPrice').value) || 0,
+        cost_price: parseFloat($('#pCost').value) || 0,
+        unit: $('#pUnit').value,
+        tax_rate: parseFloat($('#pTax').value) || 0.10,
+        track_stock: $('#pTrackStock').value === '1',
+        stock_qty: parseFloat($('#pStockQty').value) || 0,
+        image_url: $('#pImageUrl').value.trim() || null,
+      }
+      await window.pos.upsertProduct(product)
+      showToast(`Product "${name}" saved`, 'success')
+      $('#productEditPanel').style.display = 'none'
+      loadProducts($('#productSearch').value)
+    })
+
+    $('#pDeleteBtn').addEventListener('click', async () => {
+      const id = $('#pEditId').value
+      if (!id || !confirm('Delete this product?')) return
+      await window.pos.deleteProduct(id)
+      showToast('Product deleted', 'success')
+      $('#productEditPanel').style.display = 'none'
+      loadProducts($('#productSearch').value)
+    })
+
+    $('#pCancelBtn').addEventListener('click', () => {
+      $('#productEditPanel').style.display = 'none'
+    })
+
+    // ── Staff ───────────────────────────────────────────────────────
+
+    async function loadStaff() {
+      const staff = await window.pos.getStaff()
+      $('#staffTable').innerHTML = staff.map(s => `
+        <tr>
+          <td>${esc(s.name)}</td>
+          <td>${esc(s.role)}</td>
+          <td><span class="badge ${s.active ? 'badge-green' : 'badge-red'}">${s.active ? 'Active' : 'Inactive'}</span></td>
+        </tr>
+      `).join('')
+    }
+
+    $('#saveStaffBtn').addEventListener('click', async () => {
+      const name = $('#staffName').value.trim()
+      const pin = $('#staffPin').value.trim()
+      const role = $('#staffRole').value
+
+      if (!name || !pin || pin.length < 4) {
+        showToast('Name and PIN (4+ digits) are required', 'error')
+        return
+      }
+
+      await window.pos.upsertStaff({ name, pin, role })
+      showToast(`Staff "${name}" saved`, 'success')
+      $('#staffName').value = ''
+      $('#staffPin').value = ''
+      loadStaff()
+    })
+
+    // ── Deals ───────────────────────────────────────────────────────
+
+    let dealProducts = []
+
+    async function loadDeals () {
+      const deals = await window.pos.getDeals()
+      $('#dealsTable').innerHTML = deals.length ? deals.map(d => {
+        const cfg = JSON.parse(d.config || '{}')
+        let detail = ''
+        if (d.type === 'multi_buy') detail = `${cfg.qty} for $${cfg.price?.toFixed(2)}`
+        else if (d.type === 'buy_x_get_y') detail = `Buy ${cfg.buy} get ${cfg.free} free`
+        else if (d.type === 'discount_pct') detail = `${cfg.pct}% off`
+        else if (d.type === 'discount_amt') detail = `$${cfg.amt?.toFixed(2)} off`
+        else if (d.type === 'combo') detail = `Combo $${cfg.price?.toFixed(2)}`
+        return `<tr>
+          <td>${esc(d.name)}</td>
+          <td>${esc(d.type)}</td>
+          <td>${detail}</td>
+          <td><span class="badge badge-green" style="cursor:pointer" data-deal-products="${esc(d.id)}">View</span></td>
+          <td><span class="badge ${d.active ? 'badge-green' : 'badge-red'}">${d.active ? 'Active' : 'Inactive'}</span></td>
+          <td><button class="btn btn-outline" style="padding:3px 10px;font-size:11px" data-edit-deal="${esc(d.id)}">Edit</button></td>
+        </tr>`
+      }).join('') : '<tr><td colspan="6" style="color:var(--text-dim)">No deals yet</td></tr>'
+    }
+
+    $('#dealsTable').addEventListener('click', async e => {
+      const btn = e.target.closest('[data-edit-deal]')
+      if (!btn) return
+      const deals = await window.pos.getDeals()
+      const deal = deals.find(d => d.id === btn.dataset.editDeal)
+      if (deal) openDealEdit(deal)
+    })
+
+    $('#addDealBtn').addEventListener('click', () => openDealEdit(null))
+
+    function showDealConfig (type) {
+      ;['multiBuyConfig','bxgyConfig','pctConfig','amtConfig'].forEach(id => $(`#${id}`).style.display = 'none')
+      if (type === 'multi_buy' || type === 'combo') $('#multiBuyConfig').style.display = 'grid'
+      else if (type === 'buy_x_get_y') $('#bxgyConfig').style.display = 'grid'
+      else if (type === 'discount_pct') $('#pctConfig').style.display = 'grid'
+      else if (type === 'discount_amt') $('#amtConfig').style.display = 'grid'
+    }
+
+    $('#dType').addEventListener('change', () => showDealConfig($('#dType').value))
+
+    async function openDealEdit (deal) {
+      dealProducts = []
+      if (deal) {
+        $('#dealEditTitle').textContent = 'Edit Deal'
+        $('#dEditId').value = deal.id
+        $('#dName').value = deal.name
+        $('#dType').value = deal.type
+        const cfg = JSON.parse(deal.config || '{}')
+        if (deal.type === 'multi_buy' || deal.type === 'combo') {
+          $('#dBuyQty').value = cfg.qty || 2
+          $('#dForPrice').value = cfg.price || 0
+        } else if (deal.type === 'buy_x_get_y') {
+          $('#dBxgyBuy').value = cfg.buy || 2
+          $('#dBxgyGet').value = cfg.free || 1
+        } else if (deal.type === 'discount_pct') {
+          $('#dDiscPct').value = cfg.pct || 10
+        } else if (deal.type === 'discount_amt') {
+          $('#dDiscAmt').value = cfg.amt || 1
+        }
+        $('#dStartDate').value = deal.start_date || ''
+        $('#dEndDate').value = deal.end_date || ''
+        const prods = await window.pos.getDealProducts(deal.id)
+        dealProducts = prods.map(p => ({ id: p.product_id, name: p.product_name, price: p.price }))
+        $('#dDeleteBtn').style.display = 'inline-block'
+      } else {
+        $('#dealEditTitle').textContent = 'New Deal'
+        $('#dEditId').value = ''
+        $('#dName').value = ''
+        $('#dType').value = 'multi_buy'
+        $('#dBuyQty').value = 2
+        $('#dForPrice').value = '4.00'
+        $('#dStartDate').value = ''
+        $('#dEndDate').value = ''
+        $('#dDeleteBtn').style.display = 'none'
+      }
+      showDealConfig($('#dType').value)
+      renderDealProducts()
+      $('#dealEditPanel').style.display = 'block'
+    }
+
+    function renderDealProducts () {
+      $('#dealProductList').innerHTML = dealProducts.length
+        ? dealProducts.map(p => `<span class="badge badge-green" style="padding:4px 10px;font-size:12px">${esc(p.name)} <span style="cursor:pointer;margin-left:4px;opacity:.7" data-remove-dp="${esc(p.id)}">&times;</span></span>`).join('')
+        : '<span style="color:var(--text-dim);font-size:12px">No products added yet</span>'
+    }
+
+    $('#dealProductList').addEventListener('click', e => {
+      const rm = e.target.closest('[data-remove-dp]')
+      if (!rm) return
+      dealProducts = dealProducts.filter(p => p.id !== rm.dataset.removeDp)
+      renderDealProducts()
+    })
+
+    $('#dealProductSearch').addEventListener('input', debounce(async () => {
+      const q = $('#dealProductSearch').value.trim()
+      if (q.length < 2) { $('#dealProductResults').innerHTML = ''; return }
+      const results = await window.pos.searchProducts(q)
+      $('#dealProductResults').innerHTML = results.slice(0, 10).map(p =>
+        `<div style="padding:5px 8px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;display:flex;justify-content:space-between" data-add-dp="${esc(p.id)}" data-dp-name="${esc(p.name)}" data-dp-price="${p.price}">
+          <span>${esc(p.name)}</span><span style="color:var(--text-dim)">${money(p.price)}</span>
+        </div>`
+      ).join('')
+    }, 250))
+
+    $('#dealProductResults').addEventListener('click', e => {
+      const row = e.target.closest('[data-add-dp]')
+      if (!row) return
+      const id = row.dataset.addDp
+      if (dealProducts.find(p => p.id === id)) return
+      dealProducts.push({ id, name: row.dataset.dpName, price: parseFloat(row.dataset.dpPrice) })
+      renderDealProducts()
+      $('#dealProductSearch').value = ''
+      $('#dealProductResults').innerHTML = ''
+    })
+
+    $('#dSaveBtn').addEventListener('click', async () => {
+      const name = $('#dName').value.trim()
+      if (!name) { showToast('Deal name is required', 'error'); return }
+      const type = $('#dType').value
+      let config = {}
+      if (type === 'multi_buy' || type === 'combo') config = { qty: parseInt($('#dBuyQty').value), price: parseFloat($('#dForPrice').value) }
+      else if (type === 'buy_x_get_y') config = { buy: parseInt($('#dBxgyBuy').value), free: parseInt($('#dBxgyGet').value) }
+      else if (type === 'discount_pct') config = { pct: parseFloat($('#dDiscPct').value) }
+      else if (type === 'discount_amt') config = { amt: parseFloat($('#dDiscAmt').value) }
+
+      const deal = {
+        id: $('#dEditId').value || undefined,
+        name, type, config,
+        start_date: $('#dStartDate').value || null,
+        end_date: $('#dEndDate').value || null,
+        active: true
+      }
+      const res = await window.pos.upsertDeal(deal)
+      if (dealProducts.length) {
+        await window.pos.setDealProducts(res.id || deal.id, dealProducts.map(p => p.id))
+      }
+      showToast(`Deal "${name}" saved`, 'success')
+      $('#dealEditPanel').style.display = 'none'
+      loadDeals()
+    })
+
+    $('#dDeleteBtn').addEventListener('click', async () => {
+      const id = $('#dEditId').value
+      if (!id || !confirm('Delete this deal?')) return
+      await window.pos.deleteDeal(id)
+      showToast('Deal deleted', 'success')
+      $('#dealEditPanel').style.display = 'none'
+      loadDeals()
+    })
+
+    $('#dCancelBtn').addEventListener('click', () => { $('#dealEditPanel').style.display = 'none' })
+
+    // ── Transactions ────────────────────────────────────────────────
+
+    function initTxnDates () {
+      const today = new Date().toISOString().slice(0, 10)
+      if (!$('#txnDateFrom').value) $('#txnDateFrom').value = today
+      if (!$('#txnDateTo').value) $('#txnDateTo').value = today
+    }
+
+    async function loadTransactions () {
+      initTxnDates()
+      await searchTransactions()
+    }
+
+    async function searchTransactions () {
+      const opts = {
+        dateFrom: $('#txnDateFrom').value || null,
+        dateTo: $('#txnDateTo').value || null,
+        status: $('#txnStatus').value || null
+      }
+      const txns = await window.pos.searchTransactions(opts)
+      const statusColors = { completed: 'badge-green', voided: 'badge-red', refunded: 'badge-amber', parked: 'badge-amber' }
+      $('#txnTable').innerHTML = txns.length ? txns.map(t => {
+        const dt = new Date(t.created_at + 'Z')
+        return `<tr>
+          <td>${dt.toLocaleDateString('en-AU')} ${dt.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })}</td>
+          <td style="font-family:monospace;font-size:11px">${esc((t.id || '').substring(0, 8))}</td>
+          <td>${esc(t.staff_name || '-')}</td>
+          <td>${t.item_count || 0}</td>
+          <td>${money(t.total)}</td>
+          <td><span class="badge ${statusColors[t.status] || ''}">${esc(t.status)}</span></td>
+          <td style="display:flex;gap:4px">
+            <button class="btn btn-outline" style="padding:2px 8px;font-size:11px" data-txn-view="${esc(t.id)}">View</button>
+            ${t.status === 'completed' ? `<button class="btn" style="padding:2px 8px;font-size:11px;background:var(--red);color:#fff" data-txn-void="${esc(t.id)}">Void</button>` : ''}
+          </td>
+        </tr>`
+      }).join('') : '<tr><td colspan="7" style="color:var(--text-dim)">No transactions found</td></tr>'
+    }
+
+    $('#txnSearchBtn').addEventListener('click', searchTransactions)
+
+    $('#txnTable').addEventListener('click', async e => {
+      const viewBtn = e.target.closest('[data-txn-view]')
+      const voidBtn = e.target.closest('[data-txn-void]')
+      if (viewBtn) {
+        const txnId = viewBtn.dataset.txnView
+        const [items, payments] = await Promise.all([
+          window.pos.getTransactionItems(txnId),
+          window.pos.getTransactionPayments(txnId)
+        ])
+        $('#txnDetailTitle').textContent = `Transaction ${txnId.substring(0, 8)}`
+        $('#txnItemsTable').innerHTML = items.map(i => `<tr>
+          <td>${esc(i.name)}</td>
+          <td>${i.qty}</td>
+          <td>${money(i.unit_price)}</td>
+          <td>${i.discount > 0 ? '-' + money(i.discount) : '-'}</td>
+          <td>${money(i.line_total)}</td>
+        </tr>`).join('') || '<tr><td colspan="5">No items</td></tr>'
+        $('#txnPaymentsArea').innerHTML = payments.length
+          ? '<h2 style="font-size:14px;margin-bottom:6px">Payments</h2>' + payments.map(p =>
+            `<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px;border-bottom:1px solid var(--border)">
+              <span style="text-transform:capitalize">${esc(p.method)}</span><span>${money(p.amount)}${p.reference ? ` (${esc(p.reference)})` : ''}</span>
+            </div>`).join('')
+          : ''
+        $('#txnDetailPanel').style.display = 'block'
+      }
+      if (voidBtn) {
+        if (!confirm('Void this transaction? Stock will be restored.')) return
+        await window.pos.voidTransaction(voidBtn.dataset.txnVoid)
+        showToast('Transaction voided', 'success')
+        searchTransactions()
+      }
+    })
+
+    $('#txnDetailClose').addEventListener('click', () => { $('#txnDetailPanel').style.display = 'none' })
+
+    // ── Cash Drawer ─────────────────────────────────────────────────
+
+    async function loadCashDrawer () {
+      const today = new Date().toISOString().slice(0, 10)
+      const [summary, log] = await Promise.all([
+        window.pos.getCashDrawerSummary(today),
+        window.pos.getCashDrawerLog(today)
+      ])
+
+      $('#cdFloat').textContent = money(summary.float)
+      $('#cdCashSales').textContent = money(summary.cash_sales)
+      $('#cdExpected').textContent = money(summary.expected)
+
+      if (log.length) {
+        const actionLabels = { float: 'Open Float', pickup: 'Cash Pickup', drop: 'Cash Drop', close: 'Close/EOD', open: 'Drawer Open' }
+        $('#cdLogTable').innerHTML = log.map(e => {
+          const dt = new Date(e.created_at + 'Z')
+          return `<tr>
+            <td>${dt.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })}</td>
+            <td><span class="badge badge-green">${esc(actionLabels[e.action] || e.action)}</span></td>
+            <td>${e.amount != null ? money(e.amount) : '-'}</td>
+            <td>${esc(e.staff_name || '-')}</td>
+            <td>${esc(e.note || '')}</td>
+          </tr>`
+        }).join('')
+      } else {
+        $('#cdLogTable').innerHTML = '<tr><td colspan="5" style="color:var(--text-dim)">No entries today</td></tr>'
+      }
+    }
+
+    $('#cdSubmit').addEventListener('click', async () => {
+      const action = $('#cdAction').value
+      const amount = parseFloat($('#cdAmount').value) || 0
+      const note = $('#cdNote').value.trim()
+      if ((action === 'float' || action === 'pickup' || action === 'drop') && amount <= 0) {
+        showToast('Enter an amount', 'error'); return
+      }
+      await window.pos.logCashDrawer({ action, amount, note })
+      showToast(`${action} recorded`, 'success')
+      $('#cdAmount').value = '0'; $('#cdNote').value = ''
+      loadCashDrawer()
+    })
+
+    // ── Import ──────────────────────────────────────────────────────
+
+    $('#importBtn').addEventListener('click', async () => {
+      let raw = $('#importJson').value.trim()
+      const result = $('#importResult')
+
+      if (raw.startsWith('http')) {
+        result.innerHTML = '<span style="color:var(--amber)">Fetching...</span>'
+        try {
+          const resp = await fetch(raw)
+          raw = await resp.text()
+        } catch (e) {
+          result.innerHTML = `<span style="color:var(--red)">Fetch failed: ${esc(e.message)}</span>`
+          return
+        }
+      }
+
+      try {
+        const data = JSON.parse(raw)
+        const products = []
+
+        // Handle the {category: [{name, price, barcode}]} format from crisponcreek
+        for (const [category, items] of Object.entries(data)) {
+          if (!Array.isArray(items)) continue
+          for (const item of items) {
+            products.push({
+              name: item.name,
+              price: item.price,
+              barcode: item.barcode || '',
+              category,
+              unit: 'each',
+            })
+          }
+        }
+
+        if (!products.length) {
+          result.innerHTML = '<span style="color:var(--red)">No products found in JSON</span>'
+          return
+        }
+
+        const res = await window.pos.importProducts(products)
+        result.innerHTML = `<span style="color:var(--green)">Imported ${res.imported} products across ${res.categories} categories</span>`
+        showToast(`Imported ${res.imported} products!`, 'success')
+      } catch (e) {
+        result.innerHTML = `<span style="color:var(--red)">Parse error: ${esc(e.message)}</span>`
+      }
+    })
+
+    // CSV drop zone
+    const dropzone = $('#csvDropzone')
+    dropzone.addEventListener('click', () => $('#csvFile').click())
+    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover') })
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'))
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault()
+      dropzone.classList.remove('dragover')
+      const file = e.dataTransfer.files[0]
+      if (file) importCSV(file)
+    })
+    $('#csvFile').addEventListener('change', (e) => {
+      if (e.target.files[0]) importCSV(e.target.files[0])
+    })
+
+    async function importCSV(file) {
+      const text = await file.text()
+      const lines = text.trim().split('\n')
+      const headers = lines[0].split(',').map(h => h.trim().toLowerCase())
+
+      const nameIdx = headers.indexOf('name') !== -1 ? headers.indexOf('name') : headers.indexOf('description')
+      const priceIdx = headers.indexOf('price') !== -1 ? headers.indexOf('price') : headers.indexOf('sell price')
+      const barcodeIdx = headers.indexOf('barcode') !== -1 ? headers.indexOf('barcode') : headers.indexOf('plu')
+      const catIdx = headers.indexOf('category') !== -1 ? headers.indexOf('category') : headers.indexOf('department')
+
+      if (nameIdx === -1 || priceIdx === -1) {
+        showToast('CSV must have "name" and "price" columns', 'error')
+        return
+      }
+
+      const products = []
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(',').map(c => c.trim().replace(/^"|"$/g, ''))
+        const name = cols[nameIdx]
+        const price = parseFloat(cols[priceIdx])
+        if (!name || isNaN(price)) continue
+
+        products.push({
+          name,
+          price,
+          barcode: barcodeIdx !== -1 ? cols[barcodeIdx] : '',
+          category: catIdx !== -1 ? cols[catIdx] : 'General',
+          unit: 'each',
+        })
+      }
+
+      const res = await window.pos.importProducts(products)
+      showToast(`Imported ${res.imported} products from CSV`, 'success')
+    }
+
+    // ── Settings ────────────────────────────────────────────────────
+
+    async function loadSettings() {
+      const s = await window.pos.getAllSettings()
+      $('#setStoreName').value = s.store_name || ''
+      $('#setStoreAbn').value = s.store_abn || ''
+      $('#setStoreAddr').value = s.store_address || ''
+      $('#setStorePhone').value = s.store_phone || ''
+      $('#setRegisterId').value = s.register_id || ''
+      $('#setReceiptHeader').value = s.receipt_header || ''
+      $('#setReceiptFooter').value = s.receipt_footer || ''
+      $('#setSupaUrl').value = s.supabase_url || ''
+      $('#setSupaKey').value = s.supabase_anon_key || ''
+    }
+
+    $('#saveSettingsBtn').addEventListener('click', async () => {
+      await window.pos.setSetting('store_name', $('#setStoreName').value)
+      await window.pos.setSetting('store_abn', $('#setStoreAbn').value)
+      await window.pos.setSetting('store_address', $('#setStoreAddr').value)
+      await window.pos.setSetting('store_phone', $('#setStorePhone').value)
+      await window.pos.setSetting('register_id', $('#setRegisterId').value)
+      showToast('Settings saved', 'success')
+    })
+
+    $('#saveReceiptBtn').addEventListener('click', async () => {
+      await window.pos.setSetting('receipt_header', $('#setReceiptHeader').value)
+      await window.pos.setSetting('receipt_footer', $('#setReceiptFooter').value)
+      showToast('Receipt settings saved', 'success')
+    })
+
+    $('#saveSupaBtn').addEventListener('click', async () => {
+      const url = $('#setSupaUrl').value.trim()
+      const key = $('#setSupaKey').value.trim()
+      if (!url || !key) {
+        showToast('Both URL and key are required', 'error')
+        return
+      }
+      await window.pos.setSetting('supabase_url', url)
+      await window.pos.setSetting('supabase_anon_key', key)
+      showToast('Supabase credentials saved - restart app to connect', 'success')
+    })
+
+    // ── Page Layout Editor (Unified Grid) ─────────────────────────
+
+    let kbButtons = []
+    let gridCols = 10
+    let gridRows = 7
+    let currentPage = 1
+    let selectedBtnId = null
+    let dragSrcId = null
+    let allPages = [1]
+
+    let kbProductCache = []
+    let kbSelectedProduct = null
+
+    async function loadKeyboard () {
+      kbButtons = await window.pos.getAllButtons()
+      const pageRows = await window.pos.getPages()
+      allPages = pageRows.length ? pageRows.map(p => p.page) : [1]
+      if (!allPages.includes(currentPage)) currentPage = allPages[0] || 1
+      renderPageTabs()
+      renderGrid()
+      closeEditPanel()
+
+      const cats = await window.pos.getCategories()
+      $('#kbCatList').innerHTML = cats.map(c => `<option value="${esc(c.name)}">`).join('') +
+        '<option value="__all__">'
+
+      kbProductCache = await window.pos.searchProducts('')
+      renderKbProducts(kbProductCache)
+    }
+
+    function renderKbProducts (products) {
+      const list = $('#kbProductList')
+      if (!products.length) {
+        list.innerHTML = '<p style="color:var(--text-dim);font-size:12px;padding:8px">No products found</p>'
+        return
+      }
+      list.innerHTML = products.slice(0, 100).map(p => `
+        <div class="kb-prod-item${kbSelectedProduct && kbSelectedProduct.id === p.id ? ' sel-highlight' : ''}"
+             data-prod-id="${esc(p.id)}" data-prod-name="${esc(p.name)}" data-prod-price="${p.price}">
+          <span>${esc(p.name)}</span>
+          <span class="prod-price">$${(p.price || 0).toFixed(2)}</span>
+        </div>
+      `).join('')
+    }
+
+    $('#kbProductSearch').addEventListener('input', debounce(async () => {
+      const q = $('#kbProductSearch').value.trim()
+      const results = q ? await window.pos.searchProducts(q) : kbProductCache
+      renderKbProducts(results)
+    }, 250))
+
+    $('#kbProductList').addEventListener('click', e => {
+      const item = e.target.closest('.kb-prod-item')
+      if (!item) return
+      const id = item.dataset.prodId
+      const name = item.dataset.prodName
+      const price = parseFloat(item.dataset.prodPrice) || 0
+
+      if (kbSelectedProduct && kbSelectedProduct.id === id) {
+        kbSelectedProduct = null
+        $$('.kb-prod-item').forEach(el => el.classList.remove('sel-highlight'))
+        return
+      }
+
+      kbSelectedProduct = { id, name, price }
+      $$('.kb-prod-item').forEach(el => el.classList.remove('sel-highlight'))
+      item.classList.add('sel-highlight')
+    })
+
+    function renderPageTabs () {
+      $('#pageTabs').innerHTML = allPages.map(p =>
+        `<button class="btn ${p === currentPage ? 'btn-green' : 'btn-outline'}" style="padding:5px 14px;font-size:12px" data-page="${p}">Page ${p}</button>`
+      ).join('')
+    }
+
+    $('#pageTabs').addEventListener('click', e => {
+      const btn = e.target.closest('[data-page]')
+      if (!btn) return
+      currentPage = parseInt(btn.dataset.page)
+      renderPageTabs()
+      renderGrid()
+      closeEditPanel()
+    })
+
+    $('#addPageBtn').addEventListener('click', async () => {
+      const newPage = Math.max(...allPages, 0) + 1
+      allPages.push(newPage)
+      currentPage = newPage
+      renderPageTabs()
+      renderGrid()
+      showToast(`Page ${newPage} created - add buttons to it`, 'success')
+    })
+
+    $('#deletePageBtn').addEventListener('click', async () => {
+      if (allPages.length <= 1) { showToast('Cannot delete the only page', 'error'); return }
+      if (!confirm(`Delete Page ${currentPage} and all its buttons?`)) return
+      await window.pos.deletePage(currentPage)
+      kbButtons = await window.pos.getAllButtons()
+      allPages = allPages.filter(p => p !== currentPage)
+      currentPage = allPages[0] || 1
+      renderPageTabs()
+      renderGrid()
+      closeEditPanel()
+      showToast('Page deleted', 'success')
+    })
+
+    $('#gridCols').addEventListener('change', e => { gridCols = parseInt(e.target.value); renderGrid() })
+    $('#gridRows').addEventListener('change', e => { gridRows = parseInt(e.target.value); renderGrid() })
+
+    // ── Grid Rendering ─────────────────────────────────────────────
+
+    function renderGrid () {
+      const grid = $('#kbGrid')
+      grid.style.gridTemplateColumns = `repeat(${gridCols}, 1fr)`
+      grid.style.gridTemplateRows = `repeat(${gridRows}, 60px)`
+
+      const pageButtons = kbButtons.filter(b => (b.page || 1) === currentPage && b.active)
+      const occupied = new Set()
+      const cellMap = {}
+
+      for (const b of pageButtons) {
+        const r = b.grid_row || 0, c = b.grid_col || 0
+        const rs = b.row_span || 1, cs = b.col_span || 1
+        cellMap[`${r}-${c}`] = b
+        for (let dr = 0; dr < rs; dr++) {
+          for (let dc = 0; dc < cs; dc++) {
+            occupied.add(`${r + dr}-${c + dc}`)
+          }
+        }
+      }
+
+      let html = ''
+      for (let r = 0; r < gridRows; r++) {
+        for (let c = 0; c < gridCols; c++) {
+          const key = `${r}-${c}`
+          const btn = cellMap[key]
+
+          if (btn) {
+            const cs = btn.col_span || 1, rs = btn.row_span || 1
+            const sel = btn.id === selectedBtnId ? ' selected' : ''
+            html += `<div class="kb-cell${sel}" data-id="${esc(btn.id)}" data-row="${r}" data-col="${c}" draggable="true"
+              style="background:${esc(btn.bg_color)};color:${esc(btn.color)};grid-column:${c + 1}/span ${cs};grid-row:${r + 1}/span ${rs}">
+              <span class="kb-cell-type">${typeLabel(btn.type)}</span>
+              ${btn.image ? `<img src="${btn.image}" style="width:24px;height:24px;border-radius:3px;object-fit:cover">` : ''}
+              ${esc(btn.label)}
+              ${btn.price > 0 ? `<div class="kb-cell-price">$${btn.price.toFixed(2)}</div>` : ''}
+            </div>`
+          } else if (!occupied.has(key)) {
+            html += `<div class="kb-cell empty-cell" data-row="${r}" data-col="${c}"
+              style="grid-column:${c + 1};grid-row:${r + 1}">+</div>`
+          }
+        }
+      }
+      grid.innerHTML = html
+    }
+
+    function typeLabel (type) {
+      const map = { open_price:'$?', fixed_price:'$', section:'cat', nav:'nav', void:'void',
+        'return':'ret', hold:'hold', nosale:'$=0', supervisor:'sup', lock:'lock',
+        reprint:'rpt', pricecheck:'chk', errcorrect:'err', recall:'rcl', pctdiscount:'%',
+        pctone:'%1', movedrawer:'drw', ubereats:'ube', viewor:'...', digit:'#',
+        clear:'clr', qtyx:'qty', codeenter:'plu', subtotal:'sub', pay_cash:'pay',
+        pay_card:'card', park:'park', page_link:'pg', back_home:'home' }
+      return map[type] || type
+    }
+
+    // ── Grid Click & Drag ──────────────────────────────────────────
+
+    $('#kbGrid').addEventListener('click', e => {
+      if (dragSelJustFinished) return
+      const cell = e.target.closest('.kb-cell')
+      if (!cell) return
+      const id = cell.dataset.id
+      if (id) {
+        selectButton(id)
+      } else {
+        const row = parseInt(cell.dataset.row), col = parseInt(cell.dataset.col)
+        if (kbSelectedProduct) {
+          openNewButton(row, col)
+          $('#kbLabel').value = kbSelectedProduct.name
+          $('#kbType').value = 'fixed_price'
+          $('#kbPrice').value = kbSelectedProduct.price
+          updateLivePreview()
+          kbSelectedProduct = null
+          $$('.kb-prod-item').forEach(el => el.classList.remove('sel-highlight'))
+        } else {
+          openNewButton(row, col)
+        }
+      }
+    })
+
+    $('#kbGrid').addEventListener('dragstart', e => {
+      const cell = e.target.closest('.kb-cell[data-id]')
+      if (!cell) { e.preventDefault(); return }
+      dragSrcId = cell.dataset.id
+      cell.classList.add('dragging')
+      e.dataTransfer.effectAllowed = 'move'
+    })
+    $('#kbGrid').addEventListener('dragover', e => {
+      e.preventDefault()
+      e.dataTransfer.dropEffect = 'move'
+      const cell = e.target.closest('.kb-cell')
+      if (cell) cell.classList.add('drag-over')
+    })
+    $('#kbGrid').addEventListener('dragleave', e => {
+      const cell = e.target.closest('.kb-cell')
+      if (cell) cell.classList.remove('drag-over')
+    })
+    $('#kbGrid').addEventListener('drop', async e => {
+      e.preventDefault()
+      $$('#kbGrid .drag-over').forEach(c => c.classList.remove('drag-over'))
+      const target = e.target.closest('.kb-cell')
+      if (!target || !dragSrcId) return
+
+      const srcBtn = kbButtons.find(b => b.id === dragSrcId)
+      if (!srcBtn) return
+      const tgtRow = parseInt(target.dataset.row)
+      const tgtCol = parseInt(target.dataset.col)
+      const tgtId = target.dataset.id
+
+      if (tgtId && tgtId !== dragSrcId) {
+        const tgtBtn = kbButtons.find(b => b.id === tgtId)
+        if (tgtBtn) {
+          const sr = srcBtn.grid_row, sc = srcBtn.grid_col
+          await window.pos.upsertButton({ ...srcBtn, grid_row: tgtBtn.grid_row, grid_col: tgtBtn.grid_col })
+          await window.pos.upsertButton({ ...tgtBtn, grid_row: sr, grid_col: sc })
+        }
+      } else if (!tgtId) {
+        await window.pos.upsertButton({ ...srcBtn, grid_row: tgtRow, grid_col: tgtCol })
+      }
+
+      dragSrcId = null
+      kbButtons = await window.pos.getAllButtons()
+      renderGrid()
+      showToast('Button moved', 'success')
+    })
+    $('#kbGrid').addEventListener('dragend', () => {
+      $$('#kbGrid .dragging').forEach(c => c.classList.remove('dragging'))
+      dragSrcId = null
+    })
+
+    // ── Drag-Select Empty Cells ────────────────────────────────────
+
+    let isDragSelecting = false
+    let dragSelStart = null
+    let dragSelCurrent = null
+    let dragSelJustFinished = false
+
+    function getGridCellFromPoint (x, y) {
+      const els = document.elementsFromPoint(x, y)
+      const cell = els.find(el => el.classList && el.classList.contains('empty-cell'))
+      if (cell) return { row: parseInt(cell.dataset.row), col: parseInt(cell.dataset.col) }
+      return null
+    }
+
+    function getOccupiedSet () {
+      const pageButtons = kbButtons.filter(b => (b.page || 1) === currentPage && b.active)
+      const occupied = new Set()
+      for (const b of pageButtons) {
+        const r = b.grid_row || 0, c = b.grid_col || 0
+        const rs = b.row_span || 1, cs = b.col_span || 1
+        for (let dr = 0; dr < rs; dr++)
+          for (let dc = 0; dc < cs; dc++)
+            occupied.add(`${r + dr}-${c + dc}`)
+      }
+      return occupied
+    }
+
+    function updateSelectionHighlight () {
+      $$('#kbGrid .empty-cell').forEach(c => c.classList.remove('sel-highlight'))
+      if (!dragSelStart || !dragSelCurrent) return
+
+      const r0 = Math.min(dragSelStart.row, dragSelCurrent.row)
+      const r1 = Math.max(dragSelStart.row, dragSelCurrent.row)
+      const c0 = Math.min(dragSelStart.col, dragSelCurrent.col)
+      const c1 = Math.max(dragSelStart.col, dragSelCurrent.col)
+
+      for (const cell of $$('#kbGrid .empty-cell')) {
+        const cr = parseInt(cell.dataset.row), cc = parseInt(cell.dataset.col)
+        if (cr >= r0 && cr <= r1 && cc >= c0 && cc <= c1) {
+          cell.classList.add('sel-highlight')
+        }
+      }
+    }
+
+    $('#kbGrid').addEventListener('mousedown', e => {
+      if (e.button !== 0) return
+      const cell = e.target.closest('.empty-cell')
+      if (!cell) return
+      isDragSelecting = true
+      dragSelStart = { row: parseInt(cell.dataset.row), col: parseInt(cell.dataset.col) }
+      dragSelCurrent = { ...dragSelStart }
+      updateSelectionHighlight()
+      e.preventDefault()
+    })
+
+    document.addEventListener('mousemove', e => {
+      if (!isDragSelecting) return
+      const pt = getGridCellFromPoint(e.clientX, e.clientY)
+      if (pt) {
+        dragSelCurrent = pt
+        updateSelectionHighlight()
+      }
+    })
+
+    document.addEventListener('mouseup', e => {
+      if (!isDragSelecting) return
+      isDragSelecting = false
+      if (!dragSelStart || !dragSelCurrent) return
+
+      const r0 = Math.min(dragSelStart.row, dragSelCurrent.row)
+      const r1 = Math.max(dragSelStart.row, dragSelCurrent.row)
+      const c0 = Math.min(dragSelStart.col, dragSelCurrent.col)
+      const c1 = Math.max(dragSelStart.col, dragSelCurrent.col)
+
+      const occupied = getOccupiedSet()
+      let allFree = true
+      for (let rr = r0; rr <= r1; rr++)
+        for (let cc = c0; cc <= c1; cc++)
+          if (occupied.has(`${rr}-${cc}`)) allFree = false
+
+      $$('#kbGrid .empty-cell').forEach(c => c.classList.remove('sel-highlight'))
+
+      if (!allFree) {
+        showToast('Selection overlaps an existing button', 'error')
+        return
+      }
+
+      const colSpan = c1 - c0 + 1
+      const rowSpan = r1 - r0 + 1
+
+      dragSelJustFinished = true
+      setTimeout(() => { dragSelJustFinished = false }, 0)
+
+      openNewButton(r0, c0)
+      $('#kbColSpan').value = colSpan
+      $('#kbRowSpan').value = rowSpan
+      $('#kbCellInfo').textContent = `Row ${r0}, Col ${c0}, Span ${colSpan}x${rowSpan} - Page ${currentPage}`
+
+      dragSelStart = null
+      dragSelCurrent = null
+    })
+
+    // ── Edit Panel ─────────────────────────────────────────────────
+
+    function selectButton (id) {
+      selectedBtnId = id
+      const btn = kbButtons.find(b => b.id === id)
+      if (!btn) return
+      renderGrid()
+      openEditPanel(btn)
+    }
+
+    function openNewButton (row, col) {
+      selectedBtnId = null
+      $('#kbEditId').value = ''
+      $('#kbLabel').value = ''
+      $('#kbType').value = 'open_price'
+      $('#kbPrice').value = 0
+      $('#kbCatFilter').value = ''
+      $('#kbAlphaRange').value = ''
+      $('#kbColor').value = '#ffffff'
+      $('#kbBgColor').value = '#409850'
+      $('#kbColSpan').value = 1
+      $('#kbRowSpan').value = 1
+      $('#kbImageData').value = ''
+      $('#kbImagePreview').innerHTML = ''
+      $('#kbDeleteBtn').style.display = 'none'
+      $('#kbEditTitle').textContent = 'New Button'
+      $('#kbCellInfo').textContent = `Row ${row}, Col ${col} - Page ${currentPage}`
+      $('#kbEditPanel').style.display = 'block'
+      $('#kbEditPanel').dataset.row = row
+      $('#kbEditPanel').dataset.col = col
+      updateLivePreview()
+    }
+
+    function openEditPanel (btn) {
+      $('#kbEditId').value = btn.id
+      $('#kbLabel').value = btn.label
+      $('#kbType').value = btn.type
+      $('#kbPrice').value = btn.price || 0
+      $('#kbCatFilter').value = btn.category_filter || ''
+      $('#kbAlphaRange').value = btn.alpha_range || ''
+      $('#kbColor').value = btn.color || '#ffffff'
+      $('#kbBgColor').value = btn.bg_color || '#1B4332'
+      $('#kbColSpan').value = btn.col_span || 1
+      $('#kbRowSpan').value = btn.row_span || 1
+      $('#kbImageData').value = btn.image || ''
+      $('#kbImagePreview').innerHTML = btn.image ? `<img src="${btn.image}" style="width:48px;height:48px;border-radius:8px;object-fit:cover">` : ''
+      $('#kbDeleteBtn').style.display = 'inline-block'
+      $('#kbEditTitle').textContent = `Edit: ${btn.label}`
+      $('#kbCellInfo').textContent = `Row ${btn.grid_row}, Col ${btn.grid_col}, Span ${btn.col_span||1}x${btn.row_span||1} - Page ${btn.page||1}`
+      $('#kbEditPanel').style.display = 'block'
+      $('#kbEditPanel').dataset.row = btn.grid_row || 0
+      $('#kbEditPanel').dataset.col = btn.grid_col || 0
+      updateLivePreview()
+    }
+
+    function closeEditPanel () {
+      selectedBtnId = null
+      $('#kbEditPanel').style.display = 'none'
+      renderGrid()
+    }
+
+    function updateLivePreview () {
+      const preview = $('#kbLivePreview')
+      preview.style.background = $('#kbBgColor').value
+      preview.style.color = $('#kbColor').value
+      preview.textContent = $('#kbLabel').value || 'Button'
+    }
+
+    ;['kbLabel', 'kbBgColor', 'kbColor'].forEach(id => {
+      $(`#${id}`).addEventListener('input', updateLivePreview)
+    })
+
+    $('#kbCloseEdit').addEventListener('click', closeEditPanel)
+    $('#kbCancelBtn').addEventListener('click', closeEditPanel)
+
+    $('#kbImageFile').addEventListener('change', e => {
+      const file = e.target.files[0]
+      if (!file) return
+      const reader = new FileReader()
+      reader.onload = ev => {
+        const img = new Image()
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          const max = 128
+          let w = img.width, h = img.height
+          if (w > max || h > max) { const r = Math.min(max / w, max / h); w = Math.round(w * r); h = Math.round(h * r) }
+          canvas.width = w; canvas.height = h
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h)
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.8)
+          $('#kbImageData').value = dataUrl
+          $('#kbImagePreview').innerHTML = `<img src="${dataUrl}" style="width:48px;height:48px;border-radius:8px;object-fit:cover">`
+        }
+        img.src = ev.target.result
+      }
+      reader.readAsDataURL(file)
+    })
+
+    $('#kbSaveBtn').addEventListener('click', async () => {
+      const label = $('#kbLabel').value.trim()
+      if (!label) { showToast('Label is required', 'error'); return }
+      const btn = {
+        id: $('#kbEditId').value || undefined,
+        label,
+        type: $('#kbType').value,
+        price: parseFloat($('#kbPrice').value) || 0,
+        category_filter: $('#kbCatFilter').value.trim() || null,
+        alpha_range: $('#kbAlphaRange').value.trim() || null,
+        color: $('#kbColor').value,
+        bg_color: $('#kbBgColor').value,
+        col_span: parseInt($('#kbColSpan').value) || 1,
+        row_span: parseInt($('#kbRowSpan').value) || 1,
+        grid_row: parseInt($('#kbEditPanel').dataset.row) || 0,
+        grid_col: parseInt($('#kbEditPanel').dataset.col) || 0,
+        page: currentPage,
+        position: 'grid',
+        image: $('#kbImageData').value || null,
+        active: true
+      }
+      await window.pos.upsertButton(btn)
+      showToast('Button saved', 'success')
+      kbButtons = await window.pos.getAllButtons()
+      renderGrid()
+      closeEditPanel()
+    })
+
+    $('#kbDeleteBtn').addEventListener('click', async () => {
+      const id = $('#kbEditId').value
+      if (!id || !confirm('Delete this button?')) return
+      await window.pos.deleteButton(id)
+      showToast('Button deleted', 'success')
+      kbButtons = await window.pos.getAllButtons()
+      renderGrid()
+      closeEditPanel()
+    })
+
+
+    // -- Hardware Probing ---------------------------------------------------
+
+    async function loadHardware () {}
+
+    $('#probeBtn').addEventListener('click', async () => {
+      $('#probeStatus').textContent = 'Probing...'
+      $('#probeBtn').disabled = true
+
+      try {
+        const result = await window.pos.probeDevices()
+
+        if (result.usbDevices && result.usbDevices.length) {
+          $('#usbDeviceTable').innerHTML = result.usbDevices.map(d => `
+            <tr>
+              <td>0x${d.vendorId.toString(16).padStart(4, '0')}</td>
+              <td>0x${d.productId.toString(16).padStart(4, '0')}</td>
+              <td>${esc(d.manufacturer || '-')}</td>
+              <td>${esc(d.product || '-')}</td>
+              <td>${d.deviceClass || '-'}</td>
+            </tr>`).join('')
+        } else {
+          $('#usbDeviceTable').innerHTML = '<tr><td colspan="5" style="color:var(--text-dim)">No USB devices found</td></tr>'
+        }
+
+        if (result.printer.found) {
+          $('#dotPrinter').style.background = 'var(--green)'
+          $('#printerInfo').innerHTML = `<span style="color:var(--green)">Connected</span> - ${esc(result.printer.name || 'ESC/POS printer')}`
+        } else {
+          $('#dotPrinter').style.background = 'var(--red)'
+          $('#printerInfo').innerHTML = `<span style="color:var(--red)">Not found</span> - ${esc(result.printer.error || 'No ESC/POS printer detected')}`
+        }
+
+        if (result.drawer.found) {
+          $('#dotDrawerHw').style.background = 'var(--green)'
+          $('#drawerInfo').innerHTML = `<span style="color:var(--green)">Available</span> - via printer DK port`
+        } else {
+          $('#dotDrawerHw').style.background = result.printer.found ? 'var(--amber)' : 'var(--red)'
+          $('#drawerInfo').innerHTML = result.printer.found
+            ? `<span style="color:var(--amber)">Assumed available</span> - printer found, drawer should be on DK port`
+            : `<span style="color:var(--red)">Not available</span> - needs a connected printer`
+        }
+
+        if (result.scanner.found) {
+          $('#dotScanner').style.background = 'var(--green)'
+          $('#scannerInfo').innerHTML = `<span style="color:var(--green)">Detected</span> - ${esc(result.scanner.name || 'HID keyboard device')}`
+        } else {
+          $('#dotScanner').style.background = 'var(--amber)'
+          $('#scannerInfo').innerHTML = `<span style="color:var(--amber)">HID mode</span> - scanner appears as keyboard. Test with the box below.`
+        }
+
+        if (result.scale.found) {
+          $('#dotScale').style.background = 'var(--green)'
+          $('#scaleInfo').innerHTML = `<span style="color:var(--green)">Detected</span> - ${esc(result.scale.name || 'USB/Serial scale')}`
+        } else {
+          $('#dotScale').style.background = 'var(--red)'
+          $('#scaleInfo').innerHTML = `<span style="color:var(--red)">Not found</span> - No compatible scale detected`
+        }
+
+        $('#probeStatus').textContent = `Probe complete - ${result.usbDevices?.length || 0} USB device(s) found`
+      } catch (e) {
+        $('#probeStatus').textContent = 'Probe failed: ' + e.message
+      }
+      $('#probeBtn').disabled = false
+    })
+
+    $('#scannerTest').addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        const code = $('#scannerTest').value.trim()
+        if (code) {
+          $('#scannerResult').innerHTML = `<span style="color:var(--green)">Scanned: <b>${esc(code)}</b></span>`
+          $('#dotScanner').style.background = 'var(--green)'
+          $('#scannerInfo').innerHTML = `<span style="color:var(--green)">Working</span> - last scan: ${esc(code)}`
+          $('#scannerTest').value = ''
+        }
+      }
+    })
+
+    // -- Init -----------------------------------------------------------
+
+    setDashDate(dashboardDate)
+  </script>
+</body>
+</html>

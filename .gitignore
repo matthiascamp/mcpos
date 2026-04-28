@@ -1,0 +1,20 @@
+node_modules/
+*.sqlite
+*.sqlite-journal
+.env
+.DS_Store
+Thumbs.db
+
+# Profit Track legacy binaries (kept as reference docs only)
+*.dll
+*.DLL
+*.bpl
+*.BPL
+*.exe
+*.EXE
+*.fdb
+*.FDB
+*.chm
+*.CHM
+*.xls
+*.XLS
