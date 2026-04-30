@@ -737,79 +737,158 @@ function setupIPC() {
     return { imported, categories: Object.keys(catMap).length }
   })
 
-  // ── Hardware (printer/drawer — graceful no-op if not available) ────────────
+  // ── Hardware (raw USB ESC/POS — Epson VID:0x04b8 PID:0x0e11) ───────────────
+
+  const EPSON_VID = 0x04b8
+  const EPSON_PID = 0x0e11
+
+  // ESC/POS command bytes
+  const ESC = 0x1b
+  const GS = 0x1d
+  const ESCPOS = {
+    INIT: Buffer.from([ESC, 0x40]),                          // Initialize printer
+    ALIGN_CENTER: Buffer.from([ESC, 0x61, 0x01]),
+    ALIGN_LEFT: Buffer.from([ESC, 0x61, 0x00]),
+    ALIGN_RIGHT: Buffer.from([ESC, 0x61, 0x02]),
+    BOLD_ON: Buffer.from([ESC, 0x45, 0x01]),
+    BOLD_OFF: Buffer.from([ESC, 0x45, 0x00]),
+    DOUBLE_SIZE: Buffer.from([GS, 0x21, 0x11]),              // Double width+height
+    NORMAL_SIZE: Buffer.from([GS, 0x21, 0x00]),
+    CUT: Buffer.from([GS, 0x56, 0x00]),                      // Full cut
+    PARTIAL_CUT: Buffer.from([GS, 0x56, 0x01]),
+    FEED_3: Buffer.from([ESC, 0x64, 0x03]),                  // Feed 3 lines
+    DRAWER_KICK: Buffer.from([ESC, 0x70, 0x00, 0x19, 0x78]), // Pin 2, 25ms on, 120ms off
+  }
+
+  function findEpsonPrinter() {
+    const usb = require('usb')
+    const device = usb.findByIds(EPSON_VID, EPSON_PID)
+    if (!device) throw new Error(`Epson printer not found (VID:0x${EPSON_VID.toString(16)} PID:0x${EPSON_PID.toString(16)})`)
+    return device
+  }
+
+  function openPrinter(device) {
+    return new Promise((resolve, reject) => {
+      try {
+        device.open()
+        // Detach kernel driver if needed (Linux/Mac)
+        const iface = device.interfaces[0]
+        if (iface.isKernelDriverActive && iface.isKernelDriverActive()) {
+          iface.detachKernelDriver()
+        }
+        iface.claim()
+        // Find bulk OUT endpoint
+        const outEndpoint = iface.endpoints.find(e => e.direction === 'out')
+        if (!outEndpoint) reject(new Error('No OUT endpoint found on printer'))
+        else resolve({ device, iface, endpoint: outEndpoint })
+      } catch (err) {
+        reject(err)
+      }
+    })
+  }
+
+  function sendToPrinter(endpoint, data) {
+    return new Promise((resolve, reject) => {
+      endpoint.transfer(data, (err) => {
+        if (err) reject(err)
+        else resolve()
+      })
+    })
+  }
+
+  function closePrinter({ device, iface }) {
+    try { iface.release(() => device.close()) } catch (_) {}
+  }
+
+  function textToBuffer(text) {
+    return Buffer.from(text + '\n', 'utf-8')
+  }
+
+  function line(char, len) {
+    return char.repeat(len)
+  }
 
   ipcMain.handle('hardware:printReceipt', async (_e, receiptData) => {
+    let printer = null
     try {
-      const escpos = require('escpos')
-      require('escpos-usb')
-      const device = new escpos.USB()
-      const printer = new escpos.Printer(device)
+      const device = findEpsonPrinter()
+      printer = await openPrinter(device)
+      const ep = printer.endpoint
+      const send = (buf) => sendToPrinter(ep, buf)
 
-      return new Promise((resolve) => {
-        device.open(() => {
-          printer.align('ct').style('b').size(1, 1)
-            .text(receiptData.storeName || 'Crisp on Creek')
-            .style('normal').size(0, 0)
+      // Build receipt
+      await send(ESCPOS.INIT)
+      await send(ESCPOS.ALIGN_CENTER)
+      await send(ESCPOS.BOLD_ON)
+      await send(ESCPOS.DOUBLE_SIZE)
+      await send(textToBuffer(receiptData.storeName || 'Crisp on Creek'))
+      await send(ESCPOS.NORMAL_SIZE)
+      await send(ESCPOS.BOLD_OFF)
 
-          if (receiptData.storeAddress) printer.text(receiptData.storeAddress)
-          if (receiptData.storePhone) printer.text(`Ph: ${receiptData.storePhone}`)
-          if (receiptData.storeAbn) printer.text(`ABN: ${receiptData.storeAbn}`)
-          if (receiptData.header) printer.text('').text(receiptData.header)
+      if (receiptData.storeAddress) await send(textToBuffer(receiptData.storeAddress))
+      if (receiptData.storePhone) await send(textToBuffer(`Ph: ${receiptData.storePhone}`))
+      if (receiptData.storeAbn) await send(textToBuffer(`ABN: ${receiptData.storeAbn}`))
+      if (receiptData.header) { await send(textToBuffer('')); await send(textToBuffer(receiptData.header)) }
 
-          printer.text('').align('lt')
-            .text(`Date:     ${receiptData.date}`)
-            .text(`Register: ${receiptData.registerId || 'LANE01'}`)
-            .text(`Txn:      ${receiptData.txnId?.slice(0, 8) || ''}`)
-            .text(`Staff:    ${receiptData.staffName || ''}`)
-            .text('─'.repeat(42))
+      await send(textToBuffer(''))
+      await send(ESCPOS.ALIGN_LEFT)
+      await send(textToBuffer(`Date:     ${receiptData.date}`))
+      await send(textToBuffer(`Register: ${receiptData.registerId || 'LANE01'}`))
+      await send(textToBuffer(`Txn:      ${receiptData.txnId?.slice(0, 8) || ''}`))
+      await send(textToBuffer(`Staff:    ${receiptData.staffName || ''}`))
+      await send(textToBuffer(line('-', 42)))
 
-          for (const item of receiptData.items) {
-            const name = item.name.substring(0, 28)
-            const price = item.line_total.toFixed(2).padStart(10)
-            printer.text(`${name}${' '.repeat(Math.max(0, 42 - name.length - price.length))}${price}`)
-            if (item.qty !== 1) printer.text(`  ${item.qty} x $${item.unit_price.toFixed(2)}`)
-            if (item.discount > 0) printer.text(`  Discount: -$${item.discount.toFixed(2)}`)
-          }
+      for (const item of receiptData.items) {
+        const name = item.name.substring(0, 28)
+        const price = item.line_total.toFixed(2).padStart(10)
+        await send(textToBuffer(`${name}${' '.repeat(Math.max(0, 42 - name.length - price.length))}${price}`))
+        if (item.qty !== 1) await send(textToBuffer(`  ${item.qty} x $${item.unit_price.toFixed(2)}`))
+        if (item.discount > 0) await send(textToBuffer(`  Discount: -$${item.discount.toFixed(2)}`))
+      }
 
-          printer.text('─'.repeat(42)).align('rt')
-          if (receiptData.discount > 0) printer.text(`Discount: -$${receiptData.discount.toFixed(2)}`)
-          printer.style('b').size(1, 1)
-            .text(`TOTAL: $${receiptData.total.toFixed(2)}`)
-            .style('normal').size(0, 0)
-            .text(`Total includes GST of $${receiptData.tax.toFixed(2)}`)
-            .text('')
+      await send(textToBuffer(line('-', 42)))
+      await send(ESCPOS.ALIGN_RIGHT)
+      if (receiptData.discount > 0) await send(textToBuffer(`Discount: -$${receiptData.discount.toFixed(2)}`))
+      await send(ESCPOS.BOLD_ON)
+      await send(ESCPOS.DOUBLE_SIZE)
+      await send(textToBuffer(`TOTAL: $${receiptData.total.toFixed(2)}`))
+      await send(ESCPOS.NORMAL_SIZE)
+      await send(ESCPOS.BOLD_OFF)
+      await send(textToBuffer(`Total includes GST of $${receiptData.tax.toFixed(2)}`))
+      await send(textToBuffer(''))
 
-          for (const pay of receiptData.payments) {
-            printer.text(`${pay.method.toUpperCase()}: $${pay.amount.toFixed(2)}`)
-          }
-          if (receiptData.change > 0) printer.text(`Change: $${receiptData.change.toFixed(2)}`)
+      for (const pay of receiptData.payments) {
+        await send(textToBuffer(`${pay.method.toUpperCase()}: $${pay.amount.toFixed(2)}`))
+      }
+      if (receiptData.change > 0) await send(textToBuffer(`Change: $${receiptData.change.toFixed(2)}`))
 
-          printer.text('').align('ct')
-            .text(receiptData.footer || 'Thank you for shopping local!')
-            .text('').cut().close()
-          resolve(true)
-        })
-      })
+      await send(textToBuffer(''))
+      await send(ESCPOS.ALIGN_CENTER)
+      await send(textToBuffer(receiptData.footer || 'Thank you for shopping local!'))
+      await send(ESCPOS.FEED_3)
+      await send(ESCPOS.PARTIAL_CUT)
+
+      closePrinter(printer)
+      return true
     } catch (err) {
-      console.log('Printer not available:', err.message)
+      if (printer) closePrinter(printer)
+      console.log('Printer error:', err.message)
       return { error: err.message }
     }
   })
 
   ipcMain.handle('hardware:openDrawer', async () => {
+    let printer = null
     try {
-      const escpos = require('escpos')
-      require('escpos-usb')
-      const device = new escpos.USB()
-      return new Promise((resolve) => {
-        device.open(() => {
-          new escpos.Printer(device).cashdraw(2).close()
-          resolve(true)
-        })
-      })
+      const device = findEpsonPrinter()
+      printer = await openPrinter(device)
+      await sendToPrinter(printer.endpoint, ESCPOS.INIT)
+      await sendToPrinter(printer.endpoint, ESCPOS.DRAWER_KICK)
+      closePrinter(printer)
+      return true
     } catch (err) {
-      console.log('Drawer not available:', err.message)
+      if (printer) closePrinter(printer)
+      console.log('Drawer error:', err.message)
       return { error: err.message }
     }
   })
@@ -909,15 +988,14 @@ function setupIPC() {
       }
     }
 
-    // Try escpos direct detection if printer not found
+    // Try direct USB detection for Epson if not found by vendor list
     if (!result.printer.found) {
       try {
-        const escpos = require('escpos')
-        require('escpos-usb')
-        const device = new escpos.USB()
-        if (device) {
+        const usb = require('usb')
+        const dev = usb.findByIds(EPSON_VID, EPSON_PID)
+        if (dev) {
           result.printer.found = true
-          result.printer.name = 'ESC/POS USB printer'
+          result.printer.name = `Epson (VID:0x${EPSON_VID.toString(16)} PID:0x${EPSON_PID.toString(16)})`
           result.drawer.found = true
         }
       } catch (_) {}
