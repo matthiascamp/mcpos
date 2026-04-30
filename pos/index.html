@@ -1693,9 +1693,9 @@ $('#cashConfirm').addEventListener('click', async () => {
     }
     lastCompletedTxns.unshift(receiptData)
     if (lastCompletedTxns.length > 10) lastCompletedTxns.length = 10
-    try { await window.pos.printReceipt(receiptData) } catch (_) {}
+    try { const pr = await window.pos.printReceipt(receiptData); if (pr?.error) showToast('Printer: ' + pr.error, 'error') } catch (pe) { showToast('Printer: ' + pe.message, 'error') }
     const hasCash = payments.some(p => p.method === 'cash')
-    if (hasCash) { try { await window.pos.openDrawer() } catch (_) {} }
+    if (hasCash) { try { const dr = await window.pos.openDrawer(); if (dr?.error) showToast('Drawer: ' + dr.error, 'error') } catch (de) { showToast('Drawer: ' + de.message, 'error') } }
     cart.clear(); clearCartLocal(); pendingPayments = []
     if (returnMode) { returnMode = false; $('#returnBanner').classList.remove('active') }
     if (supervisorMode) { supervisorMode = false; $('#supervisorBanner').classList.remove('active'); if (supervisorTimer) clearTimeout(supervisorTimer) }

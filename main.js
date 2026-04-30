@@ -817,6 +817,7 @@ function setupIPC() {
   // -- Device Probing -------------------------------------------------------
 
   ipcMain.handle('hardware:probe', async () => {
+    const { execSync } = require('child_process')
     const result = {
       usbDevices: [],
       printer: { found: false, name: '', error: '' },
@@ -830,19 +831,21 @@ function setupIPC() {
     const SCALE_VIDS = [0x0b67, 0x0922, 0x1446, 0x0eb8]
     const SCANNER_VIDS = [0x05e0, 0x05f9, 0x0c2e, 0x1eab, 0x2dd6, 0x1a86]
 
+    // Try native usb module first
+    let usbWorked = false
     try {
       const usb = require('usb')
       const devices = usb.getDeviceList()
+      usbWorked = true
 
       result.usbDevices = devices.map(d => {
-        let manufacturer = '', product = ''
         try {
           const desc = d.deviceDescriptor
           return {
             vendorId: desc.idVendor,
             productId: desc.idProduct,
-            manufacturer: manufacturer,
-            product: product,
+            manufacturer: '',
+            product: '',
             deviceClass: desc.bDeviceClass
           }
         } catch (_) {
@@ -855,24 +858,59 @@ function setupIPC() {
           }
         }
       })
-
-      for (const d of result.usbDevices) {
-        if (PRINTER_VIDS.includes(d.vendorId)) {
-          result.printer.found = true
-          result.printer.name = `VID:0x${d.vendorId.toString(16)} PID:0x${d.productId.toString(16)}`
-          result.drawer.found = true
-        }
-        if (SCALE_VIDS.includes(d.vendorId)) {
-          result.scale.found = true
-          result.scale.name = `VID:0x${d.vendorId.toString(16)} PID:0x${d.productId.toString(16)}`
-        }
-        if (SCANNER_VIDS.includes(d.vendorId)) {
-          result.scanner.found = true
-          result.scanner.name = `VID:0x${d.vendorId.toString(16)} PID:0x${d.productId.toString(16)}`
-        }
-      }
     } catch (e1) {
-      // usb module not available, try escpos
+      // usb module not available — fall back to PowerShell/system detection
+      try {
+        const psCmd = `powershell -NoProfile -Command "Get-PnpDevice -Class USB,Printer,HIDClass -Status OK -ErrorAction SilentlyContinue | Select-Object FriendlyName,InstanceId,Class | ConvertTo-Json -Compress"`
+        const raw = execSync(psCmd, { timeout: 10000, encoding: 'utf-8' })
+        const devices = JSON.parse(raw)
+        const devList = Array.isArray(devices) ? devices : [devices]
+        for (const d of devList) {
+          const vid = (d.InstanceId?.match(/VID_([0-9A-F]{4})/i) || [])[1]
+          const pid = (d.InstanceId?.match(/PID_([0-9A-F]{4})/i) || [])[1]
+          result.usbDevices.push({
+            vendorId: vid ? parseInt(vid, 16) : 0,
+            productId: pid ? parseInt(pid, 16) : 0,
+            manufacturer: '',
+            product: d.FriendlyName || '',
+            deviceClass: d.Class || ''
+          })
+        }
+      } catch (e2) {
+        result.printer.error = `Device detection failed: ${e1.message}; PowerShell fallback: ${e2.message}`
+      }
+    }
+
+    // Match known vendor IDs
+    for (const d of result.usbDevices) {
+      if (PRINTER_VIDS.includes(d.vendorId)) {
+        result.printer.found = true
+        result.printer.name = d.product || `VID:0x${d.vendorId.toString(16)} PID:0x${d.productId.toString(16)}`
+        result.drawer.found = true
+      }
+      if (SCALE_VIDS.includes(d.vendorId)) {
+        result.scale.found = true
+        result.scale.name = d.product || `VID:0x${d.vendorId.toString(16)} PID:0x${d.productId.toString(16)}`
+      }
+      if (SCANNER_VIDS.includes(d.vendorId)) {
+        result.scanner.found = true
+        result.scanner.name = d.product || `VID:0x${d.vendorId.toString(16)} PID:0x${d.productId.toString(16)}`
+      }
+      // Also check by device name/class for printers not in vendor list
+      const name = (d.product || '').toLowerCase()
+      if (!result.printer.found && (name.includes('printer') || name.includes('receipt') || name.includes('pos') || name.includes('thermal') || d.deviceClass === 'Printer')) {
+        result.printer.found = true
+        result.printer.name = d.product || 'Detected printer'
+        result.drawer.found = true
+      }
+      if (!result.scanner.found && (name.includes('scanner') || name.includes('barcode') || (d.deviceClass === 'HIDClass' && (name.includes('symbol') || name.includes('honeywell') || name.includes('zebra'))))) {
+        result.scanner.found = true
+        result.scanner.name = d.product || 'Detected scanner'
+      }
+    }
+
+    // Try escpos direct detection if printer not found
+    if (!result.printer.found) {
       try {
         const escpos = require('escpos')
         require('escpos-usb')
@@ -882,9 +920,7 @@ function setupIPC() {
           result.printer.name = 'ESC/POS USB printer'
           result.drawer.found = true
         }
-      } catch (e2) {
-        result.printer.error = 'No USB library available (install usb or escpos-usb)'
-      }
+      } catch (_) {}
     }
 
     // Probe serial ports for scale
