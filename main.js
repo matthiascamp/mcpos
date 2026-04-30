@@ -737,157 +737,201 @@ function setupIPC() {
     return { imported, categories: Object.keys(catMap).length }
   })
 
-  // ── Hardware (raw USB ESC/POS — Epson VID:0x04b8 PID:0x0e11) ───────────────
+  // ── Hardware (Windows spooler ESC/POS — Epson TM-T82II on USB003) ──────────
 
-  const EPSON_VID = 0x04b8
-  const EPSON_PID = 0x0e11
+  const { execSync: hwExec } = require('child_process')
+  const os = require('os')
+
+  const RECEIPT_PRINTER_NAME = 'EPSON TM-T82II Receipt'
+  const RECEIPT_PRINTER_PORT = 'USB003'
 
   // ESC/POS command bytes
   const ESC = 0x1b
   const GS = 0x1d
   const ESCPOS = {
-    INIT: Buffer.from([ESC, 0x40]),                          // Initialize printer
+    INIT: Buffer.from([ESC, 0x40]),
     ALIGN_CENTER: Buffer.from([ESC, 0x61, 0x01]),
     ALIGN_LEFT: Buffer.from([ESC, 0x61, 0x00]),
     ALIGN_RIGHT: Buffer.from([ESC, 0x61, 0x02]),
     BOLD_ON: Buffer.from([ESC, 0x45, 0x01]),
     BOLD_OFF: Buffer.from([ESC, 0x45, 0x00]),
-    DOUBLE_SIZE: Buffer.from([GS, 0x21, 0x11]),              // Double width+height
+    DOUBLE_SIZE: Buffer.from([GS, 0x21, 0x11]),
     NORMAL_SIZE: Buffer.from([GS, 0x21, 0x00]),
-    CUT: Buffer.from([GS, 0x56, 0x00]),                      // Full cut
     PARTIAL_CUT: Buffer.from([GS, 0x56, 0x01]),
-    FEED_3: Buffer.from([ESC, 0x64, 0x03]),                  // Feed 3 lines
-    DRAWER_KICK: Buffer.from([ESC, 0x70, 0x00, 0x19, 0x78]), // Pin 2, 25ms on, 120ms off
+    FEED_3: Buffer.from([ESC, 0x64, 0x03]),
+    DRAWER_KICK: Buffer.from([ESC, 0x70, 0x00, 0x19, 0x78]),
   }
 
-  function findEpsonPrinter() {
-    const usb = require('usb')
-    const device = usb.findByIds(EPSON_VID, EPSON_PID)
-    if (!device) throw new Error(`Epson printer not found (VID:0x${EPSON_VID.toString(16)} PID:0x${EPSON_PID.toString(16)})`)
-    return device
+  // Ensure the Epson is registered as a Windows printer on USB003
+  function ensureReceiptPrinter() {
+    try {
+      const check = hwExec(`powershell -NoProfile -Command "Get-Printer -Name '${RECEIPT_PRINTER_NAME}' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name"`, { timeout: 10000, encoding: 'utf-8' })
+      if (check.trim()) return // already exists
+    } catch (_) {}
+    // Add it using Generic / Text Only driver on USB003
+    try {
+      hwExec(`powershell -NoProfile -Command "Add-Printer -Name '${RECEIPT_PRINTER_NAME}' -DriverName 'Generic / Text Only' -PortName '${RECEIPT_PRINTER_PORT}'"`, { timeout: 10000, encoding: 'utf-8' })
+      console.log('Added receipt printer:', RECEIPT_PRINTER_NAME, 'on', RECEIPT_PRINTER_PORT)
+    } catch (e) {
+      console.log('Failed to add receipt printer:', e.message)
+    }
   }
 
-  function openPrinter(device) {
-    return new Promise((resolve, reject) => {
-      try {
-        device.open()
-        // Detach kernel driver if needed (Linux/Mac)
-        const iface = device.interfaces[0]
-        if (iface.isKernelDriverActive && iface.isKernelDriverActive()) {
-          iface.detachKernelDriver()
-        }
-        iface.claim()
-        // Find bulk OUT endpoint
-        const outEndpoint = iface.endpoints.find(e => e.direction === 'out')
-        if (!outEndpoint) reject(new Error('No OUT endpoint found on printer'))
-        else resolve({ device, iface, endpoint: outEndpoint })
-      } catch (err) {
-        reject(err)
-      }
-    })
+  // Send raw bytes to the printer via Windows spooler (winspool.drv P/Invoke)
+  function sendRawToPrinter(data) {
+    const tmpFile = path.join(os.tmpdir(), `crisp-receipt-${Date.now()}.bin`)
+    fs.writeFileSync(tmpFile, data)
+    try {
+      // Use PowerShell with .NET P/Invoke to send raw bytes via winspool
+      const psScript = `
+$PrinterName = '${RECEIPT_PRINTER_NAME}'
+$FilePath = '${tmpFile.replace(/\\/g, '\\\\')}'
+$bytes = [System.IO.File]::ReadAllBytes($FilePath)
+
+Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+
+public class RawPrint {
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    public struct DOCINFOW {
+        public string pDocName;
+        public string pOutputFile;
+        public string pDatatype;
+    }
+
+    [DllImport("winspool.Drv", CharSet = CharSet.Unicode, SetLastError = true)]
+    public static extern bool OpenPrinter(string szPrinter, out IntPtr hPrinter, IntPtr pd);
+
+    [DllImport("winspool.Drv", CharSet = CharSet.Unicode, SetLastError = true)]
+    public static extern bool StartDocPrinter(IntPtr hPrinter, int level, ref DOCINFOW di);
+
+    [DllImport("winspool.Drv", SetLastError = true)]
+    public static extern bool StartPagePrinter(IntPtr hPrinter);
+
+    [DllImport("winspool.Drv", SetLastError = true)]
+    public static extern bool WritePrinter(IntPtr hPrinter, IntPtr pBytes, int dwCount, out int dwWritten);
+
+    [DllImport("winspool.Drv", SetLastError = true)]
+    public static extern bool EndPagePrinter(IntPtr hPrinter);
+
+    [DllImport("winspool.Drv", SetLastError = true)]
+    public static extern bool EndDocPrinter(IntPtr hPrinter);
+
+    [DllImport("winspool.Drv", SetLastError = true)]
+    public static extern bool ClosePrinter(IntPtr hPrinter);
+
+    public static bool SendRaw(string printerName, byte[] data) {
+        IntPtr hPrinter;
+        if (!OpenPrinter(printerName, out hPrinter, IntPtr.Zero)) return false;
+        var di = new DOCINFOW { pDocName = "Receipt", pDatatype = "RAW" };
+        if (!StartDocPrinter(hPrinter, 1, ref di)) { ClosePrinter(hPrinter); return false; }
+        StartPagePrinter(hPrinter);
+        IntPtr pBuf = Marshal.AllocHGlobal(data.Length);
+        Marshal.Copy(data, 0, pBuf, data.Length);
+        int written;
+        WritePrinter(hPrinter, pBuf, data.Length, out written);
+        Marshal.FreeHGlobal(pBuf);
+        EndPagePrinter(hPrinter);
+        EndDocPrinter(hPrinter);
+        ClosePrinter(hPrinter);
+        return written == data.Length;
+    }
+}
+'@ -ErrorAction SilentlyContinue
+
+$ok = [RawPrint]::SendRaw($PrinterName, $bytes)
+if ($ok) { Write-Output "OK" } else { Write-Output "FAIL" }
+`
+      const result = hwExec(`powershell -NoProfile -Command "${psScript.replace(/"/g, '\\"')}"`, { timeout: 15000, encoding: 'utf-8' })
+      return result.trim().includes('OK')
+    } finally {
+      try { fs.unlinkSync(tmpFile) } catch (_) {}
+    }
   }
 
-  function sendToPrinter(endpoint, data) {
-    return new Promise((resolve, reject) => {
-      endpoint.transfer(data, (err) => {
-        if (err) reject(err)
-        else resolve()
-      })
-    })
+  // Build receipt as a single ESC/POS byte buffer
+  function buildReceiptBuffer(receiptData) {
+    const parts = []
+    const text = (s) => parts.push(Buffer.from(s + '\n', 'utf-8'))
+    const cmd = (buf) => parts.push(buf)
+
+    cmd(ESCPOS.INIT)
+    cmd(ESCPOS.ALIGN_CENTER)
+    cmd(ESCPOS.BOLD_ON)
+    cmd(ESCPOS.DOUBLE_SIZE)
+    text(receiptData.storeName || 'Crisp on Creek')
+    cmd(ESCPOS.NORMAL_SIZE)
+    cmd(ESCPOS.BOLD_OFF)
+
+    if (receiptData.storeAddress) text(receiptData.storeAddress)
+    if (receiptData.storePhone) text(`Ph: ${receiptData.storePhone}`)
+    if (receiptData.storeAbn) text(`ABN: ${receiptData.storeAbn}`)
+    if (receiptData.header) { text(''); text(receiptData.header) }
+
+    text('')
+    cmd(ESCPOS.ALIGN_LEFT)
+    text(`Date:     ${receiptData.date}`)
+    text(`Register: ${receiptData.registerId || 'LANE01'}`)
+    text(`Txn:      ${receiptData.txnId?.slice(0, 8) || ''}`)
+    text(`Staff:    ${receiptData.staffName || ''}`)
+    text('-'.repeat(42))
+
+    for (const item of receiptData.items) {
+      const name = item.name.substring(0, 28)
+      const price = item.line_total.toFixed(2).padStart(10)
+      text(`${name}${' '.repeat(Math.max(0, 42 - name.length - price.length))}${price}`)
+      if (item.qty !== 1) text(`  ${item.qty} x $${item.unit_price.toFixed(2)}`)
+      if (item.discount > 0) text(`  Discount: -$${item.discount.toFixed(2)}`)
+    }
+
+    text('-'.repeat(42))
+    cmd(ESCPOS.ALIGN_RIGHT)
+    if (receiptData.discount > 0) text(`Discount: -$${receiptData.discount.toFixed(2)}`)
+    cmd(ESCPOS.BOLD_ON)
+    cmd(ESCPOS.DOUBLE_SIZE)
+    text(`TOTAL: $${receiptData.total.toFixed(2)}`)
+    cmd(ESCPOS.NORMAL_SIZE)
+    cmd(ESCPOS.BOLD_OFF)
+    text(`Total includes GST of $${receiptData.tax.toFixed(2)}`)
+    text('')
+
+    for (const pay of receiptData.payments) {
+      text(`${pay.method.toUpperCase()}: $${pay.amount.toFixed(2)}`)
+    }
+    if (receiptData.change > 0) text(`Change: $${receiptData.change.toFixed(2)}`)
+
+    text('')
+    cmd(ESCPOS.ALIGN_CENTER)
+    text(receiptData.footer || 'Thank you for shopping local!')
+    cmd(ESCPOS.FEED_3)
+    cmd(ESCPOS.PARTIAL_CUT)
+
+    return Buffer.concat(parts)
   }
 
-  function closePrinter({ device, iface }) {
-    try { iface.release(() => device.close()) } catch (_) {}
-  }
-
-  function textToBuffer(text) {
-    return Buffer.from(text + '\n', 'utf-8')
-  }
-
-  function line(char, len) {
-    return char.repeat(len)
-  }
+  // Auto-setup printer on app start
+  ensureReceiptPrinter()
 
   ipcMain.handle('hardware:printReceipt', async (_e, receiptData) => {
-    let printer = null
     try {
-      const device = findEpsonPrinter()
-      printer = await openPrinter(device)
-      const ep = printer.endpoint
-      const send = (buf) => sendToPrinter(ep, buf)
-
-      // Build receipt
-      await send(ESCPOS.INIT)
-      await send(ESCPOS.ALIGN_CENTER)
-      await send(ESCPOS.BOLD_ON)
-      await send(ESCPOS.DOUBLE_SIZE)
-      await send(textToBuffer(receiptData.storeName || 'Crisp on Creek'))
-      await send(ESCPOS.NORMAL_SIZE)
-      await send(ESCPOS.BOLD_OFF)
-
-      if (receiptData.storeAddress) await send(textToBuffer(receiptData.storeAddress))
-      if (receiptData.storePhone) await send(textToBuffer(`Ph: ${receiptData.storePhone}`))
-      if (receiptData.storeAbn) await send(textToBuffer(`ABN: ${receiptData.storeAbn}`))
-      if (receiptData.header) { await send(textToBuffer('')); await send(textToBuffer(receiptData.header)) }
-
-      await send(textToBuffer(''))
-      await send(ESCPOS.ALIGN_LEFT)
-      await send(textToBuffer(`Date:     ${receiptData.date}`))
-      await send(textToBuffer(`Register: ${receiptData.registerId || 'LANE01'}`))
-      await send(textToBuffer(`Txn:      ${receiptData.txnId?.slice(0, 8) || ''}`))
-      await send(textToBuffer(`Staff:    ${receiptData.staffName || ''}`))
-      await send(textToBuffer(line('-', 42)))
-
-      for (const item of receiptData.items) {
-        const name = item.name.substring(0, 28)
-        const price = item.line_total.toFixed(2).padStart(10)
-        await send(textToBuffer(`${name}${' '.repeat(Math.max(0, 42 - name.length - price.length))}${price}`))
-        if (item.qty !== 1) await send(textToBuffer(`  ${item.qty} x $${item.unit_price.toFixed(2)}`))
-        if (item.discount > 0) await send(textToBuffer(`  Discount: -$${item.discount.toFixed(2)}`))
-      }
-
-      await send(textToBuffer(line('-', 42)))
-      await send(ESCPOS.ALIGN_RIGHT)
-      if (receiptData.discount > 0) await send(textToBuffer(`Discount: -$${receiptData.discount.toFixed(2)}`))
-      await send(ESCPOS.BOLD_ON)
-      await send(ESCPOS.DOUBLE_SIZE)
-      await send(textToBuffer(`TOTAL: $${receiptData.total.toFixed(2)}`))
-      await send(ESCPOS.NORMAL_SIZE)
-      await send(ESCPOS.BOLD_OFF)
-      await send(textToBuffer(`Total includes GST of $${receiptData.tax.toFixed(2)}`))
-      await send(textToBuffer(''))
-
-      for (const pay of receiptData.payments) {
-        await send(textToBuffer(`${pay.method.toUpperCase()}: $${pay.amount.toFixed(2)}`))
-      }
-      if (receiptData.change > 0) await send(textToBuffer(`Change: $${receiptData.change.toFixed(2)}`))
-
-      await send(textToBuffer(''))
-      await send(ESCPOS.ALIGN_CENTER)
-      await send(textToBuffer(receiptData.footer || 'Thank you for shopping local!'))
-      await send(ESCPOS.FEED_3)
-      await send(ESCPOS.PARTIAL_CUT)
-
-      closePrinter(printer)
+      const buf = buildReceiptBuffer(receiptData)
+      const ok = sendRawToPrinter(buf)
+      if (!ok) return { error: 'Spooler returned FAIL — check printer is online' }
       return true
     } catch (err) {
-      if (printer) closePrinter(printer)
       console.log('Printer error:', err.message)
       return { error: err.message }
     }
   })
 
   ipcMain.handle('hardware:openDrawer', async () => {
-    let printer = null
     try {
-      const device = findEpsonPrinter()
-      printer = await openPrinter(device)
-      await sendToPrinter(printer.endpoint, ESCPOS.INIT)
-      await sendToPrinter(printer.endpoint, ESCPOS.DRAWER_KICK)
-      closePrinter(printer)
+      const buf = Buffer.concat([ESCPOS.INIT, ESCPOS.DRAWER_KICK])
+      const ok = sendRawToPrinter(buf)
+      if (!ok) return { error: 'Drawer kick failed — check printer is online' }
       return true
     } catch (err) {
-      if (printer) closePrinter(printer)
       console.log('Drawer error:', err.message)
       return { error: err.message }
     }
@@ -896,7 +940,6 @@ function setupIPC() {
   // -- Device Probing -------------------------------------------------------
 
   ipcMain.handle('hardware:probe', async () => {
-    const { execSync } = require('child_process')
     const result = {
       usbDevices: [],
       printer: { found: false, name: '', error: '' },
@@ -905,62 +948,31 @@ function setupIPC() {
       scale: { found: false, name: '' }
     }
 
-    // Known vendor IDs
     const PRINTER_VIDS = [0x04b8, 0x0519, 0x0416, 0x0dd4, 0x20d1, 0x0fe6, 0x1fc9, 0x0483]
     const SCALE_VIDS = [0x0b67, 0x0922, 0x1446, 0x0eb8]
     const SCANNER_VIDS = [0x05e0, 0x05f9, 0x0c2e, 0x1eab, 0x2dd6, 0x1a86]
 
-    // Try native usb module first
-    let usbWorked = false
+    // Use PowerShell to detect all USB/HID/Printer devices
     try {
-      const usb = require('usb')
-      const devices = usb.getDeviceList()
-      usbWorked = true
-
-      result.usbDevices = devices.map(d => {
-        try {
-          const desc = d.deviceDescriptor
-          return {
-            vendorId: desc.idVendor,
-            productId: desc.idProduct,
-            manufacturer: '',
-            product: '',
-            deviceClass: desc.bDeviceClass
-          }
-        } catch (_) {
-          return {
-            vendorId: d.deviceDescriptor?.idVendor || 0,
-            productId: d.deviceDescriptor?.idProduct || 0,
-            manufacturer: '',
-            product: '',
-            deviceClass: d.deviceDescriptor?.bDeviceClass || 0
-          }
-        }
-      })
-    } catch (e1) {
-      // usb module not available — fall back to PowerShell/system detection
-      try {
-        const psCmd = `powershell -NoProfile -Command "Get-PnpDevice -Class USB,Printer,HIDClass -Status OK -ErrorAction SilentlyContinue | Select-Object FriendlyName,InstanceId,Class | ConvertTo-Json -Compress"`
-        const raw = execSync(psCmd, { timeout: 10000, encoding: 'utf-8' })
-        const devices = JSON.parse(raw)
-        const devList = Array.isArray(devices) ? devices : [devices]
-        for (const d of devList) {
-          const vid = (d.InstanceId?.match(/VID_([0-9A-F]{4})/i) || [])[1]
-          const pid = (d.InstanceId?.match(/PID_([0-9A-F]{4})/i) || [])[1]
-          result.usbDevices.push({
-            vendorId: vid ? parseInt(vid, 16) : 0,
-            productId: pid ? parseInt(pid, 16) : 0,
-            manufacturer: '',
-            product: d.FriendlyName || '',
-            deviceClass: d.Class || ''
-          })
-        }
-      } catch (e2) {
-        result.printer.error = `Device detection failed: ${e1.message}; PowerShell fallback: ${e2.message}`
+      const psCmd = `powershell -NoProfile -Command "Get-PnpDevice -Status OK -ErrorAction SilentlyContinue | Where-Object { $_.Class -in @('USB','Printer','HIDClass','Ports','PrintQueue') } | Select-Object FriendlyName,InstanceId,Class | ConvertTo-Json -Compress"`
+      const raw = hwExec(psCmd, { timeout: 15000, encoding: 'utf-8' })
+      const devices = JSON.parse(raw)
+      const devList = Array.isArray(devices) ? devices : [devices]
+      for (const d of devList) {
+        const vid = (d.InstanceId?.match(/VID_([0-9A-F]{4})/i) || [])[1]
+        const pid = (d.InstanceId?.match(/PID_([0-9A-F]{4})/i) || [])[1]
+        result.usbDevices.push({
+          vendorId: vid ? parseInt(vid, 16) : 0,
+          productId: pid ? parseInt(pid, 16) : 0,
+          manufacturer: '',
+          product: d.FriendlyName || '',
+          deviceClass: d.Class || ''
+        })
       }
+    } catch (e) {
+      result.printer.error = `Device detection failed: ${e.message}`
     }
 
-    // Match known vendor IDs
     for (const d of result.usbDevices) {
       if (PRINTER_VIDS.includes(d.vendorId)) {
         result.printer.found = true
@@ -975,51 +987,31 @@ function setupIPC() {
         result.scanner.found = true
         result.scanner.name = d.product || `VID:0x${d.vendorId.toString(16)} PID:0x${d.productId.toString(16)}`
       }
-      // Also check by device name/class for printers not in vendor list
       const name = (d.product || '').toLowerCase()
       if (!result.printer.found && (name.includes('printer') || name.includes('receipt') || name.includes('pos') || name.includes('thermal') || d.deviceClass === 'Printer')) {
         result.printer.found = true
         result.printer.name = d.product || 'Detected printer'
         result.drawer.found = true
       }
-      if (!result.scanner.found && (name.includes('scanner') || name.includes('barcode') || (d.deviceClass === 'HIDClass' && (name.includes('symbol') || name.includes('honeywell') || name.includes('zebra'))))) {
-        result.scanner.found = true
-        result.scanner.name = d.product || 'Detected scanner'
-      }
     }
 
-    // Try direct USB detection for Epson if not found by vendor list
+    // Check if receipt printer queue exists
     if (!result.printer.found) {
       try {
-        const usb = require('usb')
-        const dev = usb.findByIds(EPSON_VID, EPSON_PID)
-        if (dev) {
+        const check = hwExec(`powershell -NoProfile -Command "Get-Printer -Name '${RECEIPT_PRINTER_NAME}' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name"`, { timeout: 10000, encoding: 'utf-8' })
+        if (check.trim()) {
           result.printer.found = true
-          result.printer.name = `Epson (VID:0x${EPSON_VID.toString(16)} PID:0x${EPSON_PID.toString(16)})`
+          result.printer.name = 'Epson TM-T82II (USB003)'
           result.drawer.found = true
         }
       } catch (_) {}
     }
 
-    // Probe serial ports for scale
-    try {
-      const { SerialPort } = require('serialport')
-      const ports = await SerialPort.list()
-      result.usbDevices.push(...ports.map(p => ({
-        vendorId: parseInt(p.vendorId, 16) || 0,
-        productId: parseInt(p.productId, 16) || 0,
-        manufacturer: p.manufacturer || 'Serial',
-        product: p.path,
-        deviceClass: 'Serial'
-      })))
-      for (const p of ports) {
-        const mfr = (p.manufacturer || '').toLowerCase()
-        if (mfr.includes('cas') || mfr.includes('mettler') || mfr.includes('ohaus') || mfr.includes('scale')) {
-          result.scale.found = true
-          result.scale.name = `${p.manufacturer} at ${p.path}`
-        }
-      }
-    } catch (_) {}
+    // Scanner in HID mode is always "found" via keyboard — mark it
+    if (!result.scanner.found) {
+      result.scanner.found = true
+      result.scanner.name = 'HID Keyboard Mode (auto-types into barcode field)'
+    }
 
     return result
   })
