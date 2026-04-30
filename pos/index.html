@@ -622,7 +622,7 @@ $('#pinPad').addEventListener('click', async e => {
 // ═══ Dynamic POS Keyboard Grid ═════════════════════════════════════
 const FUNC_TYPES = new Set(['void','return','hold','nosale','supervisor','lock','reprint','pricecheck','errcorrect','recall','pctdiscount','pctone','movedrawer','ubereats','viewor'])
 const NUMPAD_TYPES = new Set(['digit','clear','qtyx','codeenter'])
-const DEPT_TYPES = new Set(['section','open_price','fixed_price','price_change'])
+const DEPT_TYPES = new Set(['section','open_price','fixed_price','price_change','product'])
 const NAV_TYPES = new Set(['nav','subtotal','page_link','back_home'])
 const PAY_TYPES = new Set(['pay_cash','pay_card','park'])
 let posCurrentPage = 1
@@ -768,6 +768,16 @@ $('#posGrid').addEventListener('click', async e => {
   if (DEPT_TYPES.has(type)) {
     if (type === 'section') await navigateToSection(btn.dataset.cat)
     else if (type === 'open_price') showOpenPriceModal(btn.dataset.label2 || btn.textContent.trim(), 0)
+    else if (type === 'product') {
+      const plu = btn.dataset.cat
+      if (plu) {
+        const prod = await window.pos.getProductByBarcode(plu)
+        if (prod) {
+          if (prod.unit === 'kg' || prod.unit === '100g') { pendingWeightProduct = prod; showWeightModal(prod) }
+          else { addToCart(prod) }
+        } else { showToast('Product not found: ' + plu, 'error') }
+      }
+    }
     else if (type === 'fixed_price') {
       const price = parseFloat(btn.dataset.price), label2 = btn.dataset.label2 || btn.textContent.trim()
       addToCart({ id: 'FIXED_' + Date.now(), name: label2, price, active_price: price, unit: 'each', tax_rate: 0.10, is_special: false })

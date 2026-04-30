@@ -292,12 +292,12 @@ INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_o
   ('np-enter', 'CODE ENTER', 'codeenter', '#000', '#eeeeee', 45, 'grid', 1, 5, 7, 1, 1, NULL);
 
 -- Row 6: Bottom navigation
-INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, category_filter, alpha_range) VALUES
-  ('btn-grocery',  'GROCERY',   'nav',      '#fff', '#484848', 50, 'grid', 1, 6, 0, 2, 1, '__all__',     NULL),
-  ('btn-nuts',     'NUTS',      'nav',      '#000', '#b0b0b0', 51, 'grid', 1, 6, 2, 1, 1, 'Nuts',       NULL),
-  ('btn-gas',      'GAS',       'nav',      '#000', '#b0b0b0', 52, 'grid', 1, 6, 3, 1, 1, 'Gas',        NULL),
-  ('btn-fruit-am', 'FRUIT A-M', 'nav',      '#000', '#c8a828', 53, 'grid', 1, 6, 4, 1, 1, 'Fruit',      'A-M'),
-  ('btn-fruit-nz', 'FRUIT N-Z', 'nav',      '#000', '#c8a828', 54, 'grid', 1, 6, 5, 1, 1, 'Fruit',      'N-Z'),
-  ('btn-veg-ag',   'VEG A-G',   'nav',      '#fff', '#409850', 55, 'grid', 1, 6, 6, 1, 1, 'Vegetables', 'A-G'),
-  ('btn-veg-hz',   'VEGE H-Z',  'nav',      '#fff', '#409850', 56, 'grid', 1, 6, 7, 1, 1, 'Vegetables', 'H-Z'),
-  ('btn-subtotal', 'SUB TOTAL', 'subtotal', '#fff', '#cc1818', 57, 'grid', 1, 6, 8, 2, 1, NULL,         NULL);
+INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, parent_id, category_filter, alpha_range) VALUES
+  ('btn-grocery',  'GROCERY',   'page_link','#fff', '#484848', 50, 'grid', 1, 6, 0, 2, 1, '6',  NULL, NULL),
+  ('btn-nuts',     'NUTS',      'nav',      '#000', '#b0b0b0', 51, 'grid', 1, 6, 2, 1, 1, NULL, 'Nuts', NULL),
+  ('btn-gas',      'GAS',       'nav',      '#000', '#b0b0b0', 52, 'grid', 1, 6, 3, 1, 1, NULL, 'Gas',  NULL),
+  ('btn-fruit-am', 'FRUIT A-M', 'page_link','#000', '#c8a828', 53, 'grid', 1, 6, 4, 1, 1, '2',  NULL, NULL),
+  ('btn-fruit-nz', 'FRUIT N-Z', 'page_link','#000', '#c8a828', 54, 'grid', 1, 6, 5, 1, 1, '3',  NULL, NULL),
+  ('btn-veg-ag',   'VEGE A-G',  'page_link','#fff', '#409850', 55, 'grid', 1, 6, 6, 1, 1, '4',  NULL, NULL),
+  ('btn-veg-hz',   'VEGE H-Z',  'page_link','#fff', '#409850', 56, 'grid', 1, 6, 7, 1, 1, '5',  NULL, NULL),
+  ('btn-subtotal', 'SUB TOTAL', 'subtotal', '#fff', '#cc1818', 57, 'grid', 1, 6, 8, 2, 1, NULL, NULL, NULL);
