@@ -777,74 +777,23 @@ function setupIPC() {
     }
   }
 
-  // Send raw bytes to the printer via Windows spooler (winspool.drv P/Invoke)
+  // Send raw bytes to the printer via Windows spooler (rawprint.ps1)
+  const RAWPRINT_SCRIPT = path.join(__dirname, 'rawprint.ps1')
+
   function sendRawToPrinter(data) {
     const tmpFile = path.join(os.tmpdir(), `crisp-receipt-${Date.now()}.bin`)
     fs.writeFileSync(tmpFile, data)
     try {
-      // Use PowerShell with .NET P/Invoke to send raw bytes via winspool
-      const psScript = `
-$PrinterName = '${RECEIPT_PRINTER_NAME}'
-$FilePath = '${tmpFile.replace(/\\/g, '\\\\')}'
-$bytes = [System.IO.File]::ReadAllBytes($FilePath)
-
-Add-Type -TypeDefinition @'
-using System;
-using System.Runtime.InteropServices;
-
-public class RawPrint {
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-    public struct DOCINFOW {
-        public string pDocName;
-        public string pOutputFile;
-        public string pDatatype;
-    }
-
-    [DllImport("winspool.Drv", CharSet = CharSet.Unicode, SetLastError = true)]
-    public static extern bool OpenPrinter(string szPrinter, out IntPtr hPrinter, IntPtr pd);
-
-    [DllImport("winspool.Drv", CharSet = CharSet.Unicode, SetLastError = true)]
-    public static extern bool StartDocPrinter(IntPtr hPrinter, int level, ref DOCINFOW di);
-
-    [DllImport("winspool.Drv", SetLastError = true)]
-    public static extern bool StartPagePrinter(IntPtr hPrinter);
-
-    [DllImport("winspool.Drv", SetLastError = true)]
-    public static extern bool WritePrinter(IntPtr hPrinter, IntPtr pBytes, int dwCount, out int dwWritten);
-
-    [DllImport("winspool.Drv", SetLastError = true)]
-    public static extern bool EndPagePrinter(IntPtr hPrinter);
-
-    [DllImport("winspool.Drv", SetLastError = true)]
-    public static extern bool EndDocPrinter(IntPtr hPrinter);
-
-    [DllImport("winspool.Drv", SetLastError = true)]
-    public static extern bool ClosePrinter(IntPtr hPrinter);
-
-    public static bool SendRaw(string printerName, byte[] data) {
-        IntPtr hPrinter;
-        if (!OpenPrinter(printerName, out hPrinter, IntPtr.Zero)) return false;
-        var di = new DOCINFOW { pDocName = "Receipt", pDatatype = "RAW" };
-        if (!StartDocPrinter(hPrinter, 1, ref di)) { ClosePrinter(hPrinter); return false; }
-        StartPagePrinter(hPrinter);
-        IntPtr pBuf = Marshal.AllocHGlobal(data.Length);
-        Marshal.Copy(data, 0, pBuf, data.Length);
-        int written;
-        WritePrinter(hPrinter, pBuf, data.Length, out written);
-        Marshal.FreeHGlobal(pBuf);
-        EndPagePrinter(hPrinter);
-        EndDocPrinter(hPrinter);
-        ClosePrinter(hPrinter);
-        return written == data.Length;
-    }
-}
-'@ -ErrorAction SilentlyContinue
-
-$ok = [RawPrint]::SendRaw($PrinterName, $bytes)
-if ($ok) { Write-Output "OK" } else { Write-Output "FAIL" }
-`
-      const result = hwExec(`powershell -NoProfile -Command "${psScript.replace(/"/g, '\\"')}"`, { timeout: 15000, encoding: 'utf-8' })
-      return result.trim().includes('OK')
+      const result = hwExec(
+        `powershell -ExecutionPolicy Bypass -NoProfile -File "${RAWPRINT_SCRIPT}" -PrinterName "${RECEIPT_PRINTER_NAME}" -FilePath "${tmpFile}"`,
+        { timeout: 15000, encoding: 'utf-8' }
+      )
+      const output = result.trim()
+      console.log('rawprint.ps1 output:', output)
+      if (output.startsWith('OK')) return { ok: true, detail: output }
+      return { ok: false, detail: output }
+    } catch (e) {
+      return { ok: false, detail: e.stderr || e.message }
     } finally {
       try { fs.unlinkSync(tmpFile) } catch (_) {}
     }
@@ -915,9 +864,10 @@ if ($ok) { Write-Output "OK" } else { Write-Output "FAIL" }
 
   ipcMain.handle('hardware:printReceipt', async (_e, receiptData) => {
     try {
+      ensureReceiptPrinter()
       const buf = buildReceiptBuffer(receiptData)
-      const ok = sendRawToPrinter(buf)
-      if (!ok) return { error: 'Spooler returned FAIL — check printer is online' }
+      const result = sendRawToPrinter(buf)
+      if (!result.ok) return { error: result.detail }
       return true
     } catch (err) {
       console.log('Printer error:', err.message)
@@ -927,9 +877,10 @@ if ($ok) { Write-Output "OK" } else { Write-Output "FAIL" }
 
   ipcMain.handle('hardware:openDrawer', async () => {
     try {
+      ensureReceiptPrinter()
       const buf = Buffer.concat([ESCPOS.INIT, ESCPOS.DRAWER_KICK])
-      const ok = sendRawToPrinter(buf)
-      if (!ok) return { error: 'Drawer kick failed — check printer is online' }
+      const result = sendRawToPrinter(buf)
+      if (!result.ok) return { error: result.detail }
       return true
     } catch (err) {
       console.log('Drawer error:', err.message)

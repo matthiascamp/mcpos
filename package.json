@@ -27,6 +27,7 @@
     "files": [
       "main.js",
       "preload.js",
+      "rawprint.ps1",
       "package.json",
       "pos/**",
       "db/**",
