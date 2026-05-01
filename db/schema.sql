@@ -159,7 +159,8 @@ INSERT OR IGNORE INTO settings (key, value) VALUES
   ('receipt_footer', 'Thank you for shopping local!\nOpen 6am - 7pm every day'),
   ('register_id', 'LANE01'),
   ('tax_name', 'GST'),
-  ('tax_rate', '0.10');
+  ('tax_rate', '0.10'),
+  ('layout_v3_shifted', '1');
 
 -- ─── Sample Categories & Products ─────────────────────────────────────────
 
@@ -258,44 +259,41 @@ INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_o
   ('fn-recall',     'Recall Sale',    'recall',      '#000', '#dddddd', 14, 'grid', 1, 1, 5, 1, 1, NULL),
   ('fn-ubereats',   'UBER EATS ADJ',  'ubereats',    '#000', '#dddddd', 15, 'grid', 1, 1, 6, 1, 1, NULL);
 
--- Row 2-5: Department buttons (cols 0-2) + Numpad (cols 3-9)
+-- Row 2-5: Department buttons (cols 3-5, cart occupies 0-2) + Numpad (cols 6-9)
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, category_filter) VALUES
-  ('btn-meat',    'MEAT',              'section',     0,    '#fff', '#d87868', 20, 'grid', 1, 2, 0, 1, 1, 'Meat'),
-  ('btn-coffee',  'COFFEE',            'section',     0,    '#000', '#78b8d0', 21, 'grid', 1, 2, 1, 1, 1, 'Coffee'),
-  ('btn-fv',      'FRUIT & VEG',       'open_price',  0,    '#fff', '#409850', 22, 'grid', 1, 2, 2, 1, 1, NULL),
-  ('btn-cheese',  'CHEESE',            'section',     0,    '#000', '#c8c4bc', 23, 'grid', 1, 3, 0, 1, 1, 'Cheese'),
-  ('btn-flowers', 'FLOWERS',           'section',     0,    '#fff', '#4880c0', 24, 'grid', 1, 3, 1, 1, 1, 'Flowers'),
-  ('btn-bread',   'BREAD & CROISSAN',  'section',     0,    '#000', '#98c030', 25, 'grid', 1, 4, 0, 1, 1, 'Bread & Croissants'),
-  ('btn-fvkg',    'FRUIT & VEG /KG',   'open_price',  0,    '#fff', '#4880c0', 26, 'grid', 1, 4, 1, 1, 1, NULL),
-  ('btn-bags',    'REUSABLE BAGS 15c', 'fixed_price', 0.15, '#fff', '#409850', 27, 'grid', 1, 5, 0, 1, 1, NULL),
-  ('btn-deli',    'DELI',              'section',     0,    '#fff', '#a868b8', 28, 'grid', 1, 5, 1, 1, 1, 'Deli');
+  ('btn-meat',    'MEAT',              'section',     0,    '#fff', '#d87868', 20, 'grid', 1, 2, 3, 1, 1, 'Meat'),
+  ('btn-coffee',  'COFFEE',            'section',     0,    '#000', '#78b8d0', 21, 'grid', 1, 2, 4, 1, 1, 'Coffee'),
+  ('btn-fv',      'FRUIT & VEG',       'open_price',  0,    '#fff', '#409850', 22, 'grid', 1, 2, 5, 1, 1, NULL),
+  ('btn-cheese',  'CHEESE',            'section',     0,    '#000', '#c8c4bc', 23, 'grid', 1, 3, 3, 1, 1, 'Cheese'),
+  ('btn-flowers', 'FLOWERS',           'section',     0,    '#fff', '#4880c0', 24, 'grid', 1, 3, 4, 1, 1, 'Flowers'),
+  ('btn-fvsect',  'FRUIT & VEG',       'section',     0,    '#fff', '#409850', 29, 'grid', 1, 3, 5, 1, 1, 'Fruit'),
+  ('btn-bread',   'BREAD &\nCROISSAN', 'section',     0,    '#000', '#98c030', 25, 'grid', 1, 4, 4, 1, 1, 'Bread & Croissants'),
+  ('btn-fvkg',    'FRUIT & VEG\n/KG',  'open_price',  0,    '#fff', '#2d6a4f', 26, 'grid', 1, 4, 5, 1, 1, NULL),
+  ('btn-bags',    'BAG',               'fixed_price', 0.15, '#fff', '#222222', 27, 'grid', 1, 5, 3, 1, 1, NULL),
+  ('btn-gas',     'GAS',               'section',     0,    '#000', '#b0b0b0', 28, 'grid', 1, 5, 4, 1, 1, 'Gas'),
+  ('btn-deli',    'DELI',              'section',     0,    '#fff', '#c8a828', 30, 'grid', 1, 5, 5, 1, 1, 'Deli');
 
--- Numpad display (row 2-5, col 3)
-INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span) VALUES
-  ('np-display', '',           'num_display', '#00cc00', '#111111', 29, 'grid', 1, 2, 3, 1, 4);
-
--- Numpad buttons (rows 2-5, cols 4-8)
+-- Numpad buttons (rows 2-5, cols 6-9)
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, category_filter) VALUES
-  ('np-7',     '7',          'digit',     '#000', '#ffffff', 30, 'grid', 1, 2, 4, 1, 1, '7'),
-  ('np-8',     '8',          'digit',     '#000', '#ffffff', 31, 'grid', 1, 2, 5, 1, 1, '8'),
-  ('np-9',     '9',          'digit',     '#000', '#ffffff', 32, 'grid', 1, 2, 6, 1, 1, '9'),
-  ('np-qtyx',  'QTY X',      'qtyx',      '#fff', '#e07020', 33, 'grid', 1, 2, 7, 1, 1, NULL),
-  ('np-4',     '4',          'digit',     '#000', '#ffffff', 34, 'grid', 1, 3, 4, 1, 1, '4'),
-  ('np-5',     '5',          'digit',     '#000', '#ffffff', 35, 'grid', 1, 3, 5, 1, 1, '5'),
-  ('np-6',     '6',          'digit',     '#000', '#ffffff', 36, 'grid', 1, 3, 6, 1, 1, '6'),
-  ('np-clear', 'CLEAR',      'clear',     '#000', '#eeeeee', 37, 'grid', 1, 3, 7, 1, 1, NULL),
-  ('np-1',     '1',          'digit',     '#000', '#ffffff', 38, 'grid', 1, 4, 4, 1, 1, '1'),
-  ('np-2',     '2',          'digit',     '#000', '#ffffff', 39, 'grid', 1, 4, 5, 1, 1, '2'),
-  ('np-3',     '3',          'digit',     '#000', '#ffffff', 40, 'grid', 1, 4, 6, 1, 1, '3'),
-  ('np-0',     '0',          'digit',     '#000', '#ffffff', 42, 'grid', 1, 5, 4, 1, 1, '0'),
-  ('np-00',    '00',         'digit',     '#000', '#ffffff', 43, 'grid', 1, 5, 5, 1, 1, '00'),
-  ('np-enter', 'CODE ENTER', 'codeenter', '#000', '#eeeeee', 45, 'grid', 1, 5, 7, 1, 1, NULL);
+  ('np-7',     '7',          'digit',     '#000', '#ffffff', 31, 'grid', 1, 2, 6, 1, 1, '7'),
+  ('np-8',     '8',          'digit',     '#000', '#ffffff', 32, 'grid', 1, 2, 7, 1, 1, '8'),
+  ('np-9',     '9',          'digit',     '#000', '#ffffff', 33, 'grid', 1, 2, 8, 1, 1, '9'),
+  ('np-qtyx',  'QTY X',      'qtyx',      '#fff', '#e07020', 34, 'grid', 1, 2, 9, 1, 1, NULL),
+  ('np-4',     '4',          'digit',     '#000', '#ffffff', 35, 'grid', 1, 3, 6, 1, 1, '4'),
+  ('np-5',     '5',          'digit',     '#000', '#ffffff', 36, 'grid', 1, 3, 7, 1, 1, '5'),
+  ('np-6',     '6',          'digit',     '#000', '#ffffff', 37, 'grid', 1, 3, 8, 1, 1, '6'),
+  ('np-clear', 'CLEAR',      'clear',     '#000', '#eeeeee', 38, 'grid', 1, 3, 9, 1, 1, NULL),
+  ('np-1',     '1',          'digit',     '#000', '#ffffff', 39, 'grid', 1, 4, 6, 1, 1, '1'),
+  ('np-2',     '2',          'digit',     '#000', '#ffffff', 40, 'grid', 1, 4, 7, 1, 1, '2'),
+  ('np-3',     '3',          'digit',     '#000', '#ffffff', 41, 'grid', 1, 4, 8, 1, 1, '3'),
+  ('np-0',     '0',          'digit',     '#000', '#ffffff', 42, 'grid', 1, 5, 6, 1, 1, '0'),
+  ('np-00',    '00',         'digit',     '#000', '#ffffff', 43, 'grid', 1, 5, 7, 1, 1, '00'),
+  ('np-enter', 'CODE\nENTER','codeenter', '#000', '#eeeeee', 45, 'grid', 1, 5, 9, 1, 1, NULL);
 
 -- Row 6: Bottom navigation
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, parent_id, category_filter, alpha_range) VALUES
-  ('btn-grocery',  'GROCERY',   'page_link','#fff', '#484848', 50, 'grid', 1, 6, 0, 2, 1, '6',  NULL, NULL),
-  ('btn-nuts',     'NUTS',      'nav',      '#000', '#b0b0b0', 51, 'grid', 1, 6, 2, 1, 1, NULL, 'Nuts', NULL),
-  ('btn-gas',      'GAS',       'nav',      '#000', '#b0b0b0', 52, 'grid', 1, 6, 3, 1, 1, NULL, 'Gas',  NULL),
+  ('btn-grocery',  'GROCERY',   'page_link','#fff', '#6699cc', 50, 'grid', 1, 6, 0, 2, 1, '6',  NULL, NULL),
+  ('btn-nuts',     'NUTS',      'nav',      '#000', '#c8b880', 51, 'grid', 1, 6, 2, 1, 1, NULL, 'Nuts', NULL),
   ('btn-fruit-am', 'FRUIT A-M', 'page_link','#000', '#c8a828', 53, 'grid', 1, 6, 4, 1, 1, '2',  NULL, NULL),
   ('btn-fruit-nz', 'FRUIT N-Z', 'page_link','#000', '#c8a828', 54, 'grid', 1, 6, 5, 1, 1, '3',  NULL, NULL),
   ('btn-veg-ag',   'VEGE A-G',  'page_link','#fff', '#409850', 55, 'grid', 1, 6, 6, 1, 1, '4',  NULL, NULL),

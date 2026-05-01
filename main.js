@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain, globalShortcut } = require('electron')
 const path = require('path')
 const fs = require('fs')
 const { v4: uuid } = require('uuid')
+const lanSync = require('./lan-sync')
 
 let mainWindow
 let db
@@ -39,6 +40,39 @@ async function initDatabase() {
   for (const m of migrations) {
     try { db.run(m) } catch (_) {}
   }
+
+  // Layout v3: Shift Page 1 buttons to make room for in-grid cart at cols 0-2, rows 2-5
+  try {
+    const shifted = db.prepare("SELECT value FROM settings WHERE key = 'layout_v3_shifted'")
+    shifted.bind([])
+    const already = shifted.step() ? shifted.getAsObject() : null
+    shifted.free()
+    if (!already) {
+      // Shift department buttons from cols 0-2 to cols 3-5
+      db.run("UPDATE keyboard_buttons SET grid_col = grid_col + 3 WHERE page = 1 AND grid_row >= 2 AND grid_row <= 5 AND grid_col BETWEEN 0 AND 2 AND id NOT LIKE 'np-%'")
+      // Shift numpad buttons from cols 4-7 to cols 6-9
+      db.run("UPDATE keyboard_buttons SET grid_col = grid_col + 2 WHERE page = 1 AND grid_row >= 2 AND grid_row <= 5 AND grid_col BETWEEN 4 AND 7")
+      // Deactivate in-grid numpad display (status bar shows buffer instead)
+      db.run("UPDATE keyboard_buttons SET active = 0 WHERE id = 'np-display'")
+      // Add missing buttons for PT layout
+      db.run("INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, category_filter) VALUES ('btn-fvsect', 'FRUIT & VEG', 'section', '#fff', '#409850', 29, 'grid', 1, 3, 5, 1, 1, 'Fruit')")
+      // Move GAS from bottom nav (row 6) to department area (row 5)
+      db.run("UPDATE keyboard_buttons SET grid_row = 5, grid_col = 4, type = 'section' WHERE id = 'btn-gas' AND grid_row = 6")
+      // Update labels to match PT
+      db.run("UPDATE keyboard_buttons SET label = 'BAG' WHERE id = 'btn-bags'")
+      db.run("UPDATE keyboard_buttons SET label = 'BREAD &\\nCROISSAN' WHERE id = 'btn-bread'")
+      db.run("UPDATE keyboard_buttons SET label = 'FRUIT & VEG\\n/KG' WHERE id = 'btn-fvkg'")
+      db.run("UPDATE keyboard_buttons SET label = 'CODE\\nENTER' WHERE id = 'np-enter'")
+      db.run("UPDATE keyboard_buttons SET bg_color = '#2d6a4f' WHERE id = 'btn-fvkg'")
+      db.run("UPDATE keyboard_buttons SET bg_color = '#222222' WHERE id = 'btn-bags'")
+      db.run("UPDATE keyboard_buttons SET bg_color = '#c8a828' WHERE id = 'btn-deli'")
+      db.run("UPDATE keyboard_buttons SET bg_color = '#6699cc' WHERE id = 'btn-grocery'")
+      db.run("UPDATE keyboard_buttons SET bg_color = '#c8b880' WHERE id = 'btn-nuts'")
+      // Mark migration as done
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('layout_v3_shifted', '1')")
+      console.log('Layout v3: Shifted buttons for in-grid cart')
+    }
+  } catch (e) { console.error('Layout v3 migration error:', e.message) }
 
   saveDB()
 }
@@ -124,6 +158,21 @@ app.whenReady().then(async () => {
   await initDatabase()
   createWindow()
   setupIPC()
+
+  // Start LAN sync if configured
+  try {
+    const lanMode = dbGet("SELECT value FROM settings WHERE key = 'lan_mode'")?.value
+    const lanPort = parseInt(dbGet("SELECT value FROM settings WHERE key = 'lan_port'")?.value || '5555')
+    if (lanMode === 'server') {
+      lanSync.startServer(lanPort, { dbAll, dbGet, dbRun, saveDB, uuid })
+    } else if (lanMode === 'client') {
+      const serverIp = dbGet("SELECT value FROM settings WHERE key = 'lan_server_ip'")?.value
+      const secret = dbGet("SELECT value FROM settings WHERE key = 'lan_secret'")?.value
+      if (serverIp) {
+        lanSync.startClient(serverIp, lanPort, secret, { dbAll, dbGet, dbRun, saveDB, uuid })
+      }
+    }
+  } catch (e) { console.error('LAN sync startup error:', e.message) }
 })
 
 app.on('window-all-closed', () => {
@@ -965,6 +1014,28 @@ function setupIPC() {
     }
 
     return result
+  })
+
+  // ── LAN Sync ────────────────────────────────────────────────────────────────
+
+  ipcMain.handle('lan:getStatus', () => lanSync.getStatus())
+
+  ipcMain.handle('lan:testConnection', (_e, ip, port) => lanSync.testConnection(ip, port))
+
+  ipcMain.handle('lan:restart', () => {
+    lanSync.stopAll()
+    const lanMode = dbGet("SELECT value FROM settings WHERE key = 'lan_mode'")?.value
+    const lanPort = parseInt(dbGet("SELECT value FROM settings WHERE key = 'lan_port'")?.value || '5555')
+    if (lanMode === 'server') {
+      lanSync.startServer(lanPort, { dbAll, dbGet, dbRun, saveDB, uuid })
+    } else if (lanMode === 'client') {
+      const serverIp = dbGet("SELECT value FROM settings WHERE key = 'lan_server_ip'")?.value
+      const secret = dbGet("SELECT value FROM settings WHERE key = 'lan_secret'")?.value
+      if (serverIp) {
+        lanSync.startClient(serverIp, lanPort, secret, { dbAll, dbGet, dbRun, saveDB, uuid })
+      }
+    }
+    return lanSync.getStatus()
   })
 }
 

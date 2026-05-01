@@ -87,4 +87,9 @@ contextBridge.exposeInMainWorld('pos', {
   // Window
   exitFullscreen:     ()      => ipcRenderer.invoke('window:exitFullscreen'),
   quit:               ()      => ipcRenderer.invoke('window:quit'),
+
+  // LAN Sync
+  getLanStatus:       ()           => ipcRenderer.invoke('lan:getStatus'),
+  testLanConnection:  (ip, port)   => ipcRenderer.invoke('lan:testConnection', ip, port),
+  restartLan:         ()           => ipcRenderer.invoke('lan:restart'),
 })

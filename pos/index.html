@@ -88,6 +88,12 @@ body{font-family:'Inter',system-ui,sans-serif;background:#d8d4cc;color:#000;disp
 .pos-grid-btn.num-display-cell.qty-mode{color:#ff8800}
 .pos-grid-btn.empty-cell{background:transparent;border-color:transparent;cursor:default}
 
+/* Cart embedded in grid (PT white receipt area = cols 0-2, rows 2-5) */
+.cart-panel.cart-in-grid{position:static;width:auto;grid-column:1/span 3;grid-row:3/span 4;border-right:2px solid #aaa;z-index:2}
+
+/* Product pages: full width grid, no cart */
+.pos-grid.product-page{gap:4px;padding:4px}
+
 /* Page tabs at bottom of keyboard */
 .pos-page-tabs{display:flex;gap:3px;flex-shrink:0;padding:2px 0}
 .pos-page-tab{flex:1;padding:6px;border:1px solid #888;border-radius:2px;font-weight:700;font-size:12px;cursor:pointer;text-align:center;background:#ddd;color:#333;font-family:inherit}
@@ -289,6 +295,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#d8d4cc;color:#000;disp
       <span><span class="health-dot" id="dotServer"></span>Server</span>
       <span><span class="health-dot" id="dotDrawer"></span>Drawer</span>
     </div>
+    <span id="numBufDisplay" style="display:none;background:#111;color:#0c0;font-family:'Courier New',monospace;font-size:16px;font-weight:700;padding:2px 10px;border-radius:3px;margin-right:8px;min-width:50px;text-align:right"></span>
     <span class="subtotal-label">Sub Total</span>
     <span class="subtotal-amount" id="topTotal">$0.00</span>
   </div>
@@ -651,10 +658,25 @@ let posGridCols = 10
 let posGridRows = 7
 
 function updateNumDisplay () {
+  // Status bar numpad display
+  const nb = $('#numBufDisplay')
+  if (nb) {
+    if (qtyMultiplier > 1) {
+      nb.textContent = `QTY ×${qtyMultiplier}`
+      nb.style.display = ''; nb.style.color = '#ff8800'
+    } else if (numBuf) {
+      nb.textContent = numBuf
+      nb.style.display = ''; nb.style.color = '#00cc00'
+    } else {
+      nb.style.display = 'none'
+    }
+  }
+  // Legacy in-grid display
   const d = document.querySelector('.num-display-cell')
-  if (!d) return
-  if (qtyMultiplier > 1) { d.textContent = `QTY ×${qtyMultiplier}`; d.classList.add('qty-mode') }
-  else { d.textContent = numBuf || ''; d.classList.remove('qty-mode') }
+  if (d) {
+    if (qtyMultiplier > 1) { d.textContent = `QTY ×${qtyMultiplier}`; d.classList.add('qty-mode') }
+    else { d.textContent = numBuf || ''; d.classList.remove('qty-mode') }
+  }
 }
 
 async function renderPosKeyboard () {
@@ -684,6 +706,14 @@ async function renderPosKeyboard () {
 
 function renderPosGrid () {
   const grid = $('#posGrid')
+  const cartPanel = $('.cart-panel')
+
+  // Move cart out of grid before rebuilding (preserves DOM node + event listeners)
+  if (cartPanel && cartPanel.parentElement === grid) {
+    $('.main-row').prepend(cartPanel)
+    cartPanel.classList.remove('cart-in-grid')
+  }
+
   const pageButtons = posAllButtons.filter(b => (b.page || 1) === posCurrentPage && b.active)
 
   // Use the same fixed grid dimensions as admin editor
@@ -716,6 +746,19 @@ function renderPosGrid () {
     }
   }
   grid.innerHTML = html
+
+  // Embed cart panel in grid on Page 1 (PT white area = cols 0-2, rows 2-5)
+  if (posCurrentPage === 1 && cartPanel) {
+    cartPanel.classList.add('cart-in-grid')
+    cartPanel.style.display = ''
+    grid.appendChild(cartPanel)
+  }
+
+  // Product pages (2+): hide cart, show full grid
+  if (posCurrentPage > 1 && cartPanel) {
+    cartPanel.style.display = 'none'
+  }
+
   updateNumDisplay()
 }
 
@@ -1966,6 +2009,18 @@ async function init () {
       await window.pos.upsertStaff({ name: 'Cashier', pin: '0000', role: 'cashier' })
     }
   } catch (e2) { console.error('Init error:', e2) }
+
+  // LAN server health dot
+  setInterval(async () => {
+    try {
+      const status = await window.pos.getLanStatus()
+      const dot = document.getElementById('dotServer')
+      if (!dot) return
+      if (!status || status.mode === 'off') dot.style.background = '#888'
+      else if (status.connected) dot.style.background = '#4a4'
+      else dot.style.background = '#a44'
+    } catch (_) {}
+  }, 10000)
 }
 init()
 </script>

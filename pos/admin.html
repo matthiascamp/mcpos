@@ -1020,6 +1020,54 @@
         </div>
         <button class="btn btn-blue" id="saveSupaBtn">Save & Connect</button>
       </div>
+
+      <div class="section">
+        <h2>LAN Multi-Register</h2>
+        <p style="color:var(--text-dim);margin-bottom:12px;font-size:14px;">
+          Share this register's database with other POS terminals on the local network.
+        </p>
+        <div class="form-row" style="gap:16px;margin-bottom:12px;">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+            <input type="radio" name="lanMode" value="off" checked> Off
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+            <input type="radio" name="lanMode" value="server"> Server (this register hosts)
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+            <input type="radio" name="lanMode" value="client"> Client (connect to server)
+          </label>
+        </div>
+
+        <div id="lanServerInfo" style="display:none;">
+          <div class="form-row">
+            <div class="form-field"><label>This Machine's IP</label><input type="text" id="lanLocalIp" readonly style="opacity:.7;"></div>
+            <div class="form-field"><label>Port</label><input type="number" id="lanPort" value="5555"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label>Secret Key <span style="color:var(--text-dim);font-size:12px;">(give this to client registers)</span></label>
+              <input type="text" id="lanSecret" readonly style="opacity:.7;font-family:monospace;">
+            </div>
+          </div>
+          <div id="lanServerStatus" style="margin:8px 0;font-size:13px;color:var(--text-dim);"></div>
+          <button class="btn btn-green" id="lanStartServerBtn">Start Server</button>
+        </div>
+
+        <div id="lanClientInfo" style="display:none;">
+          <div class="form-row">
+            <div class="form-field"><label>Server IP Address</label><input type="text" id="lanServerIp" placeholder="192.168.1.100"></div>
+            <div class="form-field"><label>Port</label><input type="number" id="lanClientPort" value="5555"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-field"><label>Secret Key</label><input type="text" id="lanClientSecret" placeholder="Paste secret from server" style="font-family:monospace;"></div>
+          </div>
+          <div id="lanClientStatus" style="margin:8px 0;font-size:13px;color:var(--text-dim);"></div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-outline" id="lanTestBtn">Test Connection</button>
+            <button class="btn btn-green" id="lanConnectBtn">Save & Connect</button>
+          </div>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -2040,6 +2088,7 @@
       $('#setReceiptFooter').value = s.receipt_footer || ''
       $('#setSupaUrl').value = s.supabase_url || ''
       $('#setSupaKey').value = s.supabase_anon_key || ''
+      loadLanSettings()
     }
 
     $('#saveSettingsBtn').addEventListener('click', async () => {
@@ -2067,6 +2116,100 @@
       await window.pos.setSetting('supabase_url', url)
       await window.pos.setSetting('supabase_anon_key', key)
       showToast('Supabase credentials saved - restart app to connect', 'success')
+    })
+
+    // ── LAN Multi-Register ──────────────────────────────────────────
+
+    async function loadLanSettings () {
+      const s = await window.pos.getAllSettings()
+      const mode = s.lan_mode || 'off'
+
+      $$('input[name="lanMode"]').forEach(r => { r.checked = r.value === mode })
+      $('#lanPort').value = s.lan_port || '5555'
+      $('#lanClientPort').value = s.lan_port || '5555'
+      $('#lanServerIp').value = s.lan_server_ip || ''
+      $('#lanClientSecret').value = s.lan_secret || ''
+      $('#lanSecret').value = s.lan_secret || '(will be generated on start)'
+
+      updateLanPanel(mode)
+
+      // Show live status
+      const status = await window.pos.getLanStatus()
+      if (status.mode === 'server' && status.connected) {
+        $('#lanLocalIp').value = status.serverIp || ''
+        $('#lanSecret').value = status.secret || ''
+        const clients = status.clients?.length || 0
+        $('#lanServerStatus').innerHTML = `<span style="color:#4a4;">Server running</span> &mdash; ${clients} client(s) connected`
+      } else if (status.mode === 'client') {
+        $('#lanClientStatus').innerHTML = status.connected
+          ? `<span style="color:#4a4;">Connected</span> &mdash; last sync: ${status.lastPull ? new Date(status.lastPull).toLocaleTimeString('en-AU') : 'never'}`
+          : `<span style="color:#a44;">Disconnected</span>${status.error ? ' &mdash; ' + esc(status.error) : ''}`
+      }
+    }
+
+    function updateLanPanel (mode) {
+      $('#lanServerInfo').style.display = mode === 'server' ? '' : 'none'
+      $('#lanClientInfo').style.display = mode === 'client' ? '' : 'none'
+    }
+
+    $$('input[name="lanMode"]').forEach(r => {
+      r.addEventListener('change', () => updateLanPanel(r.value))
+    })
+
+    $('#lanStartServerBtn').addEventListener('click', async () => {
+      const port = $('#lanPort').value.trim() || '5555'
+      await window.pos.setSetting('lan_mode', 'server')
+      await window.pos.setSetting('lan_port', port)
+      const status = await window.pos.restartLan()
+      if (status.connected) {
+        $('#lanLocalIp').value = status.serverIp || ''
+        $('#lanSecret').value = status.secret || ''
+        await window.pos.setSetting('lan_secret', status.secret)
+        $('#lanServerStatus').innerHTML = '<span style="color:#4a4;">Server started</span>'
+        showToast('LAN server started', 'success')
+      } else {
+        $('#lanServerStatus').innerHTML = `<span style="color:#a44;">Failed: ${esc(status.error || 'unknown error')}</span>`
+        showToast('Failed to start server', 'error')
+      }
+    })
+
+    $('#lanTestBtn').addEventListener('click', async () => {
+      const ip = $('#lanServerIp').value.trim()
+      const port = $('#lanClientPort').value.trim() || '5555'
+      if (!ip) { showToast('Enter server IP', 'error'); return }
+      $('#lanClientStatus').innerHTML = '<span style="color:var(--text-dim);">Testing...</span>'
+      const result = await window.pos.testLanConnection(ip, parseInt(port))
+      if (result.ok) {
+        $('#lanClientStatus').innerHTML = `<span style="color:#4a4;">Server found at ${esc(ip)}:${esc(port)}</span>`
+        showToast('Connection successful', 'success')
+      } else {
+        $('#lanClientStatus').innerHTML = `<span style="color:#a44;">Failed: ${esc(result.error || 'unreachable')}</span>`
+        showToast('Connection failed', 'error')
+      }
+    })
+
+    $('#lanConnectBtn').addEventListener('click', async () => {
+      const ip = $('#lanServerIp').value.trim()
+      const port = $('#lanClientPort').value.trim() || '5555'
+      const secret = $('#lanClientSecret').value.trim()
+      if (!ip) { showToast('Enter server IP', 'error'); return }
+      if (!secret) { showToast('Enter secret key from server', 'error'); return }
+      await window.pos.setSetting('lan_mode', 'client')
+      await window.pos.setSetting('lan_server_ip', ip)
+      await window.pos.setSetting('lan_port', port)
+      await window.pos.setSetting('lan_secret', secret)
+      const status = await window.pos.restartLan()
+      // Give initial sync a moment
+      setTimeout(async () => {
+        const s = await window.pos.getLanStatus()
+        if (s.connected) {
+          $('#lanClientStatus').innerHTML = '<span style="color:#4a4;">Connected and synced</span>'
+          showToast('Connected to server — data synced', 'success')
+        } else {
+          $('#lanClientStatus').innerHTML = `<span style="color:#a44;">Syncing... ${esc(s.error || '')}</span>`
+          showToast('Connecting...', 'info')
+        }
+      }, 3000)
     })
 
     // ── Z Report ────────────────────────────────────────────────────
