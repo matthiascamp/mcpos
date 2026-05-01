@@ -74,6 +74,58 @@ async function initDatabase() {
     }
   } catch (e) { console.error('Layout v3 migration error:', e.message) }
 
+  // Nav button type fix + product images migration
+  try {
+    const navFixed = db.prepare("SELECT value FROM settings WHERE key = 'nav_buttons_fixed'")
+    navFixed.bind([])
+    const alreadyFixed = navFixed.step() ? navFixed.getAsObject() : null
+    navFixed.free()
+    if (!alreadyFixed) {
+      // Fix bottom nav buttons: ensure page_link with correct parent_id for keyboard pages
+      db.run("UPDATE keyboard_buttons SET type = 'page_link', parent_id = '6', category_filter = NULL, alpha_range = NULL WHERE id = 'btn-grocery'")
+      db.run("UPDATE keyboard_buttons SET type = 'page_link', parent_id = '2', category_filter = NULL, alpha_range = NULL WHERE id = 'btn-fruit-am'")
+      db.run("UPDATE keyboard_buttons SET type = 'page_link', parent_id = '3', category_filter = NULL, alpha_range = NULL WHERE id = 'btn-fruit-nz'")
+      db.run("UPDATE keyboard_buttons SET type = 'page_link', parent_id = '4', category_filter = NULL, alpha_range = NULL WHERE id = 'btn-veg-ag'")
+      db.run("UPDATE keyboard_buttons SET type = 'page_link', parent_id = '5', category_filter = NULL, alpha_range = NULL WHERE id = 'btn-veg-hz'")
+      // Add image URLs to fruit & veg products
+      const fruitImages = {
+        'Apple Royal Gala': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Royal_Gala_apple.jpg/220px-Royal_Gala_apple.jpg',
+        'Apple Granny Smith': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/GrannySmith.jpg/220px-GrannySmith.jpg',
+        'Banana': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Banana-Single.jpg/220px-Banana-Single.jpg',
+        'Orange Navel': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Orange-Whole-%26-Split.jpg/220px-Orange-Whole-%26-Split.jpg',
+        'Lemon': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Lemon.jpg/220px-Lemon.jpg',
+        'Lime': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Lime_Green.jpg/220px-Lime_Green.jpg',
+        'Strawberry Punnet': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/PerfectStrawberry.jpg/220px-PerfectStrawberry.jpg',
+        'Blueberry Punnet': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Blueberries.jpg/220px-Blueberries.jpg',
+        'Avocado Hass': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Hass.jpg/220px-Hass.jpg',
+        'Mango': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Hapus_Mango.jpg/220px-Hapus_Mango.jpg',
+        'Watermelon': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Taiwan_2009_Tainan_City_Watermelon_Stall_FRD_7962.jpg/220px-Taiwan_2009_Tainan_City_Watermelon_Stall_FRD_7962.jpg',
+        'Pineapple': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Pineapple_and_cross_section.jpg/220px-Pineapple_and_cross_section.jpg',
+        'Tomato': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Tomato_je.jpg/220px-Tomato_je.jpg',
+        'Cucumber': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/ARS_cucumber.jpg/220px-ARS_cucumber.jpg',
+        'Broccoli': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Broccoli_and_cross_section_edit.jpg/220px-Broccoli_and_cross_section_edit.jpg',
+        'Carrot': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Vegetable-Carrot-Bundle-Small.jpg/220px-Vegetable-Carrot-Bundle-Small.jpg',
+        'Capsicum Red': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Red_bell_pepper.jpg/220px-Red_bell_pepper.jpg',
+        'Lettuce Iceberg': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Iceberg_lettuce_in_SB.jpg/220px-Iceberg_lettuce_in_SB.jpg',
+        'Potato': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Patates.jpg/220px-Patates.jpg',
+        'Onion Brown': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Onion_on_White.JPG/220px-Onion_on_White.JPG',
+        'Mushroom Cup': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Champignons_Agaricus.jpg/220px-Champignons_Agaricus.jpg',
+        'Sweet Potato': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Ipomoea_batatas_006.JPG/220px-Ipomoea_batatas_006.JPG',
+        'Zucchini': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/CSA-Zucchini.jpg/220px-CSA-Zucchini.jpg',
+        'Corn Cob': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Ab_food_06.jpg/220px-Ab_food_06.jpg',
+        'Pumpkin': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/FrightNight2005pumpkins.jpg/220px-FrightNight2005pumpkins.jpg',
+        'Grapes Green': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Table_grapes_on_vine.jpg/220px-Table_grapes_on_vine.jpg',
+        'Pear Packham': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/More_pridge_pears.jpg/220px-More_pridge_pears.jpg',
+        'Kiwi Fruit': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Kiwi_aka.jpg/220px-Kiwi_aka.jpg',
+      }
+      for (const [name, url] of Object.entries(fruitImages)) {
+        db.run("UPDATE products SET image_url = ? WHERE name = ? AND (image_url IS NULL OR image_url = '')", [url, name])
+      }
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('nav_buttons_fixed', '1')")
+      console.log('Nav buttons fixed + product images added')
+    }
+  } catch (e) { console.error('Nav fix migration error:', e.message) }
+
   saveDB()
 }
 

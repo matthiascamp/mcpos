@@ -830,7 +830,11 @@ $('#posGrid').addEventListener('click', async e => {
   // Department / product buttons
   if (DEPT_TYPES.has(type)) {
     if (type === 'section') await navigateToSection(btn.dataset.cat)
-    else if (type === 'open_price') showOpenPriceModal(btn.dataset.label2 || btn.textContent.trim(), 0)
+    else if (type === 'open_price') {
+      const rawLabel = btn.dataset.label2 || btn.textContent.trim()
+      const name = rawLabel.split('\\n')[0].split('\n')[0].trim()
+      showOpenPriceModal(name, parseFloat(btn.dataset.price) || 0)
+    }
     else if (type === 'product') {
       const plu = btn.dataset.cat
       if (plu) {
@@ -1000,6 +1004,13 @@ function stockBadge (p) {
   if (p.stock_qty <= 5) return ` <span style="color:#fff;background:#e07020;font-size:7px;padding:1px 3px;border-radius:2px;font-weight:700">LOW:${Math.round(p.stock_qty)}</span>`
   return ''
 }
+function unitLabel (p) {
+  const u = p.unit || 'each'
+  if (u === 'kg') return '<span style="font-size:9px;opacity:.7">/kg</span>'
+  if (u === '100g') return '<span style="font-size:9px;opacity:.7">/100g</span>'
+  if (u === 'litre') return '<span style="font-size:9px;opacity:.7">/L</span>'
+  return '<span style="font-size:9px;opacity:.7"> ea</span>'
+}
 
 function showGroupedProducts (title, products) {
   const groups = {}
@@ -1015,7 +1026,7 @@ function showGroupedProducts (title, products) {
         return `<button class="product-btn" data-type="product" data-id="${esc(p.id)}">
           ${p.image_url ? `<img src="${esc(p.image_url)}" alt="">` : `<div class="p-placeholder">${esc(p.barcode || p.name.substring(0, 8))}</div>`}
           <div class="p-name">${esc(p.name)}</div>
-          <div class="p-price">${money(p.active_price ?? p.price)}${p.is_special ? ' <span style="color:#c44;font-size:8px">SPECIAL</span>' : ''}${stockBadge(p)}</div></button>`
+          <div class="p-price">${money(p.active_price ?? p.price)}${unitLabel(p)}${p.is_special ? ' <span style="color:#c44;font-size:8px">SPECIAL</span>' : ''}${stockBadge(p)}</div></button>`
       }
       return `<button class="product-btn group-btn" data-type="group" data-group="${esc(name)}">
         <div class="p-name" style="font-size:14px">${esc(name)}</div>
@@ -1032,7 +1043,7 @@ function drillIntoGroup (groupName) {
       <button class="product-btn" data-type="product" data-id="${esc(p.id)}">
         ${p.image_url ? `<img src="${esc(p.image_url)}" alt="">` : `<div class="p-placeholder">${esc(p.barcode || p.name.substring(0, 8))}</div>`}
         <div class="p-name">${esc(p.name)}</div>
-        <div class="p-price">${money(p.active_price ?? p.price)}${stockBadge(p)}</div></button>`).join('')
+        <div class="p-price">${money(p.active_price ?? p.price)}${unitLabel(p)}${stockBadge(p)}</div></button>`).join('')
   })
 }
 
@@ -1107,7 +1118,7 @@ si.addEventListener('input', debounce(async () => {
       <button class="product-btn" data-type="product" data-id="${esc(p.id)}">
         ${p.image_url ? `<img src="${esc(p.image_url)}" alt="">` : `<div class="p-placeholder">${esc(p.barcode || '')}</div>`}
         <div class="p-name">${esc(p.name)}</div>
-        <div class="p-price">${money(p.active_price ?? p.price)}${p.is_special ? ' <span style="color:#c44;font-size:8px">SPECIAL</span>' : ''}${stockBadge(p)}</div></button>`).join('')
+        <div class="p-price">${money(p.active_price ?? p.price)}${unitLabel(p)}${p.is_special ? ' <span style="color:#c44;font-size:8px">SPECIAL</span>' : ''}${stockBadge(p)}</div></button>`).join('')
   })
 }, 250))
 
