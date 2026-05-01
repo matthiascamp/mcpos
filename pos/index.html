@@ -598,25 +598,45 @@ function showLogin () {
   $('#loginOverlay').classList.remove('hidden')
   $('#staffBadge').textContent = 'Not logged in'
 }
+async function attemptPinLogin () {
+  if (pinBuf.length < 4) return
+  const s = await window.pos.staffLogin(pinBuf)
+  if (s) {
+    currentStaff = s
+    try { localStorage.setItem('crisp_staff', JSON.stringify(s)) } catch (_) {}
+    $('#loginOverlay').classList.add('hidden')
+    $('#staffBadge').textContent = `${s.name} (${s.role})`
+    $('#clerkInfo').textContent = `Clerk: ${s.name.toUpperCase()}`
+    si.focus()
+    showToast(`Welcome, ${s.name}`, 'success')
+  } else {
+    $('#loginError').textContent = 'Invalid PIN'; pinBuf = ''
+  }
+  $('#pinDisplay').textContent = '●'.repeat(pinBuf.length)
+}
+function pinInput (digit) {
+  if (pinBuf.length < 6) { pinBuf += digit; $('#loginError').textContent = '' }
+  $('#pinDisplay').textContent = '●'.repeat(pinBuf.length)
+}
+function pinClear () {
+  pinBuf = ''; $('#loginError').textContent = ''
+  $('#pinDisplay').textContent = ''
+}
+
 $('#pinPad').addEventListener('click', async e => {
   const b = e.target.closest('.pin-btn'); if (!b) return
   const v = b.dataset.val
-  if (v === 'C') { pinBuf = ''; $('#loginError').textContent = '' }
-  else if (v === 'OK') {
-    if (pinBuf.length < 4) return
-    const s = await window.pos.staffLogin(pinBuf)
-    if (s) {
-      currentStaff = s
-      $('#loginOverlay').classList.add('hidden')
-      $('#staffBadge').textContent = `${s.name} (${s.role})`
-      $('#clerkInfo').textContent = `Clerk: ${s.name.toUpperCase()}`
-      si.focus()
-      showToast(`Welcome, ${s.name}`, 'success')
-    } else {
-      $('#loginError').textContent = 'Invalid PIN'; pinBuf = ''
-    }
-  } else if (pinBuf.length < 6) { pinBuf += v; $('#loginError').textContent = '' }
-  $('#pinDisplay').textContent = '●'.repeat(pinBuf.length)
+  if (v === 'C') pinClear()
+  else if (v === 'OK') await attemptPinLogin()
+  else pinInput(v)
+})
+
+// Physical keyboard support for PIN login
+document.addEventListener('keydown', async e => {
+  if ($('#loginOverlay').classList.contains('hidden')) return
+  if (e.key >= '0' && e.key <= '9') { e.preventDefault(); pinInput(e.key) }
+  else if (e.key === 'Backspace' || e.key === 'Delete') { e.preventDefault(); pinClear() }
+  else if (e.key === 'Enter') { e.preventDefault(); await attemptPinLogin() }
 })
 
 // ═══ Dynamic POS Keyboard Grid ═════════════════════════════════════
@@ -1940,7 +1960,8 @@ async function init () {
     const key = await window.pos.getSetting('supabase_anon_key')
     if (url && key) { const ok = await initSync(url, key); if (ok) { startAutoSync(); updateSync() } }
     const staff = await window.pos.getStaff()
-    if (!staff.length) {
+    const hasActive = staff.some(s => s.active)
+    if (!hasActive) {
       await window.pos.upsertStaff({ name: 'Owner', pin: '1234', role: 'admin' })
       await window.pos.upsertStaff({ name: 'Cashier', pin: '0000', role: 'cashier' })
     }
