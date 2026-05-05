@@ -79,6 +79,19 @@ CREATE TABLE IF NOT EXISTS staff (
   updated_at  TEXT DEFAULT (datetime('now'))
 );
 
+-- ─── Audit Log ──────────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS audit_log (
+  id          TEXT PRIMARY KEY,
+  staff_id    TEXT REFERENCES staff(id),
+  staff_name  TEXT,
+  action      TEXT NOT NULL,
+  detail      TEXT,
+  created_at  TEXT DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_audit_log_date ON audit_log(created_at);
+
 -- ─── Transactions ───────────────────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS transactions (
@@ -222,7 +235,7 @@ INSERT OR IGNORE INTO products (id, barcode, plu, name, category_id, price, cost
 CREATE TABLE IF NOT EXISTS keyboard_buttons (
   id              TEXT PRIMARY KEY,
   label           TEXT NOT NULL,
-  type            TEXT NOT NULL,  -- product: open_price|fixed_price|section|nav  function: void|return|hold|nosale|supervisor|lock|reprint|pricecheck|errcorrect|recall|pctdiscount|pctone|movedrawer|ubereats  numpad: digit|clear|qtyx|codeenter  payment: subtotal|pay_cash|pay_card|park  nav: page_link|back_home
+  type            TEXT NOT NULL,  -- product: open_price|fixed_price|section|nav  function: return|hold|nosale|supervisor|reprint|pricecheck|recall|pctdiscount|pctone|movedrawer|ubereats|endofday  numpad: digit|clear|qtyx|codeenter  payment: subtotal|pay_cash|pay_card|park  nav: page_link|back_home
   price           REAL DEFAULT 0,
   image           TEXT,
   color           TEXT DEFAULT '#fff',
@@ -237,6 +250,7 @@ CREATE TABLE IF NOT EXISTS keyboard_buttons (
   grid_col        INTEGER DEFAULT 0,
   col_span        INTEGER DEFAULT 1,
   row_span        INTEGER DEFAULT 1,
+  product_id      TEXT REFERENCES products(id),
   active          INTEGER DEFAULT 1,
   updated_at      TEXT DEFAULT (datetime('now'))
 );
@@ -244,23 +258,22 @@ CREATE TABLE IF NOT EXISTS keyboard_buttons (
 -- Default Page 1 layout — matches Profit Track register
 -- Row 0-1: Function buttons (10 cols)
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, category_filter) VALUES
-  ('fn-lock',       '🔒',             'lock',        '#000', '#dddddd', 1,  'grid', 1, 0, 0, 1, 1, NULL),
-  ('fn-supervisor', 'SUPERVISOR ONLY', 'supervisor',  '#000', '#dddddd', 2,  'grid', 1, 0, 1, 1, 1, NULL),
-  ('fn-return',     'RETURN',          'return',      '#000', '#dddddd', 3,  'grid', 1, 0, 2, 1, 1, NULL),
-  ('fn-void',       'VOID',           'void',        '#fff', '#4466aa', 4,  'grid', 1, 0, 3, 2, 1, NULL),
-  ('fn-hold',       'Hold Sale',      'hold',        '#000', '#dddddd', 5,  'grid', 1, 0, 5, 1, 1, NULL),
-  ('fn-nosale',     'NO SALE',        'nosale',      '#000', '#dddddd', 6,  'grid', 1, 0, 6, 1, 1, NULL),
-  ('fn-viewor',     'VIEW OR...',     'viewor',      '#000', '#dddddd', 7,  'grid', 1, 0, 7, 1, 1, NULL),
-  ('fn-pricecheck', 'PRICE CHECK',    'pricecheck',  '#000', '#dddddd', 8,  'grid', 1, 0, 8, 2, 2, NULL),
-  ('fn-reprint',    'REPRINT',        'reprint',     '#000', '#dddddd', 9,  'grid', 1, 1, 0, 1, 1, NULL),
-  ('fn-pctdisc',    '% DISCOUNT',     'pctdiscount', '#000', '#d8a820', 10, 'grid', 1, 1, 1, 1, 1, NULL),
-  ('fn-pctone',     '% ONE ITEM',     'pctone',      '#fff', '#d8a820', 11, 'grid', 1, 1, 2, 1, 1, NULL),
-  ('fn-movedrawer', 'MOVE DRAWER',    'movedrawer',  '#fff', '#e07020', 12, 'grid', 1, 1, 3, 1, 1, NULL),
-  ('fn-errcorrect', 'ERROR CORRECT',  'errcorrect',  '#000', '#dddddd', 13, 'grid', 1, 1, 4, 1, 1, NULL),
-  ('fn-recall',     'Recall Sale',    'recall',      '#000', '#dddddd', 14, 'grid', 1, 1, 5, 1, 1, NULL),
-  ('fn-ubereats',   'UBER EATS ADJ',  'ubereats',    '#000', '#dddddd', 15, 'grid', 1, 1, 6, 1, 1, NULL);
+  ('fn-endofday',   'END OF\nDAY',    'endofday',    '#fff', '#8b5cf6', 1,  'grid', 1, 0, 0, 1, 1, NULL),
+  ('fn-return',     'RETURN\nITEM',   'return',      '#000', '#dddddd', 3,  'grid', 1, 0, 1, 1, 1, NULL),
+  ('fn-hold',       'HOLD\nSALE',     'hold',        '#000', '#dddddd', 5,  'grid', 1, 0, 2, 1, 1, NULL),
+  ('fn-nosale',     'OPEN\nDRAWER',   'nosale',      '#fff', '#e07020', 6,  'grid', 1, 0, 3, 1, 1, NULL),
+  ('fn-pricecheck', 'PRICE\nCHECK',   'pricecheck',  '#000', '#dddddd', 8,  'grid', 1, 0, 8, 2, 2, NULL),
+  ('fn-reprint',    'REPRINT\nRECEIPT', 'reprint',   '#000', '#dddddd', 9,  'grid', 1, 1, 0, 1, 1, NULL),
+  ('fn-discount',   'DISCOUNT',       'discount',    '#fff', '#d8a820', 10, 'grid', 1, 1, 1, 1, 1, NULL),
+  ('fn-movedrawer', 'LOG OUT',        'movedrawer',  '#fff', '#e07020', 12, 'grid', 1, 1, 2, 1, 1, NULL),
+  ('fn-recall',     'FIND\nSALE',     'recall',      '#000', '#dddddd', 14, 'grid', 1, 1, 3, 1, 1, NULL),
+  ('fn-ubereats',   'UBER EATS\nADJ', 'ubereats',    '#000', '#dddddd', 15, 'grid', 1, 1, 4, 1, 1, NULL);
 
--- Row 2-5: Department buttons (cols 3-5, cart occupies 0-2) + Numpad (cols 6-9)
+-- Cart display area (cols 0-2, rows 2-5)
+INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, category_filter) VALUES
+  ('layout-cart',    'Cart',            'cart_display', '#555', '#ffffff', 19, 'grid', 1, 2, 0, 3, 4, NULL);
+
+-- Row 2-5: Department buttons (cols 3-5) + Numpad (cols 6-9)
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, category_filter) VALUES
   ('btn-meat',    'MEAT',              'section',     0,    '#fff', '#d87868', 20, 'grid', 1, 2, 3, 1, 1, 'Meat'),
   ('btn-coffee',  'COFFEE',            'section',     0,    '#000', '#78b8d0', 21, 'grid', 1, 2, 4, 1, 1, 'Coffee'),
@@ -304,15 +317,15 @@ INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_o
 -- ═══ Page 2: Fruit A-M ══════════════════════════════════════════════
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, parent_id) VALUES
   ('pg2-apples',       'APPLES\n$5.99/kg',          'open_price', 5.99,  'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Red_Apple.jpg/150px-Red_Apple.jpg', '#000', '#ffffff', 1,  'grid', 2, 0, 0, 1, 1, NULL),
-  ('pg2-apricots',     'APRICOTS\n$12.99/kg',       'open_price', 12.99, NULL, '#000', '#ffffff', 2,  'grid', 2, 0, 1, 1, 1, NULL),
+  ('pg2-apricots',     'APRICOTS\n$12.99/kg',       'open_price', 12.99, 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Apricot_and_cross_section.jpg/150px-Apricot_and_cross_section.jpg', '#000', '#ffffff', 2,  'grid', 2, 0, 1, 1, 1, NULL),
   ('pg2-avocados',     'AVOCADOS\n$2.50 ea',        'open_price', 2.50,  'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Avocado_with_cross_section_edit.jpg/150px-Avocado_with_cross_section_edit.jpg', '#000', '#ffffff', 3,  'grid', 2, 0, 2, 1, 1, NULL),
   ('pg2-bananas',      'BANANAS\n$3.99/kg',         'open_price', 3.99,  'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Banana-Single.jpg/150px-Banana-Single.jpg', '#000', '#ffffff', 4,  'grid', 2, 0, 3, 1, 1, NULL),
-  ('pg2-cherries',     'CHERRIES KG\n$14.99/kg',    'open_price', 14.99, NULL, '#000', '#ffffff', 5,  'grid', 2, 0, 4, 1, 1, NULL),
-  ('pg2-coconut',      'COCONUT EA\n$4.99 ea',      'open_price', 4.99,  NULL, '#000', '#ffffff', 6,  'grid', 2, 0, 5, 1, 1, NULL),
-  ('pg2-custard-apple','CUSTARD APPLE KG\n$6.99/kg','open_price', 6.99,  NULL, '#000', '#ffffff', 7,  'grid', 2, 1, 0, 1, 1, NULL),
-  ('pg2-dragon-fruit', 'DRAGON FRUIT KG\n$14.99/kg','open_price', 14.99, NULL, '#000', '#ffffff', 8,  'grid', 2, 1, 1, 1, 1, NULL),
-  ('pg2-figs',         'FIGS KG\n$19.99/kg',        'open_price', 19.99, NULL, '#000', '#ffffff', 9,  'grid', 2, 1, 2, 1, 1, NULL),
-  ('pg2-grapes',       'GRAPES\n$7.99/kg',          'open_price', 7.99,  NULL, '#000', '#ffffff', 10, 'grid', 2, 1, 3, 1, 1, NULL),
+  ('pg2-cherries',     'CHERRIES KG\n$14.99/kg',    'open_price', 14.99, 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Cherry_season_%2848216568227%29.jpg/150px-Cherry_season_%2848216568227%29.jpg', '#000', '#ffffff', 5,  'grid', 2, 0, 4, 1, 1, NULL),
+  ('pg2-coconut',      'COCONUT EA\n$4.99 ea',      'open_price', 4.99,  'https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Kokosnuss-Coconut.jpg/150px-Kokosnuss-Coconut.jpg', '#000', '#ffffff', 6,  'grid', 2, 0, 5, 1, 1, NULL),
+  ('pg2-custard-apple','CUSTARD APPLE KG\n$6.99/kg','open_price', 6.99,  'https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Custard_Apple.jpg/150px-Custard_Apple.jpg', '#000', '#ffffff', 7,  'grid', 2, 1, 0, 1, 1, NULL),
+  ('pg2-dragon-fruit', 'DRAGON FRUIT KG\n$14.99/kg','open_price', 14.99, 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Pitaya_cross_section_ed2.jpg/150px-Pitaya_cross_section_ed2.jpg', '#000', '#ffffff', 8,  'grid', 2, 1, 1, 1, 1, NULL),
+  ('pg2-figs',         'FIGS KG\n$19.99/kg',        'open_price', 19.99, 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Fig_fruit.jpg/150px-Fig_fruit.jpg', '#000', '#ffffff', 9,  'grid', 2, 1, 2, 1, 1, NULL),
+  ('pg2-grapes',       'GRAPES\n$7.99/kg',          'open_price', 7.99,  'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Grapes%2C_Rostov-on-Don%2C_Russia.jpg/150px-Grapes%2C_Rostov-on-Don%2C_Russia.jpg', '#000', '#ffffff', 10, 'grid', 2, 1, 3, 1, 1, NULL),
   ('pg2-grapefruit',   'GRAPEFRUIT KG\n$4.99/kg',   'open_price', 4.99,  NULL, '#000', '#ffffff', 11, 'grid', 2, 1, 4, 1, 1, NULL),
   ('pg2-guava',        'GUAVA KG\n$8.99/kg',        'open_price', 8.99,  NULL, '#000', '#ffffff', 12, 'grid', 2, 2, 0, 1, 1, NULL),
   ('pg2-kiwi',         'KIWI FRUITS\n$2.00 ea',     'open_price', 2.00,  NULL, '#000', '#ffffff', 13, 'grid', 2, 2, 1, 1, 1, NULL),

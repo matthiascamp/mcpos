@@ -60,7 +60,9 @@ function getLocalIp () {
   const nets = os.networkInterfaces()
   for (const name of Object.keys(nets)) {
     for (const net of nets[name]) {
-      if (net.family === 'IPv4' && !net.internal) return net.address
+      // Node.js 18+ uses family=4 (number), older uses family='IPv4' (string)
+      const isIPv4 = net.family === 'IPv4' || net.family === 4
+      if (isIPv4 && !net.internal) return net.address
     }
   }
   return '127.0.0.1'
@@ -72,6 +74,7 @@ function startServer (port, dbHelpers) {
   db = dbHelpers
   state.mode = 'server'
   state.port = port
+  state.serverIp = getLocalIp()
 
   // Generate secret if not set
   let secretRow = db.dbGet("SELECT value FROM settings WHERE key = 'lan_secret'")
@@ -125,7 +128,8 @@ function startServer (port, dbHelpers) {
   })
 
   server.listen(port, '0.0.0.0', () => {
-    console.log(`LAN server started on port ${port} (IP: ${getLocalIp()})`)
+    state.serverIp = getLocalIp()
+    console.log(`LAN server started on port ${port} (IP: ${state.serverIp})`)
     state.connected = true
     state.error = null
   })
@@ -532,6 +536,14 @@ function markSynced (queueId) {
 
 // ─── HTTP Client Helpers ─────────────────────────────────────────────────────
 
+function getRegisterId () {
+  if (db) {
+    const row = db.dbGet("SELECT value FROM settings WHERE key = 'register_id'")
+    return row?.value || 'LANE01'
+  }
+  return 'LANE01'
+}
+
 function httpGet (path) {
   return new Promise((resolve, reject) => {
     const opts = {
@@ -539,7 +551,7 @@ function httpGet (path) {
       port: state.port,
       path,
       method: 'GET',
-      headers: { 'X-POS-Secret': state.secret || '' },
+      headers: { 'X-POS-Secret': state.secret || '', 'X-Register-Id': getRegisterId() },
       timeout: 8000
     }
     const req = http.request(opts, res => {
@@ -570,7 +582,8 @@ function httpPost (path, body) {
       headers: {
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(data),
-        'X-POS-Secret': state.secret || ''
+        'X-POS-Secret': state.secret || '',
+        'X-Register-Id': getRegisterId()
       },
       timeout: 8000
     }

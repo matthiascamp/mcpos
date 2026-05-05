@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Crisp POS — Admin</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -224,6 +225,7 @@
     .badge-green { background: rgba(16,185,129,0.12); color: var(--green); }
     .badge-amber { background: rgba(245,158,11,0.12); color: var(--amber); }
     .badge-red   { background: rgba(239,68,68,0.12); color: var(--red); }
+    .badge-yellow { background: rgba(234,179,8,0.12); color: #eab308; }
 
     .btn {
       padding: 10px 20px;
@@ -393,7 +395,7 @@
     #kbGrid { display: grid; gap: 3px; min-width: 500px; flex: 1; }
 
     .kb-cell {
-      height: 56px; min-height: 0; border-radius: 4px;
+      min-height: 0; border-radius: 4px;
       display: flex; align-items: center; justify-content: center; flex-direction: column;
       font-weight: 700; font-size: 11px; text-align: center; line-height: 1.15;
       cursor: pointer; position: relative; user-select: none;
@@ -416,6 +418,7 @@
     }
     .kb-cell.empty-cell:hover { border-color: var(--green); color: var(--green); opacity: 1; }
     .kb-cell.empty-cell.sel-highlight { border-color: #3b82f6; background: rgba(59,130,246,.15); color: #3b82f6; opacity: 1; }
+    .kb-cell.multi-selected { outline: 2px solid var(--blue); outline-offset: 1px; opacity: .85; }
     .kb-cell.dragging { opacity: .3; }
     .kb-cell.drag-over { outline: 3px dashed var(--green); outline-offset: 1px; }
 
@@ -549,10 +552,6 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
         Deals
       </a>
-      <a href="#" data-tab="specials">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        Specials
-      </a>
     </div>
 
     <div class="sidebar-group">
@@ -565,6 +564,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M8 16h8"/></svg>
         Keyboard
       </a>
+      <a href="#" data-tab="network">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1"/></svg>
+        Network
+      </a>
       <a href="#" data-tab="hardware">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M15 2v2M9 2v2M15 20v2M9 20v2M2 15h2M2 9h2M20 15h2M20 9h2"/></svg>
         Hardware
@@ -572,6 +575,14 @@
       <a href="#" data-tab="import">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
         Import
+      </a>
+      <a href="#" data-tab="audit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Audit Log
+      </a>
+      <a href="#" data-tab="logs">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        Logs
       </a>
       <a href="#" data-tab="settings">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -751,6 +762,7 @@
         <div style="display:flex;gap:8px;margin-top:14px">
           <button class="btn btn-green" id="pSaveBtn">Save Product</button>
           <button class="btn btn-outline" id="pCancelBtn">Cancel</button>
+          <button class="btn btn-outline" id="pDuplicateBtn" style="display:none">Duplicate</button>
           <button class="btn" style="background:var(--red);color:#fff;margin-left:auto" id="pDeleteBtn">Delete</button>
         </div>
         <input type="hidden" id="pEditId">
@@ -801,13 +813,15 @@
 
     <!-- ── Deals ─────────────────────────────────────────────────── -->
     <div class="tab-content" id="tab-deals">
-      <h1>Deals &amp; Specials</h1>
+      <h1>Deals &amp; Promotions</h1>
+      <p style="color:var(--text-dim);font-size:13px;margin-bottom:16px">Create multi-buy, buy-one-get-one, percentage or dollar-off deals. Assign products and set optional date ranges.</p>
       <div class="section">
-        <div class="form-row">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <h2 style="margin:0">Active Deals</h2>
           <button class="btn btn-green" id="addDealBtn">+ New Deal</button>
         </div>
         <table>
-          <thead><tr><th>Name</th><th>Type</th><th>Details</th><th>Products</th><th>Status</th><th style="width:80px"></th></tr></thead>
+          <thead><tr><th>Name</th><th>Type</th><th>Details</th><th>Products</th><th>Dates</th><th>Status</th><th style="width:80px"></th></tr></thead>
           <tbody id="dealsTable"></tbody>
         </table>
       </div>
@@ -873,48 +887,6 @@
       </div>
     </div>
 
-    <!-- ── Specials ──────────────────────────────────────────────── -->
-    <div class="tab-content" id="tab-specials">
-      <h1>Price Specials</h1>
-      <div class="section">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <h2 style="margin:0">Active &amp; Upcoming Specials</h2>
-          <button class="btn btn-green" id="addSpecialBtn">+ New Special</button>
-        </div>
-        <table>
-          <thead><tr><th>Product</th><th>Normal Price</th><th>Special Price</th><th>Start</th><th>End</th><th>Status</th><th style="width:120px"></th></tr></thead>
-          <tbody id="specialsTable"></tbody>
-        </table>
-      </div>
-      <div class="modal-panel" id="specialEditPanel">
-        <div class="modal-header">
-          <h2 id="specialEditTitle">New Special</h2>
-          <button class="modal-close" id="specCloseModal">&times;</button>
-        </div>
-        <div class="modal-body">
-        <div class="form-row">
-          <div class="form-field" style="flex:2">
-            <label>Product</label>
-            <input type="text" id="specProductSearch" placeholder="Search product...">
-            <div id="specProductResults" style="max-height:120px;overflow-y:auto;margin-top:4px"></div>
-            <div id="specProductSelected" style="margin-top:4px;font-weight:600"></div>
-          </div>
-          <div class="form-field"><label>Special Price ($)</label><input type="number" id="specPrice" step="0.01" min="0"></div>
-        </div>
-        <div class="form-row">
-          <div class="form-field"><label>Start Date (optional)</label><input type="date" id="specStart"></div>
-          <div class="form-field"><label>End Date (optional)</label><input type="date" id="specEnd"></div>
-        </div>
-        <div style="display:flex;gap:8px;margin-top:10px">
-          <button class="btn btn-green" id="saveSpecialBtn">Save</button>
-          <button class="btn btn-outline" id="cancelSpecialBtn">Cancel</button>
-          <button class="btn" style="background:var(--red);color:#fff;margin-left:auto;display:none" id="deleteSpecialBtn">Delete</button>
-        </div>
-        <input type="hidden" id="specEditId">
-        <input type="hidden" id="specProductId">
-        </div>
-      </div>
-    </div>
 
     <!-- ── Transactions ──────────────────────────────────────────── -->
     <div class="tab-content" id="tab-transactions">
@@ -1050,15 +1022,18 @@
         <h1 style="margin:0;font-size:20px">Keyboard Layout</h1>
         <div id="pageTabs" style="display:flex;gap:3px;align-items:center;margin-left:6px"></div>
         <button class="btn btn-outline" style="padding:4px 10px;font-size:11px" id="addPageBtn">+ Page</button>
+        <button class="btn btn-outline" style="padding:4px 10px;font-size:11px" id="copyPageBtn">Copy Page</button>
         <div style="flex:1"></div>
-        <span style="color:var(--text-dim);font-size:11px">Columns</span>
-        <select id="gridCols" style="padding:3px 6px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12px">
-          <option value="6">6</option><option value="8">8</option><option value="10" selected>10</option><option value="12">12</option>
-        </select>
-        <span style="color:var(--text-dim);font-size:11px">Rows</span>
-        <select id="gridRows" style="padding:3px 6px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12px">
-          <option value="5">5</option><option value="7" selected>7</option><option value="8">8</option><option value="10">10</option>
-        </select>
+        <button class="btn btn-outline" style="padding:4px 8px;font-size:10px" id="validateKbBtn" title="Check for issues">Validate</button>
+        <button class="btn btn-outline" style="padding:4px 8px;font-size:10px" id="exportKbBtn" title="Export layout as JSON">Export</button>
+        <button class="btn btn-outline" style="padding:4px 8px;font-size:10px" id="importKbBtn" title="Import layout from JSON">Import</button>
+        <button class="btn btn-outline" style="padding:4px 8px;font-size:10px;color:var(--red)" id="resetKbBtn" title="Reset to factory default">Reset</button>
+        <input type="file" id="importKbFile" accept=".json" style="display:none">
+        <input type="number" id="kbGridCols" min="2" max="20" value="10" style="width:48px;padding:2px 4px;font-size:11px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--text);text-align:center" title="Columns">
+        <span style="color:var(--text-dim);font-size:11px">×</span>
+        <input type="number" id="kbGridRows" min="2" max="20" value="7" style="width:48px;padding:2px 4px;font-size:11px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--text);text-align:center" title="Rows">
+        <button class="btn btn-outline" style="padding:4px 8px;font-size:10px" id="selectAllBtn" title="Select all buttons on page">Select All</button>
+        <button class="btn btn-outline" style="padding:4px 8px;font-size:10px" id="pageTreeBtn" title="Show page link tree">Page Map</button>
         <button class="btn" style="padding:4px 10px;font-size:11px;background:var(--red);color:#fff" id="deletePageBtn">Delete Page</button>
       </div>
 
@@ -1116,13 +1091,16 @@
                     <option value="clear">Clear</option>
                     <option value="qtyx">QTY X</option>
                     <option value="codeenter">Code Enter</option>
-                    <option value="num_display">LCD Display</option>
                   </optgroup>
                   <optgroup label="Payment">
                     <option value="subtotal">Sub Total</option>
                     <option value="pay_cash">Pay Cash</option>
                     <option value="pay_card">Pay Card</option>
                     <option value="park">Park Sale</option>
+                  </optgroup>
+                  <optgroup label="Layout">
+                    <option value="cart_display">Cart / Receipt Area</option>
+                    <option value="num_display">LCD Display</option>
                   </optgroup>
                   <optgroup label="Navigation">
                     <option value="page_link">Go To Page</option>
@@ -1140,6 +1118,13 @@
                 <datalist id="kbCatList"></datalist>
               </div>
               <div class="kb-field"><label>Alpha Range</label><input type="text" id="kbAlphaRange" placeholder="A-M"></div>
+            </div>
+
+            <div class="kb-edit-row" id="kbPageLinkRow" style="display:none">
+              <div class="kb-field" style="flex:1">
+                <label>Target Page</label>
+                <select id="kbTargetPage" style="width:100%"></select>
+              </div>
             </div>
 
             <div class="kb-color-row" style="margin-bottom:10px">
@@ -1167,6 +1152,33 @@
             <input type="hidden" id="kbImageData">
           </div>
 
+          <!-- Bulk actions panel (multi-select) -->
+          <div class="kb-edit-card" id="kbBulkPanel" style="display:none">
+            <h3>
+              <span id="kbBulkTitle">0 selected</span>
+              <button class="btn btn-outline" style="padding:2px 8px;font-size:10px" id="kbBulkClose">&times;</button>
+            </h3>
+            <div style="font-size:11px;color:var(--text-dim);margin:-6px 0 10px">Ctrl+click to toggle individual buttons</div>
+            <div class="kb-color-row" style="margin-bottom:10px">
+              <div style="text-align:center"><input type="color" id="kbBulkBg" value="#409850"><div class="kb-color-label">BG</div></div>
+              <div style="text-align:center"><input type="color" id="kbBulkText" value="#ffffff"><div class="kb-color-label">Text</div></div>
+              <button class="btn btn-blue" style="padding:4px 10px;font-size:11px" id="kbBulkColorBtn">Apply Colors</button>
+            </div>
+            <div style="margin-bottom:10px">
+              <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:4px">Move all selected</label>
+              <div style="display:flex;gap:4px;flex-wrap:wrap">
+                <button class="btn btn-outline" style="padding:4px 8px;font-size:16px" id="kbBulkUp" title="Move up">&#8593;</button>
+                <button class="btn btn-outline" style="padding:4px 8px;font-size:16px" id="kbBulkDown" title="Move down">&#8595;</button>
+                <button class="btn btn-outline" style="padding:4px 8px;font-size:16px" id="kbBulkLeft" title="Move left">&#8592;</button>
+                <button class="btn btn-outline" style="padding:4px 8px;font-size:16px" id="kbBulkRight" title="Move right">&#8594;</button>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-outline" id="kbBulkDeselectBtn">Deselect All</button>
+              <button class="btn" style="background:var(--red);color:#fff;margin-left:auto" id="kbBulkDeleteBtn">Delete All</button>
+            </div>
+          </div>
+
           <!-- Product picker (always visible) -->
           <div class="kb-product-sidebar">
             <h3>Products</h3>
@@ -1181,6 +1193,73 @@
 
       <!-- Drag size tooltip -->
       <div class="kb-drag-tooltip" id="kbDragTooltip"></div>
+
+      <!-- Page Map modal -->
+      <div id="pageTreeModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.6);align-items:center;justify-content:center">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;max-width:500px;width:90%;max-height:70vh;overflow-y:auto">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+            <h2 style="margin:0;font-size:16px">Page Map</h2>
+            <button class="btn btn-outline" style="padding:2px 8px;font-size:10px" id="closePageTree">&times;</button>
+          </div>
+          <div id="pageTreeContent" style="font-size:13px;line-height:1.8"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Network (LAN Multi-Register) ─────────────────────────── -->
+    <div class="tab-content" id="tab-network">
+      <h1>Network</h1>
+      <div class="section">
+        <h2>LAN Multi-Register</h2>
+        <p style="color:var(--text-dim);margin-bottom:12px;font-size:14px;">
+          Share this register's database with other POS terminals on the local network.
+        </p>
+        <div class="form-row" style="gap:16px;margin-bottom:12px;">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+            <input type="radio" name="lanMode" value="off" checked> Off
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+            <input type="radio" name="lanMode" value="server"> Server (this register hosts)
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+            <input type="radio" name="lanMode" value="client"> Client (connect to server)
+          </label>
+        </div>
+
+        <label style="display:flex;align-items:center;gap:6px;margin-bottom:12px;cursor:pointer;font-size:13px">
+          <input type="checkbox" id="lanAutostart"> Start automatically on app launch
+        </label>
+
+        <div id="lanServerInfo" style="display:none;">
+          <div class="form-row">
+            <div class="form-field"><label>This Machine's IP</label><input type="text" id="lanLocalIp" readonly style="opacity:.7;"></div>
+            <div class="form-field"><label>Port</label><input type="number" id="lanPort" value="5555"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label>Secret Key <span style="color:var(--text-dim);font-size:12px;">(give this to client registers)</span></label>
+              <input type="text" id="lanSecret" readonly style="opacity:.7;font-family:monospace;">
+            </div>
+          </div>
+          <div id="lanServerStatus" style="margin:8px 0;font-size:13px;color:var(--text-dim);"></div>
+          <button class="btn btn-green" id="lanStartServerBtn">Start Server</button>
+        </div>
+
+        <div id="lanClientInfo" style="display:none;">
+          <div class="form-row">
+            <div class="form-field"><label>Server IP Address</label><input type="text" id="lanServerIp" placeholder="192.168.1.100"></div>
+            <div class="form-field"><label>Port</label><input type="number" id="lanClientPort" value="5555"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-field"><label>Secret Key</label><input type="text" id="lanClientSecret" placeholder="Paste secret from server" style="font-family:monospace;"></div>
+          </div>
+          <div id="lanClientStatus" style="margin:8px 0;font-size:13px;color:var(--text-dim);"></div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-outline" id="lanTestBtn">Test Connection</button>
+            <button class="btn btn-green" id="lanConnectBtn">Save & Connect</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- ── Hardware ────────────────────────────────────────────────── -->
@@ -1271,6 +1350,94 @@
     </div>
 
     <!-- ── Settings ───────────────────────────────────────────────── -->
+    <div class="tab-content" id="tab-audit">
+      <h1>Audit Log</h1>
+      <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center;flex-wrap:wrap">
+        <input type="date" id="auditDate" style="padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text)">
+        <select id="auditAction" style="padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text)">
+          <option value="">All Actions</option>
+          <option value="void_item">Void Item</option>
+          <option value="no_sale">No Sale</option>
+          <option value="discount_sale">Discount (Sale)</option>
+          <option value="discount_item">Discount (Item)</option>
+          <option value="price_change">Price Change</option>
+          <option value="refund">Refund</option>
+          <option value="settings_change">Settings Change</option>
+        </select>
+        <button class="btn btn-blue" id="auditSearchBtn">Search</button>
+        <button class="btn btn-outline" id="auditTodayBtn">Today</button>
+      </div>
+      <div class="section" style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px" id="auditTable">
+          <thead>
+            <tr style="text-align:left;color:var(--text-dim);border-bottom:2px solid var(--border)">
+              <th style="padding:8px">Time</th>
+              <th style="padding:8px">Staff</th>
+              <th style="padding:8px">Action</th>
+              <th style="padding:8px">Detail</th>
+            </tr>
+          </thead>
+          <tbody id="auditBody"><tr><td colspan="4" style="padding:12px;color:var(--text-dim)">Select a date and click Search</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab-logs">
+      <h1>App Logs & Health</h1>
+
+      <!-- Health indicators -->
+      <div class="section">
+        <h2>System Health</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px" id="healthGrid">
+          <div class="stat-card"><div class="stat-label">Last DB Save</div><div class="stat-value" id="healthDbSave">—</div></div>
+          <div class="stat-card"><div class="stat-label">Last Backup</div><div class="stat-value" id="healthBackup">—</div></div>
+          <div class="stat-card"><div class="stat-label">Last Error</div><div class="stat-value" id="healthError">—</div></div>
+          <div class="stat-card"><div class="stat-label">DB Path</div><div class="stat-value" id="healthDbPath" style="font-size:11px;word-break:break-all">—</div></div>
+          <div class="stat-card"><div class="stat-label">Backup Folder</div><div class="stat-value" id="healthBackupDir" style="font-size:11px;word-break:break-all">—</div></div>
+          <div class="stat-card"><div class="stat-label">Uptime Since</div><div class="stat-value" id="healthUptime">—</div></div>
+        </div>
+      </div>
+
+      <!-- Log controls -->
+      <div class="section">
+        <h2>Application Logs</h2>
+        <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center;flex-wrap:wrap">
+          <select id="logDate" style="padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text)">
+            <option value="">Loading...</option>
+          </select>
+          <select id="logSeverity" style="padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text)">
+            <option value="">All Severities</option>
+            <option value="fatal">Fatal</option>
+            <option value="error">Error</option>
+            <option value="warn">Warn</option>
+            <option value="info">Info</option>
+          </select>
+          <input type="text" id="logSearch" placeholder="Search logs..." style="padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);width:200px">
+          <button class="btn btn-blue" id="logRefreshBtn">Refresh</button>
+          <button class="btn btn-outline" id="logExportBtn">Export</button>
+          <button class="btn btn-outline" id="logCopyBtn">Copy</button>
+          <button class="btn btn-outline" style="border-color:var(--red);color:var(--red)" id="logClearBtn">Clear</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:12px">
+            <thead>
+              <tr style="text-align:left;color:var(--text-dim);border-bottom:1px solid var(--border)">
+                <th style="padding:6px 8px;width:160px">Timestamp</th>
+                <th style="padding:6px 8px;width:60px">Level</th>
+                <th style="padding:6px 8px;width:100px">Source</th>
+                <th style="padding:6px 8px">Message</th>
+                <th style="padding:6px 8px">Details</th>
+              </tr>
+            </thead>
+            <tbody id="logBody">
+              <tr><td colspan="5" style="padding:12px;color:var(--text-dim)">Select a date to view logs</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="logCount" style="margin-top:8px;font-size:11px;color:var(--text-dim)"></div>
+      </div>
+    </div>
+
     <div class="tab-content" id="tab-settings">
       <h1>Settings</h1>
       <div class="section">
@@ -1301,9 +1468,21 @@
       </div>
 
       <div class="section">
-        <h2>Supabase Cloud Sync</h2>
+        <h2>Database Backups</h2>
         <p style="color:var(--text-dim);margin-bottom:12px;font-size:14px;">
-          Connect to Supabase for cloud backup and multi-register sync.
+          Automatic backups are created on startup. Manual backups can be created below.
+        </p>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <button class="btn btn-blue" id="createBackupBtn">Create Backup Now</button>
+          <button class="btn btn-outline" id="openBackupFolderBtn">Open Backup Folder</button>
+        </div>
+        <div id="backupList" style="font-size:13px;color:var(--text-dim)">Loading...</div>
+      </div>
+
+      <div class="section" id="supabaseSection">
+        <h2>Supabase Cloud Sync</h2>
+        <p style="color:var(--text-dim);margin-bottom:12px;font-size:14px;" id="supabaseDesc">
+          Connect to Supabase for cloud backup and multi-register sync. Only the main server pulls from Supabase — client registers sync via LAN.
         </p>
         <div class="form-row">
           <div class="form-field"><label>Supabase URL</label><input type="text" id="setSupaUrl" placeholder="https://your-project.supabase.co"></div>
@@ -1312,54 +1491,8 @@
           <div class="form-field"><label>Anon Key</label><input type="text" id="setSupaKey" placeholder="eyJ..."></div>
         </div>
         <button class="btn btn-blue" id="saveSupaBtn">Save & Connect</button>
-      </div>
-
-      <div class="section">
-        <h2>LAN Multi-Register</h2>
-        <p style="color:var(--text-dim);margin-bottom:12px;font-size:14px;">
-          Share this register's database with other POS terminals on the local network.
-        </p>
-        <div class="form-row" style="gap:16px;margin-bottom:12px;">
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-            <input type="radio" name="lanMode" value="off" checked> Off
-          </label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-            <input type="radio" name="lanMode" value="server"> Server (this register hosts)
-          </label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-            <input type="radio" name="lanMode" value="client"> Client (connect to server)
-          </label>
-        </div>
-
-        <div id="lanServerInfo" style="display:none;">
-          <div class="form-row">
-            <div class="form-field"><label>This Machine's IP</label><input type="text" id="lanLocalIp" readonly style="opacity:.7;"></div>
-            <div class="form-field"><label>Port</label><input type="number" id="lanPort" value="5555"></div>
-          </div>
-          <div class="form-row">
-            <div class="form-field">
-              <label>Secret Key <span style="color:var(--text-dim);font-size:12px;">(give this to client registers)</span></label>
-              <input type="text" id="lanSecret" readonly style="opacity:.7;font-family:monospace;">
-            </div>
-          </div>
-          <div id="lanServerStatus" style="margin:8px 0;font-size:13px;color:var(--text-dim);"></div>
-          <button class="btn btn-green" id="lanStartServerBtn">Start Server</button>
-        </div>
-
-        <div id="lanClientInfo" style="display:none;">
-          <div class="form-row">
-            <div class="form-field"><label>Server IP Address</label><input type="text" id="lanServerIp" placeholder="192.168.1.100"></div>
-            <div class="form-field"><label>Port</label><input type="number" id="lanClientPort" value="5555"></div>
-          </div>
-          <div class="form-row">
-            <div class="form-field"><label>Secret Key</label><input type="text" id="lanClientSecret" placeholder="Paste secret from server" style="font-family:monospace;"></div>
-          </div>
-          <div id="lanClientStatus" style="margin:8px 0;font-size:13px;color:var(--text-dim);"></div>
-          <div style="display:flex;gap:8px;">
-            <button class="btn btn-outline" id="lanTestBtn">Test Connection</button>
-            <button class="btn btn-green" id="lanConnectBtn">Save & Connect</button>
-          </div>
-        </div>
+        <button class="btn btn-outline" id="pullNowBtn" style="margin-left:8px;display:none">Pull from Supabase Now</button>
+        <span id="supaStatus" style="margin-left:12px;font-size:13px;color:var(--text-dim)"></span>
       </div>
     </div>
 
@@ -1368,6 +1501,7 @@
 
   <script type="module">
     import { esc, $, $$, money, showToast, debounce } from './js/ui.js'
+    import { initSync, pullAll, pullFull } from './js/sync.js'
 
     // ── Modal Helpers ───────────────────────────────────────────────
 
@@ -1423,12 +1557,14 @@
         if (a.dataset.tab === 'products') loadProducts()
         if (a.dataset.tab === 'staff') loadStaff()
         if (a.dataset.tab === 'deals') loadDeals()
-        if (a.dataset.tab === 'specials') loadSpecials()
+        if (a.dataset.tab === 'network') loadLanSettings()
         if (a.dataset.tab === 'cashdrawer') loadCashDrawer()
         if (a.dataset.tab === 'zreport') initZReport()
         if (a.dataset.tab === 'keyboard') loadKeyboard()
         if (a.dataset.tab === 'hardware') loadHardware()
-        if (a.dataset.tab === 'settings') loadSettings()
+        if (a.dataset.tab === 'audit') loadAuditLog()
+        if (a.dataset.tab === 'logs') loadLogsTab()
+        if (a.dataset.tab === 'settings') { loadSettings(); loadBackups() }
       })
     })
 
@@ -1607,8 +1743,10 @@
 
     $('#productsTable').addEventListener('click', async e => {
       const btn = e.target.closest('[data-edit]')
-      if (!btn) return
-      const p = await window.pos.getProductById(btn.dataset.edit)
+      const row = e.target.closest('tr[data-id]')
+      const id = btn ? btn.dataset.edit : row?.dataset.id
+      if (!id) return
+      const p = await window.pos.getProductById(id)
       if (p) openProductEdit(p)
     })
 
@@ -1636,6 +1774,7 @@
         $('#pStockQty').value = p.stock_qty || 0
         $('#pImageUrl').value = p.image_url || ''
         $('#pDeleteBtn').style.display = 'inline-block'
+        $('#pDuplicateBtn').style.display = 'inline-block'
       } else {
         $('#productEditTitle').textContent = 'Add Product'
         $('#pEditId').value = ''
@@ -1651,6 +1790,7 @@
         $('#pStockQty').value = '0'
         $('#pImageUrl').value = ''
         $('#pDeleteBtn').style.display = 'none'
+        $('#pDuplicateBtn').style.display = 'none'
       }
       openModal('productEditPanel')
       $('#pName').focus()
@@ -1673,7 +1813,8 @@
         stock_qty: parseFloat($('#pStockQty').value) || 0,
         image_url: $('#pImageUrl').value.trim() || null,
       }
-      await window.pos.upsertProduct(product)
+      const result = await window.pos.upsertProduct(product)
+      if (result.barcode_warning) showToast(result.barcode_warning, 'error')
       showToast(`Product "${name}" saved`, 'success')
       closeModal('productEditPanel')
       loadProducts($('#productSearch').value)
@@ -1690,6 +1831,17 @@
 
     $('#pCancelBtn').addEventListener('click', () => {
       closeModal('productEditPanel')
+    })
+
+    $('#pDuplicateBtn').addEventListener('click', () => {
+      $('#pEditId').value = ''
+      $('#pName').value = $('#pName').value + ' (copy)'
+      $('#pBarcode').value = ''
+      $('#pPlu').value = ''
+      $('#productEditTitle').textContent = 'Add Product (Duplicate)'
+      $('#pDeleteBtn').style.display = 'none'
+      $('#pDuplicateBtn').style.display = 'none'
+      showToast('Editing as new product — change name/barcode and save', 'info')
     })
 
     // ── Categories ─────────────────────────────────────────────────
@@ -1859,6 +2011,7 @@
 
     async function loadDeals () {
       const deals = await window.pos.getDeals()
+      const typeLabels = { multi_buy: 'Multi-buy', buy_x_get_y: 'BOGO', discount_pct: '% Off', discount_amt: '$ Off', combo: 'Combo' }
       $('#dealsTable').innerHTML = deals.length ? deals.map(d => {
         const cfg = JSON.parse(d.config || '{}')
         let detail = ''
@@ -1867,22 +2020,27 @@
         else if (d.type === 'discount_pct') detail = `${cfg.pct}% off`
         else if (d.type === 'discount_amt') detail = `$${cfg.amt?.toFixed(2)} off`
         else if (d.type === 'combo') detail = `Combo $${cfg.price?.toFixed(2)}`
-        return `<tr>
-          <td>${esc(d.name)}</td>
-          <td>${esc(d.type)}</td>
+        const dates = d.start_date || d.end_date
+          ? `${d.start_date || '...'} to ${d.end_date || '...'}`
+          : '<span style="color:var(--text-dim)">Always</span>'
+        return `<tr style="cursor:pointer" data-edit-deal="${esc(d.id)}">
+          <td><strong>${esc(d.name)}</strong></td>
+          <td><span class="badge" style="background:var(--surface2);font-size:11px">${typeLabels[d.type] || d.type}</span></td>
           <td>${detail}</td>
           <td><span class="badge badge-green" style="cursor:pointer" data-deal-products="${esc(d.id)}">View</span></td>
-          <td><span class="badge ${d.active ? 'badge-green' : 'badge-red'}">${d.active ? 'Active' : 'Inactive'}</span></td>
-          <td><button class="btn btn-outline" style="padding:3px 10px;font-size:11px" data-edit-deal="${esc(d.id)}">Edit</button></td>
+          <td style="font-size:11px">${dates}</td>
+          <td><span class="badge ${d.active ? 'badge-green' : 'badge-red'}">${d.active ? 'Active' : 'Off'}</span></td>
+          <td><button class="btn btn-outline" style="padding:3px 10px;font-size:11px">Edit</button></td>
         </tr>`
-      }).join('') : '<tr><td colspan="6" style="color:var(--text-dim)">No deals yet</td></tr>'
+      }).join('') : '<tr><td colspan="7" style="color:var(--text-dim)">No deals yet — click "+ New Deal" to create one</td></tr>'
     }
 
     $('#dealsTable').addEventListener('click', async e => {
-      const btn = e.target.closest('[data-edit-deal]')
-      if (!btn) return
+      if (e.target.closest('[data-deal-products]')) return // let product view handle itself
+      const row = e.target.closest('[data-edit-deal]')
+      if (!row) return
       const deals = await window.pos.getDeals()
-      const deal = deals.find(d => d.id === btn.dataset.editDeal)
+      const deal = deals.find(d => d.id === row.dataset.editDeal)
       if (deal) openDealEdit(deal)
     })
 
@@ -2010,132 +2168,6 @@
 
     $('#dCancelBtn').addEventListener('click', () => { closeModal('dealEditPanel') })
 
-    // ── Specials ────────────────────────────────────────────────────
-
-    async function loadSpecials () {
-      const specials = await window.pos.getSpecials()
-      const today = new Date().toISOString().slice(0, 10)
-      $('#specialsTable').innerHTML = specials.length ? specials.map(s => {
-        const isActive = s.active && (!s.start_date || s.start_date <= today) && (!s.end_date || s.end_date >= today)
-        const isFuture = s.active && s.start_date && s.start_date > today
-        const isExpired = s.end_date && s.end_date < today
-        let badge = ''
-        if (isActive) badge = '<span class="badge badge-green">Active</span>'
-        else if (isFuture) badge = '<span class="badge badge-amber">Upcoming</span>'
-        else if (isExpired) badge = '<span class="badge badge-red">Expired</span>'
-        else badge = '<span class="badge badge-red">Inactive</span>'
-        return `<tr>
-          <td>${esc(s.product_name)}</td>
-          <td>${money(s.product_price)}</td>
-          <td style="color:var(--green);font-weight:700">${money(s.special_price)}</td>
-          <td>${s.start_date || '-'}</td>
-          <td>${s.end_date || '-'}</td>
-          <td>${badge}</td>
-          <td>
-            <button class="btn btn-outline" style="padding:3px 10px;font-size:11px" data-edit-spec="${esc(s.id)}">Edit</button>
-            <button class="btn" style="padding:3px 10px;font-size:11px;background:var(--red);color:#fff" data-del-spec="${esc(s.id)}">Del</button>
-          </td>
-        </tr>`
-      }).join('') : '<tr><td colspan="7" style="color:var(--text-dim)">No specials — click "+ New Special" to create one</td></tr>'
-    }
-
-    let specProductId = null
-
-    $('#specialsTable').addEventListener('click', async e => {
-      const editBtn = e.target.closest('[data-edit-spec]')
-      const delBtn = e.target.closest('[data-del-spec]')
-      if (editBtn) {
-        const specials = await window.pos.getSpecials()
-        const sp = specials.find(s => s.id === editBtn.dataset.editSpec)
-        if (sp) openSpecialEdit(sp)
-      }
-      if (delBtn) {
-        if (!confirm('Delete this special?')) return
-        await window.pos.deleteSpecial(delBtn.dataset.delSpec)
-        showToast('Special deleted', 'success')
-        loadSpecials()
-      }
-    })
-
-    $('#addSpecialBtn').addEventListener('click', () => openSpecialEdit(null))
-
-    function openSpecialEdit (sp) {
-      if (sp) {
-        $('#specialEditTitle').textContent = 'Edit Special'
-        $('#specEditId').value = sp.id
-        $('#specProductId').value = sp.product_id
-        specProductId = sp.product_id
-        $('#specProductSelected').textContent = sp.product_name
-        $('#specProductSearch').value = ''
-        $('#specPrice').value = sp.special_price
-        $('#specStart').value = sp.start_date || ''
-        $('#specEnd').value = sp.end_date || ''
-        $('#deleteSpecialBtn').style.display = 'inline-block'
-      } else {
-        $('#specialEditTitle').textContent = 'New Special'
-        $('#specEditId').value = ''
-        $('#specProductId').value = ''
-        specProductId = null
-        $('#specProductSelected').textContent = ''
-        $('#specProductSearch').value = ''
-        $('#specPrice').value = ''
-        $('#specStart').value = ''
-        $('#specEnd').value = ''
-        $('#deleteSpecialBtn').style.display = 'none'
-      }
-      $('#specProductResults').innerHTML = ''
-      openModal('specialEditPanel')
-    }
-
-    $('#specProductSearch').addEventListener('input', debounce(async () => {
-      const q = $('#specProductSearch').value.trim()
-      if (q.length < 2) { $('#specProductResults').innerHTML = ''; return }
-      const results = await window.pos.searchProducts(q)
-      $('#specProductResults').innerHTML = results.slice(0, 8).map(p =>
-        `<div style="padding:5px 8px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;display:flex;justify-content:space-between" data-spec-prod="${esc(p.id)}" data-spec-name="${esc(p.name)}" data-spec-price="${p.price}">
-          <span>${esc(p.name)}</span><span style="color:var(--text-dim)">${money(p.price)}</span>
-        </div>`
-      ).join('')
-    }, 250))
-
-    $('#specProductResults').addEventListener('click', e => {
-      const row = e.target.closest('[data-spec-prod]')
-      if (!row) return
-      specProductId = row.dataset.specProd
-      $('#specProductId').value = specProductId
-      $('#specProductSelected').textContent = `${row.dataset.specName} (${money(parseFloat(row.dataset.specPrice))})`
-      $('#specProductSearch').value = ''
-      $('#specProductResults').innerHTML = ''
-    })
-
-    $('#saveSpecialBtn').addEventListener('click', async () => {
-      const productId = $('#specProductId').value
-      const price = parseFloat($('#specPrice').value)
-      if (!productId) { showToast('Select a product', 'error'); return }
-      if (!price || price <= 0) { showToast('Enter a special price', 'error'); return }
-      await window.pos.upsertSpecial({
-        id: $('#specEditId').value || undefined,
-        product_id: productId,
-        special_price: price,
-        start_date: $('#specStart').value || null,
-        end_date: $('#specEnd').value || null,
-        active: true
-      })
-      showToast('Special saved', 'success')
-      closeModal('specialEditPanel')
-      loadSpecials()
-    })
-
-    $('#cancelSpecialBtn').addEventListener('click', () => { closeModal('specialEditPanel') })
-
-    $('#deleteSpecialBtn').addEventListener('click', async () => {
-      const id = $('#specEditId').value
-      if (!id || !confirm('Delete this special?')) return
-      await window.pos.deleteSpecial(id)
-      showToast('Special deleted', 'success')
-      closeModal('specialEditPanel')
-      loadSpecials()
-    })
 
     // ── Transactions ────────────────────────────────────────────────
 
@@ -2421,7 +2453,14 @@
       $('#setReceiptFooter').value = s.receipt_footer || ''
       $('#setSupaUrl').value = s.supabase_url || ''
       $('#setSupaKey').value = s.supabase_anon_key || ''
-      loadLanSettings()
+      // If client mode, disable Supabase config (server is the single source of truth)
+      if (s.lan_mode === 'client') {
+        $('#supabaseDesc').textContent = 'This register is in client mode — product data is synced from the main server via LAN. Supabase settings are managed on the server.'
+        $('#setSupaUrl').disabled = true
+        $('#setSupaKey').disabled = true
+        $('#saveSupaBtn').disabled = true
+        $('#saveSupaBtn').textContent = 'Managed by Server'
+      }
     }
 
     $('#saveSettingsBtn').addEventListener('click', async () => {
@@ -2448,7 +2487,260 @@
       }
       await window.pos.setSetting('supabase_url', url)
       await window.pos.setSetting('supabase_anon_key', key)
-      showToast('Supabase credentials saved - restart app to connect', 'success')
+      try {
+        const ok = await initSync(url, key)
+        if (ok) {
+          showToast('Connected! Syncing products...', 'info')
+          const { categories: catCount, products: prodCount } = await pullFull()
+          showToast(`Synced ${catCount} categories, ${prodCount} products`, 'success')
+          $('#pullNowBtn').style.display = 'inline-block'
+          loadProducts()
+        } else {
+          showToast('Credentials saved but connection failed', 'error')
+        }
+      } catch (e) {
+        showToast('Saved credentials. Restart app to connect.', 'success')
+      }
+    })
+
+    // Show Pull Now button if already connected
+    {
+      const s = await window.pos.getAllSettings()
+      if (s.supabase_url && s.supabase_anon_key && s.lan_mode !== 'client') {
+        $('#pullNowBtn').style.display = 'inline-block'
+        $('#supaStatus').textContent = 'Connected'
+      }
+    }
+
+    $('#pullNowBtn').addEventListener('click', async () => {
+      const s = await window.pos.getAllSettings()
+      try {
+        const ok = await initSync(s.supabase_url, s.supabase_anon_key)
+        if (!ok) { showToast('Connection failed', 'error'); return }
+        $('#supaStatus').textContent = 'Pulling...'
+        const { categories: catCount, products: prodCount } = await pullAll()
+        showToast(`Synced ${catCount} categories, ${prodCount} products from Supabase`, 'success')
+        $('#supaStatus').textContent = `Last pull: ${new Date().toLocaleTimeString()} (${prodCount} products updated)`
+        loadProducts()
+      } catch (e) {
+        showToast('Pull failed: ' + e.message, 'error')
+        $('#supaStatus').textContent = 'Pull failed'
+      }
+    })
+
+    // ── Backups ──────────────────────────────────────────────────────
+
+    async function loadBackups () {
+      const backups = await window.pos.listBackups()
+      const el = $('#backupList')
+      if (!backups.length) { el.innerHTML = '<p>No backups yet</p>'; return }
+      el.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:12px">
+        <tr style="text-align:left;color:var(--text-dim)"><th style="padding:4px 8px">File</th><th style="padding:4px 8px">Size</th><th style="padding:4px 8px">Date</th><th></th></tr>
+        ${backups.map(b => `<tr style="border-top:1px solid var(--border)">
+          <td style="padding:4px 8px">${esc(b.name)}</td>
+          <td style="padding:4px 8px">${(b.size / 1024).toFixed(0)} KB</td>
+          <td style="padding:4px 8px">${new Date(b.created).toLocaleString()}</td>
+          <td style="padding:4px 8px"><button class="btn btn-outline" style="padding:2px 8px;font-size:10px" data-restore="${esc(b.name)}">Restore</button></td>
+        </tr>`).join('')}
+      </table>`
+    }
+
+    $('#createBackupBtn').addEventListener('click', async () => {
+      const result = await window.pos.createBackup()
+      if (result.error) { showToast(result.error, 'error'); return }
+      showToast(`Backup created: ${result.name}`, 'success')
+      loadBackups()
+    })
+
+    $('#backupList').addEventListener('click', async e => {
+      const btn = e.target.closest('[data-restore]')
+      if (!btn) return
+      const name = btn.dataset.restore
+      if (!confirm(`Restore from backup "${name}"? The app will need to restart.`)) return
+      const result = await window.pos.restoreBackup(name)
+      if (result.error) { showToast(result.error, 'error'); return }
+      alert(result.message)
+    })
+
+    $('#openBackupFolderBtn').addEventListener('click', () => {
+      window.pos.openBackupFolder()
+    })
+
+    // ── App Logs & Health ─────────────────────────────────────────────
+
+    let logLines = [] // raw lines for copy/export
+
+    async function loadLogsTab () {
+      await loadHealth()
+      await loadLogDates()
+      await loadLogs()
+    }
+
+    async function loadHealth () {
+      try {
+        const h = await window.pos.getHealth()
+        const fmt = ts => ts ? new Date(ts).toLocaleString() : '—'
+        $('#healthDbSave').textContent = fmt(h.lastDbSave)
+        $('#healthBackup').textContent = fmt(h.lastBackup)
+        const errEl = $('#healthError')
+        errEl.textContent = fmt(h.lastError)
+        errEl.style.color = h.lastError ? 'var(--red)' : ''
+        $('#healthDbPath').textContent = h.dbPath || '—'
+        $('#healthBackupDir').textContent = h.backupDir || '—'
+        $('#healthUptime').textContent = fmt(h.startedAt)
+      } catch (_) {}
+    }
+
+    async function loadLogDates () {
+      try {
+        const dates = await window.pos.getLogDates()
+        const sel = $('#logDate')
+        sel.innerHTML = dates.length
+          ? dates.map(d => `<option value="${d}">${d}</option>`).join('')
+          : '<option value="">No logs</option>'
+      } catch (_) {
+        $('#logDate').innerHTML = '<option value="">Error</option>'
+      }
+    }
+
+    async function loadLogs () {
+      const date = $('#logDate').value
+      if (!date) { $('#logBody').innerHTML = '<tr><td colspan="5" style="padding:12px;color:var(--text-dim)">No log date selected</td></tr>'; return }
+      try {
+        const result = await window.pos.getLogs({ date })
+        logLines = result.lines || []
+        renderLogLines()
+      } catch (e) {
+        $('#logBody').innerHTML = `<tr><td colspan="5" style="padding:12px;color:var(--red)">Error: ${esc(e.message)}</td></tr>`
+        logLines = []
+      }
+    }
+
+    function renderLogLines () {
+      const sev = $('#logSeverity').value.toUpperCase()
+      const search = $('#logSearch').value.toLowerCase()
+      const filtered = logLines.filter(line => {
+        if (sev && !line.includes(`[${sev}]`)) return false
+        if (search && !line.toLowerCase().includes(search)) return false
+        return true
+      })
+      const body = $('#logBody')
+      if (!filtered.length) {
+        body.innerHTML = '<tr><td colspan="5" style="padding:12px;color:var(--text-dim)">No matching log entries</td></tr>'
+        $('#logCount').textContent = `0 of ${logLines.length} entries`
+        return
+      }
+      const levelColor = l => {
+        if (l === 'FATAL') return 'var(--red)'
+        if (l === 'ERROR') return 'var(--red)'
+        if (l === 'WARN') return 'var(--amber)'
+        return 'var(--text-dim)'
+      }
+      body.innerHTML = filtered.slice(0, 500).map(line => {
+        const m = line.match(/^\[(.+?)\]\s+\[(\w+)\]\s+\[(.+?)\]\s+(.*)$/)
+        if (!m) return `<tr><td colspan="5" style="padding:4px 8px;font-size:11px;color:var(--text-dim)">${esc(line)}</td></tr>`
+        const [, ts, level, source, rest] = m
+        const parts = rest.split(' | ')
+        const msg = parts[0] || ''
+        const detail = parts.slice(1).join(' | ')
+        return `<tr style="border-top:1px solid var(--border)">
+          <td style="padding:4px 8px;white-space:nowrap;font-size:11px">${esc(ts)}</td>
+          <td style="padding:4px 8px;font-weight:600;color:${levelColor(level)}">${esc(level)}</td>
+          <td style="padding:4px 8px;color:var(--text-dim)">${esc(source)}</td>
+          <td style="padding:4px 8px">${esc(msg)}</td>
+          <td style="padding:4px 8px;font-size:11px;color:var(--text-dim);max-width:300px;overflow:hidden;text-overflow:ellipsis" title="${esc(detail)}">${esc(detail)}</td>
+        </tr>`
+      }).join('')
+      $('#logCount').textContent = `Showing ${Math.min(filtered.length, 500)} of ${logLines.length} entries` + (filtered.length > 500 ? ' (limited to 500)' : '')
+    }
+
+    $('#logDate').addEventListener('change', loadLogs)
+    $('#logSeverity').addEventListener('change', renderLogLines)
+    $('#logSearch').addEventListener('input', debounce(renderLogLines, 250))
+    $('#logRefreshBtn').addEventListener('click', loadLogsTab)
+
+    $('#logExportBtn').addEventListener('click', async () => {
+      const date = $('#logDate').value
+      if (!date) return
+      try {
+        const result = await window.pos.exportLogs(date)
+        if (result.error) { showToast(result.error, 'error'); return }
+        showToast(`Logs exported: ${result.path}`, 'success')
+      } catch (e) {
+        showToast('Export failed: ' + e.message, 'error')
+      }
+    })
+
+    $('#logCopyBtn').addEventListener('click', () => {
+      const sev = $('#logSeverity').value.toUpperCase()
+      const search = $('#logSearch').value.toLowerCase()
+      const filtered = logLines.filter(line => {
+        if (sev && !line.includes(`[${sev}]`)) return false
+        if (search && !line.toLowerCase().includes(search)) return false
+        return true
+      })
+      if (!filtered.length) { showToast('No log lines to copy', 'error'); return }
+      navigator.clipboard.writeText(filtered.join('\n')).then(
+        () => showToast(`Copied ${filtered.length} lines`, 'success'),
+        () => showToast('Copy failed', 'error')
+      )
+    })
+
+    $('#logClearBtn').addEventListener('click', async () => {
+      const date = $('#logDate').value
+      if (!date) return
+      if (!confirm(`Clear all logs for ${date}? This cannot be undone.`)) return
+      try {
+        await window.pos.clearLogs(date)
+        showToast(`Logs cleared for ${date}`, 'success')
+        await loadLogDates()
+        await loadLogs()
+      } catch (e) {
+        showToast('Clear failed: ' + e.message, 'error')
+      }
+    })
+
+    // ── Audit Log ────────────────────────────────────────────────────
+
+    async function loadAuditLog () {
+      const today = new Date().toISOString().slice(0, 10)
+      $('#auditDate').value = today
+      await searchAuditLog()
+    }
+
+    async function searchAuditLog () {
+      const opts = {}
+      const date = $('#auditDate').value
+      if (date) opts.date = date
+      const action = $('#auditAction').value
+      if (action) opts.action = action
+      const rows = await window.pos.searchAudit(opts)
+      const body = $('#auditBody')
+      if (!rows.length) {
+        body.innerHTML = '<tr><td colspan="4" style="padding:12px;color:var(--text-dim)">No audit entries found</td></tr>'
+        return
+      }
+      body.innerHTML = rows.map(r => {
+        const t = new Date(r.created_at + 'Z')
+        const actionLabel = {
+          void_item: 'Void Item', no_sale: 'No Sale', discount_sale: 'Discount (Sale)',
+          discount_item: 'Discount (Item)', price_change: 'Price Change', refund: 'Refund',
+          settings_change: 'Settings Change'
+        }[r.action] || r.action
+        return `<tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:8px;white-space:nowrap">${t.toLocaleTimeString()}</td>
+          <td style="padding:8px">${esc(r.staff_name || 'Unknown')}</td>
+          <td style="padding:8px"><span class="badge ${r.action.includes('void') || r.action.includes('refund') ? 'badge-red' : r.action.includes('discount') ? 'badge-yellow' : ''}" style="font-size:11px">${esc(actionLabel)}</span></td>
+          <td style="padding:8px">${esc(r.detail || '')}</td>
+        </tr>`
+      }).join('')
+    }
+
+    $('#auditSearchBtn').addEventListener('click', searchAuditLog)
+    $('#auditTodayBtn').addEventListener('click', () => {
+      $('#auditDate').value = new Date().toISOString().slice(0, 10)
+      $('#auditAction').value = ''
+      searchAuditLog()
     })
 
     // ── LAN Multi-Register ──────────────────────────────────────────
@@ -2463,6 +2755,7 @@
       $('#lanServerIp').value = s.lan_server_ip || ''
       $('#lanClientSecret').value = s.lan_secret || ''
       $('#lanSecret').value = s.lan_secret || '(will be generated on start)'
+      $('#lanAutostart').checked = s.lan_autostart === '1'
 
       updateLanPanel(mode)
 
@@ -2487,6 +2780,11 @@
 
     $$('input[name="lanMode"]').forEach(r => {
       r.addEventListener('change', () => updateLanPanel(r.value))
+    })
+
+    $('#lanAutostart').addEventListener('change', async () => {
+      await window.pos.setSetting('lan_autostart', $('#lanAutostart').checked ? '1' : '0')
+      showToast($('#lanAutostart').checked ? 'LAN will start on next launch' : 'LAN auto-start disabled', 'success')
     })
 
     $('#lanStartServerBtn').addEventListener('click', async () => {
@@ -2626,12 +2924,16 @@
     // ── Page Layout Editor (Unified Grid) ─────────────────────────
 
     let kbButtons = []
-    let gridCols = 10
-    let gridRows = 7
+    // Fixed keyboard grid dimensions — single source of truth
+    const KEYBOARD_GRID_DEFAULT = { columns: 10, rows: 7 }
+    let gridCols = KEYBOARD_GRID_DEFAULT.columns
+    let gridRows = KEYBOARD_GRID_DEFAULT.rows
     let currentPage = 1
     let selectedBtnId = null
     let dragSrcId = null
     let allPages = [1]
+    let pageNames = {}
+    let pageSizes = {} // {pageNum: {cols, rows}}
     let kbProductCache = []
     let kbSelectedProduct = null
     let isDragSelecting = false
@@ -2642,17 +2944,29 @@
 
     // ── Load & Init ────────────────────────────────────────────────
 
-    async function loadKeyboard () {
-      // Load saved grid dimensions
-      const savedCols = await window.pos.getSetting('keyboard_grid_cols')
-      const savedRows = await window.pos.getSetting('keyboard_grid_rows')
-      if (savedCols) { gridCols = parseInt(savedCols); $('#gridCols').value = gridCols }
-      if (savedRows) { gridRows = parseInt(savedRows); $('#gridRows').value = gridRows }
+    function applyPageSize () {
+      const ps = pageSizes[currentPage] || {}
+      gridCols = ps.cols || KEYBOARD_GRID_DEFAULT.columns
+      gridRows = ps.rows || KEYBOARD_GRID_DEFAULT.rows
+      $('#kbGridCols').value = gridCols
+      $('#kbGridRows').value = gridRows
+    }
 
+    async function savePageSize () {
+      pageSizes[currentPage] = { cols: gridCols, rows: gridRows }
+      await window.pos.setSetting('keyboard_page_sizes', JSON.stringify(pageSizes))
+    }
+
+    async function loadKeyboard () {
       kbButtons = await window.pos.getAllButtons()
       const pageRows = await window.pos.getPages()
       allPages = pageRows.length ? pageRows.map(p => p.page) : [1]
       if (!allPages.includes(currentPage)) currentPage = allPages[0] || 1
+      const pnRaw = await window.pos.getSetting('keyboard_page_names')
+      pageNames = pnRaw ? JSON.parse(pnRaw) : {}
+      const psRaw = await window.pos.getSetting('keyboard_page_sizes')
+      pageSizes = psRaw ? JSON.parse(psRaw) : {}
+      applyPageSize()
       renderPageTabs()
       renderGrid()
       closeEditPanel()
@@ -2697,16 +3011,34 @@
     // ── Page Management ─────────────────────────────────────────���──
 
     function renderPageTabs () {
-      $('#pageTabs').innerHTML = allPages.map(p =>
-        `<button class="btn ${p === currentPage ? 'btn-green' : 'btn-outline'}" style="padding:4px 12px;font-size:11px" data-page="${p}">Page ${p}</button>`
-      ).join('')
+      $('#pageTabs').innerHTML = allPages.map(p => {
+        const name = pageNames[p] || `Page ${p}`
+        return `<button class="btn ${p === currentPage ? 'btn-green' : 'btn-outline'}" style="padding:4px 12px;font-size:11px" data-page="${p}" title="Double-click to rename">${esc(name)}</button>`
+      }).join('')
     }
 
     $('#pageTabs').addEventListener('click', e => {
       const btn = e.target.closest('[data-page]')
       if (!btn) return
       currentPage = parseInt(btn.dataset.page)
-      renderPageTabs(); renderGrid(); closeEditPanel()
+      applyPageSize(); renderPageTabs(); renderGrid(); closeEditPanel()
+    })
+
+    $('#pageTabs').addEventListener('dblclick', async e => {
+      const btn = e.target.closest('[data-page]')
+      if (!btn) return
+      const page = parseInt(btn.dataset.page)
+      const current = pageNames[page] || `Page ${page}`
+      const name = prompt('Page name:', current)
+      if (name === null) return
+      if (name.trim()) {
+        pageNames[page] = name.trim()
+      } else {
+        delete pageNames[page]
+      }
+      await window.pos.setSetting('keyboard_page_names', JSON.stringify(pageNames))
+      renderPageTabs()
+      showToast('Page renamed', 'success')
     })
 
     $('#addPageBtn').addEventListener('click', () => {
@@ -2727,15 +3059,332 @@
       showToast('Page deleted', 'success')
     })
 
-    $('#gridCols').addEventListener('change', async e => {
-      gridCols = parseInt(e.target.value)
-      await window.pos.setSetting('keyboard_grid_cols', String(gridCols))
-      renderGrid()
+    $('#copyPageBtn').addEventListener('click', async () => {
+      const newPage = Math.max(...allPages, 0) + 1
+      const result = await window.pos.copyPage(currentPage, newPage)
+      const srcName = pageNames[currentPage] || `Page ${currentPage}`
+      pageNames[newPage] = `${srcName} (copy)`
+      if (pageSizes[currentPage]) pageSizes[newPage] = { ...pageSizes[currentPage] }
+      await window.pos.setSetting('keyboard_page_names', JSON.stringify(pageNames))
+      await window.pos.setSetting('keyboard_page_sizes', JSON.stringify(pageSizes))
+      allPages.push(newPage)
+      currentPage = newPage
+      kbButtons = await window.pos.getAllButtons()
+      renderPageTabs(); renderGrid()
+      showToast(`Copied ${result.count} buttons to new page`, 'success')
     })
-    $('#gridRows').addEventListener('change', async e => {
-      gridRows = parseInt(e.target.value)
-      await window.pos.setSetting('keyboard_grid_rows', String(gridRows))
+
+    let gridSaveTimer = null
+    function onGridSizeInput () {
+      const c = parseInt($('#kbGridCols').value) || KEYBOARD_GRID_DEFAULT.columns
+      const r = parseInt($('#kbGridRows').value) || KEYBOARD_GRID_DEFAULT.rows
+      if (c < 2 || c > 20 || r < 2 || r > 20) return
+      gridCols = c; gridRows = r
       renderGrid()
+      clearTimeout(gridSaveTimer)
+      gridSaveTimer = setTimeout(() => savePageSize(), 500)
+    }
+    $('#kbGridCols').addEventListener('input', onGridSizeInput)
+    $('#kbGridRows').addEventListener('input', onGridSizeInput)
+
+    // ── Undo Stack ──────────────────────────────────────────────────
+
+    const undoStack = [] // array of {buttons: [...snapshots]}
+    const MAX_UNDO = 30
+
+    function pushUndo () {
+      const snapshot = kbButtons.filter(b => (b.page || 1) === currentPage).map(b => ({ ...b }))
+      undoStack.push({ page: currentPage, buttons: snapshot })
+      if (undoStack.length > MAX_UNDO) undoStack.shift()
+    }
+
+    async function performUndo () {
+      if (!undoStack.length) { showToast('Nothing to undo', 'info'); return }
+      const state = undoStack.pop()
+      // Delete all current page buttons, re-insert from snapshot
+      await window.pos.deletePage(state.page)
+      for (const btn of state.buttons) {
+        await window.pos.upsertButton(btn)
+      }
+      kbButtons = await window.pos.getAllButtons()
+      if (currentPage !== state.page) { currentPage = state.page; applyPageSize(); renderPageTabs() }
+      renderGrid()
+      showToast('Undone', 'success')
+    }
+
+    document.addEventListener('keydown', e => {
+      // Don't intercept keyboard shortcuts when typing in form fields
+      const tag = document.activeElement?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
+
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        if ($('#tab-keyboard').classList.contains('active')) {
+          e.preventDefault()
+          performUndo()
+        }
+      }
+      // Ctrl+A select all on keyboard tab
+      if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+        if ($('#tab-keyboard').classList.contains('active')) {
+          e.preventDefault()
+          const pageButtons = kbButtons.filter(b => (b.page || 1) === currentPage && b.active)
+          multiSelected = new Set(pageButtons.map(b => b.id))
+          showBulkPanel()
+        }
+      }
+    })
+
+    // ── Multi-Select & Bulk Actions ─────────────────────────────────
+
+    let multiSelected = new Set()
+
+    $('#selectAllBtn').addEventListener('click', () => {
+      const pageButtons = kbButtons.filter(b => (b.page || 1) === currentPage && b.active)
+      if (multiSelected.size === pageButtons.length && pageButtons.length > 0) {
+        multiSelected.clear()
+        hideBulkPanel()
+      } else {
+        multiSelected = new Set(pageButtons.map(b => b.id))
+        showBulkPanel()
+      }
+    })
+
+    function showBulkPanel () {
+      $$('#kbGrid .kb-cell[data-id]').forEach(cell => {
+        cell.classList.toggle('multi-selected', multiSelected.has(cell.dataset.id))
+      })
+      $('#kbBulkTitle').textContent = `${multiSelected.size} selected`
+      $('#kbBulkPanel').style.display = ''
+      $('#kbEditPanel').classList.remove('active')
+    }
+
+    function hideBulkPanel () {
+      multiSelected.clear()
+      $$('#kbGrid .kb-cell').forEach(c => c.classList.remove('multi-selected'))
+      $('#kbBulkPanel').style.display = 'none'
+    }
+
+    $('#kbBulkClose').addEventListener('click', hideBulkPanel)
+    $('#kbBulkDeselectBtn').addEventListener('click', hideBulkPanel)
+
+    // Bulk color apply
+    $('#kbBulkColorBtn').addEventListener('click', async () => {
+      if (!multiSelected.size) return
+      pushUndo()
+      const bg = $('#kbBulkBg').value
+      const text = $('#kbBulkText').value
+      for (const id of multiSelected) {
+        const btn = kbButtons.find(b => b.id === id)
+        if (btn) await window.pos.upsertButton({ ...btn, bg_color: bg, color: text })
+      }
+      kbButtons = await window.pos.getAllButtons()
+      renderGrid()
+      showBulkPanel()
+      showToast(`Colors applied to ${multiSelected.size} buttons`, 'success')
+    })
+
+    // Bulk move
+    async function bulkMove (dr, dc) {
+      if (!multiSelected.size) return
+      const selected = [...multiSelected].map(id => kbButtons.find(b => b.id === id)).filter(Boolean)
+      // Check bounds
+      for (const btn of selected) {
+        const nr = (btn.grid_row || 0) + dr, nc = (btn.grid_col || 0) + dc
+        if (nr < 0 || nc < 0 || nc + (btn.col_span || 1) > gridCols || nr + (btn.row_span || 1) > gridRows) {
+          showToast('Move blocked — would go out of bounds', 'error'); return
+        }
+      }
+      // Check collisions with non-selected buttons
+      const selIds = new Set(multiSelected)
+      const otherBtns = kbButtons.filter(b => (b.page || 1) === currentPage && b.active && !selIds.has(b.id))
+      const otherOccupied = new Set()
+      for (const b of otherBtns) {
+        for (let r = 0; r < (b.row_span || 1); r++)
+          for (let c = 0; c < (b.col_span || 1); c++)
+            otherOccupied.add(`${(b.grid_row || 0) + r}-${(b.grid_col || 0) + c}`)
+      }
+      for (const btn of selected) {
+        const nr = (btn.grid_row || 0) + dr, nc = (btn.grid_col || 0) + dc
+        for (let r = 0; r < (btn.row_span || 1); r++)
+          for (let c = 0; c < (btn.col_span || 1); c++)
+            if (otherOccupied.has(`${nr + r}-${nc + c}`)) {
+              showToast('Move blocked — would overlap other buttons', 'error'); return
+            }
+      }
+      pushUndo()
+      for (const btn of selected) {
+        await window.pos.upsertButton({ ...btn, grid_row: (btn.grid_row || 0) + dr, grid_col: (btn.grid_col || 0) + dc })
+      }
+      kbButtons = await window.pos.getAllButtons()
+      renderGrid()
+      showBulkPanel()
+      showToast(`Moved ${selected.length} buttons`, 'success')
+    }
+
+    $('#kbBulkUp').addEventListener('click', () => bulkMove(-1, 0))
+    $('#kbBulkDown').addEventListener('click', () => bulkMove(1, 0))
+    $('#kbBulkLeft').addEventListener('click', () => bulkMove(0, -1))
+    $('#kbBulkRight').addEventListener('click', () => bulkMove(0, 1))
+
+    // Bulk delete
+    $('#kbBulkDeleteBtn').addEventListener('click', async () => {
+      if (!multiSelected.size) return
+      if (!confirm(`Delete ${multiSelected.size} buttons?`)) return
+      pushUndo()
+      for (const id of multiSelected) await window.pos.deleteButton(id)
+      showToast(`Deleted ${multiSelected.size} buttons`, 'success')
+      multiSelected.clear()
+      kbButtons = await window.pos.getAllButtons()
+      renderGrid()
+      hideBulkPanel()
+    })
+
+    // ── Page Map (Tree View) ────────────────────────────────────────
+
+    $('#pageTreeBtn').addEventListener('click', () => {
+      renderPageTree()
+      const modal = $('#pageTreeModal')
+      modal.style.display = 'flex'
+    })
+
+    $('#closePageTree').addEventListener('click', () => {
+      $('#pageTreeModal').style.display = 'none'
+    })
+
+    $('#pageTreeModal').addEventListener('click', e => {
+      if (e.target === e.currentTarget) $('#pageTreeModal').style.display = 'none'
+    })
+
+    function renderPageTree () {
+      const allActive = kbButtons.filter(b => b.active)
+      const links = allActive.filter(b => b.type === 'page_link' && b.parent_id)
+      const backLinks = allActive.filter(b => b.type === 'back_home')
+
+      // Build adjacency: page -> [{label, targetPage}]
+      const adj = {}
+      const allPagesSet = new Set(allActive.map(b => b.page || 1))
+      for (const p of allPagesSet) adj[p] = []
+      for (const link of links) {
+        const fromPage = link.page || 1
+        const toPage = parseInt(link.parent_id)
+        if (!adj[fromPage]) adj[fromPage] = []
+        adj[fromPage].push({ label: link.label, toPage })
+      }
+
+      // Find roots: pages not targeted by any page_link (typically page 1)
+      const targeted = new Set(links.map(l => parseInt(l.parent_id)))
+      const roots = [...allPagesSet].filter(p => !targeted.has(p)).sort((a, b) => a - b)
+      if (!roots.length) roots.push(Math.min(...allPagesSet))
+
+      // Build tree HTML with indentation
+      const visited = new Set()
+      function buildTree (page, depth) {
+        if (visited.has(page)) return `<div style="padding-left:${depth * 24}px;color:var(--text-dim)">&#8635; ${pageName(page)} <span style="font-size:10px">(circular)</span></div>`
+        visited.add(page)
+        const name = pageName(page)
+        const ps = pageSizes[page] || {}
+        const cols = ps.cols || KEYBOARD_GRID_DEFAULT.columns
+        const rows = ps.rows || KEYBOARD_GRID_DEFAULT.rows
+        const btnCount = allActive.filter(b => (b.page || 1) === page).length
+        const hasBack = backLinks.some(b => (b.page || 1) === page)
+        const icon = depth === 0 ? '&#127968;' : '&#128196;'
+        let html = `<div style="padding-left:${depth * 24}px;cursor:pointer" class="tree-node" data-tree-page="${page}">
+          <span style="opacity:.7">${icon}</span>
+          <b>${esc(name)}</b>
+          <span style="color:var(--text-dim);font-size:11px">${cols}×${rows} &middot; ${btnCount} btns${hasBack ? ' &middot; &#8617; back' : ''}</span>
+        </div>`
+        const children = adj[page] || []
+        for (const child of children) {
+          html += `<div style="padding-left:${depth * 24 + 12}px;color:var(--text-dim);font-size:11px">&#8627; via "${esc(child.label)}"</div>`
+          html += buildTree(child.toPage, depth + 1)
+        }
+        return html
+      }
+
+      let html = ''
+      for (const root of roots) {
+        html += buildTree(root, 0)
+      }
+      // Show orphan pages (pages with no links to/from)
+      const orphans = [...allPagesSet].filter(p => !visited.has(p))
+      if (orphans.length) {
+        html += '<div style="margin-top:12px;color:var(--text-dim);font-size:11px;font-weight:600">Unlinked pages:</div>'
+        for (const p of orphans) html += buildTree(p, 0)
+      }
+
+      $('#pageTreeContent').innerHTML = html
+
+      // Click a tree node to jump to that page
+      $$('#pageTreeContent .tree-node').forEach(node => {
+        node.addEventListener('click', () => {
+          currentPage = parseInt(node.dataset.treePage)
+          applyPageSize(); renderPageTabs(); renderGrid(); closeEditPanel()
+          $('#pageTreeModal').style.display = 'none'
+        })
+      })
+    }
+
+    function pageName (p) {
+      return pageNames[p] || `Page ${p}`
+    }
+
+    $('#exportKbBtn').addEventListener('click', async () => {
+      const data = await window.pos.exportKeyboard()
+      const json = JSON.stringify(data, null, 2)
+      const blob = new Blob([json], { type: 'application/json' })
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = `keyboard-layout-${new Date().toISOString().slice(0,10)}.json`
+      a.click()
+      URL.revokeObjectURL(a.href)
+      showToast('Layout exported', 'success')
+    })
+
+    $('#importKbBtn').addEventListener('click', () => {
+      $('#importKbFile').click()
+    })
+
+    $('#importKbFile').addEventListener('change', async e => {
+      const file = e.target.files[0]
+      if (!file) return
+      try {
+        const text = await file.text()
+        const data = JSON.parse(text)
+        if (!data.buttons || !Array.isArray(data.buttons)) {
+          showToast('Invalid layout file: no buttons array', 'error'); return
+        }
+        if (!confirm(`Import ${data.buttons.length} buttons? This will replace the current layout.`)) return
+        const result = await window.pos.importKeyboard(data)
+        if (result.error) { showToast(result.error, 'error'); return }
+        showToast(`Imported ${result.count} buttons`, 'success')
+        await loadKeyboard()
+      } catch (err) {
+        showToast('Failed to parse file: ' + err.message, 'error')
+      }
+      e.target.value = ''
+    })
+
+    $('#resetKbBtn').addEventListener('click', async () => {
+      if (!confirm('Reset keyboard to factory default?')) return
+      if (!confirm('Are you sure? All custom buttons will be lost.')) return
+      await window.pos.resetKeyboard()
+      showToast('Keyboard reset to default', 'success')
+      await loadKeyboard()
+    })
+
+    $('#validateKbBtn').addEventListener('click', async () => {
+      const result = await window.pos.validateKeyboard()
+      if (result.issues.length === 0) {
+        showToast(`Layout OK: ${result.button_count} buttons across ${result.page_count} pages`, 'success')
+      } else {
+        const msgs = result.issues.map(i => {
+          if (i.type === 'overlap') return `Overlap on page ${i.page} at row ${i.row}, col ${i.col}: ${i.buttons.join(' & ')}`
+          if (i.type === 'broken_link') return `"${i.button}" on page ${i.page} links to missing page ${i.target_page}`
+          if (i.type === 'out_of_bounds') return `"${i.button}" on page ${i.page} at row ${i.row}, col ${i.col} (${i.span}) exceeds grid bounds`
+          return JSON.stringify(i)
+        })
+        alert('Layout issues found:\n\n' + msgs.join('\n'))
+      }
     })
 
     // ── Grid Rendering ─────────────────────────────────────────────
@@ -2774,12 +3423,19 @@
           if (btn) {
             const cs = btn.col_span || 1, rs = btn.row_span || 1
             const sel = btn.id === selectedBtnId ? ' selected' : ''
+            let extra = ''
+            if (btn.type === 'page_link' && btn.parent_id) {
+              const tgtName = pageNames[parseInt(btn.parent_id)] || `Page ${btn.parent_id}`
+              extra = `<div class="kb-cell-price" style="font-size:8px;opacity:.7">&rarr; ${esc(tgtName)}</div>`
+            } else if (btn.price > 0) {
+              extra = `<div class="kb-cell-price">$${btn.price.toFixed(2)}</div>`
+            }
             html += `<div class="kb-cell${sel}" data-id="${esc(btn.id)}" data-row="${r}" data-col="${c}" draggable="true"
               style="background:${esc(btn.bg_color)};color:${esc(btn.color)};grid-column:${c+1}/span ${cs};grid-row:${r+1}/span ${rs}">
               <span class="kb-cell-type">${typeLabel(btn.type)}</span>
               ${btn.image ? `<img src="${btn.image}">` : ''}
               ${esc(btn.label)}
-              ${btn.price > 0 ? `<div class="kb-cell-price">$${btn.price.toFixed(2)}</div>` : ''}
+              ${extra}
             </div>`
           } else if (!occupied.has(key)) {
             html += `<div class="kb-cell empty-cell" data-row="${r}" data-col="${c}"
@@ -2804,7 +3460,7 @@
         reprint:'rpt', pricecheck:'chk', errcorrect:'err', recall:'rcl', pctdiscount:'%',
         pctone:'%1', movedrawer:'drw', ubereats:'ube', viewor:'...', digit:'#',
         clear:'clr', qtyx:'qty', codeenter:'plu', subtotal:'sub', pay_cash:'pay',
-        pay_card:'card', park:'park', page_link:'pg', back_home:'home', num_display:'LCD' }
+        pay_card:'card', park:'park', page_link:'pg', back_home:'home', num_display:'LCD', cart_display:'cart' }
       return map[type] || type
     }
 
@@ -2815,7 +3471,17 @@
       const cell = e.target.closest('.kb-cell')
       if (!cell) return
       const id = cell.dataset.id
+      if (id && (e.ctrlKey || e.metaKey)) {
+        // Ctrl+click: toggle in/out of multi-select
+        if (multiSelected.has(id)) multiSelected.delete(id)
+        else multiSelected.add(id)
+        if (multiSelected.size > 1) showBulkPanel()
+        else if (multiSelected.size === 1) { const sid = [...multiSelected][0]; hideBulkPanel(); selectButton(sid) }
+        else hideBulkPanel()
+        return
+      }
       if (id) {
+        hideBulkPanel()
         selectButton(id)
       } else {
         const row = parseInt(cell.dataset.row), col = parseInt(cell.dataset.col)
@@ -2833,49 +3499,220 @@
       }
     })
 
-    $('#kbGrid').addEventListener('dragstart', e => {
-      const cell = e.target.closest('.kb-cell[data-id]')
-      if (!cell) { e.preventDefault(); return }
-      dragSrcId = cell.dataset.id
-      cell.classList.add('dragging')
-      e.dataTransfer.effectAllowed = 'move'
-    })
-    $('#kbGrid').addEventListener('dragover', e => {
-      e.preventDefault(); e.dataTransfer.dropEffect = 'move'
-      const cell = e.target.closest('.kb-cell')
-      if (cell) cell.classList.add('drag-over')
-    })
-    $('#kbGrid').addEventListener('dragleave', e => {
-      const cell = e.target.closest('.kb-cell')
-      if (cell) cell.classList.remove('drag-over')
-    })
-    $('#kbGrid').addEventListener('drop', async e => {
-      e.preventDefault()
-      $$('#kbGrid .drag-over').forEach(c => c.classList.remove('drag-over'))
-      const target = e.target.closest('.kb-cell')
-      if (!target || !dragSrcId) return
-      const srcBtn = kbButtons.find(b => b.id === dragSrcId)
-      if (!srcBtn) return
-      const tgtRow = parseInt(target.dataset.row), tgtCol = parseInt(target.dataset.col), tgtId = target.dataset.id
+    // ── Multi-drag with ghost preview ──────────────────────────────
+    let bulkDragging = false
+    let bulkDragAnchor = null   // {row, col} of the grabbed button
+    let bulkDragOffset = null   // {dr, dc} current offset from anchor
+    let bulkGhostEls = []       // ghost div elements
 
-      if (tgtId && tgtId !== dragSrcId) {
-        const tgtBtn = kbButtons.find(b => b.id === tgtId)
-        if (tgtBtn) {
-          const sr = srcBtn.grid_row, sc = srcBtn.grid_col
-          await window.pos.upsertButton({ ...srcBtn, grid_row: tgtBtn.grid_row, grid_col: tgtBtn.grid_col })
-          await window.pos.upsertButton({ ...tgtBtn, grid_row: sr, grid_col: sc })
-        }
-      } else if (!tgtId) {
-        await window.pos.upsertButton({ ...srcBtn, grid_row: tgtRow, grid_col: tgtCol })
+    function getCellFromPoint (x, y) {
+      const grid = $('#kbGrid')
+      const rect = grid.getBoundingClientRect()
+      const gapPx = 3
+      const cellW = (rect.width - (gridCols - 1) * gapPx) / gridCols
+      const cellH = (rect.height - (gridRows - 1) * gapPx) / gridRows
+      const col = Math.floor((x - rect.left) / (cellW + gapPx))
+      const row = Math.floor((y - rect.top) / (cellH + gapPx))
+      return { row: Math.max(0, Math.min(row, gridRows - 1)), col: Math.max(0, Math.min(col, gridCols - 1)) }
+    }
+
+    function showBulkGhosts (dr, dc) {
+      removeBulkGhosts()
+      const grid = $('#kbGrid')
+      const rect = grid.getBoundingClientRect()
+      const gapPx = 3
+      const cellW = (rect.width - (gridCols - 1) * gapPx) / gridCols
+      const cellH = (rect.height - (gridRows - 1) * gapPx) / gridRows
+      const selected = [...multiSelected].map(id => kbButtons.find(b => b.id === id)).filter(Boolean)
+
+      // Check if position is valid
+      let valid = true
+      const selIds = new Set(multiSelected)
+      const otherOccupied = new Set()
+      const otherBtns = kbButtons.filter(b => (b.page || 1) === currentPage && b.active && !selIds.has(b.id))
+      for (const b of otherBtns) {
+        for (let r = 0; r < (b.row_span || 1); r++)
+          for (let c = 0; c < (b.col_span || 1); c++)
+            otherOccupied.add(`${(b.grid_row || 0) + r}-${(b.grid_col || 0) + c}`)
       }
-      dragSrcId = null
-      kbButtons = await window.pos.getAllButtons()
-      renderGrid()
-      showToast('Button moved', 'success')
+      for (const btn of selected) {
+        const nr = (btn.grid_row || 0) + dr, nc = (btn.grid_col || 0) + dc
+        if (nr < 0 || nc < 0) { valid = false; break }
+        for (let r = 0; r < (btn.row_span || 1); r++)
+          for (let c = 0; c < (btn.col_span || 1); c++)
+            if (otherOccupied.has(`${nr + r}-${nc + c}`)) { valid = false; break }
+        if (!valid) break
+      }
+
+      const borderColor = valid ? 'rgba(16,185,129,.8)' : 'rgba(239,68,68,.8)'
+      const bgColor = valid ? 'rgba(16,185,129,.15)' : 'rgba(239,68,68,.1)'
+
+      for (const btn of selected) {
+        const nr = (btn.grid_row || 0) + dr, nc = (btn.grid_col || 0) + dc
+        const cs = btn.col_span || 1, rs = btn.row_span || 1
+        const ghost = document.createElement('div')
+        ghost.style.cssText = `position:absolute;pointer-events:none;z-index:10;border:2px dashed ${borderColor};background:${bgColor};border-radius:4px;transition:left .06s,top .06s;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${borderColor};opacity:.9`
+        ghost.style.left = (nc * (cellW + gapPx)) + 'px'
+        ghost.style.top = (nr * (cellH + gapPx)) + 'px'
+        ghost.style.width = (cs * cellW + (cs - 1) * gapPx) + 'px'
+        ghost.style.height = (rs * cellH + (rs - 1) * gapPx) + 'px'
+        ghost.textContent = btn.label?.split('\n')[0] || ''
+        grid.appendChild(ghost)
+        bulkGhostEls.push(ghost)
+      }
+    }
+
+    function removeBulkGhosts () {
+      bulkGhostEls.forEach(g => g.remove())
+      bulkGhostEls = []
+    }
+
+    let bulkDragMoved = false
+    let bulkDragClickId = null  // track which button was mousedown'd for click-to-deselect
+
+    $('#kbGrid').addEventListener('mousedown', e => {
+      const cell = e.target.closest('.kb-cell[data-id]')
+      if (!cell) return
+      const id = cell.dataset.id
+      if (multiSelected.size > 1 && multiSelected.has(id) && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault()
+        bulkDragging = true
+        bulkDragMoved = false
+        bulkDragClickId = id
+        bulkDragAnchor = { row: parseInt(cell.dataset.row), col: parseInt(cell.dataset.col) }
+        bulkDragOffset = { dr: 0, dc: 0 }
+        $('#kbGrid').style.position = 'relative'
+      }
     })
-    $('#kbGrid').addEventListener('dragend', () => {
+
+    document.addEventListener('mousemove', e => {
+      if (!bulkDragging) return
+      const pos = getCellFromPoint(e.clientX, e.clientY)
+      const dr = pos.row - bulkDragAnchor.row
+      const dc = pos.col - bulkDragAnchor.col
+      if (!bulkDragMoved && (dr !== 0 || dc !== 0)) {
+        bulkDragMoved = true
+        $$('#kbGrid .kb-cell.multi-selected').forEach(c => c.classList.add('dragging'))
+      }
+      if (dr !== bulkDragOffset.dr || dc !== bulkDragOffset.dc) {
+        bulkDragOffset = { dr, dc }
+        showBulkGhosts(dr, dc)
+      }
+    })
+
+    document.addEventListener('mouseup', async () => {
+      if (!bulkDragging) return
+      bulkDragging = false
       $$('#kbGrid .dragging').forEach(c => c.classList.remove('dragging'))
-      dragSrcId = null
+      removeBulkGhosts()
+      if (bulkDragMoved) {
+        const { dr, dc } = bulkDragOffset
+        if (dr !== 0 || dc !== 0) {
+          await bulkMove(dr, dc)
+        }
+      } else if (bulkDragClickId) {
+        // Click without drag — deselect all, select the clicked button
+        hideBulkPanel()
+        selectButton(bulkDragClickId)
+      }
+      bulkDragOffset = null
+      bulkDragAnchor = null
+      bulkDragClickId = null
+    })
+
+    // Single-button drag — also uses custom mouse approach for proper size preview
+    // Disable HTML5 drag on all grid cells
+    $('#kbGrid').addEventListener('dragstart', e => { e.preventDefault() })
+
+    // Single-button mousedown (when not in multi-select)
+    let singleDragging = false
+    let singleDragBtn = null
+    let singleDragAnchor = null
+    let singleDragMoved = false
+
+    $('#kbGrid').addEventListener('mousedown', e => {
+      if (bulkDragging) return
+      const cell = e.target.closest('.kb-cell[data-id]')
+      if (!cell) return
+      if (multiSelected.size > 1) return // handled by bulk drag above
+      const id = cell.dataset.id
+      const btn = kbButtons.find(b => b.id === id)
+      if (!btn) return
+      singleDragging = true
+      singleDragMoved = false
+      singleDragBtn = btn
+      singleDragAnchor = { row: parseInt(cell.dataset.row), col: parseInt(cell.dataset.col) }
+      e.preventDefault()
+    })
+
+    document.addEventListener('mousemove', e => {
+      if (!singleDragging || !singleDragBtn) return
+      const pos = getCellFromPoint(e.clientX, e.clientY)
+      const dr = pos.row - singleDragAnchor.row
+      const dc = pos.col - singleDragAnchor.col
+      if (!singleDragMoved && (dr !== 0 || dc !== 0)) {
+        singleDragMoved = true
+        const srcCell = $(`#kbGrid .kb-cell[data-id="${singleDragBtn.id}"]`)
+        if (srcCell) srcCell.classList.add('dragging')
+        $('#kbGrid').style.position = 'relative'
+      }
+      if (singleDragMoved) {
+        removeBulkGhosts()
+        const btn = singleDragBtn
+        const nr = (btn.grid_row || 0) + dr, nc = (btn.grid_col || 0) + dc
+        const cs = btn.col_span || 1, rs = btn.row_span || 1
+        const valid = nr >= 0 && nc >= 0 && nc + cs <= gridCols && nr + rs <= gridRows
+        const grid = $('#kbGrid')
+        const rect = grid.getBoundingClientRect()
+        const gapPx = 3
+        const cellW = (rect.width - (gridCols - 1) * gapPx) / gridCols
+        const cellH = (rect.height - (gridRows - 1) * gapPx) / gridRows
+        const borderColor = valid ? 'rgba(16,185,129,.8)' : 'rgba(239,68,68,.8)'
+        const bgColor = valid ? 'rgba(16,185,129,.15)' : 'rgba(239,68,68,.1)'
+        const ghost = document.createElement('div')
+        ghost.style.cssText = `position:absolute;pointer-events:none;z-index:10;border:2px dashed ${borderColor};background:${bgColor};border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${borderColor};opacity:.9`
+        ghost.style.left = (nc * (cellW + gapPx)) + 'px'
+        ghost.style.top = (nr * (cellH + gapPx)) + 'px'
+        ghost.style.width = (cs * cellW + (cs - 1) * gapPx) + 'px'
+        ghost.style.height = (rs * cellH + (rs - 1) * gapPx) + 'px'
+        ghost.textContent = btn.label?.split('\n')[0] || ''
+        grid.appendChild(ghost)
+        bulkGhostEls.push(ghost)
+      }
+    })
+
+    document.addEventListener('mouseup', async () => {
+      if (!singleDragging) return
+      singleDragging = false
+      $$('#kbGrid .dragging').forEach(c => c.classList.remove('dragging'))
+      removeBulkGhosts()
+      if (singleDragMoved && singleDragBtn) {
+        const pos = getCellFromPoint(event.clientX, event.clientY)
+        const dr = pos.row - singleDragAnchor.row
+        const dc = pos.col - singleDragAnchor.col
+        if (dr !== 0 || dc !== 0) {
+          const btn = singleDragBtn
+          const nr = (btn.grid_row || 0) + dr, nc = (btn.grid_col || 0) + dc
+          const cs = btn.col_span || 1, rs = btn.row_span || 1
+          if (nr >= 0 && nc >= 0 && nc + cs <= gridCols && nr + rs <= gridRows) {
+            // Check if target has a button to swap with
+            const tgtBtn = kbButtons.find(b => b.id !== btn.id && (b.page || 1) === currentPage && b.active && b.grid_row === pos.row && b.grid_col === pos.col)
+            pushUndo()
+            if (tgtBtn) {
+              const sr = btn.grid_row, sc = btn.grid_col
+              await window.pos.upsertButton({ ...btn, grid_row: tgtBtn.grid_row, grid_col: tgtBtn.grid_col })
+              await window.pos.upsertButton({ ...tgtBtn, grid_row: sr, grid_col: sc })
+            } else {
+              await window.pos.upsertButton({ ...btn, grid_row: nr, grid_col: nc })
+            }
+            kbButtons = await window.pos.getAllButtons()
+            renderGrid()
+            showToast('Button moved', 'success')
+          }
+        }
+      }
+      singleDragBtn = null
+      singleDragAnchor = null
     })
 
     // ── Drag-Select Empty Cells ────────────────────────────────────
@@ -2975,6 +3812,7 @@
     // ── Edit Panel ─────────────────────────────────────────────────
 
     function selectButton (id) {
+      multiSelected.clear()
       selectedBtnId = id
       const btn = kbButtons.find(b => b.id === id)
       if (!btn) return
@@ -3001,6 +3839,7 @@
       $('#kbEditPanel').classList.add('active')
       $('#kbEditPanel').dataset.row = row
       $('#kbEditPanel').dataset.col = col
+      updateTypeFields()
       updateLivePreview()
     }
 
@@ -3023,6 +3862,10 @@
       $('#kbEditPanel').classList.add('active')
       $('#kbEditPanel').dataset.row = btn.grid_row || 0
       $('#kbEditPanel').dataset.col = btn.grid_col || 0
+      updateTypeFields()
+      if (btn.type === 'page_link' && btn.parent_id) {
+        $('#kbTargetPage').value = btn.parent_id
+      }
       updateLivePreview()
     }
 
@@ -3030,6 +3873,7 @@
       selectedBtnId = null
       activeSelRange = null
       $('#kbEditPanel').classList.remove('active')
+      hideBulkPanel()
       renderGrid()
     }
 
@@ -3043,6 +3887,40 @@
     ;['kbLabel', 'kbBgColor', 'kbColor'].forEach(id => {
       $(`#${id}`).addEventListener('input', updateLivePreview)
     })
+
+    // Live-update grid cell size when col/row span changes
+    ;['kbColSpan', 'kbRowSpan'].forEach(id => {
+      $(`#${id}`).addEventListener('input', () => {
+        const editId = $('#kbEditId').value
+        if (!editId) return
+        const cell = $(`#kbGrid .kb-cell[data-id="${editId}"]`)
+        if (!cell) return
+        const cs = parseInt($('#kbColSpan').value) || 1
+        const rs = parseInt($('#kbRowSpan').value) || 1
+        const col = parseInt(cell.dataset.col)
+        const row = parseInt(cell.dataset.row)
+        cell.style.gridColumn = `${col + 1} / span ${cs}`
+        cell.style.gridRow = `${row + 1} / span ${rs}`
+      })
+    })
+
+    // Show/hide target page dropdown based on type
+    function updateTypeFields () {
+      const type = $('#kbType').value
+      const pageLinkRow = $('#kbPageLinkRow')
+      if (type === 'page_link') {
+        pageLinkRow.style.display = 'flex'
+        // Populate target page options
+        const sel = $('#kbTargetPage')
+        sel.innerHTML = allPages.map(p => {
+          const name = pageNames[p] || `Page ${p}`
+          return `<option value="${p}">${esc(name)} (${p})</option>`
+        }).join('')
+      } else {
+        pageLinkRow.style.display = 'none'
+      }
+    }
+    $('#kbType').addEventListener('change', updateTypeFields)
 
     $('#kbCloseEdit').addEventListener('click', closeEditPanel)
     $('#kbCancelBtn').addEventListener('click', closeEditPanel)
@@ -3072,24 +3950,55 @@
     $('#kbSaveBtn').addEventListener('click', async () => {
       const label = $('#kbLabel').value.trim()
       if (!label) { showToast('Label is required', 'error'); return }
+      const editId = $('#kbEditId').value || null
+      const colSpan = parseInt($('#kbColSpan').value) || 1
+      const rowSpan = parseInt($('#kbRowSpan').value) || 1
+      const gridRow = parseInt($('#kbEditPanel').dataset.row) || 0
+      const gridCol = parseInt($('#kbEditPanel').dataset.col) || 0
+
+      // Validate span doesn't exceed grid
+      if (gridCol + colSpan > gridCols || gridRow + rowSpan > gridRows) {
+        showToast('Button extends beyond grid boundary', 'error'); return
+      }
+
+      // Check for overlap with other buttons (exclude self when editing)
+      const pageButtons = kbButtons.filter(b => (b.page || 1) === currentPage && b.active && b.id !== editId)
+      const occupied = new Set()
+      for (const b of pageButtons) {
+        const r = b.grid_row || 0, c = b.grid_col || 0
+        for (let dr = 0; dr < (b.row_span || 1); dr++)
+          for (let dc = 0; dc < (b.col_span || 1); dc++)
+            occupied.add(`${r + dr}-${c + dc}`)
+      }
+      for (let dr = 0; dr < rowSpan; dr++) {
+        for (let dc = 0; dc < colSpan; dc++) {
+          if (occupied.has(`${gridRow + dr}-${gridCol + dc}`)) {
+            showToast('New size overlaps another button', 'error'); return
+          }
+        }
+      }
+
+      const btnType = $('#kbType').value
       const btn = {
-        id: $('#kbEditId').value || undefined,
+        id: editId || undefined,
         label,
-        type: $('#kbType').value,
+        type: btnType,
         price: parseFloat($('#kbPrice').value) || 0,
         category_filter: $('#kbCatFilter').value.trim() || null,
         alpha_range: $('#kbAlphaRange').value.trim() || null,
         color: $('#kbColor').value,
         bg_color: $('#kbBgColor').value,
-        col_span: parseInt($('#kbColSpan').value) || 1,
-        row_span: parseInt($('#kbRowSpan').value) || 1,
-        grid_row: parseInt($('#kbEditPanel').dataset.row) || 0,
-        grid_col: parseInt($('#kbEditPanel').dataset.col) || 0,
+        col_span: colSpan,
+        row_span: rowSpan,
+        grid_row: gridRow,
+        grid_col: gridCol,
         page: currentPage,
         position: 'grid',
         image: $('#kbImageData').value || null,
+        parent_id: btnType === 'page_link' ? ($('#kbTargetPage').value || null) : null,
         active: true
       }
+      pushUndo()
       await window.pos.upsertButton(btn)
       showToast('Button saved', 'success')
       kbButtons = await window.pos.getAllButtons()
@@ -3099,6 +4008,7 @@
     $('#kbDeleteBtn').addEventListener('click', async () => {
       const id = $('#kbEditId').value
       if (!id || !confirm('Delete this button?')) return
+      pushUndo()
       await window.pos.deleteButton(id)
       showToast('Button deleted', 'success')
       kbButtons = await window.pos.getAllButtons()

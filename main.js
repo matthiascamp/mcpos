@@ -1,21 +1,83 @@
-const { app, BrowserWindow, ipcMain, globalShortcut } = require('electron')
+const { app, BrowserWindow, ipcMain, globalShortcut, shell } = require('electron')
 const path = require('path')
 const fs = require('fs')
 const { v4: uuid } = require('uuid')
 const lanSync = require('./lan-sync')
 
 let mainWindow
+let customerWindow = null
 let db
 let saveTimer = null
+let dailyBackupTimer = null
 
 const DB_PATH = path.join(app.getPath('userData'), 'crisp-pos.sqlite')
 const SCHEMA_PATH = path.join(__dirname, 'db', 'schema.sql')
+const LOG_DIR = path.join(app.getPath('userData'), 'logs')
+const BACKUP_DIR = path.join(app.getPath('userData'), 'backups')
+
+// ─── App Logging System ──────────────────────────────────────────────────────
+// File-based logging: {userData}/logs/app-YYYY-MM-DD.log
+// Levels: info, warn, error, fatal
+
+const appHealth = {
+  lastDbSave: null,
+  lastBackup: null,
+  lastError: null,
+  dbPath: DB_PATH,
+  backupDir: BACKUP_DIR,
+  logDir: LOG_DIR,
+  startedAt: new Date().toISOString()
+}
+
+function appLog (level, source, message, detail) {
+  const ts = new Date().toISOString()
+  const entry = { ts, level, source, message, detail: detail || null }
+  const line = `[${ts}] [${level.toUpperCase()}] [${source}] ${message}${detail ? ' | ' + (typeof detail === 'string' ? detail : JSON.stringify(detail)) : ''}`
+
+  // Console output
+  if (level === 'error' || level === 'fatal') console.error(line)
+  else console.log(line)
+
+  // Write to log file
+  try {
+    if (!fs.existsSync(LOG_DIR)) fs.mkdirSync(LOG_DIR, { recursive: true })
+    const logFile = path.join(LOG_DIR, `app-${ts.slice(0, 10)}.log`)
+    fs.appendFileSync(logFile, line + '\n')
+  } catch (_) {
+    // Last resort — can't even log
+  }
+
+  if (level === 'error' || level === 'fatal') {
+    appHealth.lastError = ts
+  }
+
+  // Prune old log files — keep last 14 days
+  try {
+    const files = fs.readdirSync(LOG_DIR).filter(f => f.startsWith('app-') && f.endsWith('.log')).sort()
+    while (files.length > 14) {
+      const old = files.shift()
+      try { fs.unlinkSync(path.join(LOG_DIR, old)) } catch (_) {}
+    }
+  } catch (_) {}
+}
+
+// Crash safety: catch unhandled errors
+process.on('uncaughtException', (err) => {
+  appLog('fatal', 'process', 'Uncaught exception', err.stack || err.message)
+  // Try to save DB before crashing
+  try { if (db) saveDB() } catch (_) {}
+})
+
+process.on('unhandledRejection', (reason) => {
+  appLog('error', 'process', 'Unhandled promise rejection', reason?.stack || String(reason))
+})
 
 async function initDatabase() {
   const initSqlJs = require('sql.js')
   const SQL = await initSqlJs()
 
-  if (fs.existsSync(DB_PATH)) {
+  const dbExists = fs.existsSync(DB_PATH)
+  if (dbExists) {
     const buf = fs.readFileSync(DB_PATH)
     db = new SQL.Database(buf)
   } else {
@@ -25,6 +87,7 @@ async function initDatabase() {
   const schema = fs.readFileSync(SCHEMA_PATH, 'utf-8')
   const statements = schema.split(';').filter(s => s.trim())
   for (const stmt of statements) {
+    if (dbExists && /^\s*INSERT/i.test(stmt)) continue
     try { db.run(stmt) } catch (_) {}
   }
 
@@ -36,6 +99,43 @@ async function initDatabase() {
     "ALTER TABLE keyboard_buttons ADD COLUMN col_span INTEGER DEFAULT 1",
     "ALTER TABLE keyboard_buttons ADD COLUMN row_span INTEGER DEFAULT 1",
     "INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span) VALUES ('np-display', '', 'num_display', '#00cc00', '#111111', 29, 'grid', 1, 2, 3, 1, 4)",
+    // Fix np-display overlap: must be inactive (overlaps btn-meat at row 2, col 3)
+    "UPDATE keyboard_buttons SET active = 0 WHERE id = 'np-display'",
+    // Fix pg2-melons misplacement: move from row 4 col 3 to row 3 col 2 (visible area), make 1x1
+    "UPDATE keyboard_buttons SET grid_row = 3, grid_col = 2, row_span = 1 WHERE id = 'pg2-melons' AND grid_row = 4",
+    // Add product_id column to link keyboard buttons to real products
+    "ALTER TABLE keyboard_buttons ADD COLUMN product_id TEXT REFERENCES products(id)",
+    // Remove void, error correct, lock buttons — replace with End of Day
+    "UPDATE keyboard_buttons SET active = 0 WHERE id IN ('fn-void', 'fn-errcorrect', 'fn-lock')",
+    "INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span) VALUES ('fn-endofday', 'END OF\\nDAY', 'endofday', '#fff', '#8b5cf6', 50, 'grid', 1, 0, 0, 1, 1)",
+    // Remove supervisor, viewor, pctone — rename buttons — add unified discount
+    "UPDATE keyboard_buttons SET active = 0 WHERE id IN ('fn-supervisor', 'fn-viewor', 'fn-pctone', 'fn-pctdisc')",
+    "UPDATE keyboard_buttons SET label = 'OPEN\\nDRAWER', bg_color = '#e07020', color = '#fff' WHERE id = 'fn-nosale'",
+    "UPDATE keyboard_buttons SET label = 'RETURN\\nITEM' WHERE id = 'fn-return'",
+    "UPDATE keyboard_buttons SET label = 'FIND\\nSALE' WHERE id = 'fn-recall'",
+    "UPDATE keyboard_buttons SET label = 'HOLD\\nSALE' WHERE id = 'fn-hold'",
+    "UPDATE keyboard_buttons SET label = 'REPRINT\\nRECEIPT' WHERE id = 'fn-reprint'",
+    "UPDATE keyboard_buttons SET label = 'LOG OUT' WHERE id = 'fn-movedrawer'",
+    "INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span) VALUES ('fn-discount', 'DISCOUNT', 'discount', '#fff', '#d8a820', 10, 'grid', 1, 1, 1, 1, 1)",
+    // Remove duplicate fruit & veg section button (keep only open_price one)
+    "UPDATE keyboard_buttons SET active = 0 WHERE id = 'btn-fvsect'",
+    // Remove CODE ENTER button
+    "UPDATE keyboard_buttons SET active = 0 WHERE id = 'np-enter'",
+    // Set product page grid sizes (8 cols x 5 rows for fruit/veg pages)
+    "INSERT OR REPLACE INTO settings (key, value) VALUES ('keyboard_page_sizes', '{\"2\":{\"cols\":8,\"rows\":5},\"3\":{\"cols\":8,\"rows\":5},\"4\":{\"cols\":8,\"rows\":5},\"5\":{\"cols\":8,\"rows\":5},\"6\":{\"cols\":8,\"rows\":5}}')",
+    // Give product pages dark green backgrounds for buttons (better with images)
+    "UPDATE keyboard_buttons SET bg_color = '#1B4332', color = '#fff' WHERE page IN (2,3,4,5) AND type = 'open_price' AND bg_color = '#ffffff'",
+    // Fix button types (may have been created with empty type due to INSERT OR IGNORE)
+    "UPDATE keyboard_buttons SET type = 'discount' WHERE id = 'fn-discount'",
+    "UPDATE keyboard_buttons SET type = 'endofday' WHERE id = 'fn-endofday'",
+    // Include page 1 in page_sizes setting
+    "INSERT OR REPLACE INTO settings (key, value) VALUES ('keyboard_page_sizes', '{\"1\":{\"cols\":13,\"rows\":7},\"2\":{\"cols\":8,\"rows\":5},\"3\":{\"cols\":8,\"rows\":5},\"4\":{\"cols\":8,\"rows\":5},\"5\":{\"cols\":8,\"rows\":5},\"6\":{\"cols\":8,\"rows\":5}}')",
+    // Reset images for bags, flowers, meat so relinkKeyboardProducts applies new ones
+    "UPDATE keyboard_buttons SET image = NULL WHERE id IN ('btn-bags', 'btn-flowers', 'btn-meat')",
+    // Fix wrong product_id links (buttons incorrectly linked to Bippi Chilli product)
+    "UPDATE keyboard_buttons SET product_id = NULL WHERE product_id IN (SELECT id FROM products WHERE name LIKE '%BIPPI%CHILLI%')",
+    // Clear product_id from buttons that already have their own image (avoids wrong product image showing)
+    "UPDATE keyboard_buttons SET product_id = NULL WHERE image IS NOT NULL AND image != '' AND product_id IS NOT NULL",
   ]
   for (const m of migrations) {
     try { db.run(m) } catch (_) {}
@@ -126,14 +226,56 @@ async function initDatabase() {
     }
   } catch (e) { console.error('Nav fix migration error:', e.message) }
 
+  // Link keyboard buttons to products by matching names (best image match)
+  relinkKeyboardProducts()
+
   saveDB()
+  appLog('info', 'database', 'Database initialized', `Path: ${DB_PATH}`)
+
+  // Auto-backup on startup
+  createBackup('startup')
+
+  // Daily backup timer — every 24 hours
+  dailyBackupTimer = setInterval(() => {
+    createBackup('daily')
+  }, 24 * 60 * 60 * 1000)
 }
 
 function saveDB() {
   if (!db) return
-  const data = db.export()
-  const buf = Buffer.from(data)
-  fs.writeFileSync(DB_PATH, buf)
+  try {
+    const data = db.export()
+    const buf = Buffer.from(data)
+    fs.writeFileSync(DB_PATH, buf)
+    appHealth.lastDbSave = new Date().toISOString()
+  } catch (e) {
+    appLog('error', 'database', 'Failed to save database to disk', e.message)
+  }
+}
+
+function createBackup(prefix = 'auto') {
+  try {
+    if (!fs.existsSync(BACKUP_DIR)) fs.mkdirSync(BACKUP_DIR, { recursive: true })
+    const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
+    const backupFile = path.join(BACKUP_DIR, `${prefix}-${ts}.sqlite`)
+    if (fs.existsSync(DB_PATH)) {
+      fs.copyFileSync(DB_PATH, backupFile)
+      // Prune old backups — keep last 14
+      const files = fs.readdirSync(BACKUP_DIR).filter(f => f.endsWith('.sqlite')).sort()
+      while (files.length > 14) {
+        const old = files.shift()
+        try { fs.unlinkSync(path.join(BACKUP_DIR, old)) } catch (_) {}
+      }
+      appHealth.lastBackup = new Date().toISOString()
+      appLog('info', 'backup', `Backup created: ${path.basename(backupFile)}`)
+      return { file: backupFile, name: path.basename(backupFile) }
+    }
+    appLog('warn', 'backup', 'No database file to backup')
+    return { error: 'No database to backup' }
+  } catch (e) {
+    appLog('error', 'backup', 'Backup failed', e.message)
+    return { error: 'Backup failed: ' + e.message }
+  }
 }
 
 function scheduleSave() {
@@ -154,7 +296,7 @@ function dbAll(sql, params = []) {
     stmt.free()
     return rows
   } catch (e) {
-    console.error('dbAll error:', e.message, sql)
+    appLog('error', 'database', `dbAll error: ${e.message}`, sql.slice(0, 200))
     return []
   }
 }
@@ -169,8 +311,136 @@ function dbRun(sql, params = []) {
     db.run(sql, params)
     scheduleSave()
   } catch (e) {
-    console.error('dbRun error:', e.message, sql)
+    appLog('error', 'database', `dbRun error: ${e.message}`, sql.slice(0, 200))
   }
+}
+
+// Direct image URL mapping for keyboard buttons (from GitHub repo)
+const KB_IMAGE_BASE = 'https://raw.githubusercontent.com/matthiascamp/crisponcreek/main/crisp_on_creek_fruit_veg_images/'
+const KB_IMAGE_BASE_DELI = 'https://raw.githubusercontent.com/matthiascamp/crisponcreek/main/crisp_on_creek_deli_images/'
+const KB_IMAGE_BASE_EXT = 'https://raw.githubusercontent.com/matthiascamp/crisponcreek/main/crisp_on_creek_external_images/'
+const KB_IMAGE_BASE_IMG = 'https://raw.githubusercontent.com/matthiascamp/crisponcreek/main/crisp_on_creek_images/'
+const KB_IMAGE_MAP = {
+  // Main page department buttons
+  'btn-meat':    { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Raw_Meat.jpg/200px-Raw_Meat.jpg' },
+  'btn-coffee':  { base: 'img', file: 'Fresh_Press_Cold_Drip_Coffee.jpg' },
+  'btn-fv':      { base: 'fv', file: 'Apple_Royal_Gala_Large.jpg' },
+  'btn-cheese':  { base: 'deli', file: 'Auricchio_Grana_Padano.jpg' },
+  'btn-flowers': { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/A_bouquet_of_Gerberas_on_Ermou_Street.jpg/200px-A_bouquet_of_Gerberas_on_Ermou_Street.jpg' },
+  'btn-bread':   { base: 'ext', file: 'F_R_CIABATTA_LOAF.jpg' },
+  'btn-bags':    { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Have_a_nice_day_and_smiley_face_bag.jpg/200px-Have_a_nice_day_and_smiley_face_bag.jpg' },
+  'btn-deli':    { base: 'deli', file: 'Casalingo_Prosciutto.jpg' },
+  'btn-nuts':    { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Mixed_nuts.jpg/145px-Mixed_nuts.jpg' },
+  'btn-grocery': { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Grocery_bag_of_junk_foods.jpg/200px-Grocery_bag_of_junk_foods.jpg' },
+  'btn-gas':     { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Soft_drink_shelf.JPG/200px-Soft_drink_shelf.JPG' },
+  // Page 2: Fruit A-M
+  'pg2-apples': { base: 'fv', file: 'Apple_Royal_Gala_Large.jpg' },
+  'pg2-apricots': { base: 'fv', file: 'Apricots.jpg' },
+  'pg2-avocados': { base: 'fv', file: 'Avocadoes_Small.jpg' },
+  'pg2-bananas': { base: 'fv', file: 'Bananas_Cavendish.jpg' },
+  'pg2-berries': { base: 'fv', file: 'Strawberries.jpg' },
+  'pg2-cherries': { base: 'fv', file: 'Cherry_Tomatoes.jpg' },
+  'pg2-coconut': { base: 'img', file: 'MAE_MASSIMO_VUVOA_COCONUT.jpg' },
+  'pg2-custard-apple': { base: 'fv', file: 'Custard_Apples.jpg' },
+  'pg2-dragon-fruit': { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Dragonfruit_Chiayi_market.jpg/200px-Dragonfruit_Chiayi_market.jpg' },
+  'pg2-figs': { base: 'fv', file: 'Figs_Fresh.jpg' },
+  'pg2-grapes': { base: 'fv', file: 'Grapes_Autumn_King.jpg' },
+  'pg2-grapefruit': { base: 'fv', file: 'Grapefruit_Ruby_Red.jpg' },
+  'pg2-guava': { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Guava_ID.jpg/200px-Guava_ID.jpg' },
+  'pg2-kiwi': { base: 'fv', file: 'Kiwi_Fruit.jpg' },
+  'pg2-lemons': { base: 'fv', file: 'Lemons_Fresh.jpg' },
+  'pg2-limes': { base: 'fv', file: 'Limes.jpg' },
+  'pg2-longan': { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Longan_fruit_flesh_%26_skin.jpg/200px-Longan_fruit_flesh_%26_skin.jpg' },
+  'pg2-lychee': { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Lychee_Fruit.jpg/200px-Lychee_Fruit.jpg' },
+  'pg2-mandarins': { base: 'fv', file: 'Mandarines_Afrourer.jpg' },
+  'pg2-mangoes': { base: 'ext', file: 'MANGOES_R2E2_EA.jpg' },
+  'pg2-melons': { base: 'fv', file: 'Melon_Honey_Dew.jpg' },
+  // Page 3: Fruit N-Z
+  'pg3-nectarines': { base: 'fv', file: 'Nectarine.jpg' },
+  'pg3-oranges': { base: 'fv', file: 'Navel_Orange.jpg' },
+  'pg3-passion-fruit': { base: 'fv', file: 'Passionfruit.jpg' },
+  'pg3-papaya': { base: 'fv', file: '(S)_Red_Papaya.jpg' },
+  'pg3-pawpaw': { base: 'fv', file: 'Paw_Paw_Green.jpg' },
+  'pg3-peaches': { base: 'fv', file: 'Peach_White.jpg' },
+  'pg3-pears': { base: 'fv', file: 'Pears_Packham.jpg' },
+  'pg3-persimmons': { base: 'fv', file: 'Persimmon.jpg' },
+  'pg3-pineapple-sm': { base: 'fv', file: 'Pineapple_Smooth_Small.jpg' },
+  'pg3-pineapple-md': { base: 'fv', file: 'Pineapple_Topless_M_Small.jpg' },
+  'pg3-pineapple-xl': { base: 'fv', file: 'Pineapple_Extra_Large.jpg' },
+  'pg3-plums': { base: 'fv', file: 'Plums_Sugar.jpg' },
+  'pg3-pomegranate': { base: 'fv', file: 'Pomegranate.jpg' },
+  'pg3-raspberries': { base: 'fv', file: 'Raspberries_Punnet.jpg' },
+  'pg3-blueberries': { base: 'fv', file: 'Blueberries_Punnet.jpg' },
+  'pg3-rockmelon': { base: 'fv', file: 'Rockmelon.jpg' },
+  'pg3-strawberries': { base: 'fv', file: 'Strawberries.jpg' },
+  'pg3-watermelon': { base: 'fv', file: '(S)Seedless_Watermelon_Whole.jpg' },
+  'pg3-tangello': { base: 'fv', file: 'Cara_Cara_Orange.jpg' },
+  // Page 4: Vegetables A-G
+  'pg4-asian-vege': { base: 'fv', file: 'Cabbage_Chinese.jpg' },
+  'pg4-asparagus': { base: 'fv', file: 'Asparagus_Bunch.jpg' },
+  'pg4-beans': { base: 'fv', file: 'Beans_Fresh.jpg' },
+  'pg4-beetroot': { base: 'fv', file: 'Beetroot.jpg' },
+  'pg4-broccolini': { base: 'fv', file: 'Broccolini_Bunch.jpg' },
+  'pg4-broccoli': { base: 'fv', file: 'Broccoli.jpg' },
+  'pg4-brussels': { base: 'fv', file: 'Brussel_Sprouts.jpg' },
+  'pg4-cabbage': { base: 'fv', file: 'Cabbage_Drum_Head.jpg' },
+  'pg4-capsicum': { base: 'fv', file: 'Capsicum_Red.jpg' },
+  'pg4-carrots': { base: 'fv', file: 'Carrots.jpg' },
+  'pg4-carrot-bag': { base: 'fv', file: 'Carrot_Bag.jpg' },
+  'pg4-cauliflower': { base: 'fv', file: 'Cauliflower.jpg' },
+  'pg4-celery': { base: 'fv', file: 'Celery.jpg' },
+  'pg4-celeriac': { base: 'ext', file: 'CELERIAC_EA.jpg' },
+  'pg4-chillies': { base: 'fv', file: '(S)_Chilli_Birds_Eye.jpg' },
+  'pg4-chokos': { base: 'fv', file: 'Chokoes.jpg' },
+  'pg4-corn': { base: 'fv', file: 'Corn_Each.jpg' },
+  'pg4-cucumbers': { base: 'fv', file: 'Cucumber_Continental.jpg' },
+  'pg4-eggplant': { base: 'fv', file: 'Eggplant.jpg' },
+  'pg4-leb-eggplant': { base: 'fv', file: 'Eggplant_Baby.jpg' },
+  'pg4-fennel': { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Fennel_bulb.jpg/200px-Fennel_bulb.jpg' },
+  'pg4-garlic': { base: 'fv', file: 'Garlic.jpg' },
+  'pg4-ginger': { base: 'fv', file: 'Ginger.jpg' },
+  // Page 5: Vegetables H-Z
+  'pg5-herbs': { base: 'fv', file: 'Basil_Large_Bunch.jpg' },
+  'pg5-kale': { base: 'fv', file: 'Kale_Bunch.jpg' },
+  'pg5-leeks': { base: 'fv', file: 'Leek_Bunch.jpg' },
+  'pg5-lettuces': { base: 'fv', file: 'Lettuce_Iceberg.jpg' },
+  'pg5-lettuce-bags': { base: 'fv', file: 'Assorted_Lettuce_Bags.jpg' },
+  'pg5-mushrooms': { base: 'fv', file: 'Mushroom_Cups.jpg' },
+  'pg5-olives': { base: 'ext', file: 'AGEAN_BLACK_BEANS.jpg' },
+  'pg5-onions': { base: 'fv', file: 'Onions_Brown.jpg' },
+  'pg5-parsnip': { base: 'fv', file: 'Parsnip.jpg' },
+  'pg5-peas': { base: 'ext', file: 'SNOW_PEAS_KG.jpg' },
+  'pg5-potatoes': { base: 'fv', file: 'Potatoes_Washed.jpg' },
+  'pg5-pumpkins': { base: 'fv', file: 'Pumpkin_Jap.jpg' },
+  'pg5-radish': { base: 'fv', file: 'Snacking_Raddish.jpg' },
+  'pg5-rhubarb': { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/01-rhubarb_stalks.jpg/200px-01-rhubarb_stalks.jpg' },
+  'pg5-shallots': { base: 'fv', file: 'Eshallots_Bunch.jpg' },
+  'pg5-silverbeet': { base: 'fv', file: 'Silverbeet_Bunch.jpg' },
+  'pg5-snow-peas': { base: 'ext', file: 'SNOW_PEAS_KG.jpg' },
+  'pg5-sprouts': { base: 'fv', file: 'Alfalfa_Sprout_Salad.jpg' },
+  'pg5-swedes': { base: 'fv', file: 'Swedes.jpg' },
+  'pg5-sweet-potato': { base: 'fv', file: 'Special_Sweet_Potatoes.jpg' },
+  'pg5-tomatoes': { base: 'fv', file: 'Tomatoes.jpg' },
+  'pg5-turnip': { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Turnip_2622027.jpg/200px-Turnip_2622027.jpg' },
+  'pg5-zucchini': { base: 'fv', file: 'Zucchini_Large.jpg' },
+}
+
+// Apply direct image mappings to keyboard buttons
+function relinkKeyboardProducts() {
+  const bases = { fv: KB_IMAGE_BASE, deli: KB_IMAGE_BASE_DELI, ext: KB_IMAGE_BASE_EXT, img: KB_IMAGE_BASE_IMG }
+  try {
+    let linked = 0
+    for (const [btnId, entry] of Object.entries(KB_IMAGE_MAP)) {
+      if (!entry) continue
+      const imgUrl = entry.base === 'direct' ? entry.file : bases[entry.base] + entry.file
+      db.run("UPDATE keyboard_buttons SET image = ? WHERE id = ? AND (image IS NULL OR image = '')", [imgUrl, btnId])
+      linked++
+    }
+    if (linked > 0) {
+      scheduleSave()
+      console.log(`Applied ${linked} keyboard button images`)
+    }
+  } catch (e) { console.error('relinkKeyboardProducts error:', e.message) }
 }
 
 function createWindow() {
@@ -204,6 +474,49 @@ function createWindow() {
       mainWindow.setFullScreen(false)
     }
   })
+
+  // Close customer display when main window closes
+  mainWindow.on('closed', () => {
+    if (customerWindow && !customerWindow.isDestroyed()) {
+      customerWindow.close()
+    }
+    mainWindow = null
+  })
+}
+
+function createCustomerWindow () {
+  const { screen } = require('electron')
+  const displays = screen.getAllDisplays()
+  const externalDisplay = displays.find(d => d.id !== screen.getPrimaryDisplay().id)
+
+  const opts = {
+    width: 1024,
+    height: 768,
+    autoHideMenuBar: true,
+    title: 'Customer Display',
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+    }
+  }
+
+  if (externalDisplay) {
+    opts.x = externalDisplay.bounds.x + 50
+    opts.y = externalDisplay.bounds.y + 50
+    opts.fullscreen = true
+  }
+
+  customerWindow = new BrowserWindow(opts)
+  customerWindow.loadFile(path.join(__dirname, 'pos', 'customer.html'))
+  customerWindow.on('closed', () => { customerWindow = null })
+
+  // Send store name
+  customerWindow.webContents.on('did-finish-load', () => {
+    const row = dbGet("SELECT value FROM settings WHERE key = 'store_name'")
+    if (row && customerWindow) {
+      customerWindow.webContents.send('customer:update', { items: [], storeName: row.value })
+    }
+  })
 }
 
 app.whenReady().then(async () => {
@@ -211,23 +524,47 @@ app.whenReady().then(async () => {
   createWindow()
   setupIPC()
 
-  // Start LAN sync if configured
+  // Auto-open customer display if a second monitor is available
+  const { screen } = require('electron')
+  if (screen.getAllDisplays().length > 1) {
+    createCustomerWindow()
+  }
+
+  // LAN sync — only auto-start if lan_autostart is explicitly enabled
   try {
-    const lanMode = dbGet("SELECT value FROM settings WHERE key = 'lan_mode'")?.value
-    const lanPort = parseInt(dbGet("SELECT value FROM settings WHERE key = 'lan_port'")?.value || '5555')
-    if (lanMode === 'server') {
-      lanSync.startServer(lanPort, { dbAll, dbGet, dbRun, saveDB, uuid })
-    } else if (lanMode === 'client') {
-      const serverIp = dbGet("SELECT value FROM settings WHERE key = 'lan_server_ip'")?.value
-      const secret = dbGet("SELECT value FROM settings WHERE key = 'lan_secret'")?.value
-      if (serverIp) {
-        lanSync.startClient(serverIp, lanPort, secret, { dbAll, dbGet, dbRun, saveDB, uuid })
+    const lanAutostart = dbGet("SELECT value FROM settings WHERE key = 'lan_autostart'")?.value
+    if (lanAutostart === '1') {
+      const lanMode = dbGet("SELECT value FROM settings WHERE key = 'lan_mode'")?.value
+      const lanPort = parseInt(dbGet("SELECT value FROM settings WHERE key = 'lan_port'")?.value || '5555')
+      if (lanMode === 'server') {
+        lanSync.startServer(lanPort, { dbAll, dbGet, dbRun, saveDB, uuid })
+      } else if (lanMode === 'client') {
+        const serverIp = dbGet("SELECT value FROM settings WHERE key = 'lan_server_ip'")?.value
+        const secret = dbGet("SELECT value FROM settings WHERE key = 'lan_secret'")?.value
+        if (serverIp) {
+          lanSync.startClient(serverIp, lanPort, secret, { dbAll, dbGet, dbRun, saveDB, uuid })
+        }
       }
     }
-  } catch (e) { console.error('LAN sync startup error:', e.message) }
+  } catch (e) { appLog('error', 'lan-sync', 'LAN sync startup error', e.message) }
+
+  // Supabase cloud pull — only on server or standalone (not client registers)
+  // Server pulls from Supabase, then LAN clients pull from server
+  try {
+    const currentLanMode = dbGet("SELECT value FROM settings WHERE key = 'lan_mode'")?.value
+    if (currentLanMode !== 'client') {
+      const supaUrl = dbGet("SELECT value FROM settings WHERE key = 'supabase_url'")?.value
+      const supaKey = dbGet("SELECT value FROM settings WHERE key = 'supabase_anon_key'")?.value
+      if (supaUrl && supaKey) {
+        appLog('info', 'supabase', `Cloud sync enabled (mode: ${currentLanMode || 'standalone'})`)
+      }
+    }
+  } catch (e) { appLog('error', 'supabase', 'Supabase config check failed', e.message) }
 })
 
 app.on('window-all-closed', () => {
+  if (dailyBackupTimer) clearInterval(dailyBackupTimer)
+  appLog('info', 'app', 'App shutting down')
   saveDB()
   app.quit()
 })
@@ -245,6 +582,148 @@ function setupIPC() {
 
   ipcMain.handle('window:quit', () => {
     app.quit()
+  })
+
+  // ── Backups ─────────────────────────────────────────────────────────────
+
+  ipcMain.handle('db:backup:create', () => {
+    return createBackup()
+  })
+
+  ipcMain.handle('db:backup:list', () => {
+    if (!fs.existsSync(BACKUP_DIR)) return []
+    const files = fs.readdirSync(BACKUP_DIR)
+      .filter(f => f.endsWith('.sqlite'))
+      .sort()
+      .reverse()
+    return files.map(f => {
+      const stat = fs.statSync(path.join(BACKUP_DIR, f))
+      return { name: f, size: stat.size, created: stat.mtime.toISOString() }
+    })
+  })
+
+  ipcMain.handle('db:backup:restore', (_e, filename) => {
+    const backupPath = path.join(BACKUP_DIR, filename)
+    if (!fs.existsSync(backupPath)) return { error: 'Backup file not found' }
+    createBackup('pre-restore')
+    appLog('info', 'backup', `Restoring backup: ${filename}`)
+    const buf = fs.readFileSync(backupPath)
+    fs.writeFileSync(DB_PATH, buf)
+    return { success: true, message: 'Backup restored. Restart the app to apply.' }
+  })
+
+  ipcMain.handle('db:backup:openFolder', () => {
+    if (!fs.existsSync(BACKUP_DIR)) fs.mkdirSync(BACKUP_DIR, { recursive: true })
+    shell.openPath(BACKUP_DIR)
+    return true
+  })
+
+  // ── App Logs & Health ──────────────────────────────────────────────────
+
+  ipcMain.handle('app:logs:get', (_e, opts = {}) => {
+    try {
+      if (!fs.existsSync(LOG_DIR)) return []
+      const date = opts.date || new Date().toISOString().slice(0, 10)
+      const logFile = path.join(LOG_DIR, `app-${date}.log`)
+      if (!fs.existsSync(logFile)) return []
+      const content = fs.readFileSync(logFile, 'utf-8')
+      const lines = content.split('\n').filter(l => l.trim())
+      // Parse log lines back into objects
+      return lines.map(line => {
+        const match = line.match(/^\[(.+?)\] \[(.+?)\] \[(.+?)\] (.+?)(?:\s*\|\s*(.*))?$/)
+        if (match) return { ts: match[1], level: match[2].toLowerCase(), source: match[3], message: match[4], detail: match[5] || null }
+        return { ts: '', level: 'info', source: 'unknown', message: line, detail: null }
+      }).reverse() // newest first
+    } catch (e) {
+      return [{ ts: new Date().toISOString(), level: 'error', source: 'logs', message: 'Failed to read log file', detail: e.message }]
+    }
+  })
+
+  ipcMain.handle('app:logs:dates', () => {
+    try {
+      if (!fs.existsSync(LOG_DIR)) return []
+      return fs.readdirSync(LOG_DIR)
+        .filter(f => f.startsWith('app-') && f.endsWith('.log'))
+        .map(f => f.replace('app-', '').replace('.log', ''))
+        .sort()
+        .reverse()
+    } catch (_) { return [] }
+  })
+
+  ipcMain.handle('app:logs:clear', (_e, date) => {
+    try {
+      const logFile = path.join(LOG_DIR, `app-${date}.log`)
+      if (fs.existsSync(logFile)) fs.unlinkSync(logFile)
+      appLog('info', 'logs', `Log file cleared: ${date}`)
+      return true
+    } catch (e) {
+      return { error: e.message }
+    }
+  })
+
+  ipcMain.handle('app:logs:export', (_e, date) => {
+    try {
+      const logFile = path.join(LOG_DIR, `app-${date}.log`)
+      if (!fs.existsSync(logFile)) return { error: 'Log file not found' }
+      return { content: fs.readFileSync(logFile, 'utf-8'), filename: `app-${date}.log` }
+    } catch (e) {
+      return { error: e.message }
+    }
+  })
+
+  ipcMain.handle('app:health', () => {
+    return { ...appHealth }
+  })
+
+  // ── Audit Log ──────────────────────────────────────────────────────────
+
+  ipcMain.handle('db:audit:log', (_e, entry) => {
+    const id = uuid()
+    dbRun(`INSERT INTO audit_log (id, staff_id, staff_name, action, detail, created_at)
+      VALUES (?1, ?2, ?3, ?4, ?5, datetime('now'))`,
+      [id, entry.staff_id || null, entry.staff_name || null, entry.action, entry.detail || null])
+    return { id }
+  })
+
+  ipcMain.handle('db:audit:search', (_e, opts = {}) => {
+    let sql = "SELECT * FROM audit_log WHERE 1=1"
+    const params = []
+    let idx = 1
+    if (opts.date) {
+      sql += ` AND date(created_at) = ?${idx}`
+      params.push(opts.date); idx++
+    }
+    if (opts.action) {
+      sql += ` AND action = ?${idx}`
+      params.push(opts.action); idx++
+    }
+    if (opts.staff_id) {
+      sql += ` AND staff_id = ?${idx}`
+      params.push(opts.staff_id); idx++
+    }
+    sql += " ORDER BY created_at DESC LIMIT 200"
+    return dbAll(sql, params)
+  })
+
+  // ── Customer Display ───────────────────────────────────────────────────
+  ipcMain.handle('customer:update', (_e, data) => {
+    if (customerWindow && !customerWindow.isDestroyed()) {
+      customerWindow.webContents.send('customer:update', data)
+    }
+  })
+
+  ipcMain.handle('customer:saleComplete', (_e, data) => {
+    if (customerWindow && !customerWindow.isDestroyed()) {
+      customerWindow.webContents.send('customer:saleComplete', data)
+    }
+  })
+
+  ipcMain.handle('customer:open', () => {
+    if (!customerWindow || customerWindow.isDestroyed()) {
+      createCustomerWindow()
+    } else {
+      customerWindow.focus()
+    }
   })
 
   // ── Products ────────���───────────────────────────��─────────────────────────
@@ -308,6 +787,14 @@ function setupIPC() {
 
   ipcMain.handle('db:products:upsert', (_e, product) => {
     const id = product.id || uuid()
+
+    // Check for barcode duplicates (exclude self)
+    let barcode_warning = null
+    if (product.barcode) {
+      const dup = dbGet("SELECT id, name FROM products WHERE barcode = ?1 AND id != ?2 AND active = 1", [product.barcode, id])
+      if (dup) barcode_warning = `Barcode "${product.barcode}" already used by "${dup.name}"`
+    }
+
     dbRun(`
       INSERT OR REPLACE INTO products (id, barcode, plu, name, category_id, price, cost_price, unit, tax_rate, track_stock, stock_qty, active, image_url, updated_at)
       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, datetime('now'))
@@ -317,7 +804,7 @@ function setupIPC() {
         product.stock_qty || 0, product.active !== false ? 1 : 0, product.image_url || null])
 
     queueSync('products', id, product.id ? 'update' : 'insert')
-    return { id }
+    return { id, barcode_warning }
   })
 
   ipcMain.handle('db:categories:upsert', (_e, cat) => {
@@ -329,6 +816,44 @@ function setupIPC() {
 
     queueSync('categories', id, cat.id ? 'update' : 'insert')
     return { id }
+  })
+
+  // Bulk upsert from cloud sync — skips sync queue to avoid circular push
+  // Uses INSERT + ON CONFLICT to preserve local active/stock state
+  ipcMain.handle('db:products:bulkUpsert', (_e, products) => {
+    let count = 0
+    for (const p of products) {
+      if (!p.id || !p.name) continue
+      dbRun(`INSERT INTO products (id, barcode, plu, name, category_id, price, cost_price, unit, tax_rate, track_stock, stock_qty, active, image_url, updated_at)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, datetime('now'))
+        ON CONFLICT(id) DO UPDATE SET
+          barcode = excluded.barcode, plu = excluded.plu, name = excluded.name,
+          category_id = excluded.category_id, price = excluded.price,
+          cost_price = excluded.cost_price, unit = excluded.unit,
+          tax_rate = excluded.tax_rate, image_url = excluded.image_url,
+          updated_at = excluded.updated_at`,
+        [p.id, p.barcode || null, p.plu || null, p.name, p.category_id || null,
+         p.price, p.cost_price || 0, p.unit || 'each', p.tax_rate ?? 0.10,
+         p.track_stock ? 1 : 0, p.stock_qty || 0, p.active !== false ? 1 : 0, p.image_url || null])
+      count++
+    }
+    scheduleSave()
+    // Re-link keyboard buttons to products after bulk import (images may have arrived)
+    relinkKeyboardProducts()
+    return count
+  })
+
+  ipcMain.handle('db:categories:bulkUpsert', (_e, categories) => {
+    let count = 0
+    for (const c of categories) {
+      if (!c.id || !c.name) continue
+      dbRun(`INSERT OR REPLACE INTO categories (id, name, sort_order, colour, active, updated_at)
+        VALUES (?1, ?2, ?3, ?4, ?5, datetime('now'))`,
+        [c.id, c.name, c.sort_order || 0, c.colour || '#10b981', c.active !== false ? 1 : 0])
+      count++
+    }
+    scheduleSave()
+    return count
   })
 
   ipcMain.handle('db:products:delete', (_e, id) => {
@@ -379,6 +904,19 @@ function setupIPC() {
     return true
   })
 
+  ipcMain.handle('db:specials:bulkUpsert', (_e, specials) => {
+    let count = 0
+    for (const s of specials) {
+      if (!s.id || !s.product_id) continue
+      dbRun(`INSERT OR REPLACE INTO specials (id, product_id, special_price, start_date, end_date, active, updated_at)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, datetime('now'))`,
+        [s.id, s.product_id, s.special_price, s.start_date || null, s.end_date || null, s.active !== false ? 1 : 0])
+      count++
+    }
+    scheduleSave()
+    return count
+  })
+
   // ── Deals ─────────────────────────────────────────────────────────────────
 
   ipcMain.handle('db:deals:getAll', () => {
@@ -416,6 +954,33 @@ function setupIPC() {
       dbRun("INSERT INTO deal_products (deal_id, product_id, role) VALUES (?1, ?2, 'trigger')", [dealId, pid])
     }
     return true
+  })
+
+  ipcMain.handle('db:deals:bulkUpsert', (_e, deals) => {
+    let count = 0
+    for (const d of deals) {
+      if (!d.id || !d.name) continue
+      const config = typeof d.config === 'string' ? d.config : JSON.stringify(d.config || {})
+      dbRun(`INSERT OR REPLACE INTO deals (id, name, type, config, start_date, end_date, active, updated_at)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, datetime('now'))`,
+        [d.id, d.name, d.type, config, d.start_date || null, d.end_date || null, d.active !== false ? 1 : 0])
+      count++
+    }
+    scheduleSave()
+    return count
+  })
+
+  ipcMain.handle('db:dealProducts:bulkUpsert', (_e, dealProducts) => {
+    let count = 0
+    for (const dp of dealProducts) {
+      if (!dp.deal_id || !dp.product_id) continue
+      dbRun(`INSERT OR REPLACE INTO deal_products (deal_id, product_id, role)
+        VALUES (?1, ?2, ?3)`,
+        [dp.deal_id, dp.product_id, dp.role || 'trigger'])
+      count++
+    }
+    scheduleSave()
+    return count
   })
 
   // ── Transactions ────────��──────────��──────────────────────────────────────
@@ -460,6 +1025,14 @@ function setupIPC() {
     queueSync('transactions', txnId, 'insert')
     saveDB()
     return { id: txnId }
+  })
+
+  ipcMain.handle('db:transaction:get', (_e, txnId) => {
+    const txn = dbGet("SELECT * FROM transactions WHERE id = ?1", [txnId])
+    if (!txn) return null
+    txn.items = dbAll("SELECT * FROM transaction_items WHERE transaction_id = ?1", [txnId])
+    txn.payments = dbAll("SELECT * FROM payments WHERE transaction_id = ?1", [txnId])
+    return txn
   })
 
   ipcMain.handle('db:transaction:void', (_e, txnId) => {
@@ -551,7 +1124,21 @@ function setupIPC() {
       INSERT INTO cash_drawer (id, register_id, staff_id, action, amount, note, created_at)
       VALUES (?1, ?2, ?3, ?4, ?5, ?6, datetime('now'))
     `, [id, regRow?.value || 'LANE01', entry.staff_id || null, entry.action, entry.amount || null, entry.note || null])
+    queueSync('cash_drawer', id, 'insert')
     return { id }
+  })
+
+  ipcMain.handle('db:cashDrawer:bulkUpsert', (_e, entries) => {
+    let count = 0
+    for (const e of entries) {
+      if (!e.id) continue
+      dbRun(`INSERT OR REPLACE INTO cash_drawer (id, register_id, staff_id, action, amount, note, created_at)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)`,
+        [e.id, e.register_id || 'LANE01', e.staff_id || null, e.action, e.amount || null, e.note || null, e.created_at || new Date().toISOString()])
+      count++
+    }
+    scheduleSave()
+    return count
   })
 
   ipcMain.handle('db:cash_drawer:getLog', (_e, date) => {
@@ -655,6 +1242,19 @@ function setupIPC() {
     return { id }
   })
 
+  ipcMain.handle('db:staff:bulkUpsert', (_e, staffArr) => {
+    let count = 0
+    for (const s of staffArr) {
+      if (!s.id || !s.name) continue
+      dbRun(`INSERT OR REPLACE INTO staff (id, name, pin, role, active, updated_at)
+        VALUES (?1, ?2, ?3, ?4, ?5, datetime('now'))`,
+        [s.id, s.name, s.pin || s.pin_hash || '', s.role || 'cashier', s.active !== false ? 1 : 0])
+      count++
+    }
+    scheduleSave()
+    return count
+  })
+
   // ── Settings ────────────────��───────────────────────────────────────��─────
 
   ipcMain.handle('db:settings:get', (_e, key) => {
@@ -670,6 +1270,17 @@ function setupIPC() {
   ipcMain.handle('db:settings:set', (_e, key, value) => {
     dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES (?1, ?2)", [key, value])
     return true
+  })
+
+  ipcMain.handle('db:settings:bulkUpsert', (_e, settings) => {
+    let count = 0
+    for (const s of settings) {
+      if (!s.key) continue
+      dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES (?1, ?2)", [s.key, s.value ?? null])
+      count++
+    }
+    scheduleSave()
+    return count
   })
 
   // ── Sync Queue ──────────────────────────────────────��─────────────────────
@@ -774,11 +1385,11 @@ function setupIPC() {
   // ── Keyboard Layout ─────────────────────────────────────────────────────
 
   ipcMain.handle('db:keyboard:getAll', () => {
-    return dbAll("SELECT * FROM keyboard_buttons WHERE active = 1 ORDER BY page, sort_order")
+    return dbAll("SELECT kb.*, p.image_url AS product_image_url FROM keyboard_buttons kb LEFT JOIN products p ON kb.product_id = p.id WHERE kb.active = 1 ORDER BY kb.page, kb.sort_order")
   })
 
   ipcMain.handle('db:keyboard:getByPage', (_e, page) => {
-    return dbAll("SELECT * FROM keyboard_buttons WHERE active = 1 AND page = ?1 ORDER BY grid_row, grid_col", [page])
+    return dbAll("SELECT kb.*, p.image_url AS product_image_url FROM keyboard_buttons kb LEFT JOIN products p ON kb.product_id = p.id WHERE kb.active = 1 AND kb.page = ?1 ORDER BY kb.grid_row, kb.grid_col", [page])
   })
 
   ipcMain.handle('db:keyboard:getPages', () => {
@@ -788,18 +1399,20 @@ function setupIPC() {
   ipcMain.handle('db:keyboard:upsert', (_e, btn) => {
     const id = btn.id || uuid()
     dbRun(`
-      INSERT OR REPLACE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, active, updated_at)
-      VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, datetime('now'))
+      INSERT OR REPLACE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, product_id, active, updated_at)
+      VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, datetime('now'))
     `, [id, btn.label, btn.type, btn.price || 0, btn.image || null, btn.color || '#fff',
         btn.bg_color || '#1B4332', btn.parent_id || null, btn.category_filter || null,
         btn.alpha_range || null, btn.sort_order || 0, btn.position || 'grid',
         btn.page || 1, btn.grid_row || 0, btn.grid_col || 0,
-        btn.col_span || 1, btn.row_span || 1,
+        btn.col_span || 1, btn.row_span || 1, btn.product_id || null,
         btn.active !== false ? 1 : 0])
+    queueSync('keyboard_buttons', id, btn.id ? 'update' : 'insert')
     return { id }
   })
 
   ipcMain.handle('db:keyboard:delete', (_e, id) => {
+    queueSync('keyboard_buttons', id, 'delete')
     dbRun("DELETE FROM keyboard_buttons WHERE id = ?1", [id])
     dbRun("DELETE FROM keyboard_buttons WHERE parent_id = ?1", [id])
     return true
@@ -811,7 +1424,158 @@ function setupIPC() {
   })
 
   ipcMain.handle('db:keyboard:getAllIncludingInactive', () => {
-    return dbAll("SELECT * FROM keyboard_buttons ORDER BY page, sort_order")
+    return dbAll("SELECT kb.*, p.image_url AS product_image_url FROM keyboard_buttons kb LEFT JOIN products p ON kb.product_id = p.id ORDER BY kb.page, kb.sort_order")
+  })
+
+  ipcMain.handle('db:keyboard:bulkUpsert', (_e, buttons) => {
+    let count = 0
+    for (const b of buttons) {
+      if (!b.id || !b.label) continue
+      db.run(`INSERT INTO keyboard_buttons (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, product_id, active, updated_at)
+        VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,datetime('now'))
+        ON CONFLICT(id) DO UPDATE SET
+          label=excluded.label, type=excluded.type, price=excluded.price, image=excluded.image,
+          color=excluded.color, bg_color=excluded.bg_color, parent_id=excluded.parent_id,
+          category_filter=excluded.category_filter, alpha_range=excluded.alpha_range,
+          sort_order=excluded.sort_order, position=excluded.position, page=excluded.page,
+          grid_row=excluded.grid_row, grid_col=excluded.grid_col, col_span=excluded.col_span,
+          row_span=excluded.row_span, product_id=excluded.product_id, active=excluded.active,
+          updated_at=excluded.updated_at`,
+        [b.id, b.label, b.type, b.price || 0, b.image || null, b.color || '#fff',
+         b.bg_color || '#1B4332', b.parent_id || null, b.category_filter || null,
+         b.alpha_range || null, b.sort_order || 0, b.position || 'grid',
+         b.page || 1, b.grid_row || 0, b.grid_col || 0, b.col_span || 1, b.row_span || 1,
+         b.product_id || null, b.active !== false ? 1 : 0])
+      count++
+    }
+    scheduleSave()
+    return count
+  })
+
+  ipcMain.handle('db:keyboard:copyPage', (_e, srcPage, destPage) => {
+    const buttons = dbAll("SELECT * FROM keyboard_buttons WHERE page = ?1 AND active = 1", [srcPage])
+    for (const btn of buttons) {
+      const newId = uuid()
+      dbRun(`INSERT INTO keyboard_buttons (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, active, updated_at)
+        VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,1,datetime('now'))`,
+        [newId, btn.label, btn.type, btn.price, btn.image, btn.color, btn.bg_color,
+         btn.parent_id, btn.category_filter, btn.alpha_range, btn.sort_order, btn.position || 'grid',
+         destPage, btn.grid_row, btn.grid_col, btn.col_span, btn.row_span])
+    }
+    return { count: buttons.length }
+  })
+
+  const KEYBOARD_GRID_DEFAULT = { columns: 10, rows: 7 }
+
+  function getPageGridSize (page) {
+    const raw = dbGet("SELECT value FROM settings WHERE key = 'keyboard_page_sizes'")
+    const sizes = raw ? JSON.parse(raw.value) : {}
+    const ps = sizes[page] || {}
+    return { cols: ps.cols || KEYBOARD_GRID_DEFAULT.columns, rows: ps.rows || KEYBOARD_GRID_DEFAULT.rows }
+  }
+
+  ipcMain.handle('db:keyboard:export', () => {
+    const buttons = dbAll("SELECT * FROM keyboard_buttons ORDER BY page, sort_order")
+    const pageNames = dbGet("SELECT value FROM settings WHERE key = 'keyboard_page_names'")
+    const pageSizes = dbGet("SELECT value FROM settings WHERE key = 'keyboard_page_sizes'")
+    return {
+      version: 2,
+      exported_at: new Date().toISOString(),
+      grid_cols: String(KEYBOARD_GRID_DEFAULT.columns),
+      grid_rows: String(KEYBOARD_GRID_DEFAULT.rows),
+      page_names: pageNames ? pageNames.value : '{}',
+      page_sizes: pageSizes ? pageSizes.value : '{}',
+      buttons
+    }
+  })
+
+  ipcMain.handle('db:keyboard:import', (_e, data) => {
+    if (!data || !data.buttons || !Array.isArray(data.buttons)) {
+      return { error: 'Invalid keyboard layout data' }
+    }
+    // Clear existing buttons
+    dbRun("DELETE FROM keyboard_buttons")
+    // Insert imported buttons, clamping to fixed grid bounds
+    let count = 0
+    let skipped = 0
+    for (const btn of data.buttons) {
+      const row = btn.grid_row || 0, col = btn.grid_col || 0
+      const rs = btn.row_span || 1, cs = btn.col_span || 1
+      // Skip buttons that exceed page grid bounds
+      const pg = getPageGridSize(btn.page || 1)
+      if (col + cs > pg.cols || row + rs > pg.rows) {
+        skipped++; continue
+      }
+      const id = btn.id || uuid()
+      dbRun(`INSERT OR REPLACE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, active, updated_at)
+        VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,datetime('now'))`,
+        [id, btn.label, btn.type, btn.price || 0, btn.image || null, btn.color || '#fff',
+         btn.bg_color || '#1B4332', btn.parent_id || null, btn.category_filter || null,
+         btn.alpha_range || null, btn.sort_order || 0, btn.position || 'grid',
+         btn.page || 1, row, col, cs, rs, btn.active !== undefined ? btn.active : 1])
+      count++
+    }
+    if (data.page_names) dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('keyboard_page_names', ?1)", [data.page_names])
+    if (data.page_sizes) dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('keyboard_page_sizes', ?1)", [data.page_sizes])
+    return { count, skipped }
+  })
+
+  ipcMain.handle('db:keyboard:reset', () => {
+    // Delete all keyboard buttons
+    dbRun("DELETE FROM keyboard_buttons")
+    // Re-run keyboard seed from schema
+    const schema = fs.readFileSync(SCHEMA_PATH, 'utf-8')
+    const statements = schema.split(';').filter(s => s.trim())
+    let count = 0
+    for (const stmt of statements) {
+      if (stmt.includes('keyboard_buttons') && stmt.trim().toUpperCase().startsWith('INSERT')) {
+        try { db.run(stmt); count++ } catch (_) {}
+      }
+    }
+    dbRun("DELETE FROM settings WHERE key = 'keyboard_page_names'")
+    dbRun("DELETE FROM settings WHERE key = 'keyboard_page_sizes'")
+    return { count }
+  })
+
+  ipcMain.handle('db:keyboard:validate', () => {
+    const buttons = dbAll("SELECT * FROM keyboard_buttons WHERE active = 1 ORDER BY page, sort_order")
+    const issues = []
+    const pages = [...new Set(buttons.map(b => b.page || 1))]
+
+    for (const page of pages) {
+      const pageButtons = buttons.filter(b => (b.page || 1) === page)
+      const occupied = new Map()
+      for (const btn of pageButtons) {
+        const r = btn.grid_row || 0, c = btn.grid_col || 0
+        const rs = btn.row_span || 1, cs = btn.col_span || 1
+
+        // Check grid bounds (per-page size)
+        const pgSize = getPageGridSize(page)
+        if (c + cs > pgSize.cols || r + rs > pgSize.rows) {
+          issues.push({ type: 'out_of_bounds', page, button: btn.label, row: r, col: c, span: `${cs}x${rs}` })
+        }
+
+        for (let dr = 0; dr < rs; dr++) {
+          for (let dc = 0; dc < cs; dc++) {
+            const key = `${r + dr}-${c + dc}`
+            if (occupied.has(key)) {
+              issues.push({ type: 'overlap', page, row: r + dr, col: c + dc, buttons: [occupied.get(key), btn.label] })
+            }
+            occupied.set(key, btn.label)
+          }
+        }
+      }
+      // Check for page_link buttons pointing to non-existent pages
+      for (const btn of pageButtons) {
+        if (btn.type === 'page_link' && btn.parent_id) {
+          const targetPage = parseInt(btn.parent_id)
+          if (!pages.includes(targetPage)) {
+            issues.push({ type: 'broken_link', page, button: btn.label, target_page: targetPage })
+          }
+        }
+      }
+    }
+    return { issues, button_count: buttons.length, page_count: pages.length }
   })
 
   // ── Bulk Import ────────────���──────────────────────────────────────────────
@@ -861,19 +1625,29 @@ function setupIPC() {
     PARTIAL_CUT: Buffer.from([GS, 0x56, 0x01]),
     FEED_3: Buffer.from([ESC, 0x64, 0x03]),
     DRAWER_KICK: Buffer.from([ESC, 0x70, 0x00, 0x19, 0x78]),
+    // Barcode: CODE128, height 60, width 2, HRI below
+    BARCODE_HEIGHT: Buffer.from([GS, 0x68, 0x3C]),
+    BARCODE_WIDTH: Buffer.from([GS, 0x77, 0x02]),
+    BARCODE_HRI_BELOW: Buffer.from([GS, 0x48, 0x02]),
   }
 
   // Ensure the Epson is registered as a Windows printer on USB003
+  let printerReady = false
+  let printerCheckTime = 0
   function ensureReceiptPrinter() {
+    // Cache printer check for 60 seconds to avoid repeated slow powershell calls
+    if (printerReady && Date.now() - printerCheckTime < 60000) return
     try {
-      const check = hwExec(`powershell -NoProfile -Command "Get-Printer -Name '${RECEIPT_PRINTER_NAME}' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name"`, { timeout: 10000, encoding: 'utf-8' })
-      if (check.trim()) return // already exists
+      const check = hwExec(`powershell -NoProfile -Command "Get-Printer -Name '${RECEIPT_PRINTER_NAME}' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name"`, { timeout: 5000, encoding: 'utf-8' })
+      if (check.trim()) { printerReady = true; printerCheckTime = Date.now(); return }
     } catch (_) {}
     // Add it using Generic / Text Only driver on USB003
     try {
-      hwExec(`powershell -NoProfile -Command "Add-Printer -Name '${RECEIPT_PRINTER_NAME}' -DriverName 'Generic / Text Only' -PortName '${RECEIPT_PRINTER_PORT}'"`, { timeout: 10000, encoding: 'utf-8' })
+      hwExec(`powershell -NoProfile -Command "Add-Printer -Name '${RECEIPT_PRINTER_NAME}' -DriverName 'Generic / Text Only' -PortName '${RECEIPT_PRINTER_PORT}'"`, { timeout: 5000, encoding: 'utf-8' })
+      printerReady = true; printerCheckTime = Date.now()
       console.log('Added receipt printer:', RECEIPT_PRINTER_NAME, 'on', RECEIPT_PRINTER_PORT)
     } catch (e) {
+      printerCheckTime = Date.now() // Don't retry for 60s even on failure
       console.log('Failed to add receipt printer:', e.message)
     }
   }
@@ -908,6 +1682,21 @@ function setupIPC() {
 
     cmd(ESCPOS.INIT)
     cmd(ESCPOS.ALIGN_CENTER)
+
+    // Print barcode at top if provided (for held sales)
+    if (receiptData.barcode) {
+      cmd(ESCPOS.BARCODE_HEIGHT)
+      cmd(ESCPOS.BARCODE_WIDTH)
+      cmd(ESCPOS.BARCODE_HRI_BELOW)
+      // CODE128: GS k 73 len data
+      const barcodeStr = receiptData.barcode.replace(/-/g, '').substring(0, 20)
+      const barcodeData = Buffer.from(barcodeStr, 'ascii')
+      cmd(Buffer.from([GS, 0x6B, 0x49, barcodeData.length]))
+      cmd(barcodeData)
+      text('')
+      text('')
+    }
+
     cmd(ESCPOS.BOLD_ON)
     cmd(ESCPOS.DOUBLE_SIZE)
     text(receiptData.storeName || 'Crisp on Creek')
@@ -971,7 +1760,7 @@ function setupIPC() {
       if (!result.ok) return { error: result.detail }
       return true
     } catch (err) {
-      console.log('Printer error:', err.message)
+      appLog('error', 'printer', 'Print receipt failed', err.message)
       return { error: err.message }
     }
   })
@@ -984,7 +1773,7 @@ function setupIPC() {
       if (!result.ok) return { error: result.detail }
       return true
     } catch (err) {
-      console.log('Drawer error:', err.message)
+      appLog('error', 'drawer', 'Open drawer failed', err.message)
       return { error: err.message }
     }
   })
@@ -1025,7 +1814,9 @@ function setupIPC() {
       result.printer.error = `Device detection failed: ${e.message}`
     }
 
+    // Only check real USB devices (vendorId > 0) — skip virtual printers/ports
     for (const d of result.usbDevices) {
+      if (!d.vendorId) continue // Skip virtual devices (PrintQueue, COM ports)
       if (PRINTER_VIDS.includes(d.vendorId)) {
         result.printer.found = true
         result.printer.name = d.product || `VID:0x${d.vendorId.toString(16)} PID:0x${d.productId.toString(16)}`
@@ -1039,15 +1830,16 @@ function setupIPC() {
         result.scanner.found = true
         result.scanner.name = d.product || `VID:0x${d.vendorId.toString(16)} PID:0x${d.productId.toString(16)}`
       }
+      // Only match physical USB printers (not virtual print queues)
       const name = (d.product || '').toLowerCase()
-      if (!result.printer.found && (name.includes('printer') || name.includes('receipt') || name.includes('pos') || name.includes('thermal') || d.deviceClass === 'Printer')) {
+      if (!result.printer.found && d.deviceClass === 'USB' && (name.includes('receipt') || name.includes('pos') || name.includes('thermal'))) {
         result.printer.found = true
         result.printer.name = d.product || 'Detected printer'
         result.drawer.found = true
       }
     }
 
-    // Check if receipt printer queue exists
+    // Check if our specific receipt printer queue exists (configured printer only)
     if (!result.printer.found) {
       try {
         const check = hwExec(`powershell -NoProfile -Command "Get-Printer -Name '${RECEIPT_PRINTER_NAME}' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name"`, { timeout: 10000, encoding: 'utf-8' })
@@ -1059,12 +1851,6 @@ function setupIPC() {
       } catch (_) {}
     }
 
-    // Scanner in HID mode is always "found" via keyboard — mark it
-    if (!result.scanner.found) {
-      result.scanner.found = true
-      result.scanner.name = 'HID Keyboard Mode (auto-types into barcode field)'
-    }
-
     return result
   })
 
@@ -1074,12 +1860,14 @@ function setupIPC() {
 
   ipcMain.handle('lan:testConnection', (_e, ip, port) => lanSync.testConnection(ip, port))
 
-  ipcMain.handle('lan:restart', () => {
+  ipcMain.handle('lan:restart', async () => {
     lanSync.stopAll()
     const lanMode = dbGet("SELECT value FROM settings WHERE key = 'lan_mode'")?.value
     const lanPort = parseInt(dbGet("SELECT value FROM settings WHERE key = 'lan_port'")?.value || '5555')
     if (lanMode === 'server') {
       lanSync.startServer(lanPort, { dbAll, dbGet, dbRun, saveDB, uuid })
+      // Wait briefly for server to bind so status reflects the correct IP/port
+      await new Promise(resolve => setTimeout(resolve, 500))
     } else if (lanMode === 'client') {
       const serverIp = dbGet("SELECT value FROM settings WHERE key = 'lan_server_ip'")?.value
       const secret = dbGet("SELECT value FROM settings WHERE key = 'lan_secret'")?.value

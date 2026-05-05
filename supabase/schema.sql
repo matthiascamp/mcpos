@@ -188,6 +188,47 @@ CREATE POLICY "Authenticated users can manage deals" ON deals FOR ALL TO authent
 CREATE POLICY "Authenticated users can manage deal_products" ON deal_products FOR ALL TO authenticated USING (true) WITH CHECK (true);
 CREATE POLICY "Authenticated users can manage staff" ON staff FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
+-- ─── Keyboard Layout ───────────────────────────────────────────────────────
+
+CREATE TABLE keyboard_buttons (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  label           TEXT NOT NULL,
+  type            TEXT NOT NULL,
+  price           NUMERIC(10,2) DEFAULT 0,
+  image           TEXT,
+  color           TEXT DEFAULT '#fff',
+  bg_color        TEXT DEFAULT '#1B4332',
+  parent_id       TEXT,
+  category_filter TEXT,
+  alpha_range     TEXT,
+  sort_order      INT DEFAULT 0,
+  position        TEXT DEFAULT 'main',
+  page            INT DEFAULT 1,
+  grid_row        INT DEFAULT 0,
+  grid_col        INT DEFAULT 0,
+  col_span        INT DEFAULT 1,
+  row_span        INT DEFAULT 1,
+  product_id      UUID REFERENCES products(id),
+  active          BOOLEAN DEFAULT true,
+  updated_at      TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE keyboard_buttons ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Authenticated users can read all" ON keyboard_buttons FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Authenticated users can manage keyboard" ON keyboard_buttons FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- ─── Settings ──────────────────────────────────────────────────────────────
+
+CREATE TABLE settings (
+  key         TEXT PRIMARY KEY,
+  value       TEXT,
+  updated_at  TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Authenticated users can read all" ON settings FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Authenticated users can manage settings" ON settings FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
 -- ─── Realtime ───────────────────────────────────────────────────────────────
 -- Enable realtime on tables that registers need to watch for updates
 
@@ -195,3 +236,6 @@ ALTER PUBLICATION supabase_realtime ADD TABLE products;
 ALTER PUBLICATION supabase_realtime ADD TABLE categories;
 ALTER PUBLICATION supabase_realtime ADD TABLE specials;
 ALTER PUBLICATION supabase_realtime ADD TABLE deals;
+ALTER PUBLICATION supabase_realtime ADD TABLE keyboard_buttons;
+ALTER PUBLICATION supabase_realtime ADD TABLE staff;
+ALTER PUBLICATION supabase_realtime ADD TABLE settings;

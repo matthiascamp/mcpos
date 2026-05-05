@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crisp on Creek — Customer Display</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Inter',system-ui,sans-serif;background:linear-gradient(160deg,#0f1a14 0%,#1a1d27 40%,#1a2218 100%);color:#f5f0e8;display:flex;flex-direction:column;user-select:none;-webkit-font-smoothing:antialiased}
+
+.header{padding:18px 32px;display:flex;align-items:center;gap:16px;border-bottom:1px solid rgba(16,185,129,.15);background:rgba(0,0,0,.25)}
+.brand-circle-img{width:52px;height:52px;border-radius:50%;object-fit:cover;box-shadow:0 2px 12px rgba(16,185,129,.2)}
+.store-name{font-family:'Playfair Display',serif;font-weight:700;font-size:26px;color:#f5f0e8}
+.store-sub{font-size:14px;color:rgba(245,240,232,.5);margin-top:2px;letter-spacing:.5px;text-transform:uppercase}
+
+.content{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
+
+/* ═══ Idle / Deals Screen ═══════════════════════════════════════════════════ */
+.idle-screen{flex:1;display:flex;flex-direction:column;padding:32px 40px;overflow:hidden;animation:fadeIn .6s ease}
+.deals-header{text-align:center;margin-bottom:28px}
+.deals-title{font-family:'Playfair Display',serif;font-size:48px;font-weight:800;color:#f5f0e8;margin-bottom:6px}
+.deals-subtitle{font-size:18px;color:rgba(245,240,232,.5);letter-spacing:.5px;text-transform:uppercase}
+
+.deals-grid{flex:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;align-content:start;overflow-y:auto;padding-bottom:16px}
+
+.deal-card{background:linear-gradient(145deg,rgba(27,67,50,.45),rgba(27,67,50,.12));border:1px solid rgba(16,185,129,.2);border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden}
+.deal-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#10b981,#f59e0b);border-radius:18px 18px 0 0;opacity:.6}
+.deal-card-top{display:flex;align-items:center;gap:14px}
+.deal-emoji{font-size:52px;line-height:1;flex-shrink:0}
+.deal-info{flex:1;min-width:0}
+.deal-name{font-weight:700;font-size:22px;color:#f5f0e8;margin-bottom:5px}
+.deal-badge{display:inline-block;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.badge-special{background:rgba(239,68,68,.2);color:#fca5a5;border:1px solid rgba(239,68,68,.3)}
+.badge-today{background:rgba(245,158,11,.15);color:#fcd34d;border:1px solid rgba(245,158,11,.3)}
+.badge-fresh{background:rgba(16,185,129,.15);color:#6ee7b7;border:1px solid rgba(16,185,129,.3)}
+.badge-popular{background:rgba(139,92,246,.15);color:#c4b5fd;border:1px solid rgba(139,92,246,.3)}
+.deal-pricing{display:flex;align-items:baseline;gap:10px;margin-top:4px}
+.deal-special-price{font-size:32px;font-weight:800;color:#10b981}
+.deal-special-text{font-size:24px;font-weight:700;color:#f59e0b}
+.deal-normal-price{font-size:18px;color:rgba(245,240,232,.4);text-decoration:line-through}
+.deal-unit{font-size:16px;color:rgba(245,240,232,.5);font-weight:500}
+
+.idle-footer{display:flex;align-items:center;justify-content:space-between;padding-top:20px;border-top:1px solid rgba(16,185,129,.1);margin-top:auto}
+.idle-footer-left{display:flex;align-items:center;gap:12px}
+.idle-footer-logo{width:40px;height:40px;border-radius:50%;object-fit:cover}
+.idle-footer-text{font-size:16px;color:rgba(245,240,232,.5)}
+.qr-area{display:flex;align-items:center;gap:12px}
+.qr-placeholder{width:60px;height:60px;border-radius:8px;border:1px dashed rgba(245,240,232,.25);display:flex;align-items:center;justify-content:center}
+.qr-placeholder-text{font-size:11px;color:rgba(245,240,232,.3)}
+.qr-label{font-size:13px;color:rgba(245,240,232,.4);line-height:1.4}
+.qr-label-bold{font-size:15px;color:rgba(245,240,232,.6);font-weight:600}
+
+/* ═══ Active Sale — Split Layout ═══════════════════════════════════════════ */
+.sale-view{flex:1;display:none;flex-direction:row;overflow:hidden;animation:fadeIn .3s ease}
+
+.sale-left{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.items-header{padding:16px 28px;font-size:20px;color:rgba(245,240,232,.5);text-transform:uppercase;letter-spacing:.5px;font-weight:700;border-bottom:1px solid rgba(16,185,129,.08)}
+.items-list{flex:1;overflow-y:auto;padding:12px 24px}
+.item-row{display:flex;align-items:center;padding:20px 22px;margin-bottom:10px;border-radius:14px;background:rgba(27,67,50,.12);border:1px solid rgba(16,185,129,.06);gap:16px;transition:all .2s}
+.item-row:last-child{margin-bottom:0}
+.item-row.item-new{animation:slideIn .3s ease}
+.item-qty{background:rgba(16,185,129,.15);color:#6ee7b7;font-size:24px;font-weight:700;padding:8px 12px;border-radius:8px;min-width:52px;text-align:center}
+.item-details{flex:1;min-width:0}
+.item-name{font-weight:600;font-size:28px;color:#f5f0e8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item-unit-price{font-size:18px;color:rgba(245,240,232,.4);margin-top:3px}
+.item-price{font-weight:800;font-size:30px;color:#10b981;min-width:110px;text-align:right}
+
+.totals-bar{padding:24px 28px;background:rgba(0,0,0,.4);border-top:3px solid rgba(16,185,129,.4)}
+.total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:22px;color:rgba(245,240,232,.5)}
+.total-row:last-child{margin-bottom:0}
+.total-row.grand{font-size:40px;font-weight:800;color:#f5f0e8;margin-top:14px;padding-top:16px;border-top:2px solid rgba(16,185,129,.25)}
+.total-row.grand .total-amount{color:#10b981;font-family:'Playfair Display',serif;font-size:60px}
+
+/* Right sidebar — mini deals */
+.sale-right{width:320px;flex-shrink:0;display:flex;flex-direction:column;background:rgba(0,0,0,.15);border-left:1px solid rgba(16,185,129,.1);overflow:hidden}
+.sidebar-header{padding:18px 20px;text-align:center;border-bottom:1px solid rgba(16,185,129,.08)}
+.sidebar-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#f5f0e8}
+.sidebar-sub{font-size:13px;color:rgba(245,240,232,.4);margin-top:3px;text-transform:uppercase;letter-spacing:.3px}
+.sidebar-deals{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+
+.mini-deal{background:rgba(27,67,50,.25);border:1px solid rgba(16,185,129,.12);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px}
+.mini-deal-emoji{font-size:36px;flex-shrink:0}
+.mini-deal-info{flex:1;min-width:0}
+.mini-deal-name{font-weight:600;font-size:16px;color:#f5f0e8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini-deal-price{font-size:20px;font-weight:700;color:#10b981;margin-top:2px}
+.mini-deal-unit{font-size:13px;color:rgba(245,240,232,.4);font-weight:400}
+.mini-deal-badge{font-size:10px;font-weight:700;text-transform:uppercase;color:#fcd34d;letter-spacing:.3px;margin-top:2px}
+
+.sidebar-footer{padding:14px 20px;border-top:1px solid rgba(16,185,129,.08);text-align:center}
+.sidebar-footer-text{font-size:13px;color:rgba(245,240,232,.3);line-height:1.5}
+
+/* ═══ Sale Complete ════════════════════════════════════════════════════════ */
+.sale-complete{flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:40px}
+.sale-complete.active{display:flex}
+.check-circle{width:110px;height:110px;border-radius:50%;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;animation:popIn .4s ease;box-shadow:0 4px 30px rgba(16,185,129,.3)}
+.check-circle svg{width:56px;height:56px;stroke:#fff;stroke-width:3;fill:none}
+.thank-you{font-family:'Playfair Display',serif;font-size:42px;font-weight:700;color:#f5f0e8;animation:fadeIn .6s ease}
+.thank-store{font-size:20px;color:rgba(245,240,232,.5);margin-top:-4px}
+.change-display{font-size:36px;color:#10b981;font-weight:700;margin-top:8px}
+.total-paid{font-size:22px;color:rgba(245,240,232,.5)}
+.goodbye{font-size:16px;color:rgba(245,240,232,.35);margin-top:12px}
+
+@keyframes popIn{0%{transform:scale(0)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <img src="logo.png" alt="C" class="brand-circle-img">
+  <div>
+    <div class="store-name" id="storeName">Crisp on Creek</div>
+    <div class="store-sub" id="storeSub">Fresh Fruit & Veg</div>
+  </div>
+</div>
+
+<div class="content">
+  <!-- Idle screen with Today's Deals -->
+  <div class="idle-screen" id="idleScreen">
+    <div class="deals-header">
+      <div class="deals-title">Today's Deals</div>
+      <div class="deals-subtitle">Fresh picks updated daily</div>
+    </div>
+    <div class="deals-grid" id="dealsGrid"></div>
+    <div class="idle-footer">
+      <div class="idle-footer-left">
+        <img src="logo.png" alt="C" class="idle-footer-logo">
+        <div class="idle-footer-text">1832 Logan Rd, Mt Gravatt QLD 4122</div>
+      </div>
+      <div class="qr-area">
+        <div>
+          <div class="qr-label-bold">Order Online</div>
+          <div class="qr-label">Scan to browse & pickup</div>
+        </div>
+        <div class="qr-placeholder"><div class="qr-placeholder-text">QR</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active sale view — split: items left, deals right -->
+  <div class="sale-view" id="saleView">
+    <div class="sale-left">
+      <div class="items-header">Your Items</div>
+      <div class="items-list" id="itemsList"></div>
+      <div class="totals-bar">
+        <div class="total-row"><span>Items</span><span id="cdItemCount">0</span></div>
+        <div class="total-row"><span>GST (included)</span><span id="cdTax">$0.00</span></div>
+        <div class="total-row grand"><span>Total</span><span class="total-amount" id="cdTotal">$0.00</span></div>
+      </div>
+    </div>
+    <div class="sale-right">
+      <div class="sidebar-header">
+        <div class="sidebar-title">Today's Picks</div>
+        <div class="sidebar-sub">While you shop</div>
+      </div>
+      <div class="sidebar-deals" id="sidebarDeals"></div>
+      <div class="sidebar-footer">
+        <div class="sidebar-footer-text">Crisp on Creek<br>Fresh Fruit & Veg Daily</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sale complete -->
+  <div class="sale-complete" id="saleComplete">
+    <div class="check-circle"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <div class="thank-you">Thank You!</div>
+    <div class="thank-store">Thank you for shopping at Crisp on Creek</div>
+    <div class="total-paid" id="cdTotalPaid"></div>
+    <div class="change-display" id="cdChange"></div>
+    <div class="goodbye">Have a wonderful day</div>
+  </div>
+</div>
+
+<script>
+  const { ipcRenderer } = require('electron')
+
+  function money(n) { return '$' + (n || 0).toFixed(2) }
+  function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+
+  // ═══ Deals Data & Helpers ═══════════════════════════════════════════════════
+  // TODO: Connect to real product/specials database via IPC
+  // Replace getFallbackDeals() with real data from window.pos.getSpecials()
+
+  function getFallbackDeals() {
+    return [
+      { id: 'f1', name: 'Strawberries', normalPrice: 6.99, specialPrice: 4.99, unit: '/ punnet', emoji: '🍓', badge: 'special', isSpecial: true, displayPriority: 1 },
+      { id: 'f2', name: 'Hass Avocados', specialText: '2 for $5', unit: '/ each', emoji: '🥑', badge: 'today', isSpecial: true, displayPriority: 2 },
+      { id: 'f3', name: 'Bananas', normalPrice: 3.99, specialPrice: 2.49, unit: '/ kg', emoji: '🍌', badge: 'popular', isSpecial: true, displayPriority: 3 },
+      { id: 'f4', name: 'Mangoes', specialText: 'Special today', normalPrice: 4.50, specialPrice: 3.50, unit: '/ each', emoji: '🥭', badge: 'fresh', isSpecial: true, displayPriority: 4 },
+      { id: 'f5', name: 'Blueberries', normalPrice: 7.99, specialPrice: 5.99, unit: '/ punnet', emoji: '🫐', badge: 'fresh', isSpecial: true, displayPriority: 5 },
+    ]
+  }
+
+  function getActiveDeals() {
+    // TODO: Replace with real IPC call:
+    // const specials = await window.pos.getSpecials()
+    const deals = getFallbackDeals()
+    const now = new Date()
+    return deals
+      .filter(d => {
+        if (!d.isSpecial) return false
+        if (d.specialStart && new Date(d.specialStart) > now) return false
+        if (d.specialEnd && new Date(d.specialEnd) < now) return false
+        return true
+      })
+      .sort((a, b) => (a.displayPriority || 99) - (b.displayPriority || 99))
+      .slice(0, 5)
+  }
+
+  function formatPrice(price) { return '$' + Number(price).toFixed(2) }
+
+  function getBadgeClass(badge) {
+    return { special: 'badge-special', today: 'badge-today', fresh: 'badge-fresh', popular: 'badge-popular' }[badge] || 'badge-fresh'
+  }
+  function getBadgeLabel(badge) {
+    return { special: 'SPECIAL', today: 'TODAY ONLY', fresh: 'FRESH PICK', popular: 'POPULAR' }[badge] || ''
+  }
+
+  // ═══ Render Functions ═══════════════════════════════════════════════════════
+
+  function renderDeals() {
+    const deals = getActiveDeals()
+    document.getElementById('dealsGrid').innerHTML = deals.map(deal => `
+      <div class="deal-card">
+        <div class="deal-card-top">
+          <div class="deal-emoji">${deal.emoji || '🍎'}</div>
+          <div class="deal-info">
+            <div class="deal-name">${esc(deal.name)}</div>
+            ${deal.badge ? `<span class="deal-badge ${getBadgeClass(deal.badge)}">${getBadgeLabel(deal.badge)}</span>` : ''}
+          </div>
+        </div>
+        <div class="deal-pricing">
+          ${deal.specialPrice ? `<span class="deal-special-price">${formatPrice(deal.specialPrice)}</span>` : ''}
+          ${deal.specialText && !deal.specialPrice ? `<span class="deal-special-text">${esc(deal.specialText)}</span>` : ''}
+          ${deal.normalPrice && deal.specialPrice ? `<span class="deal-normal-price">${formatPrice(deal.normalPrice)}</span>` : ''}
+          ${deal.unit ? `<span class="deal-unit">${esc(deal.unit)}</span>` : ''}
+        </div>
+      </div>
+    `).join('')
+  }
+
+  function renderSidebarDeals() {
+    const deals = getActiveDeals()
+    document.getElementById('sidebarDeals').innerHTML = deals.map(deal => `
+      <div class="mini-deal">
+        <div class="mini-deal-emoji">${deal.emoji || '🍎'}</div>
+        <div class="mini-deal-info">
+          <div class="mini-deal-name">${esc(deal.name)}</div>
+          <div class="mini-deal-price">
+            ${deal.specialPrice ? formatPrice(deal.specialPrice) : ''}${deal.specialText && !deal.specialPrice ? esc(deal.specialText) : ''}
+            <span class="mini-deal-unit">${deal.unit ? esc(deal.unit) : ''}</span>
+          </div>
+          ${deal.badge ? `<div class="mini-deal-badge">${getBadgeLabel(deal.badge)}</div>` : ''}
+        </div>
+      </div>
+    `).join('')
+  }
+
+  // Render on load
+  renderDeals()
+  renderSidebarDeals()
+
+  // ═══ IPC Listeners ══════════════════════════════════════════════════════════
+
+  ipcRenderer.on('customer:update', (_e, data) => {
+    const { items, total, tax, count, storeName } = data
+
+    if (storeName) document.getElementById('storeName').textContent = storeName
+
+    if (!items || items.length === 0) {
+      document.getElementById('idleScreen').style.display = 'flex'
+      document.getElementById('saleView').style.display = 'none'
+      document.getElementById('saleComplete').style.display = 'none'
+      return
+    }
+
+    document.getElementById('idleScreen').style.display = 'none'
+    document.getElementById('saleView').style.display = 'flex'
+    document.getElementById('saleComplete').style.display = 'none'
+
+    document.getElementById('itemsList').innerHTML = items.map((item, i) =>
+      `<div class="item-row${i === items.length - 1 ? ' item-new' : ''}">
+        <span class="item-qty">${item.qty > 1 ? item.qty + 'x' : '1x'}</span>
+        <div class="item-details">
+          <div class="item-name">${esc(item.name)}</div>
+          ${item.qty > 1 && item.unit_price ? `<div class="item-unit-price">${money(item.unit_price)} ${item.unit === 'kg' ? '/ kg' : 'each'}</div>` : ''}
+        </div>
+        <span class="item-price">${money(item.line_total)}</span>
+      </div>`
+    ).join('')
+
+    document.getElementById('cdItemCount').textContent = count || 0
+    document.getElementById('cdTax').textContent = money(tax)
+    document.getElementById('cdTotal').textContent = money(total)
+
+    const list = document.getElementById('itemsList')
+    list.scrollTop = list.scrollHeight
+  })
+
+  ipcRenderer.on('customer:saleComplete', (_e, data) => {
+    document.getElementById('idleScreen').style.display = 'none'
+    document.getElementById('saleView').style.display = 'none'
+    document.getElementById('saleComplete').style.display = 'flex'
+    document.getElementById('saleComplete').classList.add('active')
+
+    const changeEl = document.getElementById('cdChange')
+    const totalPaidEl = document.getElementById('cdTotalPaid')
+
+    if (data.total) {
+      totalPaidEl.textContent = `Total: ${money(data.total)}`
+    } else {
+      totalPaidEl.textContent = ''
+    }
+
+    if (data.change > 0) {
+      changeEl.textContent = `Change: ${money(data.change)}`
+    } else {
+      changeEl.textContent = ''
+    }
+
+    // Return to idle after 5 seconds
+    setTimeout(() => {
+      document.getElementById('saleComplete').style.display = 'none'
+      document.getElementById('saleComplete').classList.remove('active')
+      document.getElementById('idleScreen').style.display = 'flex'
+      renderDeals()
+    }, 5000)
+  })
+</script>
+</body>
+</html>

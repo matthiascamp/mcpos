@@ -11,6 +11,7 @@
     "build:installer": "electron-builder --win nsis"
   },
   "dependencies": {
+    "pg": "^8.20.0",
     "sql.js": "^1.11.0",
     "uuid": "^11.1.0"
   },
@@ -37,7 +38,9 @@
       "target": [
         {
           "target": "portable",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "build/icon.png"
