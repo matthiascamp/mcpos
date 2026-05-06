@@ -518,7 +518,9 @@
     body.register-mode [data-tab="audit"],
     body.register-mode [data-tab="logs"],
     body.register-mode [data-tab="settings"],
-    body.register-mode [data-tab="network"] { display: none !important; }
+    body.register-mode [data-tab="staff"],
+    body.register-mode [data-tab="keyboard"],
+    body.register-mode [data-tab="labels"] { display: none !important; }
     body.register-mode .sidebar-group-label { display: none; }
     body.register-mode .sidebar-group { padding-top: 6px; }
 
@@ -894,9 +896,15 @@
                 </select>
               </label>
               <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:6px;cursor:move;border:1px solid var(--border)" draggable="true" data-el="barcode">
-                <input type="checkbox" checked data-show="barcode"><span style="flex:1;font-size:12px">Barcode (PLU)</span>
+                <input type="checkbox" checked data-show="barcode"><span style="flex:1;font-size:12px">Barcode Image</span>
                 <select data-size="barcode" style="padding:2px 6px;border-radius:4px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:10px">
-                  <option value="8" selected>8pt</option><option value="9">9pt</option><option value="10">10pt</option><option value="12">12pt</option>
+                  <option value="20">20px</option><option value="25" selected>25px</option><option value="30">30px</option><option value="35">35px</option><option value="40">40px</option>
+                </select>
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:6px;cursor:move;border:1px solid var(--border)" draggable="true" data-el="barcode_text">
+                <input type="checkbox" checked data-show="barcode_text"><span style="flex:1;font-size:12px">Barcode Number</span>
+                <select data-size="barcode_text" style="padding:2px 6px;border-radius:4px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:10px">
+                  <option value="7" selected>7pt</option><option value="8">8pt</option><option value="9">9pt</option><option value="10">10pt</option>
                 </select>
               </label>
               <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:6px;cursor:move;border:1px solid var(--border)" draggable="true" data-el="unit">
@@ -918,6 +926,16 @@
             </div>
           </div>
 
+          <!-- Print Queue -->
+          <div class="section" style="padding:14px;display:flex;flex-direction:column;max-height:40%">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+              <h2 style="margin:0">Print Queue</h2>
+              <span id="labelQueueCount" style="font-size:11px;color:var(--text-dim)"></span>
+              <button class="btn btn-outline" id="labelClearBtn2" style="margin-left:auto;font-size:10px;padding:4px 8px">Clear</button>
+            </div>
+            <div id="labelQueueList" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:3px"></div>
+          </div>
+
           <!-- Product Selection -->
           <div class="section" style="padding:14px;flex:1;display:flex;flex-direction:column;overflow:hidden">
             <h2 style="margin-bottom:8px">Add Products</h2>
@@ -928,7 +946,6 @@
             <div id="labelProductList" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:4px"></div>
             <div style="margin-top:8px;display:flex;gap:8px">
               <button class="btn btn-green" id="labelAddAllBtn" style="font-size:11px;padding:6px 10px">Add All Visible</button>
-              <span id="labelQueueCount" style="font-size:12px;color:var(--text-dim);align-self:center"></span>
             </div>
           </div>
         </div>
@@ -1387,9 +1404,9 @@
       </div>
 
       <!-- Network Diagram -->
-      <div class="section" id="lanDiagramSection" style="display:none;">
+      <div class="section" id="lanDiagramSection">
         <h2>Network Topology</h2>
-        <div id="lanDiagram" style="padding:20px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border);text-align:center;"></div>
+        <div id="lanDiagram" style="padding:20px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border);text-align:center;min-height:200px;"></div>
       </div>
 
       <div class="section">
@@ -2936,7 +2953,7 @@
         title.style.color = 'var(--text)'
         desc.textContent = 'LAN sync is currently off. Choose a role below to enable multi-register sync.'
         banner.style.borderColor = 'var(--border)'
-        diagramSection.style.display = 'none'
+        renderLanDiagram('server', { clients: [], serverIp: 'Not configured', port: '5555' })
       }
     }
 
@@ -2945,51 +2962,75 @@
       const clients = status?.clients || []
       const serverIp = status?.serverIp || '192.168.x.x'
       const clientIp = status?.clientIp || ''
+      const isOnline = navigator.onLine
+      const supaConnected = !!status?.supabaseConnected || isOnline
 
-      if (role === 'server') {
-        const clientNodes = clients.length > 0
-          ? clients.map((c, i) => `
-            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-              <div style="width:48px;height:40px;background:var(--surface);border:2px solid var(--blue);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;">💻</div>
-              <span style="font-size:11px;color:var(--text-dim);">${esc(c.ip || 'Register ' + (i+1))}</span>
-            </div>`).join('')
-          : `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;opacity:0.4;">
-              <div style="width:48px;height:40px;background:var(--surface);border:2px dashed var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;">💻</div>
-              <span style="font-size:11px;color:var(--text-muted);">No clients yet</span>
-            </div>`
+      const clientNodes = clients.length > 0
+        ? clients.map((c, i) => `
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+            <div style="width:52px;height:44px;background:rgba(59,130,246,0.08);border:2px solid var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;">💻</div>
+            <span style="font-size:11px;font-weight:600;color:var(--blue);">Register ${i+1}</span>
+            <span style="font-size:10px;color:var(--text-dim);">${esc(c.ip || '')}</span>
+          </div>`).join('')
+        : `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;opacity:0.4;">
+            <div style="width:52px;height:44px;background:var(--surface);border:2px dashed var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;">💻</div>
+            <span style="font-size:10px;color:var(--text-dim);">No registers</span>
+          </div>`
 
-        diagram.innerHTML = `
-          <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
-            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-              <div style="width:56px;height:48px;background:rgba(16,185,129,0.1);border:2px solid var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 12px rgba(16,185,129,0.2);">🖥</div>
-              <span style="font-size:12px;font-weight:600;color:var(--green);">THIS PC (Server)</span>
-              <span style="font-size:11px;color:var(--text-dim);">${esc(serverIp)}:${status?.port || '5555'}</span>
-            </div>
-            <div style="width:2px;height:24px;background:linear-gradient(to bottom, var(--green), var(--blue));border-radius:1px;"></div>
-            <div style="font-size:11px;color:var(--text-dim);background:var(--surface);padding:2px 10px;border-radius:10px;border:1px solid var(--border);">LAN Sync</div>
-            <div style="width:2px;height:24px;background:linear-gradient(to bottom, var(--blue), var(--blue));border-radius:1px;"></div>
-            <div style="display:flex;gap:20px;justify-content:center;flex-wrap:wrap;">
-              ${clientNodes}
-            </div>
-          </div>`
-      } else {
-        diagram.innerHTML = `
-          <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
-            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-              <div style="width:56px;height:48px;background:rgba(16,185,129,0.1);border:2px solid var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;">🖥</div>
-              <span style="font-size:12px;font-weight:600;color:var(--green);">Main Server</span>
-              <span style="font-size:11px;color:var(--text-dim);">${esc(status?.serverIp || 'unknown')}</span>
-            </div>
-            <div style="width:2px;height:24px;background:linear-gradient(to bottom, var(--green), var(--blue));border-radius:1px;"></div>
-            <div style="font-size:11px;color:var(--text-dim);background:var(--surface);padding:2px 10px;border-radius:10px;border:1px solid var(--border);">LAN Sync ${status?.connected ? '✓' : '✗'}</div>
-            <div style="width:2px;height:24px;background:linear-gradient(to bottom, var(--blue), var(--blue));border-radius:1px;"></div>
-            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-              <div style="width:56px;height:48px;background:rgba(59,130,246,0.1);border:2px solid var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 12px rgba(59,130,246,0.2);">💻</div>
-              <span style="font-size:12px;font-weight:600;color:var(--blue);">THIS PC (Client)</span>
-              <span style="font-size:11px;color:var(--text-dim);">${esc(clientIp || 'this register')}</span>
-            </div>
-          </div>`
-      }
+      const thisIsServer = role === 'server'
+
+      diagram.innerHTML = `
+        <style>
+          @keyframes flowDown { 0% { top: -6px; opacity:0; } 50% { opacity:1; } 100% { top: calc(100% - 6px); opacity:0; } }
+          @keyframes flowUp { 0% { bottom: -6px; opacity:0; } 50% { opacity:1; } 100% { bottom: calc(100% - 6px); opacity:0; } }
+          .flow-line { position:relative; width:3px; border-radius:2px; overflow:hidden; }
+          .flow-dot { position:absolute; width:6px; height:6px; border-radius:50%; left:-1.5px; }
+          .flow-dot.down { animation: flowDown 2s ease-in-out infinite; }
+          .flow-dot.up { animation: flowUp 2s ease-in-out infinite; }
+        </style>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:0;">
+          <!-- Supabase Cloud -->
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-bottom:4px;">
+            <div style="width:60px;height:50px;background:${supaConnected ? 'rgba(168,85,247,0.1)' : 'rgba(100,100,100,0.1)'};border:2px solid ${supaConnected ? '#a855f7' : '#555'};border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;${supaConnected ? 'box-shadow:0 0 14px rgba(168,85,247,0.25);' : ''}">☁️</div>
+            <span style="font-size:12px;font-weight:700;color:${supaConnected ? '#a855f7' : '#666'};">Supabase Cloud</span>
+            <span style="font-size:10px;color:var(--text-dim);">${supaConnected ? 'Connected' : 'Offline'}</span>
+          </div>
+
+          <!-- Cloud to Server connection -->
+          <div class="flow-line" style="height:36px;background:linear-gradient(to bottom, ${supaConnected ? '#a855f7' : '#555'}, ${supaConnected ? 'var(--green)' : '#555'});">
+            ${supaConnected ? '<div class="flow-dot down" style="background:#a855f7;animation-delay:0s;"></div><div class="flow-dot up" style="background:var(--green);animation-delay:1s;"></div>' : ''}
+          </div>
+          <div style="font-size:10px;color:var(--text-dim);background:var(--surface);padding:2px 10px;border-radius:10px;border:1px solid var(--border);margin:4px 0;">${supaConnected ? '⬆ Push / ⬇ Pull' : '✗ No Internet'}</div>
+          <div class="flow-line" style="height:20px;background:linear-gradient(to bottom, ${supaConnected ? 'var(--green)' : '#555'}, var(--green));">
+          </div>
+
+          <!-- Main Server -->
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin:4px 0;">
+            <div style="width:64px;height:52px;background:rgba(16,185,129,0.1);border:2px solid var(--green);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 0 14px rgba(16,185,129,0.2);">🖥️</div>
+            <span style="font-size:12px;font-weight:700;color:var(--green);">${thisIsServer ? 'THIS PC (Server)' : 'Main Server'}</span>
+            <span style="font-size:10px;color:var(--text-dim);">${esc(serverIp)}:${status?.port || '5555'}</span>
+            <span style="font-size:10px;padding:2px 8px;border-radius:8px;background:rgba(16,185,129,0.15);color:var(--green);font-weight:600;">Master Database</span>
+          </div>
+
+          <!-- Server to Registers connection -->
+          <div class="flow-line" style="height:36px;background:linear-gradient(to bottom, var(--green), var(--blue));">
+            ${clients.length > 0 ? '<div class="flow-dot down" style="background:var(--green);animation-delay:0.3s;"></div><div class="flow-dot up" style="background:var(--blue);animation-delay:1.3s;"></div>' : ''}
+          </div>
+          <div style="font-size:10px;color:var(--text-dim);background:var(--surface);padding:2px 10px;border-radius:10px;border:1px solid var(--border);margin:4px 0;">LAN Sync ${clients.length > 0 || !thisIsServer ? '✓' : '(waiting)'}</div>
+          <div class="flow-line" style="height:20px;background:var(--blue);">
+          </div>
+
+          <!-- Registers -->
+          <div style="display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-top:4px;">
+            ${thisIsServer ? clientNodes : `
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+                <div style="width:56px;height:46px;background:rgba(59,130,246,0.1);border:2px solid var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 12px rgba(59,130,246,0.2);">💻</div>
+                <span style="font-size:12px;font-weight:700;color:var(--blue);">THIS PC (Register)</span>
+                <span style="font-size:10px;color:var(--text-dim);">${esc(clientIp || 'this machine')}</span>
+                <span style="font-size:10px;padding:2px 8px;border-radius:8px;background:rgba(59,130,246,0.15);color:var(--blue);">${status?.connected ? 'Synced' : 'Disconnected'}</span>
+              </div>`}
+          </div>
+        </div>`
     }
 
     function updateLanPanel (mode) {
@@ -4316,7 +4357,59 @@
     // -- Price Tags / Labels ------------------------------------------------
 
     let labelQueue = []
-    let labelElementOrder = ['name', 'price', 'barcode', 'unit', 'category']
+    let labelElementOrder = ['name', 'price', 'barcode', 'barcode_text', 'unit', 'category']
+
+    // Code128 barcode generator (produces SVG data URI)
+    function generateBarcodeSVG(text, height = 25) {
+      if (!text) return ''
+      const CODE128_START_B = 104
+      const CODE128_STOP = 106
+      const PATTERNS = [
+        '11011001100','11001101100','11001100110','10010011000','10010001100',
+        '10001001100','10011001000','10011000100','10001100100','11001001000',
+        '11001000100','11000100100','10110011100','10011011100','10011001110',
+        '10111001100','10011101100','10011100110','11001110010','11001011100',
+        '11001001110','11011100100','11001110100','11100101100','11100100110',
+        '11101100100','11100110100','11100110010','11011011000','11011000110',
+        '11000110110','10100011000','10001011000','10001000110','10110001000',
+        '10001101000','10001100010','11010001000','11000101000','11000100010',
+        '10110111000','10110001110','10001101110','10111011000','10111000110',
+        '10001110110','11101110110','11010001110','11000101110','11011101000',
+        '11011100010','11011101110','11101011000','11101000110','11100010110',
+        '11101101000','11101100010','11100011010','11101111010','11001000010',
+        '11110001010','10100110000','10100001100','10010110000','10010000110',
+        '10000101100','10000100110','10110010000','10110000100','10011010000',
+        '10011000010','10000110100','10000110010','11000010010','11001010000',
+        '11110111010','11000010100','10001111010','10100111100','10010111100',
+        '10010011110','10111100100','10011110100','10011110010','11110100100',
+        '11110010100','11110010010','11011011110','11011110110','11110110110',
+        '10101111000','10100011110','10001011110','10111101000','10111100010',
+        '10001111010','11110101000','11110100010','10111011110','10111101110',
+        '11101011110','11110101110','11010000100','11010010000','11010011100',
+        '11000111010'
+      ]
+      let encoded = PATTERNS[CODE128_START_B]
+      let checksum = CODE128_START_B
+      for (let i = 0; i < text.length; i++) {
+        const val = text.charCodeAt(i) - 32
+        if (val < 0 || val > 95) continue
+        encoded += PATTERNS[val]
+        checksum += val * (i + 1)
+      }
+      encoded += PATTERNS[checksum % 103]
+      encoded += PATTERNS[CODE128_STOP]
+      encoded += '11'
+      const barWidth = 1
+      const totalWidth = encoded.length * barWidth
+      let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${totalWidth}" height="${height}" viewBox="0 0 ${totalWidth} ${height}" preserveAspectRatio="none">`
+      let x = 0
+      for (const bit of encoded) {
+        if (bit === '1') svg += `<rect x="${x}" y="0" width="${barWidth}" height="${height}" fill="#000"/>`
+        x += barWidth
+      }
+      svg += '</svg>'
+      return `data:image/svg+xml;base64,${btoa(svg)}`
+    }
 
     function getLabelConfig () {
       const elements = []
@@ -4349,10 +4442,15 @@
         const product = labelQueue[i]
         if (product) {
           let content = ''
+          const barcodeVal = product.plu || product.barcode || ''
           for (const el of cfg.elements) {
             if (el.type === 'name') content += `<div style="font-size:${el.size}pt;font-weight:600;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(product.name)}</div>`
             else if (el.type === 'price') content += `<div style="font-size:${el.size}pt;font-weight:800;color:#000">${money(product.active_price ?? product.price)}</div>`
-            else if (el.type === 'barcode') content += `<div style="font-size:${el.size}pt;font-family:monospace;color:#444">${esc(product.plu || product.barcode || '')}</div>`
+            else if (el.type === 'barcode') {
+              const svg = generateBarcodeSVG(barcodeVal, el.size)
+              content += svg ? `<img src="${svg}" style="width:90%;height:${el.size}px;object-fit:fill" alt="${esc(barcodeVal)}">` : ''
+            }
+            else if (el.type === 'barcode_text') content += `<div style="font-size:${el.size}pt;font-family:monospace;color:#444;letter-spacing:0.5px">${esc(barcodeVal)}</div>`
             else if (el.type === 'unit') content += `<div style="font-size:${el.size}pt;color:#666">${product.unit === 'each' ? 'each' : 'per ' + product.unit}</div>`
             else if (el.type === 'category') content += `<div style="font-size:${el.size}pt;color:#888">${esc(product.category_name || '')}</div>`
           }
@@ -4374,13 +4472,44 @@
         cell.addEventListener('mouseleave', () => btn.style.display = 'none')
       })
 
-      $('#labelQueueCount').textContent = `${labelQueue.length} / ${totalSlots} slots filled`
+      const totalInQueue = labelQueue.length
+      $('#labelQueueCount').textContent = `${totalInQueue} / ${totalSlots} slots filled`
+      renderLabelQueue()
+    }
+
+    function renderLabelQueue () {
+      const list = $('#labelQueueList')
+      if (!labelQueue.length) {
+        list.innerHTML = '<div style="color:var(--text-dim);font-size:12px;padding:8px;text-align:center">No products in queue. Add from below.</div>'
+        return
+      }
+      list.innerHTML = labelQueue.map((p, i) => `
+        <div style="display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:5px;background:var(--surface2);border:1px solid var(--border);font-size:11px" data-qi="${i}">
+          <span style="color:var(--text-dim);width:16px;text-align:right;flex-shrink:0">${i + 1}.</span>
+          <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.name)}</span>
+          <span style="color:var(--green);font-weight:600;flex-shrink:0">${money(p.active_price ?? p.price)}</span>
+          <button class="btn" style="padding:1px 5px;font-size:9px;background:var(--surface);border:1px solid var(--border);color:var(--text)" data-q-dup="${i}" title="Duplicate">+1</button>
+          <button class="btn" style="padding:1px 5px;font-size:9px;background:#f44;color:#fff;border:none" data-q-del="${i}" title="Remove">&times;</button>
+        </div>`).join('')
     }
 
     $('#labelSheet').addEventListener('click', e => {
       const btn = e.target.closest('[data-label-remove]')
       if (btn) { labelQueue.splice(parseInt(btn.dataset.labelRemove), 1); renderLabelSheet() }
     })
+
+    $('#labelQueueList').addEventListener('click', e => {
+      const del = e.target.closest('[data-q-del]')
+      if (del) { labelQueue.splice(parseInt(del.dataset.qDel), 1); renderLabelSheet(); return }
+      const dup = e.target.closest('[data-q-dup]')
+      if (dup) {
+        const idx = parseInt(dup.dataset.qDup)
+        labelQueue.splice(idx + 1, 0, { ...labelQueue[idx] })
+        renderLabelSheet()
+      }
+    })
+
+    $('#labelClearBtn2').addEventListener('click', () => { labelQueue = []; renderLabelSheet() })
 
     async function loadLabelProducts () {
       const query = $('#labelProductSearch').value.trim()
@@ -4405,10 +4534,10 @@
       const p = await window.pos.getProductById(id)
       if (!p) return
       const cfg = getLabelConfig()
-      if (labelQueue.length >= cfg.cols * cfg.rows) { showToast('Sheet is full', 'error'); return }
+      if (labelQueue.length >= cfg.cols * cfg.rows) { showToast('Sheet is full — print or clear first', 'error'); return }
       const cats = await window.pos.getCategories()
       p.category_name = (cats.find(c => c.id === p.category_id) || {}).name || ''
-      labelQueue.push(p)
+      labelQueue.unshift(p)
       renderLabelSheet()
     })
 
@@ -4475,6 +4604,7 @@
       content += `@page { margin: 5mm; } body { margin: 0; font-family: Arial, sans-serif; }`
       content += `.sheet { display: grid; grid-template-columns: repeat(${cfg.cols}, ${cfg.width}mm); grid-template-rows: repeat(${cfg.rows}, ${cfg.height}mm); gap: 0; }`
       content += `.tag { border: 0.5px solid #ccc; padding: 2px 3px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; overflow: hidden; page-break-inside: avoid; }`
+      content += `.tag img { image-rendering: pixelated; }`
       content += '</style></head><body>'
 
       const totalSlots = cfg.cols * cfg.rows
@@ -4484,11 +4614,16 @@
         for (let i = 0; i < totalSlots; i++) {
           const p = labelQueue[page * totalSlots + i]
           if (p) {
+            const barcodeVal = p.plu || p.barcode || ''
             content += '<div class="tag">'
             for (const el of cfg.elements) {
               if (el.type === 'name') content += `<div style="font-size:${el.size}pt;font-weight:600;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%">${esc(p.name)}</div>`
               else if (el.type === 'price') content += `<div style="font-size:${el.size}pt;font-weight:800">${money(p.active_price ?? p.price)}</div>`
-              else if (el.type === 'barcode') content += `<div style="font-size:${el.size}pt;font-family:monospace">${esc(p.plu || p.barcode || '')}</div>`
+              else if (el.type === 'barcode') {
+                const svg = generateBarcodeSVG(barcodeVal, el.size)
+                if (svg) content += `<img src="${svg}" style="width:90%;height:${el.size}px;object-fit:fill">`
+              }
+              else if (el.type === 'barcode_text') content += `<div style="font-size:${el.size}pt;font-family:monospace;letter-spacing:0.5px">${esc(barcodeVal)}</div>`
               else if (el.type === 'unit') content += `<div style="font-size:${el.size}pt;color:#666">${p.unit === 'each' ? 'each' : 'per ' + p.unit}</div>`
               else if (el.type === 'category') content += `<div style="font-size:${el.size}pt;color:#888">${esc(p.category_name || '')}</div>`
             }
@@ -4499,6 +4634,8 @@
         }
         content += '</div>'
       }
+      // Include barcode generator in print window
+      content += `<script>${generateBarcodeSVG.toString()}<\/script>`
       content += '<script>window.print()<\/script></body></html>'
       printWin.document.write(content)
       printWin.document.close()
