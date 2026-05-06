@@ -87,7 +87,9 @@ async function initDatabase() {
   const schema = fs.readFileSync(SCHEMA_PATH, 'utf-8')
   const statements = schema.split(';').filter(s => s.trim())
   for (const stmt of statements) {
-    if (dbExists && /^\s*INSERT/i.test(stmt)) continue
+    // Skip all INSERT/seed statements for existing databases (strip SQL comments first)
+    const stripped = stmt.replace(/--[^\n]*/g, '').trim()
+    if (dbExists && /^INSERT/i.test(stripped)) continue
     try { db.run(stmt) } catch (_) {}
   }
 
@@ -218,6 +220,17 @@ async function initDatabase() {
 
   // Link keyboard buttons to products by matching names (best image match)
   relinkKeyboardProducts()
+
+  // Enforce deleted_records — remove anything that was intentionally deleted but got re-inserted
+  try {
+    const deleted = db.exec("SELECT table_name, record_id FROM deleted_records")
+    if (deleted.length && deleted[0].values.length) {
+      for (const [table, recordId] of deleted[0].values) {
+        db.run(`DELETE FROM ${table} WHERE id = ?1`, [recordId])
+      }
+      console.log(`Enforced ${deleted[0].values.length} deletions from deleted_records`)
+    }
+  } catch (_) {}
 
   saveDB()
   appLog('info', 'database', 'Database initialized', `Path: ${DB_PATH}`)
