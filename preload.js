@@ -78,6 +78,11 @@ contextBridge.exposeInMainWorld('pos', {
 
   bulkUpsertKeyboard: (btns) => ipcRenderer.invoke('db:keyboard:bulkUpsert', btns),
 
+  // Keyboard Pages
+  createPage:         (opts)      => ipcRenderer.invoke('db:keyboard:createPage', opts),
+  renamePage:         (page, name) => ipcRenderer.invoke('db:keyboard:renamePage', page, name),
+  updatePageSize:     (page, cols, rows) => ipcRenderer.invoke('db:keyboard:updatePageSize', page, cols, rows),
+
   // Keyboard Extended
   copyPage:           (src, dest) => ipcRenderer.invoke('db:keyboard:copyPage', src, dest),
   exportKeyboard:     ()          => ipcRenderer.invoke('db:keyboard:export'),
