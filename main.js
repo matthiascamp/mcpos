@@ -141,6 +141,10 @@ async function initDatabase() {
     try { db.run(m) } catch (_) {}
   }
 
+  // Ensure layout flags are set (schema INSERTs are skipped on existing DBs)
+  try { db.run("INSERT OR IGNORE INTO settings (key, value) VALUES ('layout_v3_shifted', '1')") } catch (_) {}
+  try { db.run("INSERT OR IGNORE INTO settings (key, value) VALUES ('nav_buttons_fixed', '1')") } catch (_) {}
+
   // Layout v3: Shift Page 1 buttons to make room for in-grid cart at cols 0-2, rows 2-5
   try {
     const shifted = db.prepare("SELECT value FROM settings WHERE key = 'layout_v3_shifted'")
