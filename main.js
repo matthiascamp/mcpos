@@ -130,8 +130,10 @@ async function initDatabase() {
     "UPDATE keyboard_buttons SET type = 'endofday' WHERE id = 'fn-endofday'",
     // Include page 1 in page_sizes setting
     "INSERT OR REPLACE INTO settings (key, value) VALUES ('keyboard_page_sizes', '{\"1\":{\"cols\":13,\"rows\":7},\"2\":{\"cols\":8,\"rows\":5},\"3\":{\"cols\":8,\"rows\":5},\"4\":{\"cols\":8,\"rows\":5},\"5\":{\"cols\":8,\"rows\":5},\"6\":{\"cols\":8,\"rows\":5}}')",
-    // Reset images for bags, flowers, meat so relinkKeyboardProducts applies new ones
-    "UPDATE keyboard_buttons SET image = NULL WHERE id IN ('btn-bags', 'btn-flowers', 'btn-meat')",
+    // Reset Wikimedia images so relinkKeyboardProducts applies GitHub-hosted ones
+    "UPDATE keyboard_buttons SET image = NULL WHERE image LIKE '%wikimedia%'",
+    // Clear Wikimedia product images — will be re-set by nav migration
+    "UPDATE products SET image_url = NULL WHERE image_url LIKE '%wikimedia%'",
     // Fix wrong product_id links (buttons incorrectly linked to Bippi Chilli product)
     "UPDATE keyboard_buttons SET product_id = NULL WHERE product_id IN (SELECT id FROM products WHERE name LIKE '%BIPPI%CHILLI%')",
     // Clear product_id from buttons that already have their own image (avoids wrong product image showing)
@@ -174,9 +176,9 @@ async function initDatabase() {
   try {
     const navFixed = db.prepare("SELECT value FROM settings WHERE key = 'nav_buttons_fixed'")
     navFixed.bind([])
-    const alreadyFixed = navFixed.step() ? navFixed.getAsObject() : null
+    const navRow = navFixed.step() ? navFixed.getAsObject() : null
     navFixed.free()
-    if (!alreadyFixed) {
+    if (!navRow || navRow.value !== '3') {
       // Fix bottom nav buttons: ensure page_link with correct parent_id for keyboard pages
       db.run("UPDATE keyboard_buttons SET type = 'page_link', parent_id = '6', category_filter = NULL, alpha_range = NULL WHERE id = 'btn-grocery'")
       db.run("UPDATE keyboard_buttons SET type = 'page_link', parent_id = '2', category_filter = NULL, alpha_range = NULL WHERE id = 'btn-fruit-am'")
@@ -184,42 +186,31 @@ async function initDatabase() {
       db.run("UPDATE keyboard_buttons SET type = 'page_link', parent_id = '4', category_filter = NULL, alpha_range = NULL WHERE id = 'btn-veg-ag'")
       db.run("UPDATE keyboard_buttons SET type = 'page_link', parent_id = '5', category_filter = NULL, alpha_range = NULL WHERE id = 'btn-veg-hz'")
       // Add image URLs to fruit & veg products
+      const fvBase = 'https://raw.githubusercontent.com/matthiascamp/crisponcreek/main/crisp_on_creek_fruit_veg_images/'
       const fruitImages = {
-        'Apple Royal Gala': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Royal_Gala_apple.jpg/220px-Royal_Gala_apple.jpg',
-        'Apple Granny Smith': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/GrannySmith.jpg/220px-GrannySmith.jpg',
-        'Banana': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Banana-Single.jpg/220px-Banana-Single.jpg',
-        'Orange Navel': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Orange-Whole-%26-Split.jpg/220px-Orange-Whole-%26-Split.jpg',
-        'Lemon': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Lemon.jpg/220px-Lemon.jpg',
-        'Lime': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Lime_Green.jpg/220px-Lime_Green.jpg',
-        'Strawberry Punnet': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/PerfectStrawberry.jpg/220px-PerfectStrawberry.jpg',
-        'Blueberry Punnet': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Blueberries.jpg/220px-Blueberries.jpg',
-        'Avocado Hass': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Hass.jpg/220px-Hass.jpg',
-        'Mango': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Hapus_Mango.jpg/220px-Hapus_Mango.jpg',
-        'Watermelon': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Taiwan_2009_Tainan_City_Watermelon_Stall_FRD_7962.jpg/220px-Taiwan_2009_Tainan_City_Watermelon_Stall_FRD_7962.jpg',
-        'Pineapple': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Pineapple_and_cross_section.jpg/220px-Pineapple_and_cross_section.jpg',
-        'Tomato': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Tomato_je.jpg/220px-Tomato_je.jpg',
-        'Cucumber': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/ARS_cucumber.jpg/220px-ARS_cucumber.jpg',
-        'Broccoli': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Broccoli_and_cross_section_edit.jpg/220px-Broccoli_and_cross_section_edit.jpg',
-        'Carrot': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Vegetable-Carrot-Bundle-Small.jpg/220px-Vegetable-Carrot-Bundle-Small.jpg',
-        'Capsicum Red': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Red_bell_pepper.jpg/220px-Red_bell_pepper.jpg',
-        'Lettuce Iceberg': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Iceberg_lettuce_in_SB.jpg/220px-Iceberg_lettuce_in_SB.jpg',
-        'Potato': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Patates.jpg/220px-Patates.jpg',
-        'Onion Brown': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Onion_on_White.JPG/220px-Onion_on_White.JPG',
-        'Mushroom Cup': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Champignons_Agaricus.jpg/220px-Champignons_Agaricus.jpg',
-        'Sweet Potato': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Ipomoea_batatas_006.JPG/220px-Ipomoea_batatas_006.JPG',
-        'Zucchini': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/CSA-Zucchini.jpg/220px-CSA-Zucchini.jpg',
-        'Corn Cob': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Ab_food_06.jpg/220px-Ab_food_06.jpg',
-        'Pumpkin': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/FrightNight2005pumpkins.jpg/220px-FrightNight2005pumpkins.jpg',
-        'Grapes Green': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Table_grapes_on_vine.jpg/220px-Table_grapes_on_vine.jpg',
-        'Pear Packham': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/More_pridge_pears.jpg/220px-More_pridge_pears.jpg',
-        'Kiwi Fruit': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Kiwi_aka.jpg/220px-Kiwi_aka.jpg',
+        'Bananas': fvBase + 'Bananas_Cavendish.jpg',
+        'Royal Gala Apples': fvBase + 'Apple_Royal_Gala_Large.jpg',
+        'Granny Smith Apples': fvBase + 'Apple_Granny_Smith_Large.jpg',
+        'Navel Oranges': fvBase + 'Navel_Orange.jpg',
+        'Strawberries Punnet': fvBase + 'Strawberries_Punnet.jpg',
+        'Avocado Hass': fvBase + 'Avocado_Large_Hass.jpg',
+        'Mangoes': fvBase + 'Mandarines_Afrourer.jpg',
+        'Watermelon': fvBase + '(S)_Watermelon.jpg',
+        'Tomatoes': fvBase + 'Tomatoes.jpg',
+        'Potatoes Washed': fvBase + 'Potatoes_Brushed.jpg',
+        'Brown Onions': fvBase + 'Brown_Onion.jpg',
+        'Carrots': fvBase + 'Carrots.jpg',
+        'Broccoli': fvBase + 'Broccoli.jpg',
+        'Iceberg Lettuce': fvBase + 'Lettuce_Iceberg.jpg',
+        'Red Capsicum': fvBase + 'Capsicum_Red.jpg',
+        'Cup Mushrooms': fvBase + 'Mushroom_Cups.jpg',
       }
       for (const [name, url] of Object.entries(fruitImages)) {
-        db.run("UPDATE products SET image_url = ? WHERE name = ? AND (image_url IS NULL OR image_url = '')", [url, name])
+        db.run("UPDATE products SET image_url = ? WHERE name = ? AND (image_url IS NULL OR image_url = '' OR image_url LIKE '%wikimedia%')", [url, name])
       }
       console.log('Nav buttons fixed + product images added')
     }
-    db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('nav_buttons_fixed', '1')")
+    db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('nav_buttons_fixed', '3')")
   } catch (e) { console.error('Nav fix migration error:', e.message) }
 
   // Link keyboard buttons to products by matching names (best image match)
@@ -318,17 +309,17 @@ const KB_IMAGE_BASE_EXT = 'https://raw.githubusercontent.com/matthiascamp/crispo
 const KB_IMAGE_BASE_IMG = 'https://raw.githubusercontent.com/matthiascamp/crisponcreek/main/crisp_on_creek_images/'
 const KB_IMAGE_MAP = {
   // Main page department buttons
-  'btn-meat':    { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Raw_Meat.jpg/200px-Raw_Meat.jpg' },
+  'btn-meat':    { base: 'ext', file: 'Barbell_Air_Dried_Steak.jpg' },
   'btn-coffee':  { base: 'img', file: 'Fresh_Press_Cold_Drip_Coffee.jpg' },
   'btn-fv':      { base: 'fv', file: 'Apple_Royal_Gala_Large.jpg' },
   'btn-cheese':  { base: 'deli', file: 'Auricchio_Grana_Padano.jpg' },
-  'btn-flowers': { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/A_bouquet_of_Gerberas_on_Ermou_Street.jpg/200px-A_bouquet_of_Gerberas_on_Ermou_Street.jpg' },
+  'btn-flowers': { base: 'fv', file: 'Strawberries.jpg' },
   'btn-bread':   { base: 'ext', file: 'F_R_CIABATTA_LOAF.jpg' },
-  'btn-bags':    { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Have_a_nice_day_and_smiley_face_bag.jpg/200px-Have_a_nice_day_and_smiley_face_bag.jpg' },
+  'btn-bags':    { base: 'img', file: 'Home_Force_Garbage_Bags_Handle_Tie.jpg' },
   'btn-deli':    { base: 'deli', file: 'Casalingo_Prosciutto.jpg' },
-  'btn-nuts':    { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Mixed_nuts.jpg/145px-Mixed_nuts.jpg' },
-  'btn-grocery': { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Grocery_bag_of_junk_foods.jpg/200px-Grocery_bag_of_junk_foods.jpg' },
-  'btn-gas':     { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Soft_drink_shelf.JPG/200px-Soft_drink_shelf.JPG' },
+  'btn-nuts':    { base: 'img', file: 'Cashew_Macadamia_Mix.jpg' },
+  'btn-grocery': { base: 'img', file: 'Kettle.jpg' },
+  'btn-gas':     { base: 'img', file: 'Coca_Cola_1.25L.jpg' },
   // Page 2: Fruit A-M
   'pg2-apples': { base: 'fv', file: 'Apple_Royal_Gala_Large.jpg' },
   'pg2-apricots': { base: 'fv', file: 'Apricots.jpg' },
@@ -338,16 +329,16 @@ const KB_IMAGE_MAP = {
   'pg2-cherries': { base: 'fv', file: 'Cherry_Tomatoes.jpg' },
   'pg2-coconut': { base: 'img', file: 'MAE_MASSIMO_VUVOA_COCONUT.jpg' },
   'pg2-custard-apple': { base: 'fv', file: 'Custard_Apples.jpg' },
-  'pg2-dragon-fruit': { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Dragonfruit_Chiayi_market.jpg/200px-Dragonfruit_Chiayi_market.jpg' },
+  'pg2-dragon-fruit': { base: 'img', file: 'Red_Dragon_Fruit.jpg' },
   'pg2-figs': { base: 'fv', file: 'Figs_Fresh.jpg' },
   'pg2-grapes': { base: 'fv', file: 'Grapes_Autumn_King.jpg' },
   'pg2-grapefruit': { base: 'fv', file: 'Grapefruit_Ruby_Red.jpg' },
-  'pg2-guava': { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Guava_ID.jpg/200px-Guava_ID.jpg' },
+  'pg2-guava': { base: 'fv', file: 'Passionfruit.jpg' },
   'pg2-kiwi': { base: 'fv', file: 'Kiwi_Fruit.jpg' },
   'pg2-lemons': { base: 'fv', file: 'Lemons_Fresh.jpg' },
   'pg2-limes': { base: 'fv', file: 'Limes.jpg' },
-  'pg2-longan': { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Longan_fruit_flesh_%26_skin.jpg/200px-Longan_fruit_flesh_%26_skin.jpg' },
-  'pg2-lychee': { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Lychee_Fruit.jpg/200px-Lychee_Fruit.jpg' },
+  'pg2-longan': { base: 'fv', file: 'Nectarine.jpg' },
+  'pg2-lychee': { base: 'fv', file: 'Raspberries_Punnet.jpg' },
   'pg2-mandarins': { base: 'fv', file: 'Mandarines_Afrourer.jpg' },
   'pg2-mangoes': { base: 'ext', file: 'MANGOES_R2E2_EA.jpg' },
   'pg2-melons': { base: 'fv', file: 'Melon_Honey_Dew.jpg' },
@@ -392,7 +383,7 @@ const KB_IMAGE_MAP = {
   'pg4-cucumbers': { base: 'fv', file: 'Cucumber_Continental.jpg' },
   'pg4-eggplant': { base: 'fv', file: 'Eggplant.jpg' },
   'pg4-leb-eggplant': { base: 'fv', file: 'Eggplant_Baby.jpg' },
-  'pg4-fennel': { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Fennel_bulb.jpg/200px-Fennel_bulb.jpg' },
+  'pg4-fennel': { base: 'fv', file: 'Celery.jpg' },
   'pg4-garlic': { base: 'fv', file: 'Garlic.jpg' },
   'pg4-ginger': { base: 'fv', file: 'Ginger.jpg' },
   // Page 5: Vegetables H-Z
@@ -409,7 +400,7 @@ const KB_IMAGE_MAP = {
   'pg5-potatoes': { base: 'fv', file: 'Potatoes_Washed.jpg' },
   'pg5-pumpkins': { base: 'fv', file: 'Pumpkin_Jap.jpg' },
   'pg5-radish': { base: 'fv', file: 'Snacking_Raddish.jpg' },
-  'pg5-rhubarb': { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/01-rhubarb_stalks.jpg/200px-01-rhubarb_stalks.jpg' },
+  'pg5-rhubarb': { base: 'fv', file: 'Celery.jpg' },
   'pg5-shallots': { base: 'fv', file: 'Eshallots_Bunch.jpg' },
   'pg5-silverbeet': { base: 'fv', file: 'Silverbeet_Bunch.jpg' },
   'pg5-snow-peas': { base: 'ext', file: 'SNOW_PEAS_KG.jpg' },
@@ -417,7 +408,7 @@ const KB_IMAGE_MAP = {
   'pg5-swedes': { base: 'fv', file: 'Swedes.jpg' },
   'pg5-sweet-potato': { base: 'fv', file: 'Special_Sweet_Potatoes.jpg' },
   'pg5-tomatoes': { base: 'fv', file: 'Tomatoes.jpg' },
-  'pg5-turnip': { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Turnip_2622027.jpg/200px-Turnip_2622027.jpg' },
+  'pg5-turnip': { base: 'fv', file: 'Swedes.jpg' },
   'pg5-zucchini': { base: 'fv', file: 'Zucchini_Large.jpg' },
 }
 

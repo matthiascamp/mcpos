@@ -136,12 +136,10 @@ export async function pullCategories(since) {
 export async function pullKeyboard(since) {
   if (!isOnline()) return false
 
-  const lastPull = since || await getLastPull()
-
+  // Always pull all keyboard buttons (small dataset, ensures layout is always correct)
   const { data, error } = await supabase
     .from('keyboard_buttons')
     .select('*')
-    .gte('updated_at', lastPull)
 
   if (error) { console.error('Pull keyboard failed:', error.message); return false }
 
