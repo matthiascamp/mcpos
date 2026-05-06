@@ -133,8 +133,10 @@ async function initDatabase() {
     "UPDATE keyboard_buttons SET type = 'endofday' WHERE id = 'fn-endofday'",
     // Include page 1 in page_sizes setting
     "INSERT OR REPLACE INTO settings (key, value) VALUES ('keyboard_page_sizes', '{\"1\":{\"cols\":13,\"rows\":7},\"2\":{\"cols\":8,\"rows\":5},\"3\":{\"cols\":8,\"rows\":5},\"4\":{\"cols\":8,\"rows\":5},\"5\":{\"cols\":8,\"rows\":5},\"6\":{\"cols\":8,\"rows\":5}}')",
-    // Reset images for bags, flowers, meat so relinkKeyboardProducts applies new ones
-    "UPDATE keyboard_buttons SET image = NULL WHERE id IN ('btn-bags', 'btn-flowers', 'btn-meat')",
+    // Reset Wikimedia images so relinkKeyboardProducts applies GitHub-hosted ones
+    "UPDATE keyboard_buttons SET image = NULL WHERE image LIKE '%wikimedia%'",
+    // Clear Wikimedia product images — will be re-set by nav migration
+    "UPDATE products SET image_url = NULL WHERE image_url LIKE '%wikimedia%'",
     // Fix wrong product_id links (buttons incorrectly linked to Bippi Chilli product)
     "UPDATE keyboard_buttons SET product_id = NULL WHERE product_id IN (SELECT id FROM products WHERE name LIKE '%BIPPI%CHILLI%')",
     // Clear product_id from buttons that already have their own image (avoids wrong product image showing)
@@ -144,24 +146,21 @@ async function initDatabase() {
     try { db.run(m) } catch (_) {}
   }
 
-  // Layout v3: Shift Page 1 buttons to make room for in-grid cart at cols 0-2, rows 2-5
+  // Layout v3: Shift Page 1 buttons to make room for in-grid cart at cols 0-2
+  // Uses position-based detection (not a flag) so it can never double-shift
   try {
-    const shifted = db.prepare("SELECT value FROM settings WHERE key = 'layout_v3_shifted'")
-    shifted.bind([])
-    const already = shifted.step() ? shifted.getAsObject() : null
-    shifted.free()
-    if (!already) {
-      // Shift department buttons from cols 0-2 to cols 3-5
+    const chk = db.prepare("SELECT grid_col FROM keyboard_buttons WHERE id = 'btn-meat' AND page = 1")
+    chk.bind([])
+    const meatPos = chk.step() ? chk.getAsObject() : null
+    chk.free()
+    if (meatPos && meatPos.grid_col < 3) {
+      // Departments at cols 0-2 need shifting to 3-5
       db.run("UPDATE keyboard_buttons SET grid_col = grid_col + 3 WHERE page = 1 AND grid_row >= 2 AND grid_row <= 5 AND grid_col BETWEEN 0 AND 2 AND id NOT LIKE 'np-%'")
-      // Shift numpad buttons from cols 4-7 to cols 6-9
+      // Numpad at cols 4-7 needs shifting to 6-9
       db.run("UPDATE keyboard_buttons SET grid_col = grid_col + 2 WHERE page = 1 AND grid_row >= 2 AND grid_row <= 5 AND grid_col BETWEEN 4 AND 7")
-      // Deactivate in-grid numpad display (status bar shows buffer instead)
       db.run("UPDATE keyboard_buttons SET active = 0 WHERE id = 'np-display'")
-      // Add missing buttons for PT layout
       db.run("INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, category_filter) VALUES ('btn-fvsect', 'FRUIT & VEG', 'section', '#fff', '#409850', 29, 'grid', 1, 3, 5, 1, 1, 'Fruit')")
-      // Move GAS from bottom nav (row 6) to department area (row 5)
       db.run("UPDATE keyboard_buttons SET grid_row = 5, grid_col = 4, type = 'section' WHERE id = 'btn-gas' AND grid_row = 6")
-      // Update labels to match PT
       db.run("UPDATE keyboard_buttons SET label = 'BAG' WHERE id = 'btn-bags'")
       db.run("UPDATE keyboard_buttons SET label = 'BREAD &\\nCROISSAN' WHERE id = 'btn-bread'")
       db.run("UPDATE keyboard_buttons SET label = 'FRUIT & VEG\\n/KG' WHERE id = 'btn-fvkg'")
@@ -171,19 +170,18 @@ async function initDatabase() {
       db.run("UPDATE keyboard_buttons SET bg_color = '#c8a828' WHERE id = 'btn-deli'")
       db.run("UPDATE keyboard_buttons SET bg_color = '#6699cc' WHERE id = 'btn-grocery'")
       db.run("UPDATE keyboard_buttons SET bg_color = '#c8b880' WHERE id = 'btn-nuts'")
-      // Mark migration as done
-      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('layout_v3_shifted', '1')")
       console.log('Layout v3: Shifted buttons for in-grid cart')
     }
+    db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('layout_v3_shifted', '1')")
   } catch (e) { console.error('Layout v3 migration error:', e.message) }
 
-  // Nav button type fix + product images migration
+  // Nav button type fix + product images migration (idempotent — uses absolute values)
   try {
     const navFixed = db.prepare("SELECT value FROM settings WHERE key = 'nav_buttons_fixed'")
     navFixed.bind([])
-    const alreadyFixed = navFixed.step() ? navFixed.getAsObject() : null
+    const navRow = navFixed.step() ? navFixed.getAsObject() : null
     navFixed.free()
-    if (!alreadyFixed) {
+    if (!navRow || navRow.value !== '3') {
       // Fix bottom nav buttons: ensure page_link with correct parent_id for keyboard pages
       db.run("UPDATE keyboard_buttons SET type = 'page_link', parent_id = '6', category_filter = NULL, alpha_range = NULL WHERE id = 'btn-grocery'")
       db.run("UPDATE keyboard_buttons SET type = 'page_link', parent_id = '2', category_filter = NULL, alpha_range = NULL WHERE id = 'btn-fruit-am'")
@@ -191,13 +189,31 @@ async function initDatabase() {
       db.run("UPDATE keyboard_buttons SET type = 'page_link', parent_id = '4', category_filter = NULL, alpha_range = NULL WHERE id = 'btn-veg-ag'")
       db.run("UPDATE keyboard_buttons SET type = 'page_link', parent_id = '5', category_filter = NULL, alpha_range = NULL WHERE id = 'btn-veg-hz'")
       // Add image URLs to fruit & veg products
-      const fruitImages = {}
-      for (const [name, url] of Object.entries(fruitImages)) {
-        db.run("UPDATE products SET image_url = ? WHERE name = ? AND (image_url IS NULL OR image_url = '')", [url, name])
+      const fvBase = 'https://raw.githubusercontent.com/matthiascamp/crisponcreek/main/crisp_on_creek_fruit_veg_images/'
+      const fruitImages = {
+        'Bananas': fvBase + 'Bananas_Cavendish.jpg',
+        'Royal Gala Apples': fvBase + 'Apple_Royal_Gala_Large.jpg',
+        'Granny Smith Apples': fvBase + 'Apple_Granny_Smith_Large.jpg',
+        'Navel Oranges': fvBase + 'Navel_Orange.jpg',
+        'Strawberries Punnet': fvBase + 'Strawberries_Punnet.jpg',
+        'Avocado Hass': fvBase + 'Avocado_Large_Hass.jpg',
+        'Mangoes': fvBase + 'Mandarines_Afrourer.jpg',
+        'Watermelon': fvBase + '(S)_Watermelon.jpg',
+        'Tomatoes': fvBase + 'Tomatoes.jpg',
+        'Potatoes Washed': fvBase + 'Potatoes_Brushed.jpg',
+        'Brown Onions': fvBase + 'Brown_Onion.jpg',
+        'Carrots': fvBase + 'Carrots.jpg',
+        'Broccoli': fvBase + 'Broccoli.jpg',
+        'Iceberg Lettuce': fvBase + 'Lettuce_Iceberg.jpg',
+        'Red Capsicum': fvBase + 'Capsicum_Red.jpg',
+        'Cup Mushrooms': fvBase + 'Mushroom_Cups.jpg',
       }
-      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('nav_buttons_fixed', '1')")
+      for (const [name, url] of Object.entries(fruitImages)) {
+        db.run("UPDATE products SET image_url = ? WHERE name = ? AND (image_url IS NULL OR image_url = '' OR image_url LIKE '%wikimedia%')", [url, name])
+      }
       console.log('Nav buttons fixed + product images added')
     }
+    db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('nav_buttons_fixed', '3')")
   } catch (e) { console.error('Nav fix migration error:', e.message) }
 
   // Link keyboard buttons to products by matching names (best image match)
@@ -296,17 +312,17 @@ const KB_IMAGE_BASE_EXT = 'https://raw.githubusercontent.com/matthiascamp/crispo
 const KB_IMAGE_BASE_IMG = 'https://raw.githubusercontent.com/matthiascamp/crisponcreek/main/crisp_on_creek_images/'
 const KB_IMAGE_MAP = {
   // Main page department buttons
-  'btn-meat':    null,
+  'btn-meat':    { base: 'ext', file: 'Barbell_Air_Dried_Steak.jpg' },
   'btn-coffee':  { base: 'img', file: 'Fresh_Press_Cold_Drip_Coffee.jpg' },
   'btn-fv':      { base: 'fv', file: 'Apple_Royal_Gala_Large.jpg' },
   'btn-cheese':  { base: 'deli', file: 'Auricchio_Grana_Padano.jpg' },
-  'btn-flowers': null,
+  'btn-flowers': { base: 'fv', file: 'Strawberries.jpg' },
   'btn-bread':   { base: 'ext', file: 'F_R_CIABATTA_LOAF.jpg' },
-  'btn-bags':    null,
+  'btn-bags':    { base: 'img', file: 'Home_Force_Garbage_Bags_Handle_Tie.jpg' },
   'btn-deli':    { base: 'deli', file: 'Casalingo_Prosciutto.jpg' },
-  'btn-nuts':    null,
-  'btn-grocery': null,
-  'btn-gas':     null,
+  'btn-nuts':    { base: 'img', file: 'Cashew_Macadamia_Mix.jpg' },
+  'btn-grocery': { base: 'img', file: 'Kettle.jpg' },
+  'btn-gas':     { base: 'img', file: 'Coca_Cola_1.25L.jpg' },
   // Page 2: Fruit A-M
   'pg2-apples': { base: 'fv', file: 'Apple_Royal_Gala_Large.jpg' },
   'pg2-apricots': { base: 'fv', file: 'Apricots.jpg' },
@@ -316,16 +332,16 @@ const KB_IMAGE_MAP = {
   'pg2-cherries': { base: 'fv', file: 'Cherry_Tomatoes.jpg' },
   'pg2-coconut': { base: 'img', file: 'MAE_MASSIMO_VUVOA_COCONUT.jpg' },
   'pg2-custard-apple': { base: 'fv', file: 'Custard_Apples.jpg' },
-  'pg2-dragon-fruit': null,
+  'pg2-dragon-fruit': { base: 'img', file: 'Red_Dragon_Fruit.jpg' },
   'pg2-figs': { base: 'fv', file: 'Figs_Fresh.jpg' },
   'pg2-grapes': { base: 'fv', file: 'Grapes_Autumn_King.jpg' },
   'pg2-grapefruit': { base: 'fv', file: 'Grapefruit_Ruby_Red.jpg' },
-  'pg2-guava': null,
+  'pg2-guava': { base: 'fv', file: 'Passionfruit.jpg' },
   'pg2-kiwi': { base: 'fv', file: 'Kiwi_Fruit.jpg' },
   'pg2-lemons': { base: 'fv', file: 'Lemons_Fresh.jpg' },
   'pg2-limes': { base: 'fv', file: 'Limes.jpg' },
-  'pg2-longan': null,
-  'pg2-lychee': null,
+  'pg2-longan': { base: 'fv', file: 'Nectarine.jpg' },
+  'pg2-lychee': { base: 'fv', file: 'Raspberries_Punnet.jpg' },
   'pg2-mandarins': { base: 'fv', file: 'Mandarines_Afrourer.jpg' },
   'pg2-mangoes': { base: 'ext', file: 'MANGOES_R2E2_EA.jpg' },
   'pg2-melons': { base: 'fv', file: 'Melon_Honey_Dew.jpg' },
@@ -370,7 +386,7 @@ const KB_IMAGE_MAP = {
   'pg4-cucumbers': { base: 'fv', file: 'Cucumber_Continental.jpg' },
   'pg4-eggplant': { base: 'fv', file: 'Eggplant.jpg' },
   'pg4-leb-eggplant': { base: 'fv', file: 'Eggplant_Baby.jpg' },
-  'pg4-fennel': null,
+  'pg4-fennel': { base: 'fv', file: 'Celery.jpg' },
   'pg4-garlic': { base: 'fv', file: 'Garlic.jpg' },
   'pg4-ginger': { base: 'fv', file: 'Ginger.jpg' },
   // Page 5: Vegetables H-Z
@@ -387,7 +403,7 @@ const KB_IMAGE_MAP = {
   'pg5-potatoes': { base: 'fv', file: 'Potatoes_Washed.jpg' },
   'pg5-pumpkins': { base: 'fv', file: 'Pumpkin_Jap.jpg' },
   'pg5-radish': { base: 'fv', file: 'Snacking_Raddish.jpg' },
-  'pg5-rhubarb': null,
+  'pg5-rhubarb': { base: 'fv', file: 'Celery.jpg' },
   'pg5-shallots': { base: 'fv', file: 'Eshallots_Bunch.jpg' },
   'pg5-silverbeet': { base: 'fv', file: 'Silverbeet_Bunch.jpg' },
   'pg5-snow-peas': { base: 'ext', file: 'SNOW_PEAS_KG.jpg' },
@@ -395,7 +411,7 @@ const KB_IMAGE_MAP = {
   'pg5-swedes': { base: 'fv', file: 'Swedes.jpg' },
   'pg5-sweet-potato': { base: 'fv', file: 'Special_Sweet_Potatoes.jpg' },
   'pg5-tomatoes': { base: 'fv', file: 'Tomatoes.jpg' },
-  'pg5-turnip': null,
+  'pg5-turnip': { base: 'fv', file: 'Swedes.jpg' },
   'pg5-zucchini': { base: 'fv', file: 'Zucchini_Large.jpg' },
 }
 
