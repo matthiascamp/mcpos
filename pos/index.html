@@ -765,7 +765,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 <script type="module">
 import { Cart } from './js/cart.js'
 import { esc, $, $$, money, showToast, debounce } from './js/ui.js'
-import { initSync, pullAll, pushPending, startAutoSync, subscribeToChanges } from './js/sync.js'
+import { initSync, pullAll, pushPending, pushKeyboard, startAutoSync, subscribeToChanges } from './js/sync.js'
 
 const cart = new Cart()
 let currentStaff = null, pendingWeightProduct = null
@@ -2834,6 +2834,8 @@ async function init () {
               console.log(`Synced ${catCount} categories, ${prodCount} products from Supabase`)
             }
           } catch (e) { console.warn('Initial Supabase pull failed:', e.message) }
+          // Push keyboard layout to Supabase on startup
+          try { const kbCount = await pushKeyboard(); if (kbCount) console.log(`Pushed ${kbCount} keyboard buttons to Supabase`) } catch (_) {}
           subscribeToChanges(() => { window.pos.getCategories().then(c => { allCategories = c }) })
         }
       }

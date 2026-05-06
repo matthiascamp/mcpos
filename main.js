@@ -141,28 +141,21 @@ async function initDatabase() {
     try { db.run(m) } catch (_) {}
   }
 
-  // Ensure layout flags are set (schema INSERTs are skipped on existing DBs)
-  try { db.run("INSERT OR IGNORE INTO settings (key, value) VALUES ('layout_v3_shifted', '1')") } catch (_) {}
-  try { db.run("INSERT OR IGNORE INTO settings (key, value) VALUES ('nav_buttons_fixed', '1')") } catch (_) {}
-
-  // Layout v3: Shift Page 1 buttons to make room for in-grid cart at cols 0-2, rows 2-5
+  // Layout v3: Shift Page 1 buttons to make room for in-grid cart at cols 0-2
+  // Uses position-based detection (not a flag) so it can never double-shift
   try {
-    const shifted = db.prepare("SELECT value FROM settings WHERE key = 'layout_v3_shifted'")
-    shifted.bind([])
-    const already = shifted.step() ? shifted.getAsObject() : null
-    shifted.free()
-    if (!already) {
-      // Shift department buttons from cols 0-2 to cols 3-5
+    const chk = db.prepare("SELECT grid_col FROM keyboard_buttons WHERE id = 'btn-meat' AND page = 1")
+    chk.bind([])
+    const meatPos = chk.step() ? chk.getAsObject() : null
+    chk.free()
+    if (meatPos && meatPos.grid_col < 3) {
+      // Departments at cols 0-2 need shifting to 3-5
       db.run("UPDATE keyboard_buttons SET grid_col = grid_col + 3 WHERE page = 1 AND grid_row >= 2 AND grid_row <= 5 AND grid_col BETWEEN 0 AND 2 AND id NOT LIKE 'np-%'")
-      // Shift numpad buttons from cols 4-7 to cols 6-9
+      // Numpad at cols 4-7 needs shifting to 6-9
       db.run("UPDATE keyboard_buttons SET grid_col = grid_col + 2 WHERE page = 1 AND grid_row >= 2 AND grid_row <= 5 AND grid_col BETWEEN 4 AND 7")
-      // Deactivate in-grid numpad display (status bar shows buffer instead)
       db.run("UPDATE keyboard_buttons SET active = 0 WHERE id = 'np-display'")
-      // Add missing buttons for PT layout
       db.run("INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, category_filter) VALUES ('btn-fvsect', 'FRUIT & VEG', 'section', '#fff', '#409850', 29, 'grid', 1, 3, 5, 1, 1, 'Fruit')")
-      // Move GAS from bottom nav (row 6) to department area (row 5)
       db.run("UPDATE keyboard_buttons SET grid_row = 5, grid_col = 4, type = 'section' WHERE id = 'btn-gas' AND grid_row = 6")
-      // Update labels to match PT
       db.run("UPDATE keyboard_buttons SET label = 'BAG' WHERE id = 'btn-bags'")
       db.run("UPDATE keyboard_buttons SET label = 'BREAD &\\nCROISSAN' WHERE id = 'btn-bread'")
       db.run("UPDATE keyboard_buttons SET label = 'FRUIT & VEG\\n/KG' WHERE id = 'btn-fvkg'")
@@ -172,13 +165,12 @@ async function initDatabase() {
       db.run("UPDATE keyboard_buttons SET bg_color = '#c8a828' WHERE id = 'btn-deli'")
       db.run("UPDATE keyboard_buttons SET bg_color = '#6699cc' WHERE id = 'btn-grocery'")
       db.run("UPDATE keyboard_buttons SET bg_color = '#c8b880' WHERE id = 'btn-nuts'")
-      // Mark migration as done
-      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('layout_v3_shifted', '1')")
       console.log('Layout v3: Shifted buttons for in-grid cart')
     }
+    db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('layout_v3_shifted', '1')")
   } catch (e) { console.error('Layout v3 migration error:', e.message) }
 
-  // Nav button type fix + product images migration
+  // Nav button type fix + product images migration (idempotent — uses absolute values)
   try {
     const navFixed = db.prepare("SELECT value FROM settings WHERE key = 'nav_buttons_fixed'")
     navFixed.bind([])
@@ -225,9 +217,9 @@ async function initDatabase() {
       for (const [name, url] of Object.entries(fruitImages)) {
         db.run("UPDATE products SET image_url = ? WHERE name = ? AND (image_url IS NULL OR image_url = '')", [url, name])
       }
-      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('nav_buttons_fixed', '1')")
       console.log('Nav buttons fixed + product images added')
     }
+    db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('nav_buttons_fixed', '1')")
   } catch (e) { console.error('Nav fix migration error:', e.message) }
 
   // Link keyboard buttons to products by matching names (best image match)
