@@ -57,7 +57,10 @@ export async function pushPending() {
           if (error) throw error
         }
       } else if (item.action === 'insert' || item.action === 'update') {
-        const { error } = await supabase.from(table).upsert(payload)
+        let cleanPayload = { ...payload }
+        // Strip fields that don't exist in Supabase schema
+        if (table === 'staff') delete cleanPayload.pin
+        const { error } = await supabase.from(table).upsert(cleanPayload)
         if (error) throw error
       } else if (item.action === 'delete') {
         const { error } = await supabase.from(table).delete().eq('id', item.record_id)
@@ -146,7 +149,11 @@ export async function pullKeyboard(since) {
   if (error) { console.error('Pull keyboard failed:', error.message); return false }
 
   if (data && data.length) {
-    await window.pos.bulkUpsertKeyboard(data)
+    // Don't re-insert records that were intentionally deleted locally
+    const deletedRows = await window.pos.getDeletedRecords('keyboard_buttons')
+    const deletedIds = new Set(deletedRows.map(r => r.record_id))
+    const filtered = data.filter(d => !deletedIds.has(d.id))
+    if (filtered.length) await window.pos.bulkUpsertKeyboard(filtered)
   }
   return data ? data.length : 0
 }
@@ -154,7 +161,6 @@ export async function pullKeyboard(since) {
 export async function pullSettings() {
   if (!isOnline()) return false
 
-  // Settings don't have updated_at locally, so always pull all
   const { data, error } = await supabase
     .from('settings')
     .select('*')
@@ -162,7 +168,15 @@ export async function pullSettings() {
   if (error) { console.error('Pull settings failed:', error.message); return false }
 
   if (data && data.length) {
-    await window.pos.bulkUpsertSettings(data)
+    // Don't overwrite settings that have pending local changes
+    const pending = await window.pos.getSyncPending()
+    const pendingKeys = new Set(
+      pending.filter(p => p.table_name === 'settings').map(p => p.record_id)
+    )
+    const deletedRows = await window.pos.getDeletedRecords('settings')
+    const deletedKeys = new Set(deletedRows.map(r => r.record_id))
+    const filtered = data.filter(d => !pendingKeys.has(d.key) && !deletedKeys.has(d.key))
+    if (filtered.length) await window.pos.bulkUpsertSettings(filtered)
   }
   return data ? data.length : 0
 }
@@ -314,6 +328,9 @@ export async function pushKeyboard() {
 
 export async function pullAll() {
   if (!isOnline()) return { categories: 0, products: 0, keyboard: 0, settings: 0, staff: 0, deals: 0, deal_products: 0, specials: 0, cash_drawer: 0 }
+
+  // Push local deletes/changes first so they take priority over incoming data
+  await pushPending()
 
   const since = await getLastPull()
   const pullTime = new Date().toISOString()

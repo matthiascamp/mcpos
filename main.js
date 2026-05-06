@@ -91,6 +91,9 @@ async function initDatabase() {
     try { db.run(stmt) } catch (_) {}
   }
 
+  // Deleted records tracking — prevents sync/seed from resurrecting deleted items
+  try { db.run("CREATE TABLE IF NOT EXISTS deleted_records (table_name TEXT NOT NULL, record_id TEXT NOT NULL, deleted_at TEXT DEFAULT (datetime('now')), PRIMARY KEY (table_name, record_id))") } catch (_) {}
+
   // Migrations for existing DBs
   const migrations = [
     "ALTER TABLE keyboard_buttons ADD COLUMN page INTEGER DEFAULT 1",
@@ -188,36 +191,7 @@ async function initDatabase() {
       db.run("UPDATE keyboard_buttons SET type = 'page_link', parent_id = '4', category_filter = NULL, alpha_range = NULL WHERE id = 'btn-veg-ag'")
       db.run("UPDATE keyboard_buttons SET type = 'page_link', parent_id = '5', category_filter = NULL, alpha_range = NULL WHERE id = 'btn-veg-hz'")
       // Add image URLs to fruit & veg products
-      const fruitImages = {
-        'Apple Royal Gala': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Royal_Gala_apple.jpg/220px-Royal_Gala_apple.jpg',
-        'Apple Granny Smith': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/GrannySmith.jpg/220px-GrannySmith.jpg',
-        'Banana': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Banana-Single.jpg/220px-Banana-Single.jpg',
-        'Orange Navel': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Orange-Whole-%26-Split.jpg/220px-Orange-Whole-%26-Split.jpg',
-        'Lemon': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Lemon.jpg/220px-Lemon.jpg',
-        'Lime': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Lime_Green.jpg/220px-Lime_Green.jpg',
-        'Strawberry Punnet': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/PerfectStrawberry.jpg/220px-PerfectStrawberry.jpg',
-        'Blueberry Punnet': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Blueberries.jpg/220px-Blueberries.jpg',
-        'Avocado Hass': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Hass.jpg/220px-Hass.jpg',
-        'Mango': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Hapus_Mango.jpg/220px-Hapus_Mango.jpg',
-        'Watermelon': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Taiwan_2009_Tainan_City_Watermelon_Stall_FRD_7962.jpg/220px-Taiwan_2009_Tainan_City_Watermelon_Stall_FRD_7962.jpg',
-        'Pineapple': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Pineapple_and_cross_section.jpg/220px-Pineapple_and_cross_section.jpg',
-        'Tomato': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Tomato_je.jpg/220px-Tomato_je.jpg',
-        'Cucumber': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/ARS_cucumber.jpg/220px-ARS_cucumber.jpg',
-        'Broccoli': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Broccoli_and_cross_section_edit.jpg/220px-Broccoli_and_cross_section_edit.jpg',
-        'Carrot': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Vegetable-Carrot-Bundle-Small.jpg/220px-Vegetable-Carrot-Bundle-Small.jpg',
-        'Capsicum Red': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Red_bell_pepper.jpg/220px-Red_bell_pepper.jpg',
-        'Lettuce Iceberg': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Iceberg_lettuce_in_SB.jpg/220px-Iceberg_lettuce_in_SB.jpg',
-        'Potato': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Patates.jpg/220px-Patates.jpg',
-        'Onion Brown': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Onion_on_White.JPG/220px-Onion_on_White.JPG',
-        'Mushroom Cup': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Champignons_Agaricus.jpg/220px-Champignons_Agaricus.jpg',
-        'Sweet Potato': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Ipomoea_batatas_006.JPG/220px-Ipomoea_batatas_006.JPG',
-        'Zucchini': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/CSA-Zucchini.jpg/220px-CSA-Zucchini.jpg',
-        'Corn Cob': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Ab_food_06.jpg/220px-Ab_food_06.jpg',
-        'Pumpkin': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/FrightNight2005pumpkins.jpg/220px-FrightNight2005pumpkins.jpg',
-        'Grapes Green': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Table_grapes_on_vine.jpg/220px-Table_grapes_on_vine.jpg',
-        'Pear Packham': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/More_pridge_pears.jpg/220px-More_pridge_pears.jpg',
-        'Kiwi Fruit': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Kiwi_aka.jpg/220px-Kiwi_aka.jpg',
-      }
+      const fruitImages = {}
       for (const [name, url] of Object.entries(fruitImages)) {
         db.run("UPDATE products SET image_url = ? WHERE name = ? AND (image_url IS NULL OR image_url = '')", [url, name])
       }
@@ -322,17 +296,17 @@ const KB_IMAGE_BASE_EXT = 'https://raw.githubusercontent.com/matthiascamp/crispo
 const KB_IMAGE_BASE_IMG = 'https://raw.githubusercontent.com/matthiascamp/crisponcreek/main/crisp_on_creek_images/'
 const KB_IMAGE_MAP = {
   // Main page department buttons
-  'btn-meat':    { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Raw_Meat.jpg/200px-Raw_Meat.jpg' },
+  'btn-meat':    null,
   'btn-coffee':  { base: 'img', file: 'Fresh_Press_Cold_Drip_Coffee.jpg' },
   'btn-fv':      { base: 'fv', file: 'Apple_Royal_Gala_Large.jpg' },
   'btn-cheese':  { base: 'deli', file: 'Auricchio_Grana_Padano.jpg' },
-  'btn-flowers': { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/A_bouquet_of_Gerberas_on_Ermou_Street.jpg/200px-A_bouquet_of_Gerberas_on_Ermou_Street.jpg' },
+  'btn-flowers': null,
   'btn-bread':   { base: 'ext', file: 'F_R_CIABATTA_LOAF.jpg' },
-  'btn-bags':    { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Have_a_nice_day_and_smiley_face_bag.jpg/200px-Have_a_nice_day_and_smiley_face_bag.jpg' },
+  'btn-bags':    null,
   'btn-deli':    { base: 'deli', file: 'Casalingo_Prosciutto.jpg' },
-  'btn-nuts':    { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Mixed_nuts.jpg/145px-Mixed_nuts.jpg' },
-  'btn-grocery': { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Grocery_bag_of_junk_foods.jpg/200px-Grocery_bag_of_junk_foods.jpg' },
-  'btn-gas':     { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Soft_drink_shelf.JPG/200px-Soft_drink_shelf.JPG' },
+  'btn-nuts':    null,
+  'btn-grocery': null,
+  'btn-gas':     null,
   // Page 2: Fruit A-M
   'pg2-apples': { base: 'fv', file: 'Apple_Royal_Gala_Large.jpg' },
   'pg2-apricots': { base: 'fv', file: 'Apricots.jpg' },
@@ -342,16 +316,16 @@ const KB_IMAGE_MAP = {
   'pg2-cherries': { base: 'fv', file: 'Cherry_Tomatoes.jpg' },
   'pg2-coconut': { base: 'img', file: 'MAE_MASSIMO_VUVOA_COCONUT.jpg' },
   'pg2-custard-apple': { base: 'fv', file: 'Custard_Apples.jpg' },
-  'pg2-dragon-fruit': { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Dragonfruit_Chiayi_market.jpg/200px-Dragonfruit_Chiayi_market.jpg' },
+  'pg2-dragon-fruit': null,
   'pg2-figs': { base: 'fv', file: 'Figs_Fresh.jpg' },
   'pg2-grapes': { base: 'fv', file: 'Grapes_Autumn_King.jpg' },
   'pg2-grapefruit': { base: 'fv', file: 'Grapefruit_Ruby_Red.jpg' },
-  'pg2-guava': { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Guava_ID.jpg/200px-Guava_ID.jpg' },
+  'pg2-guava': null,
   'pg2-kiwi': { base: 'fv', file: 'Kiwi_Fruit.jpg' },
   'pg2-lemons': { base: 'fv', file: 'Lemons_Fresh.jpg' },
   'pg2-limes': { base: 'fv', file: 'Limes.jpg' },
-  'pg2-longan': { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Longan_fruit_flesh_%26_skin.jpg/200px-Longan_fruit_flesh_%26_skin.jpg' },
-  'pg2-lychee': { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Lychee_Fruit.jpg/200px-Lychee_Fruit.jpg' },
+  'pg2-longan': null,
+  'pg2-lychee': null,
   'pg2-mandarins': { base: 'fv', file: 'Mandarines_Afrourer.jpg' },
   'pg2-mangoes': { base: 'ext', file: 'MANGOES_R2E2_EA.jpg' },
   'pg2-melons': { base: 'fv', file: 'Melon_Honey_Dew.jpg' },
@@ -396,7 +370,7 @@ const KB_IMAGE_MAP = {
   'pg4-cucumbers': { base: 'fv', file: 'Cucumber_Continental.jpg' },
   'pg4-eggplant': { base: 'fv', file: 'Eggplant.jpg' },
   'pg4-leb-eggplant': { base: 'fv', file: 'Eggplant_Baby.jpg' },
-  'pg4-fennel': { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Fennel_bulb.jpg/200px-Fennel_bulb.jpg' },
+  'pg4-fennel': null,
   'pg4-garlic': { base: 'fv', file: 'Garlic.jpg' },
   'pg4-ginger': { base: 'fv', file: 'Ginger.jpg' },
   // Page 5: Vegetables H-Z
@@ -413,7 +387,7 @@ const KB_IMAGE_MAP = {
   'pg5-potatoes': { base: 'fv', file: 'Potatoes_Washed.jpg' },
   'pg5-pumpkins': { base: 'fv', file: 'Pumpkin_Jap.jpg' },
   'pg5-radish': { base: 'fv', file: 'Snacking_Raddish.jpg' },
-  'pg5-rhubarb': { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/01-rhubarb_stalks.jpg/200px-01-rhubarb_stalks.jpg' },
+  'pg5-rhubarb': null,
   'pg5-shallots': { base: 'fv', file: 'Eshallots_Bunch.jpg' },
   'pg5-silverbeet': { base: 'fv', file: 'Silverbeet_Bunch.jpg' },
   'pg5-snow-peas': { base: 'ext', file: 'SNOW_PEAS_KG.jpg' },
@@ -421,7 +395,7 @@ const KB_IMAGE_MAP = {
   'pg5-swedes': { base: 'fv', file: 'Swedes.jpg' },
   'pg5-sweet-potato': { base: 'fv', file: 'Special_Sweet_Potatoes.jpg' },
   'pg5-tomatoes': { base: 'fv', file: 'Tomatoes.jpg' },
-  'pg5-turnip': { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Turnip_2622027.jpg/200px-Turnip_2622027.jpg' },
+  'pg5-turnip': null,
   'pg5-zucchini': { base: 'fv', file: 'Zucchini_Large.jpg' },
 }
 
@@ -900,14 +874,18 @@ function setupIPC() {
   })
 
   ipcMain.handle('db:specials:delete', (_e, id) => {
+    dbRun("INSERT OR IGNORE INTO deleted_records (table_name, record_id) VALUES ('specials', ?1)", [id])
     dbRun("DELETE FROM specials WHERE id = ?1", [id])
     return true
   })
 
   ipcMain.handle('db:specials:bulkUpsert', (_e, specials) => {
+    const deletedRows = dbAll("SELECT record_id FROM deleted_records WHERE table_name = 'specials'")
+    const deletedIds = new Set(deletedRows.map(r => r.record_id))
     let count = 0
     for (const s of specials) {
       if (!s.id || !s.product_id) continue
+      if (deletedIds.has(s.id)) continue
       dbRun(`INSERT OR REPLACE INTO specials (id, product_id, special_price, start_date, end_date, active, updated_at)
         VALUES (?1, ?2, ?3, ?4, ?5, ?6, datetime('now'))`,
         [s.id, s.product_id, s.special_price, s.start_date || null, s.end_date || null, s.active !== false ? 1 : 0])
@@ -934,6 +912,7 @@ function setupIPC() {
   })
 
   ipcMain.handle('db:deals:delete', (_e, id) => {
+    dbRun("INSERT OR IGNORE INTO deleted_records (table_name, record_id) VALUES ('deals', ?1)", [id])
     dbRun("DELETE FROM deal_products WHERE deal_id = ?1", [id])
     dbRun("DELETE FROM deals WHERE id = ?1", [id])
     return true
@@ -957,9 +936,12 @@ function setupIPC() {
   })
 
   ipcMain.handle('db:deals:bulkUpsert', (_e, deals) => {
+    const deletedRows = dbAll("SELECT record_id FROM deleted_records WHERE table_name = 'deals'")
+    const deletedIds = new Set(deletedRows.map(r => r.record_id))
     let count = 0
     for (const d of deals) {
       if (!d.id || !d.name) continue
+      if (deletedIds.has(d.id)) continue
       const config = typeof d.config === 'string' ? d.config : JSON.stringify(d.config || {})
       dbRun(`INSERT OR REPLACE INTO deals (id, name, type, config, start_date, end_date, active, updated_at)
         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, datetime('now'))`,
@@ -1269,6 +1251,11 @@ function setupIPC() {
 
   ipcMain.handle('db:settings:set', (_e, key, value) => {
     dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES (?1, ?2)", [key, value])
+    const skipSync = ['supabase_last_pull', 'keyboard_page_sizes', 'keyboard_page_names', 'layout_v3_shifted', 'nav_buttons_fixed']
+    if (!skipSync.includes(key)) {
+      dbRun(`INSERT INTO sync_queue (table_name, record_id, action, payload) VALUES (?1, ?2, ?3, ?4)`,
+            ['settings', key, 'update', JSON.stringify({ key, value })])
+    }
     return true
   })
 
@@ -1294,6 +1281,13 @@ function setupIPC() {
       dbRun("UPDATE sync_queue SET synced = 1 WHERE id = ?1", [id])
     }
     return true
+  })
+
+  ipcMain.handle('db:sync:getDeleted', (_e, tableName) => {
+    if (tableName) {
+      return dbAll("SELECT record_id FROM deleted_records WHERE table_name = ?1", [tableName])
+    }
+    return dbAll("SELECT table_name, record_id FROM deleted_records")
   })
 
   // ── Reporting ──��──────────────��────────────────────────────────��──────────
@@ -1398,6 +1392,11 @@ function setupIPC() {
 
   ipcMain.handle('db:keyboard:upsert', (_e, btn) => {
     const id = btn.id || uuid()
+    // Don't resurrect intentionally deleted buttons (e.g. from realtime sync)
+    if (btn.id) {
+      const deleted = dbGet("SELECT 1 FROM deleted_records WHERE table_name = 'keyboard_buttons' AND record_id = ?1", [btn.id])
+      if (deleted) return { id, skipped: true }
+    }
     dbRun(`
       INSERT OR REPLACE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, product_id, active, updated_at)
       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, datetime('now'))
@@ -1413,6 +1412,7 @@ function setupIPC() {
 
   ipcMain.handle('db:keyboard:delete', (_e, id) => {
     queueSync('keyboard_buttons', id, 'delete')
+    dbRun("INSERT OR IGNORE INTO deleted_records (table_name, record_id) VALUES ('keyboard_buttons', ?1)", [id])
     dbRun("DELETE FROM keyboard_buttons WHERE id = ?1", [id])
     dbRun("DELETE FROM keyboard_buttons WHERE parent_id = ?1", [id])
     return true
@@ -1428,9 +1428,12 @@ function setupIPC() {
   })
 
   ipcMain.handle('db:keyboard:bulkUpsert', (_e, buttons) => {
+    const deletedRows = dbAll("SELECT record_id FROM deleted_records WHERE table_name = 'keyboard_buttons'")
+    const deletedIds = new Set(deletedRows.map(r => r.record_id))
     let count = 0
     for (const b of buttons) {
       if (!b.id || !b.label) continue
+      if (deletedIds.has(b.id)) continue
       db.run(`INSERT INTO keyboard_buttons (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, product_id, active, updated_at)
         VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,datetime('now'))
         ON CONFLICT(id) DO UPDATE SET

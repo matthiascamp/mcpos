@@ -56,6 +56,7 @@ contextBridge.exposeInMainWorld('pos', {
   // Sync
   getSyncPending:     ()      => ipcRenderer.invoke('db:sync:getPending'),
   markSynced:         (ids)   => ipcRenderer.invoke('db:sync:markSynced', ids),
+  getDeletedRecords:  (table) => ipcRenderer.invoke('db:sync:getDeleted', table),
 
   // Reports
   dailySummary:       (date)  => ipcRenderer.invoke('db:reports:dailySummary', date),

@@ -10,7 +10,7 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;touch-action:manipulation}
 body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;display:flex;flex-direction:column;user-select:none;font-size:13px;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:rgba(0,0,0,.06)}
-::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#c0c4cc;border-radius:3px}
+::-webkit-scrollbar{width:0px;display:none}*{scrollbar-width:none}
 
 /* ═══ Status Bar ═══════════════════════════════════════════════════ */
 .status-bar{height:48px;background:linear-gradient(180deg,#22252f 0%,#1a1d27 100%);display:flex;align-items:center;padding:0 12px;gap:10px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.04);box-shadow:0 2px 8px rgba(0,0,0,.2)}
@@ -40,8 +40,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .cart-header-left{display:flex;align-items:center;gap:8px}
 .cart-title{font-weight:700;font-size:13px;color:#1a1a2e;letter-spacing:-.2px}
 .cart-count{background:#5b8def;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
-.cart-clear{background:none;border:1px solid #e2e4e8;border-radius:8px;color:#8891a5;cursor:pointer;font-size:11px;font-family:inherit;padding:6px 12px;min-height:32px;transition:all .15s}
-.cart-clear:active{color:#ef4444;background:#fef2f2;border-color:#fca5a5}
+.cart-clear{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;color:#ef4444;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;padding:8px 14px;min-height:38px;transition:all .15s}
+.cart-clear:active{color:#fff;background:#ef4444;border-color:#ef4444}
 .cart-items{flex:1;overflow-y:auto}
 .cart-item{display:flex;align-items:center;padding:10px 12px;gap:8px;border-bottom:1px solid #f4f5f7;font-size:12px;min-height:52px;transition:background .1s}
 .cart-item:active{background:#f0f7ff}
@@ -51,7 +51,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .meta-special{color:#ef4444;font-weight:700;font-size:9px;background:rgba(239,68,68,.08);padding:1px 4px;border-radius:3px}
 .cart-item-price{font-weight:700;color:#1a1a2e;min-width:50px;text-align:right;font-size:14px}
 .cart-item-qty{display:flex;align-items:center;gap:3px}
-.qty-btn{width:34px;height:34px;border-radius:8px;border:1px solid #e2e4e8;background:#fff;color:#4a5068;font-size:16px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;transition:all .1s;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.qty-btn{width:40px;height:40px;border-radius:10px;border:1px solid #e2e4e8;background:#fff;color:#4a5068;font-size:20px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;transition:all .1s;box-shadow:0 1px 2px rgba(0,0,0,.04)}
 .qty-btn:active{background:#f0f1f3;border-color:#c0c4cc;transform:scale(.95)}
 .qty-btn.remove{color:#ef4444;border-color:#fecaca;background:#fff5f5}
 .qty-btn.remove:active{background:#fee2e2;border-color:#ef4444}
@@ -258,7 +258,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .sale-summary-method.card{background:rgba(91,141,239,.08);color:#5b8def}
 
 /* Cart delete button */
-.cart-item-delete{width:28px;height:28px;border:none;background:#fef2f2;color:#ef4444;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .1s}
+.cart-item-delete{width:36px;height:36px;border:none;background:#fef2f2;color:#ef4444;border-radius:8px;font-size:18px;font-weight:700;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .1s}
 .cart-item-delete:active{background:#fee2e2;transform:scale(.9)}
 
 
@@ -331,7 +331,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
     <img src="logo.png" alt="" style="width:28px;height:28px;object-fit:contain;flex-shrink:0">
     <span class="store-name">Crisp on Creek</span>
     <div style="position:relative">
-      <input type="text" id="searchInput" class="scan-input" placeholder="Scan barcode..." autofocus>
+      <input type="text" id="searchInput" class="scan-input" placeholder="Scan barcode or enter PLU..." autofocus>
     </div>
     <span class="staff-info" id="staffBadge">Not logged in</span>
     <a href="admin.html" class="admin-link">Admin</a>
@@ -733,6 +733,72 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
   </div>
 </div></div>
 
+<!-- ═══ Remove Item Confirmation ═══════════════════════════════════ -->
+<div class="modal-overlay" id="removeConfirmModal"><div class="modal" style="width:360px;padding:24px;text-align:center">
+  <div style="font-size:36px;margin-bottom:8px">&#128465;</div>
+  <h2 style="font-size:16px;margin-bottom:4px">Remove Item?</h2>
+  <div style="font-size:14px;font-weight:600;color:#1a1a2e;margin-bottom:2px" id="removeItemName"></div>
+  <div style="font-size:18px;font-weight:700;color:#c44;margin-bottom:16px" id="removeItemPrice"></div>
+  <div style="display:flex;gap:10px">
+    <button id="removeCancel" style="flex:1;padding:14px;border-radius:10px;border:1px solid #e2e4e8;background:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;min-height:52px">Cancel</button>
+    <button id="removeConfirm" style="flex:1;padding:14px;border-radius:10px;border:none;background:#ef4444;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;min-height:52px">Remove</button>
+  </div>
+</div></div>
+
+<!-- ═══ Clear Cart Confirmation ═══════════════════════════════════ -->
+<div class="modal-overlay" id="clearConfirmModal"><div class="modal" style="width:380px;padding:24px;text-align:center">
+  <div style="font-size:36px;margin-bottom:8px">&#9888;&#65039;</div>
+  <h2 style="font-size:16px;margin-bottom:8px">Clear Entire Cart?</h2>
+  <p style="font-size:13px;color:#666;margin-bottom:16px">This will remove <strong id="clearCartCount">0</strong> item(s) totalling <strong id="clearCartTotal">$0.00</strong></p>
+  <div style="display:flex;gap:10px">
+    <button id="clearCartCancel" style="flex:1;padding:14px;border-radius:10px;border:1px solid #e2e4e8;background:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;min-height:52px">Cancel</button>
+    <button id="clearCartConfirm" style="flex:1;padding:14px;border-radius:10px;border:none;background:#ef4444;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;min-height:52px">Clear All</button>
+  </div>
+</div></div>
+
+<!-- ═══ Product Lookup Panel ═══════════════════════════════════════ -->
+<div class="modal-overlay" id="lookupModal"><div class="modal" style="width:720px;max-height:88vh;display:flex;flex-direction:column;padding:0;overflow:hidden">
+  <div style="padding:16px 20px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:12px;flex-shrink:0">
+    <span style="font-size:18px;font-weight:700">Product Lookup</span>
+    <input type="text" id="lookupSearch" placeholder="Search name, barcode, or PLU..." style="flex:1;padding:10px 14px;border:2px solid #e2e4e8;border-radius:10px;font-size:14px;outline:none;font-family:inherit">
+    <button id="lookupClose" style="width:36px;height:36px;border:none;background:#f4f5f7;border-radius:8px;font-size:18px;cursor:pointer;color:#666">&#x2715;</button>
+  </div>
+  <div style="padding:10px 20px;display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid #f0f1f3;flex-shrink:0;align-items:center">
+    <select id="lookupCat" style="padding:7px 12px;border-radius:8px;border:1px solid #e2e4e8;font-size:12px;font-family:inherit;background:#fff;min-width:130px">
+      <option value="">All Categories</option>
+    </select>
+    <select id="lookupUnit" style="padding:7px 12px;border-radius:8px;border:1px solid #e2e4e8;font-size:12px;font-family:inherit;background:#fff">
+      <option value="">All Units</option>
+      <option value="each">Each</option>
+      <option value="kg">Per kg</option>
+      <option value="100g">Per 100g</option>
+      <option value="litre">Per litre</option>
+    </select>
+    <select id="lookupStock" style="padding:7px 12px;border-radius:8px;border:1px solid #e2e4e8;font-size:12px;font-family:inherit;background:#fff">
+      <option value="">Any Stock</option>
+      <option value="in">In Stock</option>
+      <option value="low">Low Stock</option>
+      <option value="out">Out of Stock</option>
+    </select>
+    <select id="lookupPrice" style="padding:7px 12px;border-radius:8px;border:1px solid #e2e4e8;font-size:12px;font-family:inherit;background:#fff">
+      <option value="">Any Price</option>
+      <option value="0-2">Under $2</option>
+      <option value="2-5">$2 - $5</option>
+      <option value="5-10">$5 - $10</option>
+      <option value="10-20">$10 - $20</option>
+      <option value="20-999">Over $20</option>
+    </select>
+    <select id="lookupSort" style="padding:7px 12px;border-radius:8px;border:1px solid #e2e4e8;font-size:12px;font-family:inherit;background:#fff">
+      <option value="name">Sort: Name A-Z</option>
+      <option value="name-desc">Sort: Name Z-A</option>
+      <option value="price-asc">Sort: Price Low-High</option>
+      <option value="price-desc">Sort: Price High-Low</option>
+    </select>
+    <span id="lookupCount" style="margin-left:auto;font-size:12px;color:#888"></span>
+  </div>
+  <div id="lookupResults" style="flex:1;overflow-y:auto;padding:12px 16px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;align-content:start"></div>
+</div></div>
+
 <!-- ═══ On-Screen QWERTY Keyboard ══════════════════════════════════ -->
 <div class="osk-overlay" id="oskOverlay">
 <div class="osk-container">
@@ -780,6 +846,14 @@ let cashNumBuf = ''
 const si = $('#searchInput')
 
 function closeAllModals () { $$('.modal-overlay.show').forEach(m => m.classList.remove('show')) }
+
+// Close modals by clicking outside (on the overlay background)
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('modal-overlay') && e.target.classList.contains('show')) {
+    e.target.classList.remove('show')
+    refocus()
+  }
+})
 function refocus () { setTimeout(() => si.focus(), 50) }
 
 // Global barcode capture — redirect typed characters to scan input regardless of focus
@@ -886,7 +960,7 @@ document.addEventListener('keydown', async e => {
 })
 
 // ═══ Dynamic POS Keyboard Grid ═════════════════════════════════════
-const FUNC_TYPES = new Set(['void','return','hold','nosale','supervisor','lock','reprint','pricecheck','errcorrect','recall','pctdiscount','pctone','movedrawer','ubereats','viewor','endofday','discount'])
+const FUNC_TYPES = new Set(['void','return','hold','nosale','supervisor','lock','reprint','pricecheck','errcorrect','recall','pctdiscount','pctone','movedrawer','ubereats','viewor','endofday','discount','product_lookup'])
 const NUMPAD_TYPES = new Set(['digit','clear','qtyx','codeenter'])
 const DEPT_TYPES = new Set(['section','open_price','fixed_price','price_change','product'])
 const NAV_TYPES = new Set(['nav','subtotal','page_link','back_home'])
@@ -1234,8 +1308,91 @@ async function handleFuncButton (action) {
     case 'ubereats': showUberModal(); break
     case 'viewor': showToast('View options not configured', 'info'); break
     case 'endofday': showEodModal(); break
+    case 'product_lookup': showProductLookup(); break
   }
 }
+
+// ═══ Product Lookup ══════════════════════════════════════════════
+async function showProductLookup () {
+  lookupModeActive = true
+  const catSelect = $('#lookupCat')
+  catSelect.innerHTML = '<option value="">All Categories</option>' + allCategories.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('')
+  $('#lookupSearch').value = ''
+  $('#lookupUnit').value = ''
+  $('#lookupStock').value = ''
+  $('#lookupPrice').value = ''
+  $('#lookupSort').value = 'name'
+  $('#lookupModal').classList.add('show')
+  setTimeout(() => $('#lookupSearch').focus(), 100)
+  await runLookupSearch()
+}
+
+function closeLookup () {
+  lookupModeActive = false
+  $('#lookupModal').classList.remove('show')
+  refocus()
+}
+
+$('#lookupClose').addEventListener('click', closeLookup)
+$('#lookupModal').addEventListener('click', e => { if (e.target === $('#lookupModal')) closeLookup() })
+
+async function runLookupSearch () {
+  const query = $('#lookupSearch').value.trim()
+  const catId = $('#lookupCat').value
+  const unit = $('#lookupUnit').value
+  const stock = $('#lookupStock').value
+  const priceRange = $('#lookupPrice').value
+  const sort = $('#lookupSort').value
+
+  let results = query.length >= 2
+    ? await window.pos.searchProducts(query)
+    : await window.pos.searchProducts('')
+
+  if (catId) results = results.filter(p => p.category_id === catId)
+  if (unit) results = results.filter(p => (p.unit || 'each') === unit)
+  if (stock === 'in') results = results.filter(p => !p.track_stock || p.stock_qty > 5)
+  else if (stock === 'low') results = results.filter(p => p.track_stock && p.stock_qty > 0 && p.stock_qty <= 5)
+  else if (stock === 'out') results = results.filter(p => p.track_stock && p.stock_qty <= 0)
+
+  if (priceRange) {
+    const [lo, hi] = priceRange.split('-').map(Number)
+    results = results.filter(p => { const pr = p.active_price ?? p.price; return pr >= lo && pr < hi })
+  }
+
+  if (sort === 'name') results.sort((a, b) => a.name.localeCompare(b.name))
+  else if (sort === 'name-desc') results.sort((a, b) => b.name.localeCompare(a.name))
+  else if (sort === 'price-asc') results.sort((a, b) => (a.active_price ?? a.price) - (b.active_price ?? b.price))
+  else if (sort === 'price-desc') results.sort((a, b) => (b.active_price ?? b.price) - (a.active_price ?? a.price))
+
+  $('#lookupCount').textContent = `${results.length} product${results.length !== 1 ? 's' : ''}`
+
+  const grid = $('#lookupResults')
+  if (!results.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#888">No products match your filters</div>'
+    return
+  }
+  grid.innerHTML = results.slice(0, 100).map(p => `
+    <button class="lookup-item" data-id="${esc(p.id)}" style="background:#fafbfc;border:1px solid #e8eaef;border-radius:10px;padding:12px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:inherit;transition:all .1s;min-height:80px;justify-content:center">
+      <div style="font-size:12px;font-weight:600;text-align:center;line-height:1.2;color:#1a1a2e">${esc(p.name)}</div>
+      <div style="font-size:13px;font-weight:700;color:#059669">${money(p.active_price ?? p.price)}</div>
+      ${p.unit !== 'each' ? `<div style="font-size:10px;color:#888">per ${p.unit}</div>` : ''}
+      ${p.track_stock && p.stock_qty <= 0 ? '<div style="font-size:9px;color:#c44;font-weight:700">OUT OF STOCK</div>' : ''}
+    </button>`).join('')
+}
+
+$('#lookupSearch').addEventListener('input', debounce(runLookupSearch, 200))
+$('#lookupCat').addEventListener('change', runLookupSearch)
+$('#lookupUnit').addEventListener('change', runLookupSearch)
+$('#lookupStock').addEventListener('change', runLookupSearch)
+$('#lookupPrice').addEventListener('change', runLookupSearch)
+$('#lookupSort').addEventListener('change', runLookupSearch)
+
+$('#lookupResults').addEventListener('click', async e => {
+  const btn = e.target.closest('.lookup-item')
+  if (!btn) return
+  const p = await window.pos.getProductById(btn.dataset.id)
+  if (p) { addToCart(p); closeLookup() }
+})
 
 // ═══ View Switching ═══════════════════════════════════════════════
 function showKeyboardView () { $('#keyboardView').style.display = 'flex'; $('#sectionView').style.display = 'none'; refocus() }
@@ -1366,7 +1523,10 @@ function addToCart (product) {
 }
 
 // ═══ Search / Barcode ═════════════════════════════════════════════
+let lookupModeActive = false
+
 si.addEventListener('input', debounce(async () => {
+  if (!lookupModeActive) return
   const q = si.value.trim(); if (q.length < 2) return
   const results = await window.pos.searchProducts(q)
   pushSection(`Search: "${q}" (${results.length} result${results.length !== 1 ? 's' : ''})`, () => {
@@ -1525,9 +1685,18 @@ function renderCart () {
       `<button class="cart-item-delete" data-delete="${i}" title="Remove">&times;</button></div>`
   }).join(''); c.scrollTop = c.scrollHeight
 }
+let pendingDeleteIdx = null
 $('#cartItems').addEventListener('click', e => {
   const del = e.target.closest('.cart-item-delete')
-  if (del) { const i = parseInt(del.dataset.delete); if (cart.items[i]) { showToast(`Removed: ${cart.items[i].name}`, 'info'); cart.removeItem(i); applyDeals() } return }
+  if (del) {
+    const i = parseInt(del.dataset.delete)
+    if (!cart.items[i]) return
+    pendingDeleteIdx = i
+    $('#removeItemName').textContent = cart.items[i].name
+    $('#removeItemPrice').textContent = money(cart.items[i].line_total)
+    $('#removeConfirmModal').classList.add('show')
+    return
+  }
   const b = e.target.closest('.qty-btn'); if (!b) return
   const i = parseInt(b.dataset.index), item = cart.items[i]; if (!item) return
   const step = item.unit === 'each' ? 1 : 0.1
@@ -1550,20 +1719,38 @@ function updateTotals () {
   $('#sectionPrice').textContent = money(cart.total)
 }
 
-let clearConfirmTimer = null
 $('#cartClear').addEventListener('click', () => {
   if (cart.isEmpty) return
-  if (clearConfirmTimer) {
-    clearTimeout(clearConfirmTimer); clearConfirmTimer = null
-    cart.clear(); clearCartLocal(); showToast('Cart cleared', 'info')
-    $('#cartClear').textContent = 'Clear All'; $('#cartClear').style.background = ''
-  } else {
-    $('#cartClear').textContent = 'Tap again to clear'
-    $('#cartClear').style.background = '#fdd'
-    clearConfirmTimer = setTimeout(() => {
-      clearConfirmTimer = null; $('#cartClear').textContent = 'Clear All'; $('#cartClear').style.background = ''
-    }, 2500)
+  $('#clearCartCount').textContent = cart.items.length
+  $('#clearCartTotal').textContent = money(cart.total)
+  $('#clearConfirmModal').classList.add('show')
+})
+
+// Remove item confirmation handlers
+$('#removeConfirm').addEventListener('click', () => {
+  if (pendingDeleteIdx !== null && cart.items[pendingDeleteIdx]) {
+    showToast(`Removed: ${cart.items[pendingDeleteIdx].name}`, 'info')
+    cart.removeItem(pendingDeleteIdx); applyDeals()
   }
+  pendingDeleteIdx = null
+  $('#removeConfirmModal').classList.remove('show')
+  refocus()
+})
+$('#removeCancel').addEventListener('click', () => {
+  pendingDeleteIdx = null
+  $('#removeConfirmModal').classList.remove('show')
+  refocus()
+})
+
+// Clear cart confirmation handlers
+$('#clearCartConfirm').addEventListener('click', () => {
+  cart.clear(); clearCartLocal(); showToast('Cart cleared', 'info')
+  $('#clearConfirmModal').classList.remove('show')
+  refocus()
+})
+$('#clearCartCancel').addEventListener('click', () => {
+  $('#clearConfirmModal').classList.remove('show')
+  refocus()
 })
 
 function showSaleComplete (ch, txnData) {
