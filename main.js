@@ -533,20 +533,19 @@ app.whenReady().then(async () => {
     createCustomerWindow()
   }
 
-  // LAN sync — only auto-start if lan_autostart is explicitly enabled
+  // LAN sync — always auto-start if a mode is configured
   try {
-    const lanAutostart = dbGet("SELECT value FROM settings WHERE key = 'lan_autostart'")?.value
-    if (lanAutostart === '1') {
-      const lanMode = dbGet("SELECT value FROM settings WHERE key = 'lan_mode'")?.value
-      const lanPort = parseInt(dbGet("SELECT value FROM settings WHERE key = 'lan_port'")?.value || '5555')
-      if (lanMode === 'server') {
-        lanSync.startServer(lanPort, { dbAll, dbGet, dbRun, saveDB, uuid })
-      } else if (lanMode === 'client') {
-        const serverIp = dbGet("SELECT value FROM settings WHERE key = 'lan_server_ip'")?.value
-        const secret = dbGet("SELECT value FROM settings WHERE key = 'lan_secret'")?.value
-        if (serverIp) {
-          lanSync.startClient(serverIp, lanPort, secret, { dbAll, dbGet, dbRun, saveDB, uuid })
-        }
+    const lanMode = dbGet("SELECT value FROM settings WHERE key = 'lan_mode'")?.value
+    const lanPort = parseInt(dbGet("SELECT value FROM settings WHERE key = 'lan_port'")?.value || '5555')
+    if (lanMode === 'server') {
+      lanSync.startServer(lanPort, { dbAll, dbGet, dbRun, saveDB, uuid })
+      appLog('info', 'lan-sync', 'Auto-started LAN server on port ' + lanPort)
+    } else if (lanMode === 'client') {
+      const serverIp = dbGet("SELECT value FROM settings WHERE key = 'lan_server_ip'")?.value
+      const secret = dbGet("SELECT value FROM settings WHERE key = 'lan_secret'")?.value
+      if (serverIp) {
+        lanSync.startClient(serverIp, lanPort, secret, { dbAll, dbGet, dbRun, saveDB, uuid })
+        appLog('info', 'lan-sync', `Auto-connected to server at ${serverIp}:${lanPort}`)
       }
     }
   } catch (e) { appLog('error', 'lan-sync', 'LAN sync startup error', e.message) }
@@ -733,6 +732,7 @@ function setupIPC() {
 
   ipcMain.handle('db:products:search', (_e, query) => {
     const q = `%${query}%`
+    const limit = query.length < 2 ? 200 : 50
     return dbAll(`
       SELECT p.*, c.name as category_name,
         COALESCE(s.special_price, p.price) as active_price,
@@ -746,7 +746,7 @@ function setupIPC() {
       WHERE p.active = 1
         AND (p.name LIKE ?1 OR p.barcode LIKE ?1 OR p.plu LIKE ?1)
       ORDER BY p.name
-      LIMIT 50
+      LIMIT ${limit}
     `, [q])
   })
 
@@ -1898,7 +1898,6 @@ function setupIPC() {
     const lanPort = parseInt(dbGet("SELECT value FROM settings WHERE key = 'lan_port'")?.value || '5555')
     if (lanMode === 'server') {
       lanSync.startServer(lanPort, { dbAll, dbGet, dbRun, saveDB, uuid })
-      // Wait briefly for server to bind so status reflects the correct IP/port
       await new Promise(resolve => setTimeout(resolve, 500))
     } else if (lanMode === 'client') {
       const serverIp = dbGet("SELECT value FROM settings WHERE key = 'lan_server_ip'")?.value
@@ -1908,6 +1907,11 @@ function setupIPC() {
       }
     }
     return lanSync.getStatus()
+  })
+
+  ipcMain.handle('lan:discover', async () => {
+    const result = await lanSync.discoverServer(6000)
+    return result
   })
 }
 

@@ -30,7 +30,7 @@ let state = {
 
 // ─── Exports ─────────────────────────────────────────────────────────────────
 
-module.exports = { startServer, startClient, stopAll, getStatus, testConnection }
+module.exports = { startServer, startClient, stopAll, getStatus, testConnection, discoverServer }
 
 function getStatus () {
   return { ...state }
@@ -145,7 +145,7 @@ async function handleRoute (req, res, url, path) {
   if (req.method === 'GET') {
     switch (path) {
       case '/api/heartbeat':
-        return jsonReply(res, { ok: true, time: new Date().toISOString(), ip: getLocalIp() })
+        return jsonReply(res, { ok: true, time: new Date().toISOString(), ip: getLocalIp(), secret: state.secret, port: state.port })
 
       case '/api/products':
         return jsonReply(res, db.dbAll(
@@ -281,6 +281,7 @@ function startUdpBroadcast (port) {
         service: 'crisp-pos',
         ip: getLocalIp(),
         port,
+        secret: state.secret,
         register_id: regRow?.value || 'LANE01'
       })
       const buf = Buffer.from(msg)
@@ -288,7 +289,7 @@ function startUdpBroadcast (port) {
       udpBroadcastTimer = setInterval(() => {
         try { udpSocket.send(buf, 0, buf.length, UDP_PORT, '255.255.255.255') }
         catch (_) {}
-      }, 10000)
+      }, 5000)
 
       // Send immediately too
       try { udpSocket.send(buf, 0, buf.length, UDP_PORT, '255.255.255.255') } catch (_) {}
@@ -324,14 +325,10 @@ function startClient (serverIp, port, secret, dbHelpers) {
   state.port = port
   state.secret = secret
 
-  // Initial full sync
-  doFullSync().then(() => {
-    console.log('LAN client: initial sync complete')
-  }).catch(e => {
-    console.error('LAN client: initial sync failed:', e.message)
-  })
+  // Initial full sync with retry
+  attemptInitialSync()
 
-  // Periodic sync loop
+  // Periodic sync loop (also serves as reconnection)
   clientSyncTimer = setInterval(() => {
     doSyncCycle().catch(e => {
       console.error('LAN sync error:', e.message)
@@ -340,13 +337,37 @@ function startClient (serverIp, port, secret, dbHelpers) {
     })
   }, SYNC_INTERVAL)
 
-  // UDP listener for server discovery
+  // UDP listener for server discovery — auto-update IP if server moves
   startUdpListener(data => {
-    // Auto-update server IP if it changes (same service)
     if (data.ip !== state.serverIp) {
       console.log(`LAN: server moved to ${data.ip}:${data.port}`)
       state.serverIp = data.ip
       state.port = data.port
+      if (data.secret) state.secret = data.secret
+      // Save updated IP
+      if (db) {
+        db.dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('lan_server_ip', ?1)", [data.ip])
+        db.dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('lan_port', ?1)", [String(data.port)])
+        if (data.secret) db.dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('lan_secret', ?1)", [data.secret])
+        db.saveDB()
+      }
+      // Retry sync immediately with new address
+      if (!state.connected) attemptInitialSync()
+    }
+  })
+}
+
+function attemptInitialSync (retries = 0) {
+  doFullSync().then(() => {
+    console.log('LAN client: initial sync complete')
+  }).catch(e => {
+    console.error(`LAN client: sync attempt ${retries + 1} failed:`, e.message)
+    state.error = e.message
+    state.connected = false
+    // Retry with backoff: 5s, 10s, 20s, then every 30s via the regular interval
+    if (retries < 3) {
+      const delay = Math.min(5000 * Math.pow(2, retries), 20000)
+      setTimeout(() => attemptInitialSync(retries + 1), delay)
     }
   })
 }
@@ -422,7 +443,8 @@ async function doFullSync () {
   if (data.settings) {
     // Sync shared settings but preserve local-only ones
     const localOnly = new Set(['lan_mode', 'lan_server_ip', 'lan_port', 'lan_secret', 'register_id',
-                                'supabase_url', 'supabase_anon_key', 'keyboard_grid_cols', 'keyboard_grid_rows'])
+                                'supabase_url', 'supabase_anon_key', 'keyboard_grid_cols', 'keyboard_grid_rows',
+                                'app_mode', 'lan_autostart', 'lan_last_pull'])
     for (const [key, value] of Object.entries(data.settings)) {
       if (!localOnly.has(key)) {
         db.dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES (?1, ?2)", [key, value])
@@ -631,6 +653,85 @@ async function testConnection (ip, port) {
   } catch (e) {
     return { ok: false, error: e.message }
   }
+}
+
+// ─── Auto-Discovery ─────────────────────────────────────────────────────
+
+function discoverServer (timeoutMs = 8000) {
+  return new Promise((resolve) => {
+    let resolved = false
+    const done = (result) => {
+      if (resolved) return
+      resolved = true
+      clearTimeout(timer)
+      try { socket?.close() } catch (_) {}
+      resolve(result)
+    }
+
+    const timer = setTimeout(() => done(null), timeoutMs)
+
+    // Method 1: UDP broadcast listener (fast if server is broadcasting)
+    let socket
+    try {
+      socket = dgram.createSocket({ type: 'udp4', reuseAddr: true })
+      socket.bind(UDP_PORT, () => { socket.setBroadcast(true) })
+      socket.on('message', (msg) => {
+        try {
+          const data = JSON.parse(msg.toString())
+          if (data.service === 'crisp-pos' && data.ip && data.port) {
+            done(data)
+          }
+        } catch (_) {}
+      })
+      socket.on('error', () => {})
+    } catch (_) {}
+
+    // Method 2: Active network scan (probes all IPs on local subnet)
+    scanSubnet(5555).then(result => {
+      if (result) done(result)
+    }).catch(() => {})
+  })
+}
+
+function scanSubnet (port) {
+  return new Promise((resolve) => {
+    const localIp = getLocalIp()
+    const parts = localIp.split('.')
+    if (parts.length !== 4) { resolve(null); return }
+
+    const subnet = parts.slice(0, 3).join('.')
+    let found = false
+    let pending = 0
+
+    for (let i = 1; i <= 254; i++) {
+      const ip = `${subnet}.${i}`
+      if (ip === localIp) continue
+
+      pending++
+      const req = http.request({
+        hostname: ip, port, path: '/api/heartbeat',
+        method: 'GET', timeout: 1500
+      }, (res) => {
+        const chunks = []
+        res.on('data', c => chunks.push(c))
+        res.on('end', () => {
+          pending--
+          if (found) return
+          try {
+            const data = JSON.parse(Buffer.concat(chunks).toString())
+            if (data.ok && res.statusCode === 200) {
+              found = true
+              resolve({ service: 'crisp-pos', ip, port, secret: data.secret || null })
+            }
+          } catch (_) {}
+          if (pending <= 0 && !found) resolve(null)
+        })
+      })
+      req.on('error', () => { pending--; if (pending <= 0 && !found) resolve(null) })
+      req.on('timeout', () => { req.destroy(); pending--; if (pending <= 0 && !found) resolve(null) })
+      req.end()
+    }
+  })
 }
 
 // ─── Cleanup ─────────────────────────────────────────────────────────────────

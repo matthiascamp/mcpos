@@ -1409,54 +1409,65 @@
         <div id="lanDiagram" style="padding:20px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border);text-align:center;min-height:200px;"></div>
       </div>
 
-      <div class="section">
-        <h2>LAN Multi-Register</h2>
-        <p style="color:var(--text-dim);margin-bottom:12px;font-size:14px;">
-          Share this register's database with other POS terminals on the local network.
+      <div class="section" id="lanSetupSection">
+        <h2>Setup</h2>
+        <p style="color:var(--text-dim);margin-bottom:16px;font-size:14px;">
+          Choose what role this computer plays. Once set, it automatically reconnects every time the app starts.
         </p>
-        <div class="form-row" style="gap:16px;margin-bottom:12px;">
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-            <input type="radio" name="lanMode" value="off" checked> Off
-          </label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-            <input type="radio" name="lanMode" value="server"> Server (this register hosts)
-          </label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-            <input type="radio" name="lanMode" value="client"> Client (connect to server)
-          </label>
+
+        <!-- Initial setup: two big buttons -->
+        <div id="lanSetupButtons" style="display:flex;gap:16px;margin-bottom:16px;">
+          <button class="btn" id="lanBecomeServer" style="flex:1;padding:24px 16px;background:rgba(16,185,129,0.1);border:2px solid var(--green);border-radius:12px;cursor:pointer;text-align:center;">
+            <div style="font-size:32px;margin-bottom:8px;">🖥️</div>
+            <div style="font-size:15px;font-weight:700;color:var(--green);margin-bottom:4px;">This is the SERVER</div>
+            <div style="font-size:12px;color:var(--text-dim);">The main PC with the master database. Products &amp; settings live here.</div>
+          </button>
+          <button class="btn" id="lanBecomeClient" style="flex:1;padding:24px 16px;background:rgba(59,130,246,0.1);border:2px solid var(--blue);border-radius:12px;cursor:pointer;text-align:center;">
+            <div style="font-size:32px;margin-bottom:8px;">💻</div>
+            <div style="font-size:15px;font-weight:700;color:var(--blue);margin-bottom:4px;">This is a REGISTER</div>
+            <div style="font-size:12px;color:var(--text-dim);">A checkout register that syncs data from the server automatically.</div>
+          </button>
         </div>
 
-        <label style="display:flex;align-items:center;gap:6px;margin-bottom:12px;cursor:pointer;font-size:13px">
-          <input type="checkbox" id="lanAutostart"> Start automatically on app launch
-        </label>
-
+        <!-- Server info (shown when mode=server) -->
         <div id="lanServerInfo" style="display:none;">
-          <div class="form-row">
-            <div class="form-field"><label>This Machine's IP</label><input type="text" id="lanLocalIp" readonly style="opacity:.7;"></div>
-            <div class="form-field"><label>Port</label><input type="number" id="lanPort" value="5555"></div>
+          <div style="padding:12px 16px;border-radius:8px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);margin-bottom:12px;">
+            <div style="font-size:13px;color:var(--green);font-weight:600;margin-bottom:4px;">Server Running</div>
+            <div style="font-size:12px;color:var(--text-dim);">Registers on this network will auto-discover and connect. No setup needed on registers.</div>
           </div>
           <div class="form-row">
-            <div class="form-field">
-              <label>Secret Key <span style="color:var(--text-dim);font-size:12px;">(give this to client registers)</span></label>
-              <input type="text" id="lanSecret" readonly style="opacity:.7;font-family:monospace;">
-            </div>
+            <div class="form-field"><label>IP Address</label><input type="text" id="lanLocalIp" readonly style="opacity:.7;"></div>
+            <div class="form-field"><label>Port</label><input type="text" id="lanPort" value="5555" readonly style="opacity:.7;"></div>
           </div>
           <div id="lanServerStatus" style="margin:8px 0;font-size:13px;color:var(--text-dim);"></div>
-          <button class="btn btn-green" id="lanStartServerBtn">Start Server</button>
+          <button class="btn btn-outline" id="lanResetBtn" style="margin-top:8px;font-size:12px;">Reset to Unconfigured</button>
         </div>
 
+        <!-- Client info (shown when mode=client) -->
         <div id="lanClientInfo" style="display:none;">
-          <div class="form-row">
-            <div class="form-field"><label>Server IP Address</label><input type="text" id="lanServerIp" placeholder="192.168.1.100"></div>
-            <div class="form-field"><label>Port</label><input type="number" id="lanClientPort" value="5555"></div>
+          <div style="padding:12px 16px;border-radius:8px;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);margin-bottom:12px;">
+            <div style="font-size:13px;color:var(--blue);font-weight:600;margin-bottom:4px;" id="lanClientConnMsg">Connected</div>
+            <div style="font-size:12px;color:var(--text-dim);">This register auto-connects to the server on every startup. Products, deals, and keyboard sync automatically.</div>
           </div>
           <div class="form-row">
-            <div class="form-field"><label>Secret Key</label><input type="text" id="lanClientSecret" placeholder="Paste secret from server" style="font-family:monospace;"></div>
+            <div class="form-field"><label>Server IP</label><input type="text" id="lanServerIp" readonly style="opacity:.7;"></div>
+            <div class="form-field"><label>Port</label><input type="number" id="lanClientPort" value="5555" readonly style="opacity:.7;"></div>
           </div>
           <div id="lanClientStatus" style="margin:8px 0;font-size:13px;color:var(--text-dim);"></div>
-          <div style="display:flex;gap:8px;">
-            <button class="btn btn-outline" id="lanTestBtn">Test Connection</button>
-            <button class="btn btn-green" id="lanConnectBtn">Save &amp; Connect</button>
+          <button class="btn btn-outline" id="lanResetClientBtn" style="margin-top:8px;font-size:12px;">Reset to Unconfigured</button>
+        </div>
+
+        <!-- Discovery progress (shown during auto-discovery) -->
+        <div id="lanDiscovering" style="display:none;text-align:center;padding:24px;">
+          <div style="font-size:24px;margin-bottom:8px;">📡</div>
+          <div style="font-size:14px;color:var(--text);margin-bottom:4px;">Searching for server on this network...</div>
+          <div style="font-size:12px;color:var(--text-dim);">Make sure the server PC is running with the app open.</div>
+          <div id="lanDiscoverFallback" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+            <div style="font-size:13px;color:var(--text-dim);margin-bottom:8px;">Server not found automatically. Enter the IP manually:</div>
+            <div class="form-row" style="justify-content:center;">
+              <div class="form-field" style="max-width:200px;"><input type="text" id="lanManualIp" placeholder="192.168.1.100"></div>
+              <button class="btn btn-green" id="lanManualConnectBtn">Connect</button>
+            </div>
           </div>
         </div>
       </div>
@@ -2888,27 +2899,27 @@
       const s = await window.pos.getAllSettings()
       const mode = s.lan_mode || 'off'
 
-      $$('input[name="lanMode"]').forEach(r => { r.checked = r.value === mode })
-      $('#lanPort').value = s.lan_port || '5555'
-      $('#lanClientPort').value = s.lan_port || '5555'
-      $('#lanServerIp').value = s.lan_server_ip || ''
-      $('#lanClientSecret').value = s.lan_secret || ''
-      $('#lanSecret').value = s.lan_secret || '(will be generated on start)'
-      $('#lanAutostart').checked = s.lan_autostart === '1'
-
       updateLanPanel(mode)
 
-      // Show live status
       const status = await window.pos.getLanStatus()
-      if (status.mode === 'server' && status.connected) {
-        $('#lanLocalIp').value = status.serverIp || ''
-        $('#lanSecret').value = status.secret || ''
+
+      if (mode === 'server') {
+        $('#lanLocalIp').value = status.serverIp || s.lan_server_ip || ''
+        $('#lanPort').value = s.lan_port || '5555'
         const clients = status.clients?.length || 0
-        $('#lanServerStatus').innerHTML = `<span style="color:#4a4;">Server running</span> &mdash; ${clients} client(s) connected`
-      } else if (status.mode === 'client') {
-        $('#lanClientStatus').innerHTML = status.connected
-          ? `<span style="color:#4a4;">Connected</span> &mdash; last sync: ${status.lastPull ? new Date(status.lastPull).toLocaleTimeString('en-AU') : 'never'}`
-          : `<span style="color:#a44;">Disconnected</span>${status.error ? ' &mdash; ' + esc(status.error) : ''}`
+        $('#lanServerStatus').innerHTML = status.connected
+          ? `<span style="color:#4a4;">${clients} register(s) connected</span>`
+          : '<span style="color:var(--text-dim);">Waiting for registers...</span>'
+      } else if (mode === 'client') {
+        $('#lanServerIp').value = s.lan_server_ip || ''
+        $('#lanClientPort').value = s.lan_port || '5555'
+        if (status.connected) {
+          $('#lanClientConnMsg').textContent = 'Connected & Syncing'
+          $('#lanClientStatus').innerHTML = `<span style="color:#4a4;">Last sync: ${status.lastPull ? new Date(status.lastPull).toLocaleTimeString('en-AU') : 'just now'}</span>`
+        } else {
+          $('#lanClientConnMsg').textContent = 'Reconnecting...'
+          $('#lanClientStatus').innerHTML = `<span style="color:#a44;">${status.error ? esc(status.error) : 'Trying to reach server...'}</span>`
+        }
       }
 
       updateLanRoleBanner(mode, status)
@@ -2979,128 +2990,155 @@
 
       const thisIsServer = role === 'server'
 
+      const lanActive = clients.length > 0 || (!thisIsServer && status?.connected)
+
       diagram.innerHTML = `
         <style>
-          @keyframes flowDown { 0% { top: -6px; opacity:0; } 50% { opacity:1; } 100% { top: calc(100% - 6px); opacity:0; } }
-          @keyframes flowUp { 0% { bottom: -6px; opacity:0; } 50% { opacity:1; } 100% { bottom: calc(100% - 6px); opacity:0; } }
-          .flow-line { position:relative; width:3px; border-radius:2px; overflow:hidden; }
-          .flow-dot { position:absolute; width:6px; height:6px; border-radius:50%; left:-1.5px; }
-          .flow-dot.down { animation: flowDown 2s ease-in-out infinite; }
-          .flow-dot.up { animation: flowUp 2s ease-in-out infinite; }
+          @keyframes pulse-down { 0% { top:-8px; opacity:0; } 20% { opacity:1; } 80% { opacity:1; } 100% { top:calc(100% - 4px); opacity:0; } }
+          @keyframes pulse-up { 0% { bottom:-8px; opacity:0; } 20% { opacity:1; } 80% { opacity:1; } 100% { bottom:calc(100% - 4px); opacity:0; } }
+          .net-line { position:relative; width:4px; border-radius:2px; overflow:visible; }
+          .net-line.active { overflow:hidden; }
+          .net-pulse { position:absolute; width:12px; height:4px; border-radius:2px; left:-4px; filter:blur(0.5px); }
+          .net-pulse.down { animation: pulse-down 1.4s linear infinite; }
+          .net-pulse.up { animation: pulse-up 1.4s linear infinite; }
+          .net-node { transition: all 0.3s; }
+          .net-node.active { box-shadow: 0 0 12px currentColor; }
+          .net-offline { position:relative; }
+          .net-offline::after { content:'✕'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:28px; font-weight:900; color:#ef4444; text-shadow: 0 0 8px #ef4444; }
         </style>
         <div style="display:flex;flex-direction:column;align-items:center;gap:0;">
           <!-- Supabase Cloud -->
           <div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-bottom:4px;">
-            <div style="width:60px;height:50px;background:${supaConnected ? 'rgba(168,85,247,0.1)' : 'rgba(100,100,100,0.1)'};border:2px solid ${supaConnected ? '#a855f7' : '#555'};border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;${supaConnected ? 'box-shadow:0 0 14px rgba(168,85,247,0.25);' : ''}">☁️</div>
+            <div class="net-node ${supaConnected ? 'active' : 'net-offline'}" style="width:64px;height:52px;background:${supaConnected ? 'rgba(168,85,247,0.12)' : 'rgba(60,60,60,0.2)'};border:2px solid ${supaConnected ? '#a855f7' : '#444'};border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#a855f7;">☁️</div>
             <span style="font-size:12px;font-weight:700;color:${supaConnected ? '#a855f7' : '#666'};">Supabase Cloud</span>
-            <span style="font-size:10px;color:var(--text-dim);">${supaConnected ? 'Connected' : 'Offline'}</span>
+            <span style="font-size:10px;color:var(--text-dim);">${supaConnected ? '● Connected' : '○ Offline'}</span>
           </div>
 
-          <!-- Cloud to Server connection -->
-          <div class="flow-line" style="height:36px;background:linear-gradient(to bottom, ${supaConnected ? '#a855f7' : '#555'}, ${supaConnected ? 'var(--green)' : '#555'});">
-            ${supaConnected ? '<div class="flow-dot down" style="background:#a855f7;animation-delay:0s;"></div><div class="flow-dot up" style="background:var(--green);animation-delay:1s;"></div>' : ''}
+          <!-- Cloud ↔ Server link -->
+          <div class="net-line ${supaConnected ? 'active' : ''}" style="height:44px;background:${supaConnected ? 'linear-gradient(to bottom, #a855f7, #10b981)' : '#333'};">
+            ${supaConnected ? `
+              <div class="net-pulse down" style="background:#a855f7;box-shadow:0 0 6px #a855f7;animation-delay:0s;"></div>
+              <div class="net-pulse down" style="background:#c084fc;box-shadow:0 0 6px #c084fc;animation-delay:0.7s;"></div>
+              <div class="net-pulse up" style="background:#10b981;box-shadow:0 0 6px #10b981;animation-delay:0.35s;"></div>
+            ` : `<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:16px;font-weight:900;color:#ef4444;text-shadow:0 0 6px #ef4444;">✕</div>`}
           </div>
-          <div style="font-size:10px;color:var(--text-dim);background:var(--surface);padding:2px 10px;border-radius:10px;border:1px solid var(--border);margin:4px 0;">${supaConnected ? '⬆ Push / ⬇ Pull' : '✗ No Internet'}</div>
-          <div class="flow-line" style="height:20px;background:linear-gradient(to bottom, ${supaConnected ? 'var(--green)' : '#555'}, var(--green));">
+          <div style="font-size:10px;color:${supaConnected ? '#a855f7' : '#ef4444'};background:var(--surface);padding:3px 12px;border-radius:10px;border:1px solid ${supaConnected ? 'rgba(168,85,247,0.3)' : 'rgba(239,68,68,0.3)'};margin:4px 0;font-weight:600;">${supaConnected ? '⚡ Push / Pull' : '✕ No Internet'}</div>
+          <div class="net-line ${supaConnected ? 'active' : ''}" style="height:20px;background:${supaConnected ? 'linear-gradient(to bottom, #10b981, #10b981)' : '#333'};">
+            ${supaConnected ? '<div class="net-pulse down" style="background:#34d399;box-shadow:0 0 4px #34d399;animation-delay:0.2s;"></div>' : ''}
           </div>
 
           <!-- Main Server -->
           <div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin:4px 0;">
-            <div style="width:64px;height:52px;background:rgba(16,185,129,0.1);border:2px solid var(--green);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 0 14px rgba(16,185,129,0.2);">🖥️</div>
-            <span style="font-size:12px;font-weight:700;color:var(--green);">${thisIsServer ? 'THIS PC (Server)' : 'Main Server'}</span>
+            <div class="net-node active" style="width:68px;height:56px;background:rgba(16,185,129,0.12);border:2.5px solid var(--green);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--green);">🖥️</div>
+            <span style="font-size:13px;font-weight:700;color:var(--green);">${thisIsServer ? '⬤ THIS PC (Server)' : 'Main Server'}</span>
             <span style="font-size:10px;color:var(--text-dim);">${esc(serverIp)}:${status?.port || '5555'}</span>
-            <span style="font-size:10px;padding:2px 8px;border-radius:8px;background:rgba(16,185,129,0.15);color:var(--green);font-weight:600;">Master Database</span>
+            <span style="font-size:10px;padding:3px 10px;border-radius:8px;background:rgba(16,185,129,0.15);color:var(--green);font-weight:700;">Master Database</span>
           </div>
 
-          <!-- Server to Registers connection -->
-          <div class="flow-line" style="height:36px;background:linear-gradient(to bottom, var(--green), var(--blue));">
-            ${clients.length > 0 ? '<div class="flow-dot down" style="background:var(--green);animation-delay:0.3s;"></div><div class="flow-dot up" style="background:var(--blue);animation-delay:1.3s;"></div>' : ''}
+          <!-- Server ↔ Registers link -->
+          <div class="net-line ${lanActive ? 'active' : ''}" style="height:44px;background:${lanActive ? 'linear-gradient(to bottom, #10b981, #3b82f6)' : '#333'};">
+            ${lanActive ? `
+              <div class="net-pulse down" style="background:#10b981;box-shadow:0 0 6px #10b981;animation-delay:0.15s;"></div>
+              <div class="net-pulse down" style="background:#6ee7b7;box-shadow:0 0 6px #6ee7b7;animation-delay:0.85s;"></div>
+              <div class="net-pulse up" style="background:#3b82f6;box-shadow:0 0 6px #3b82f6;animation-delay:0.5s;"></div>
+            ` : `<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:16px;font-weight:900;color:#ef4444;text-shadow:0 0 6px #ef4444;">✕</div>`}
           </div>
-          <div style="font-size:10px;color:var(--text-dim);background:var(--surface);padding:2px 10px;border-radius:10px;border:1px solid var(--border);margin:4px 0;">LAN Sync ${clients.length > 0 || !thisIsServer ? '✓' : '(waiting)'}</div>
-          <div class="flow-line" style="height:20px;background:var(--blue);">
+          <div style="font-size:10px;color:${lanActive ? 'var(--blue)' : '#ef4444'};background:var(--surface);padding:3px 12px;border-radius:10px;border:1px solid ${lanActive ? 'rgba(59,130,246,0.3)' : 'rgba(239,68,68,0.3)'};margin:4px 0;font-weight:600;">${lanActive ? '⚡ LAN Sync Active' : '✕ No Clients'}</div>
+          <div class="net-line ${lanActive ? 'active' : ''}" style="height:20px;background:${lanActive ? '#3b82f6' : '#333'};">
+            ${lanActive ? '<div class="net-pulse down" style="background:#60a5fa;box-shadow:0 0 4px #60a5fa;animation-delay:0.4s;"></div>' : ''}
           </div>
 
           <!-- Registers -->
-          <div style="display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-top:4px;">
+          <div style="display:flex;gap:24px;justify-content:center;flex-wrap:wrap;margin-top:4px;">
             ${thisIsServer ? clientNodes : `
               <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-                <div style="width:56px;height:46px;background:rgba(59,130,246,0.1);border:2px solid var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 12px rgba(59,130,246,0.2);">💻</div>
-                <span style="font-size:12px;font-weight:700;color:var(--blue);">THIS PC (Register)</span>
+                <div class="net-node ${status?.connected ? 'active' : 'net-offline'}" style="width:58px;height:48px;background:rgba(59,130,246,0.1);border:2px solid ${status?.connected ? 'var(--blue)' : '#444'};border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--blue);">💻</div>
+                <span style="font-size:12px;font-weight:700;color:var(--blue);">⬤ THIS PC (Register)</span>
                 <span style="font-size:10px;color:var(--text-dim);">${esc(clientIp || 'this machine')}</span>
-                <span style="font-size:10px;padding:2px 8px;border-radius:8px;background:rgba(59,130,246,0.15);color:var(--blue);">${status?.connected ? 'Synced' : 'Disconnected'}</span>
+                <span style="font-size:10px;padding:3px 10px;border-radius:8px;background:${status?.connected ? 'rgba(59,130,246,0.15)' : 'rgba(239,68,68,0.15)'};color:${status?.connected ? 'var(--blue)' : '#ef4444'};font-weight:600;">${status?.connected ? '● Synced' : '● Disconnected'}</span>
               </div>`}
           </div>
         </div>`
     }
 
     function updateLanPanel (mode) {
+      $('#lanSetupButtons').style.display = mode === 'off' ? 'flex' : 'none'
       $('#lanServerInfo').style.display = mode === 'server' ? '' : 'none'
       $('#lanClientInfo').style.display = mode === 'client' ? '' : 'none'
+      $('#lanDiscovering').style.display = 'none'
     }
 
-    $$('input[name="lanMode"]').forEach(r => {
-      r.addEventListener('change', () => updateLanPanel(r.value))
-    })
-
-    $('#lanAutostart').addEventListener('change', async () => {
-      await window.pos.setSetting('lan_autostart', $('#lanAutostart').checked ? '1' : '0')
-      showToast($('#lanAutostart').checked ? 'LAN will start on next launch' : 'LAN auto-start disabled', 'success')
-    })
-
-    $('#lanStartServerBtn').addEventListener('click', async () => {
-      const port = $('#lanPort').value.trim() || '5555'
+    // "This is the SERVER" button
+    $('#lanBecomeServer').addEventListener('click', async () => {
       await window.pos.setSetting('lan_mode', 'server')
-      await window.pos.setSetting('lan_port', port)
+      await window.pos.setSetting('lan_port', '5555')
       const status = await window.pos.restartLan()
       if (status.connected) {
         $('#lanLocalIp').value = status.serverIp || ''
-        $('#lanSecret').value = status.secret || ''
-        await window.pos.setSetting('lan_secret', status.secret)
-        $('#lanServerStatus').innerHTML = '<span style="color:#4a4;">Server started</span>'
-        showToast('LAN server started', 'success')
+        $('#lanPort').value = status.port || '5555'
+        showToast('Server started! Registers will auto-connect.', 'success')
       } else {
-        $('#lanServerStatus').innerHTML = `<span style="color:#a44;">Failed: ${esc(status.error || 'unknown error')}</span>`
-        showToast('Failed to start server', 'error')
+        showToast('Server started (will be ready on next launch)', 'success')
+      }
+      loadLanSettings()
+    })
+
+    // "This is a REGISTER" button — auto-discover server
+    $('#lanBecomeClient').addEventListener('click', async () => {
+      $('#lanSetupButtons').style.display = 'none'
+      $('#lanDiscovering').style.display = ''
+      $('#lanDiscoverFallback').style.display = 'none'
+
+      const discovered = await window.pos.discoverServer()
+
+      if (discovered && discovered.ip) {
+        // Auto-discovered! Save and connect
+        await window.pos.setSetting('lan_mode', 'client')
+        await window.pos.setSetting('lan_server_ip', discovered.ip)
+        await window.pos.setSetting('lan_port', String(discovered.port || 5555))
+        if (discovered.secret) await window.pos.setSetting('lan_secret', discovered.secret)
+        await window.pos.restartLan()
+        showToast(`Connected to server at ${discovered.ip}`, 'success')
+        loadLanSettings()
+      } else {
+        // Not found — show manual entry
+        $('#lanDiscoverFallback').style.display = ''
       }
     })
 
-    $('#lanTestBtn').addEventListener('click', async () => {
-      const ip = $('#lanServerIp').value.trim()
-      const port = $('#lanClientPort').value.trim() || '5555'
-      if (!ip) { showToast('Enter server IP', 'error'); return }
-      $('#lanClientStatus').innerHTML = '<span style="color:var(--text-dim);">Testing...</span>'
-      const result = await window.pos.testLanConnection(ip, parseInt(port))
-      if (result.ok) {
-        $('#lanClientStatus').innerHTML = `<span style="color:#4a4;">Server found at ${esc(ip)}:${esc(port)}</span>`
-        showToast('Connection successful', 'success')
-      } else {
-        $('#lanClientStatus').innerHTML = `<span style="color:#a44;">Failed: ${esc(result.error || 'unreachable')}</span>`
-        showToast('Connection failed', 'error')
-      }
-    })
+    // Manual IP fallback connect
+    $('#lanManualConnectBtn').addEventListener('click', async () => {
+      const ip = $('#lanManualIp').value.trim()
+      if (!ip) { showToast('Enter the server IP address', 'error'); return }
 
-    $('#lanConnectBtn').addEventListener('click', async () => {
-      const ip = $('#lanServerIp').value.trim()
-      const port = $('#lanClientPort').value.trim() || '5555'
-      const secret = $('#lanClientSecret').value.trim()
-      if (!ip) { showToast('Enter server IP', 'error'); return }
-      if (!secret) { showToast('Enter secret key from server', 'error'); return }
+      const test = await window.pos.testLanConnection(ip, 5555)
+      if (!test.ok) { showToast('Cannot reach server at ' + ip, 'error'); return }
+
+      // Heartbeat returns the secret — save it
+      if (test.secret) await window.pos.setSetting('lan_secret', test.secret)
+
       await window.pos.setSetting('lan_mode', 'client')
       await window.pos.setSetting('lan_server_ip', ip)
-      await window.pos.setSetting('lan_port', port)
-      await window.pos.setSetting('lan_secret', secret)
-      const status = await window.pos.restartLan()
-      // Give initial sync a moment
-      setTimeout(async () => {
-        const s = await window.pos.getLanStatus()
-        if (s.connected) {
-          $('#lanClientStatus').innerHTML = '<span style="color:#4a4;">Connected and synced</span>'
-          showToast('Connected to server — data synced', 'success')
-        } else {
-          $('#lanClientStatus').innerHTML = `<span style="color:#a44;">Syncing... ${esc(s.error || '')}</span>`
-          showToast('Connecting...', 'info')
-        }
-      }, 3000)
+      await window.pos.setSetting('lan_port', String(test.port || 5555))
+      await window.pos.restartLan()
+
+      showToast(`Connected to server at ${ip}`, 'success')
+      loadLanSettings()
+    })
+
+    // Reset buttons
+    $('#lanResetBtn').addEventListener('click', async () => {
+      await window.pos.setSetting('lan_mode', 'off')
+      const lanSync = await window.pos.restartLan()
+      showToast('Server stopped. Role reset.', 'info')
+      loadLanSettings()
+    })
+
+    $('#lanResetClientBtn').addEventListener('click', async () => {
+      await window.pos.setSetting('lan_mode', 'off')
+      await window.pos.restartLan()
+      showToast('Disconnected. Role reset.', 'info')
+      loadLanSettings()
     })
 
     // ── Z Report ────────────────────────────────────────────────────
@@ -4653,9 +4691,15 @@
 
     let currentMode = localStorage.getItem('crisp_admin_mode') || 'admin'
 
+    // Also load from DB (survives localStorage clears)
+    window.pos.getSetting('app_mode').then(v => {
+      if (v && v !== currentMode) { currentMode = v; applyMode(v) }
+    })
+
     function applyMode (mode) {
       currentMode = mode
       localStorage.setItem('crisp_admin_mode', mode)
+      window.pos.setSetting('app_mode', mode)
       if (mode === 'register') {
         document.body.classList.add('register-mode')
         $('#modeBadge').textContent = 'Register'
