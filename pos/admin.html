@@ -1518,6 +1518,34 @@
           <tbody id="usbDeviceTable"><tr><td colspan="5" style="color:var(--text-dim)">Click "Probe All Devices" to scan</td></tr></tbody>
         </table>
       </div>
+
+      <div class="section" style="margin-top:24px">
+        <h2>Payment Terminal (Linkly)</h2>
+        <p style="color:var(--text-dim);font-size:13px;margin-bottom:14px">
+          Connect to your EFTPOS terminal via Linkly Cloud. Get credentials from your payment processor or Linkly (1300 286 464).
+        </p>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <div id="dotLinkly" style="width:12px;height:12px;border-radius:50%;background:#555;flex-shrink:0"></div>
+          <span id="linklyStatusText" style="font-size:14px;color:var(--text-dim)">Not configured</span>
+        </div>
+        <div class="form-row" style="gap:10px;margin-bottom:10px">
+          <div class="form-field" style="flex:1"><label>Username</label><input type="text" id="linklyUser" placeholder="Linkly username"></div>
+          <div class="form-field" style="flex:1"><label>Password</label><input type="password" id="linklyPass" placeholder="Linkly password"></div>
+        </div>
+        <div class="form-row" style="gap:10px;margin-bottom:10px">
+          <div class="form-field" style="flex:1"><label>Pair Code (from terminal)</label><input type="text" id="linklyPairCode" placeholder="6-digit code shown on terminal" maxlength="8"></div>
+          <div class="form-field" style="flex:1"><label>Environment</label>
+            <select id="linklyEnv"><option value="sandbox">Sandbox (testing)</option><option value="production">Production (live)</option></select>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:10px">
+          <button class="btn btn-green" id="linklyPairBtn">Pair Terminal</button>
+          <button class="btn btn-blue" id="linklySaveBtn">Save Credentials</button>
+          <button class="btn btn-outline" id="linklyTestBtn">Test Connection</button>
+          <button class="btn" id="linklySettleBtn" style="background:var(--amber);color:#000">Settlement</button>
+        </div>
+        <div id="linklyResult" style="font-size:13px;color:var(--text-dim);min-height:20px;margin-top:4px"></div>
+      </div>
     </div>
 
 
@@ -4438,6 +4466,77 @@
           $('#scannerInfo').innerHTML = `<span style="color:var(--green)">Working</span> - last scan: ${esc(code)}`
           $('#scannerTest').value = ''
         }
+      }
+    })
+
+    // -- Linkly Payment Terminal ------------------------------------------
+
+    async function loadLinklyStatus () {
+      try {
+        const status = await window.pos.linklyGetStatus()
+        const s = await window.pos.getAllSettings()
+        if (s.linkly_username) $('#linklyUser').value = s.linkly_username
+        if (s.linkly_password) $('#linklyPass').value = s.linkly_password
+        if (s.linkly_environment) $('#linklyEnv').value = s.linkly_environment
+
+        if (status.paired || status.hasCredentials) {
+          $('#dotLinkly').style.background = status.sessionActive ? 'var(--green)' : 'var(--amber)'
+          $('#linklyStatusText').innerHTML = status.paired
+            ? `<span style="color:var(--green)">Paired</span> (${status.environment})`
+            : `<span style="color:var(--amber)">Credentials saved</span> — not yet paired`
+        } else {
+          $('#dotLinkly').style.background = '#555'
+          $('#linklyStatusText').textContent = 'Not configured'
+        }
+      } catch (_) {}
+    }
+    loadLinklyStatus()
+
+    $('#linklyPairBtn').addEventListener('click', async () => {
+      const user = $('#linklyUser').value.trim()
+      const pass = $('#linklyPass').value.trim()
+      const code = $('#linklyPairCode').value.trim()
+      if (!user || !pass || !code) { $('#linklyResult').innerHTML = '<span style="color:var(--red)">Fill in username, password, and pair code</span>'; return }
+
+      $('#linklyResult').textContent = 'Pairing...'
+      const result = await window.pos.linklyPair(user, pass, code)
+      if (result.error) {
+        $('#linklyResult').innerHTML = `<span style="color:var(--red)">Pairing failed: ${esc(result.error)}</span>`
+      } else {
+        $('#linklyResult').innerHTML = `<span style="color:var(--green)">Paired successfully!</span>`
+        await window.pos.linklyConfigure({ environment: $('#linklyEnv').value })
+        loadLinklyStatus()
+      }
+    })
+
+    $('#linklySaveBtn').addEventListener('click', async () => {
+      const user = $('#linklyUser').value.trim()
+      const pass = $('#linklyPass').value.trim()
+      if (!user) { $('#linklyResult').innerHTML = '<span style="color:var(--red)">Username required</span>'; return }
+      await window.pos.linklyConfigure({ username: user, password: pass, environment: $('#linklyEnv').value })
+      $('#linklyResult').innerHTML = '<span style="color:var(--green)">Credentials saved</span>'
+      loadLinklyStatus()
+    })
+
+    $('#linklyTestBtn').addEventListener('click', async () => {
+      $('#linklyResult').textContent = 'Testing connection...'
+      const status = await window.pos.linklyGetStatus()
+      if (status.paired || status.hasCredentials) {
+        $('#linklyResult').innerHTML = `<span style="color:var(--green)">Connected (${status.environment})</span>`
+      } else {
+        $('#linklyResult').innerHTML = `<span style="color:var(--red)">Not connected — pair terminal first</span>`
+      }
+      loadLinklyStatus()
+    })
+
+    $('#linklySettleBtn').addEventListener('click', async () => {
+      if (!confirm('Run end-of-day settlement on the EFTPOS terminal?')) return
+      $('#linklyResult').textContent = 'Running settlement...'
+      const result = await window.pos.linklySettlement()
+      if (result.error) {
+        $('#linklyResult').innerHTML = `<span style="color:var(--red)">Settlement failed: ${esc(result.error)}</span>`
+      } else {
+        $('#linklyResult').innerHTML = `<span style="color:var(--green)">Settlement complete</span>`
       }
     })
 

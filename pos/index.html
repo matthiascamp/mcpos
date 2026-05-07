@@ -728,6 +728,17 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 </div></div>
 
 <!-- ═══ End of Day Modal ═══════════════════════════════════════════ -->
+<div class="modal-overlay" id="terminalModal"><div class="modal" style="width:380px;text-align:center;padding:32px">
+  <div id="terminalIcon" style="font-size:48px;margin-bottom:16px">💳</div>
+  <h2 id="terminalTitle" style="margin-bottom:8px;font-size:20px">Waiting for terminal...</h2>
+  <p id="terminalMsg" style="color:#666;font-size:15px;margin-bottom:24px">Present card on the EFTPOS terminal</p>
+  <div id="terminalAmount" style="font-size:28px;font-weight:800;color:#1a1a2e;margin-bottom:24px"></div>
+  <div id="terminalSpinner" style="margin-bottom:20px"><div style="width:40px;height:40px;border:4px solid #e0e0e0;border-top-color:#2d6a4f;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto"></div></div>
+  <div id="terminalResult" style="display:none;padding:16px;border-radius:10px;margin-bottom:16px;font-weight:700;font-size:16px"></div>
+  <button class="btn" id="terminalCancelBtn" style="background:#cc1818;color:#fff;padding:12px 32px;font-size:15px">Cancel</button>
+</div></div>
+<style>@keyframes spin { to { transform: rotate(360deg) } }</style>
+
 <div class="modal-overlay" id="eodModal"><div class="modal" style="width:640px;max-height:92vh;overflow-y:auto;padding:24px">
   <h2 style="margin-bottom:4px;font-size:20px">End of Day — Cash Count</h2>
   <p style="color:#888;font-size:13px;margin-bottom:16px">Count all cash in your drawer</p>
@@ -2554,8 +2565,23 @@ $('#payOptAccount').addEventListener('click', () => { $('#paymentModal').classLi
 
 async function completeCardPayment () {
   if (cart.isEmpty) return
-  const status = returnMode ? 'refunded' : 'completed'
-  const txn = cart.toTransaction(currentStaff?.id, [{ method: 'card', amount: Math.abs(cart.total), reference: 'EFTPOS' }])
+  const isRefund = returnMode
+  const amountDollars = Math.abs(cart.total)
+  const amountCents = Math.round(amountDollars * 100)
+
+  // Check if Linkly terminal is configured
+  const linklyStatus = await window.pos.linklyGetStatus()
+  if (linklyStatus.paired || linklyStatus.hasCredentials) {
+    await processTerminalPayment(amountCents, amountDollars, isRefund)
+  } else {
+    // Manual mode — no terminal integration
+    await completeCardManual(amountDollars, isRefund)
+  }
+}
+
+async function completeCardManual (amountDollars, isRefund) {
+  const status = isRefund ? 'refunded' : 'completed'
+  const txn = cart.toTransaction(currentStaff?.id, [{ method: 'card', amount: amountDollars, reference: 'EFTPOS' }])
   txn.status = status
   try {
     const r = await window.pos.saveTransaction(txn)
@@ -2567,6 +2593,84 @@ async function completeCardPayment () {
     showSaleComplete(0, receiptData); refocus()
   } catch (e) { showToast('Card payment failed: ' + e.message, 'error') }
 }
+
+async function processTerminalPayment (amountCents, amountDollars, isRefund) {
+  // Show terminal modal
+  $('#terminalAmount').textContent = money(amountDollars)
+  $('#terminalTitle').textContent = isRefund ? 'Processing refund...' : 'Waiting for terminal...'
+  $('#terminalMsg').textContent = isRefund ? 'Present card for refund' : 'Present card on the EFTPOS terminal'
+  $('#terminalIcon').textContent = '💳'
+  $('#terminalSpinner').style.display = ''
+  $('#terminalResult').style.display = 'none'
+  $('#terminalCancelBtn').style.display = ''
+  $('#terminalModal').classList.add('show')
+
+  const txnRef = `POS-${Date.now()}`
+
+  try {
+    const result = isRefund
+      ? await window.pos.linklyRefund(amountCents, txnRef)
+      : await window.pos.linklyPurchase(amountCents, txnRef)
+
+    if (result.success) {
+      // Approved
+      $('#terminalSpinner').style.display = 'none'
+      $('#terminalIcon').textContent = '✅'
+      $('#terminalTitle').textContent = 'Approved'
+      $('#terminalMsg').textContent = result.cardType ? `${result.cardType} ${result.responseText}` : 'Payment approved'
+      $('#terminalCancelBtn').style.display = 'none'
+      $('#terminalResult').style.display = 'block'
+      $('#terminalResult').style.background = '#d4edda'
+      $('#terminalResult').style.color = '#155724'
+      $('#terminalResult').textContent = result.bankRef ? `Ref: ${result.bankRef}` : 'APPROVED'
+
+      // Save transaction
+      const ref = [result.cardType, result.bankRef].filter(Boolean).join(' ') || 'EFTPOS'
+      const status = isRefund ? 'refunded' : 'completed'
+      const txn = cart.toTransaction(currentStaff?.id, [{ method: 'card', amount: amountDollars, reference: ref }])
+      txn.status = status
+      const r = await window.pos.saveTransaction(txn)
+      const receiptData = await buildReceiptData(txn, r)
+      lastCompletedTxns.unshift(receiptData); if (lastCompletedTxns.length > 10) lastCompletedTxns.pop()
+      try { await window.pos.printReceipt(receiptData) } catch (_) {}
+      cart.clear(); clearCartLocal()
+      if (returnMode) { returnMode = false; $('#returnBanner').classList.remove('active') }
+
+      setTimeout(() => {
+        $('#terminalModal').classList.remove('show')
+        showSaleComplete(0, receiptData); refocus()
+      }, 1500)
+    } else {
+      // Declined
+      $('#terminalSpinner').style.display = 'none'
+      $('#terminalIcon').textContent = '❌'
+      $('#terminalTitle').textContent = 'Declined'
+      $('#terminalMsg').textContent = result.responseText || result.error || 'Payment declined'
+      $('#terminalCancelBtn').textContent = 'Close'
+      $('#terminalResult').style.display = 'block'
+      $('#terminalResult').style.background = '#f8d7da'
+      $('#terminalResult').style.color = '#721c24'
+      $('#terminalResult').textContent = result.responseCode ? `Code: ${result.responseCode}` : 'DECLINED'
+    }
+  } catch (e) {
+    $('#terminalSpinner').style.display = 'none'
+    $('#terminalIcon').textContent = '⚠️'
+    $('#terminalTitle').textContent = 'Error'
+    $('#terminalMsg').textContent = e.message || 'Terminal communication failed'
+    $('#terminalCancelBtn').textContent = 'Close'
+  }
+}
+
+$('#terminalCancelBtn').addEventListener('click', () => {
+  window.pos.linklyCancel()
+  $('#terminalModal').classList.remove('show')
+  refocus()
+})
+
+// Listen for terminal status updates
+window.pos.onLinklyStatus((status) => {
+  if (status.message) $('#terminalMsg').textContent = status.message
+})
 
 async function completeAccountPayment () {
   if (cart.isEmpty) return
@@ -2604,13 +2708,51 @@ $('#splitPayments').addEventListener('click', e => {
   $('#cashTendered').dispatchEvent(new Event('input'))
 })
 
-$('#splitCardBtn').addEventListener('click', () => {
+$('#splitCardBtn').addEventListener('click', async () => {
   const remaining = getRemaining()
   if (remaining <= 0) { showToast('Already fully paid', 'info'); return }
-  pendingPayments.push({ method: 'card', amount: remaining, reference: 'EFTPOS' })
-  renderSplitPayments()
-  $('#cashTendered').value = ''
-  $('#cashTendered').dispatchEvent(new Event('input'))
+
+  // If Linkly configured, process card portion through terminal
+  const linklyStatus = await window.pos.linklyGetStatus()
+  if (linklyStatus.paired || linklyStatus.hasCredentials) {
+    const amountCents = Math.round(remaining * 100)
+    $('#cashModal').classList.remove('show')
+    $('#terminalAmount').textContent = money(remaining)
+    $('#terminalTitle').textContent = 'Waiting for terminal...'
+    $('#terminalMsg').textContent = 'Present card on the EFTPOS terminal'
+    $('#terminalIcon').textContent = '💳'
+    $('#terminalSpinner').style.display = ''
+    $('#terminalResult').style.display = 'none'
+    $('#terminalCancelBtn').style.display = ''
+    $('#terminalCancelBtn').textContent = 'Cancel'
+    $('#terminalModal').classList.add('show')
+
+    try {
+      const result = await window.pos.linklyPurchase(amountCents, `SPLIT-${Date.now()}`)
+      $('#terminalModal').classList.remove('show')
+      if (result.success) {
+        const ref = [result.cardType, result.bankRef].filter(Boolean).join(' ') || 'EFTPOS'
+        pendingPayments.push({ method: 'card', amount: remaining, reference: ref })
+        $('#cashModal').classList.add('show')
+        renderSplitPayments()
+        $('#cashTendered').value = ''
+        $('#cashTendered').dispatchEvent(new Event('input'))
+        showToast('Card approved', 'success')
+      } else {
+        $('#cashModal').classList.add('show')
+        showToast(`Card declined: ${result.responseText || result.error}`, 'error')
+      }
+    } catch (e) {
+      $('#terminalModal').classList.remove('show')
+      $('#cashModal').classList.add('show')
+      showToast('Terminal error: ' + e.message, 'error')
+    }
+  } else {
+    pendingPayments.push({ method: 'card', amount: remaining, reference: 'EFTPOS' })
+    renderSplitPayments()
+    $('#cashTendered').value = ''
+    $('#cashTendered').dispatchEvent(new Event('input'))
+  }
 })
 
 function changeBreakdown (amount) {
@@ -3080,6 +3222,15 @@ $('#eodSubmit').addEventListener('click', async () => {
   } catch (e) {
     showToast('EOD saved (print failed)', 'info')
   }
+
+  // Trigger EFTPOS settlement if Linkly is configured
+  try {
+    const linklyStatus = await window.pos.linklyGetStatus()
+    if (linklyStatus.paired || linklyStatus.hasCredentials) {
+      await window.pos.linklySettlement()
+      showToast('EFTPOS settlement triggered', 'info')
+    }
+  } catch (_) {}
 
   $('#eodModal').classList.remove('show')
   showToast(`End of Day: Counted ${money(countedTotal)}`, 'success')

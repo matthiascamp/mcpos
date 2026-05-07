@@ -3,6 +3,7 @@ const path = require('path')
 const fs = require('fs')
 const { v4: uuid } = require('uuid')
 const lanSync = require('./lan-sync')
+const linkly = require('./linkly')
 
 let mainWindow
 let customerWindow = null
@@ -2057,6 +2058,86 @@ function setupIPC() {
     const result = await lanSync.discoverServer(6000)
     return result
   })
+
+  // ── Linkly Payment Terminal ─────────────────────────────────────────────────
+
+  ipcMain.handle('linkly:getStatus', () => linkly.getStatus())
+
+  ipcMain.handle('linkly:configure', (_e, opts) => {
+    linkly.configure(opts)
+    if (opts.username) dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('linkly_username', ?1)", [opts.username])
+    if (opts.password) dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('linkly_password', ?1)", [opts.password])
+    if (opts.secret) dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('linkly_secret', ?1)", [opts.secret])
+    if (opts.environment) dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('linkly_environment', ?1)", [opts.environment])
+    return { ok: true }
+  })
+
+  ipcMain.handle('linkly:pair', async (_e, username, password, pairCode) => {
+    try {
+      const result = await linkly.pair(username, password, pairCode)
+      if (result.secret) {
+        dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('linkly_secret', ?1)", [result.secret])
+        dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('linkly_username', ?1)", [username])
+        dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('linkly_password', ?1)", [password])
+      }
+      return result
+    } catch (e) {
+      return { error: e.message }
+    }
+  })
+
+  ipcMain.handle('linkly:purchase', async (_e, amountCents, txnRef) => {
+    try {
+      const result = await linkly.processPayment(amountCents, txnRef, (status) => {
+        if (mainWindow) mainWindow.webContents.send('linkly:status', status)
+      })
+      return result
+    } catch (e) {
+      return { success: false, error: e.message }
+    }
+  })
+
+  ipcMain.handle('linkly:refund', async (_e, amountCents, txnRef) => {
+    try {
+      const result = await linkly.processRefund(amountCents, txnRef, (status) => {
+        if (mainWindow) mainWindow.webContents.send('linkly:status', status)
+      })
+      return result
+    } catch (e) {
+      return { success: false, error: e.message }
+    }
+  })
+
+  ipcMain.handle('linkly:cancel', () => {
+    linkly.cancelPolling()
+    return { ok: true }
+  })
+
+  ipcMain.handle('linkly:settlement', async () => {
+    try {
+      const result = await linkly.settlement()
+      return result
+    } catch (e) {
+      return { error: e.message }
+    }
+  })
+
+  // Restore Linkly config from settings on startup
+  try {
+    const lkUser = dbGet("SELECT value FROM settings WHERE key = 'linkly_username'")
+    const lkPass = dbGet("SELECT value FROM settings WHERE key = 'linkly_password'")
+    const lkSecret = dbGet("SELECT value FROM settings WHERE key = 'linkly_secret'")
+    const lkEnv = dbGet("SELECT value FROM settings WHERE key = 'linkly_environment'")
+    if (lkUser?.value || lkSecret?.value) {
+      linkly.configure({
+        username: lkUser?.value || '',
+        password: lkPass?.value || '',
+        secret: lkSecret?.value || '',
+        environment: lkEnv?.value || 'sandbox'
+      })
+      appLog('info', 'linkly', 'Linkly credentials loaded from settings')
+    }
+  } catch (_) {}
 }
 
 // ─── Sync Queue Helper ───────────���────────────────────────────────────────────

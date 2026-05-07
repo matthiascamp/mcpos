@@ -139,4 +139,14 @@ contextBridge.exposeInMainWorld('pos', {
   customerUpdate:     (data)       => ipcRenderer.invoke('customer:update', data),
   customerSaleComplete: (data)     => ipcRenderer.invoke('customer:saleComplete', data),
   openCustomerDisplay: ()          => ipcRenderer.invoke('customer:open'),
+
+  // Linkly Payment Terminal
+  linklyGetStatus:    ()                    => ipcRenderer.invoke('linkly:getStatus'),
+  linklyConfigure:    (opts)                => ipcRenderer.invoke('linkly:configure', opts),
+  linklyPair:         (user, pass, code)    => ipcRenderer.invoke('linkly:pair', user, pass, code),
+  linklyPurchase:     (amountCents, ref)    => ipcRenderer.invoke('linkly:purchase', amountCents, ref),
+  linklyRefund:       (amountCents, ref)    => ipcRenderer.invoke('linkly:refund', amountCents, ref),
+  linklyCancel:       ()                    => ipcRenderer.invoke('linkly:cancel'),
+  linklySettlement:   ()                    => ipcRenderer.invoke('linkly:settlement'),
+  onLinklyStatus:     (cb)                  => ipcRenderer.on('linkly:status', (_e, data) => cb(data)),
 })
