@@ -178,6 +178,12 @@ async function handleRoute (req, res, url, path) {
         return jsonReply(res, btns)
       }
 
+      case '/api/keyboard_pages': {
+        let kbPages = []
+        try { kbPages = db.dbAll("SELECT * FROM keyboard_pages ORDER BY page") } catch (_) {}
+        return jsonReply(res, kbPages)
+      }
+
       case '/api/settings': {
         const rows = db.dbAll("SELECT key, value FROM settings")
         const obj = {}
@@ -188,6 +194,8 @@ async function handleRoute (req, res, url, path) {
       case '/api/full-sync': {
         const delKb = db.dbAll("SELECT record_id FROM deleted_records WHERE table_name = 'keyboard_buttons'")
         const delKbIds = new Set(delKb.map(r => r.record_id))
+        let kbPages = []
+        try { kbPages = db.dbAll("SELECT * FROM keyboard_pages ORDER BY page") } catch (_) {}
         return jsonReply(res, {
           products: db.dbAll("SELECT * FROM products"),
           categories: db.dbAll("SELECT * FROM categories"),
@@ -196,6 +204,7 @@ async function handleRoute (req, res, url, path) {
           deal_products: db.dbAll("SELECT * FROM deal_products"),
           staff: db.dbAll("SELECT * FROM staff"),
           keyboard_buttons: db.dbAll("SELECT * FROM keyboard_buttons").filter(b => !delKbIds.has(b.id)),
+          keyboard_pages: kbPages,
           deleted_records: db.dbAll("SELECT table_name, record_id FROM deleted_records"),
           settings: (() => {
             const rows = db.dbAll("SELECT key, value FROM settings")
@@ -275,9 +284,11 @@ async function handleRoute (req, res, url, path) {
       }
 
       case '/api/deleted': {
+        const ALLOWED_TABLES = new Set(['products','categories','specials','deals','deal_products','staff','keyboard_buttons','keyboard_pages','transactions','transaction_items','payments','cash_drawer'])
         const records = Array.isArray(body) ? body : body.records || []
         for (const r of records) {
           if (!r.table_name || !r.record_id) continue
+          if (!ALLOWED_TABLES.has(r.table_name)) continue
           db.dbRun("INSERT OR IGNORE INTO deleted_records (table_name, record_id) VALUES (?1, ?2)",
                    [r.table_name, r.record_id])
           db.dbRun(`DELETE FROM ${r.table_name} WHERE id = ?1`, [r.record_id])
@@ -312,7 +323,20 @@ function startUdpBroadcast (port) {
       const buf = Buffer.from(msg)
 
       udpBroadcastTimer = setInterval(() => {
-        try { udpSocket.send(buf, 0, buf.length, UDP_PORT, '255.255.255.255') }
+        try {
+          // Rebuild buffer each broadcast so DHCP IP changes are picked up
+          const currentIp = getLocalIp()
+          const freshMsg = JSON.stringify({
+            service: 'crisp-pos',
+            ip: currentIp,
+            port,
+            secret: state.secret,
+            register_id: regRow?.value || 'LANE01'
+          })
+          const freshBuf = Buffer.from(freshMsg)
+          state.serverIp = currentIp
+          udpSocket.send(freshBuf, 0, freshBuf.length, UDP_PORT, '255.255.255.255')
+        }
         catch (_) {}
       }, 5000)
 
@@ -523,10 +547,18 @@ async function doFullSync () {
     }
   }
 
+  if (data.keyboard_pages && data.keyboard_pages.length > 0) {
+    for (const pg of data.keyboard_pages) {
+      db.dbRun(`INSERT OR REPLACE INTO keyboard_pages (page, name, cols, rows)
+                VALUES (?1, ?2, ?3, ?4)`,
+               [pg.page, pg.name || ('Page ' + pg.page), pg.cols || 10, pg.rows || 7])
+    }
+  }
+
   if (data.settings) {
     // Sync shared settings but preserve local-only ones
     const localOnly = new Set(['lan_mode', 'lan_server_ip', 'lan_port', 'lan_secret', 'register_id',
-                                'supabase_url', 'supabase_anon_key', 'keyboard_grid_cols', 'keyboard_grid_rows',
+                                'keyboard_grid_cols', 'keyboard_grid_rows',
                                 'app_mode', 'lan_autostart', 'lan_last_pull'])
     for (const [key, value] of Object.entries(data.settings)) {
       if (!localOnly.has(key)) {
@@ -591,12 +623,16 @@ async function doSyncCycle () {
   const lastPull = db.dbGet("SELECT value FROM settings WHERE key = 'lan_last_pull'")?.value || '1970-01-01T00:00:00'
 
   try {
-    const [products, categories, specials, deals, staff] = await Promise.all([
+    const [products, categories, specials, deals, staff, keyboard, dealProducts, settings, kbPages] = await Promise.all([
       httpGet(`/api/products?since=${encodeURIComponent(lastPull)}`),
       httpGet(`/api/categories?since=${encodeURIComponent(lastPull)}`),
       httpGet(`/api/specials?since=${encodeURIComponent(lastPull)}`),
       httpGet(`/api/deals?since=${encodeURIComponent(lastPull)}`),
-      httpGet(`/api/staff?since=${encodeURIComponent(lastPull)}`)
+      httpGet(`/api/staff?since=${encodeURIComponent(lastPull)}`),
+      httpGet('/api/keyboard'),
+      httpGet('/api/deal_products'),
+      httpGet('/api/settings'),
+      httpGet('/api/keyboard_pages').catch(() => [])
     ])
 
     for (const c of categories) {
@@ -629,6 +665,55 @@ async function doSyncCycle () {
       db.dbRun(`INSERT OR REPLACE INTO staff (id, name, pin, role, active, updated_at)
                 VALUES (?1, ?2, ?3, ?4, ?5, ?6)`,
                [s.id, s.name, s.pin, s.role || 'cashier', s.active ?? 1, s.updated_at || null])
+    }
+
+    // Keyboard buttons (full replace — server already filters deletions)
+    if (keyboard && keyboard.length > 0) {
+      const delRows = db.dbAll("SELECT record_id FROM deleted_records WHERE table_name = 'keyboard_buttons'")
+      const deletedIds = new Set(delRows.map(r => r.record_id))
+      for (const b of keyboard) {
+        if (deletedIds.has(b.id)) continue
+        db.dbRun(`INSERT OR REPLACE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, product_id, active, updated_at)
+                  VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20)`,
+                 [b.id, b.label, b.type, b.price || null, b.image || null, b.color || '#fff',
+                  b.bg_color || '#1B4332', b.parent_id || null, b.category_filter || null,
+                  b.alpha_range || null, b.sort_order || 0, b.position || 'grid',
+                  b.page || 1, b.grid_row || 0, b.grid_col || 0, b.col_span || 1, b.row_span || 1,
+                  b.product_id || null, b.active ?? 1, b.updated_at || null])
+      }
+      for (const id of deletedIds) {
+        db.dbRun("DELETE FROM keyboard_buttons WHERE id = ?1", [id])
+      }
+    }
+
+    // Deal products (full replace from server)
+    if (dealProducts && dealProducts.length > 0) {
+      db.dbRun("DELETE FROM deal_products")
+      for (const dp of dealProducts) {
+        db.dbRun("INSERT OR IGNORE INTO deal_products (deal_id, product_id, role) VALUES (?1, ?2, ?3)",
+                 [dp.deal_id, dp.product_id, dp.role || 'trigger'])
+      }
+    }
+
+    // Settings (respect localOnly)
+    if (settings && typeof settings === 'object') {
+      const localOnly = new Set(['lan_mode', 'lan_server_ip', 'lan_port', 'lan_secret', 'register_id',
+                                  'keyboard_grid_cols', 'keyboard_grid_rows',
+                                  'app_mode', 'lan_autostart', 'lan_last_pull'])
+      for (const [key, value] of Object.entries(settings)) {
+        if (!localOnly.has(key)) {
+          db.dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES (?1, ?2)", [key, value])
+        }
+      }
+    }
+
+    // Keyboard pages
+    if (kbPages && kbPages.length > 0) {
+      for (const pg of kbPages) {
+        db.dbRun(`INSERT OR REPLACE INTO keyboard_pages (page, name, cols, rows)
+                  VALUES (?1, ?2, ?3, ?4)`,
+                 [pg.page, pg.name || ('Page ' + pg.page), pg.cols || 10, pg.rows || 7])
+      }
     }
 
     db.saveDB()
