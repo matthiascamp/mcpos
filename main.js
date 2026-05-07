@@ -735,20 +735,87 @@ function setupIPC() {
 
   ipcMain.handle('app:update', async () => {
     const { execSync } = require('child_process')
+    const https = require('https')
     const appDir = __dirname
+
+    // Try git first
+    let hasGit = false
+    try { execSync('git --version', { timeout: 3000, encoding: 'utf-8' }); hasGit = true } catch (_) {}
+
+    if (hasGit) {
+      try {
+        const before = execSync('git rev-parse HEAD', { cwd: appDir, encoding: 'utf-8', timeout: 5000 }).trim()
+        const pullOutput = execSync('git pull origin main', { cwd: appDir, encoding: 'utf-8', timeout: 30000 })
+        const after = execSync('git rev-parse HEAD', { cwd: appDir, encoding: 'utf-8', timeout: 5000 }).trim()
+        if (before === after) return { upToDate: true, log: pullOutput.trim() }
+        const diffLog = execSync(`git log --oneline ${before}..${after}`, { cwd: appDir, encoding: 'utf-8', timeout: 5000 }).trim()
+        appLog('info', 'update', `Updated from ${before.slice(0,7)} to ${after.slice(0,7)}`)
+        setTimeout(() => { app.relaunch(); app.exit(0) }, 1500)
+        return { updated: true, log: `${pullOutput.trim()}\n\nNew commits:\n${diffLog}`, from: before.slice(0,7), to: after.slice(0,7) }
+      } catch (e) {
+        const msg = (e.stderr || e.message || '').trim()
+        if (!msg.includes('not a git repository')) return { error: msg, log: msg }
+      }
+    }
+
+    // Fallback: download zip from GitHub
     try {
-      const before = execSync('git rev-parse HEAD', { cwd: appDir, encoding: 'utf-8', timeout: 5000 }).trim()
-      const pullOutput = execSync('git pull origin main', { cwd: appDir, encoding: 'utf-8', timeout: 30000 })
-      const after = execSync('git rev-parse HEAD', { cwd: appDir, encoding: 'utf-8', timeout: 5000 }).trim()
-      if (before === after) return { upToDate: true, log: pullOutput.trim() }
-      const diffLog = execSync(`git log --oneline ${before}..${after}`, { cwd: appDir, encoding: 'utf-8', timeout: 5000 }).trim()
-      appLog('info', 'update', `Updated from ${before.slice(0,7)} to ${after.slice(0,7)}`)
+      const zipUrl = 'https://github.com/matthiascamp/mcpos/archive/refs/heads/main.zip'
+      const tmpZip = path.join(os.tmpdir(), `mcpos-update-${Date.now()}.zip`)
+      const tmpDir = path.join(os.tmpdir(), `mcpos-update-${Date.now()}`)
+
+      await new Promise((resolve, reject) => {
+        const follow = (url) => {
+          https.get(url, { headers: { 'User-Agent': 'CrispPOS' } }, res => {
+            if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+              return follow(res.headers.location)
+            }
+            if (res.statusCode !== 200) return reject(new Error(`HTTP ${res.statusCode}`))
+            const ws = fs.createWriteStream(tmpZip)
+            res.pipe(ws)
+            ws.on('finish', () => ws.close(resolve))
+            ws.on('error', reject)
+          }).on('error', reject)
+        }
+        follow(zipUrl)
+      })
+
+      if (os.platform() === 'win32') {
+        execSync(`powershell -NoProfile -Command "Expand-Archive -Path '${tmpZip}' -DestinationPath '${tmpDir}' -Force"`, { timeout: 30000 })
+      } else {
+        fs.mkdirSync(tmpDir, { recursive: true })
+        execSync(`unzip -o "${tmpZip}" -d "${tmpDir}"`, { timeout: 30000 })
+      }
+
+      const extracted = path.join(tmpDir, 'mcpos-main')
+      if (!fs.existsSync(extracted)) return { error: 'Download succeeded but extraction failed — folder not found' }
+
+      const skipDirs = new Set(['node_modules', '.git', 'mcpos'])
+      const skipFiles = new Set(['package-lock.json'])
+      const copyRecursive = (src, dest) => {
+        const entries = fs.readdirSync(src, { withFileTypes: true })
+        for (const entry of entries) {
+          if (skipDirs.has(entry.name) || skipFiles.has(entry.name)) continue
+          const srcPath = path.join(src, entry.name)
+          const destPath = path.join(dest, entry.name)
+          if (entry.isDirectory()) {
+            fs.mkdirSync(destPath, { recursive: true })
+            copyRecursive(srcPath, destPath)
+          } else {
+            fs.copyFileSync(srcPath, destPath)
+          }
+        }
+      }
+      copyRecursive(extracted, appDir)
+
+      try { fs.unlinkSync(tmpZip) } catch (_) {}
+      try { fs.rmSync(tmpDir, { recursive: true, force: true }) } catch (_) {}
+
+      appLog('info', 'update', 'Updated from GitHub zip download')
       setTimeout(() => { app.relaunch(); app.exit(0) }, 1500)
-      return { updated: true, log: `${pullOutput.trim()}\n\nNew commits:\n${diffLog}`, from: before.slice(0,7), to: after.slice(0,7) }
+      return { updated: true, log: 'Downloaded latest version from GitHub and applied.\nApp will restart now.' }
     } catch (e) {
-      const msg = (e.stderr || e.message || '').trim()
-      if (msg.includes('not a git repository')) return { error: 'App directory is not a git repository', log: msg }
-      return { error: msg, log: msg }
+      return { error: `Download update failed: ${e.message}`, log: e.message }
     }
   })
 
