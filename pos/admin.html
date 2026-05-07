@@ -3532,8 +3532,11 @@
       for (const kids of Object.values(childMap)) kids.forEach(k => childPages.add(k))
       const rootPages = allPages.filter(p => !childPages.has(p.page))
 
+      const visited = new Set()
       function renderNode (pageInfo, depth) {
         const pg = pageInfo.page
+        if (visited.has(pg)) return ''
+        visited.add(pg)
         const name = pageInfo.name || `Page ${pg}`
         const active = pg === currentPage ? 'background:var(--green);color:#000;' : ''
         const pad = depth * 12
