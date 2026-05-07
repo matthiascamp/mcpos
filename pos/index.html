@@ -389,6 +389,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
       <span><span class="health-dot" id="dotServer"></span>Server</span>
       <span><span class="health-dot" id="dotDrawer"></span>Drawer</span>
     </div>
+    <button id="receiptToggle" style="background:none;border:1px solid rgba(255,255,255,.3);color:#10b981;padding:3px 8px;border-radius:4px;font-size:11px;cursor:pointer;min-height:26px;white-space:nowrap" title="Toggle auto-receipt printing">REC: ON</button>
     <span id="numBufDisplay" style="display:none;background:#111;color:#0c0;font-family:'Courier New',monospace;font-size:16px;font-weight:700;padding:2px 10px;border-radius:3px;margin-right:8px;min-width:50px;text-align:right"></span>
     <span class="subtotal-label">Sub Total</span>
     <span class="subtotal-amount" id="topTotal">$0.00</span>
@@ -949,6 +950,20 @@ let returnMode = false, supervisorMode = false, supervisorTimer = null
 let lastCompletedTxns = [], pcFoundProduct = null
 let payProcessing = false
 let cashNumBuf = ''
+let autoReceipt = localStorage.getItem('crisp_auto_receipt') !== '0'
+function updateReceiptToggle () {
+  const btn = $('#receiptToggle')
+  btn.textContent = autoReceipt ? 'REC: ON' : 'REC: OFF'
+  btn.style.color = autoReceipt ? '#10b981' : '#ef4444'
+  btn.style.borderColor = autoReceipt ? 'rgba(16,185,129,.4)' : 'rgba(239,68,68,.4)'
+}
+$('#receiptToggle').addEventListener('click', () => {
+  autoReceipt = !autoReceipt
+  localStorage.setItem('crisp_auto_receipt', autoReceipt ? '1' : '0')
+  updateReceiptToggle()
+  showToast(autoReceipt ? 'Auto-receipt ON' : 'Auto-receipt OFF', 'info')
+})
+updateReceiptToggle()
 
 const si = $('#searchInput')
 
@@ -2832,7 +2847,7 @@ $('#cashConfirm').addEventListener('click', async () => {
     }
     lastCompletedTxns.unshift(receiptData)
     if (lastCompletedTxns.length > 10) lastCompletedTxns.length = 10
-    try { const pr = await window.pos.printReceipt(receiptData); if (pr?.error) showToast('Printer: ' + pr.error, 'error') } catch (pe) { showToast('Printer: ' + pe.message, 'error') }
+    if (autoReceipt) { try { const pr = await window.pos.printReceipt(receiptData); if (pr?.error) showToast('Printer: ' + pr.error, 'error') } catch (pe) { showToast('Printer: ' + pe.message, 'error') } }
     const hasCash = payments.some(p => p.method === 'cash')
     if (hasCash) { try { const dr = await window.pos.openDrawer(); if (dr?.error) showToast('Drawer: ' + dr.error, 'error') } catch (de) { showToast('Drawer: ' + de.message, 'error') } }
     cart.clear(); clearCartLocal(); pendingPayments = []
@@ -2882,6 +2897,13 @@ $('#cashNumpad').addEventListener('click', e => {
   else if (v === 'back') { cashNumBuf = cashNumBuf.slice(0, -1); input.value = cashNumBuf }
   else if (v === 'OK') { /* just trigger recalc */ }
   else if (v === '.') { if (!cashNumBuf.includes('.')) { cashNumBuf += '.'; input.value = cashNumBuf } }
+  else if (v === '00') {
+    if (!cashNumBuf.includes('.')) { cashNumBuf += '.00'; input.value = cashNumBuf }
+    else {
+      const decimals = cashNumBuf.split('.')[1]?.length || 0
+      if (decimals < 2) { cashNumBuf += '00'.substring(0, 2 - decimals); input.value = cashNumBuf }
+    }
+  }
   else { cashNumBuf += v; input.value = cashNumBuf }
   input.dispatchEvent(new Event('input'))
 })

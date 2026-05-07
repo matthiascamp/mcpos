@@ -731,6 +731,27 @@ function setupIPC() {
     app.quit()
   })
 
+  // ── App Update (git pull from GitHub) ──────────────────────────────────
+
+  ipcMain.handle('app:update', async () => {
+    const { execSync } = require('child_process')
+    const appDir = __dirname
+    try {
+      const before = execSync('git rev-parse HEAD', { cwd: appDir, encoding: 'utf-8', timeout: 5000 }).trim()
+      const pullOutput = execSync('git pull origin main', { cwd: appDir, encoding: 'utf-8', timeout: 30000 })
+      const after = execSync('git rev-parse HEAD', { cwd: appDir, encoding: 'utf-8', timeout: 5000 }).trim()
+      if (before === after) return { upToDate: true, log: pullOutput.trim() }
+      const diffLog = execSync(`git log --oneline ${before}..${after}`, { cwd: appDir, encoding: 'utf-8', timeout: 5000 }).trim()
+      appLog('info', 'update', `Updated from ${before.slice(0,7)} to ${after.slice(0,7)}`)
+      setTimeout(() => { app.relaunch(); app.exit(0) }, 1500)
+      return { updated: true, log: `${pullOutput.trim()}\n\nNew commits:\n${diffLog}`, from: before.slice(0,7), to: after.slice(0,7) }
+    } catch (e) {
+      const msg = (e.stderr || e.message || '').trim()
+      if (msg.includes('not a git repository')) return { error: 'App directory is not a git repository', log: msg }
+      return { error: msg, log: msg }
+    }
+  })
+
   // ── Backups ─────────────────────────────────────────────────────────────
 
   ipcMain.handle('db:backup:create', () => {
@@ -1810,8 +1831,10 @@ function setupIPC() {
               [catId, p.category, catOrder++])
       }
       const id = uuid()
-      dbRun(`INSERT OR REPLACE INTO products (id, barcode, name, category_id, price, unit, active, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, 1, datetime('now'))`,
-            [id, p.barcode || null, p.name, catMap[p.category] || null, p.price, p.unit || 'each'])
+      const barcode = p.barcode || null
+      const plu = p.plu || (barcode && /^\d{3,6}$/.test(barcode) ? barcode : null)
+      dbRun(`INSERT OR REPLACE INTO products (id, barcode, plu, name, category_id, price, unit, active, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, 1, datetime('now'))`,
+            [id, barcode, plu, p.name, catMap[p.category] || null, p.price, p.unit || 'each'])
       imported++
     }
 
