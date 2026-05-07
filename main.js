@@ -143,6 +143,10 @@ async function initDatabase() {
     "UPDATE keyboard_buttons SET product_id = NULL WHERE product_id IN (SELECT id FROM products WHERE name LIKE '%BIPPI%CHILLI%')",
     // Clear product_id from buttons that already have their own image (avoids wrong product image showing)
     "UPDATE keyboard_buttons SET product_id = NULL WHERE image IS NOT NULL AND image != '' AND product_id IS NOT NULL",
+    // Permanently remove Uber Eats button
+    "UPDATE keyboard_buttons SET active = 0 WHERE id = 'fn-ubereats'",
+    "INSERT OR IGNORE INTO deleted_records (table_name, record_id) VALUES ('keyboard_buttons', 'fn-ubereats')",
+    "DELETE FROM keyboard_buttons WHERE id = 'fn-ubereats'",
   ]
   for (const m of migrations) {
     try { db.run(m) } catch (_) {}

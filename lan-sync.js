@@ -166,8 +166,12 @@ async function handleRoute (req, res, url, path) {
       case '/api/staff':
         return jsonReply(res, db.dbAll("SELECT * FROM staff WHERE updated_at > ?1", [since]))
 
-      case '/api/keyboard':
-        return jsonReply(res, db.dbAll("SELECT * FROM keyboard_buttons"))
+      case '/api/keyboard': {
+        const delRows = db.dbAll("SELECT record_id FROM deleted_records WHERE table_name = 'keyboard_buttons'")
+        const delIds = new Set(delRows.map(r => r.record_id))
+        const btns = db.dbAll("SELECT * FROM keyboard_buttons").filter(b => !delIds.has(b.id))
+        return jsonReply(res, btns)
+      }
 
       case '/api/settings': {
         const rows = db.dbAll("SELECT key, value FROM settings")
@@ -176,7 +180,9 @@ async function handleRoute (req, res, url, path) {
         return jsonReply(res, obj)
       }
 
-      case '/api/full-sync':
+      case '/api/full-sync': {
+        const delKb = db.dbAll("SELECT record_id FROM deleted_records WHERE table_name = 'keyboard_buttons'")
+        const delKbIds = new Set(delKb.map(r => r.record_id))
         return jsonReply(res, {
           products: db.dbAll("SELECT * FROM products"),
           categories: db.dbAll("SELECT * FROM categories"),
@@ -184,7 +190,8 @@ async function handleRoute (req, res, url, path) {
           deals: db.dbAll("SELECT * FROM deals"),
           deal_products: db.dbAll("SELECT * FROM deal_products"),
           staff: db.dbAll("SELECT * FROM staff"),
-          keyboard_buttons: db.dbAll("SELECT * FROM keyboard_buttons"),
+          keyboard_buttons: db.dbAll("SELECT * FROM keyboard_buttons").filter(b => !delKbIds.has(b.id)),
+          deleted_records: db.dbAll("SELECT table_name, record_id FROM deleted_records"),
           settings: (() => {
             const rows = db.dbAll("SELECT key, value FROM settings")
             const obj = {}
@@ -192,6 +199,7 @@ async function handleRoute (req, res, url, path) {
             return obj
           })()
         })
+      }
 
       default:
         return jsonReply(res, { error: 'Not found' }, 404)
@@ -259,6 +267,18 @@ async function handleRoute (req, res, url, path) {
             entry.created_at || new Date().toISOString()])
         db.saveDB()
         return jsonReply(res, { ok: true })
+      }
+
+      case '/api/deleted': {
+        const records = Array.isArray(body) ? body : body.records || []
+        for (const r of records) {
+          if (!r.table_name || !r.record_id) continue
+          db.dbRun("INSERT OR IGNORE INTO deleted_records (table_name, record_id) VALUES (?1, ?2)",
+                   [r.table_name, r.record_id])
+          db.dbRun(`DELETE FROM ${r.table_name} WHERE id = ?1`, [r.record_id])
+        }
+        db.saveDB()
+        return jsonReply(res, { ok: true, count: records.length })
       }
 
       default:
@@ -373,6 +393,12 @@ function attemptInitialSync (retries = 0) {
 }
 
 async function doFullSync () {
+  // Push local deletions first so server removes them before responding
+  const localDeleted = db.dbAll("SELECT table_name, record_id FROM deleted_records")
+  if (localDeleted.length > 0) {
+    try { await httpPost('/api/deleted', localDeleted) } catch (_) {}
+  }
+
   const data = await httpGet('/api/full-sync')
 
   // Upsert all master data into local DB (no queueSync — don't re-push to server)
@@ -426,10 +452,22 @@ async function doFullSync () {
     }
   }
 
+  // Merge server deleted_records into local — prevents resurrecting items deleted on server
+  if (data.deleted_records) {
+    for (const r of data.deleted_records) {
+      db.dbRun("INSERT OR IGNORE INTO deleted_records (table_name, record_id) VALUES (?1, ?2)",
+               [r.table_name, r.record_id])
+    }
+  }
+
   if (data.keyboard_buttons) {
-    // Full replace — delete local buttons, insert server's
-    db.dbRun("DELETE FROM keyboard_buttons")
-    for (const b of data.keyboard_buttons) {
+    // Build combined deletion set (local + server)
+    const delRows = db.dbAll("SELECT record_id FROM deleted_records WHERE table_name = 'keyboard_buttons'")
+    const deletedIds = new Set(delRows.map(r => r.record_id))
+    const filtered = data.keyboard_buttons.filter(b => !deletedIds.has(b.id))
+
+    // Merge server buttons (upsert, not full replace — preserves local-only buttons)
+    for (const b of filtered) {
       db.dbRun(`INSERT OR REPLACE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, active, updated_at)
                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19)`,
                [b.id, b.label, b.type, b.price || null, b.image || null, b.color || '#fff',
@@ -437,6 +475,11 @@ async function doFullSync () {
                 b.alpha_range || null, b.sort_order || 0, b.position || 'grid',
                 b.page || 1, b.grid_row || 0, b.grid_col || 0, b.col_span || 1, b.row_span || 1,
                 b.active ?? 1, b.updated_at || null])
+    }
+
+    // Enforce all deletions (removes anything that slipped through)
+    for (const id of deletedIds) {
+      db.dbRun("DELETE FROM keyboard_buttons WHERE id = ?1", [id])
     }
   }
 
@@ -495,6 +538,14 @@ async function doSyncCycle () {
   if (pending.length > 0) {
     state.lastPush = new Date().toISOString()
   }
+
+  // Step 1b: Push local deletions to server so they propagate
+  try {
+    const deletedRecords = db.dbAll("SELECT table_name, record_id FROM deleted_records")
+    if (deletedRecords.length > 0) {
+      await httpPost('/api/deleted', deletedRecords)
+    }
+  } catch (_) {}
 
   // Step 2: Pull master data updates from server
   const lastPull = db.dbGet("SELECT value FROM settings WHERE key = 'lan_last_pull'")?.value || '1970-01-01T00:00:00'

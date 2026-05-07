@@ -3349,6 +3349,9 @@
     $('#deletePageBtn').addEventListener('click', async () => {
       if (allPages.length <= 1) { showToast('Cannot delete the only page', 'error'); return }
       if (!confirm(`Delete Page ${currentPage} and all its buttons?`)) return
+      // Track each button as deleted so sync won't bring them back
+      const pageBtns = kbButtons.filter(b => (b.page || 1) === currentPage)
+      for (const b of pageBtns) await window.pos.deleteButton(b.id)
       await window.pos.deletePage(currentPage)
       kbButtons = await window.pos.getAllButtons()
       allPages = allPages.filter(p => p !== currentPage)

@@ -235,7 +235,7 @@ INSERT OR IGNORE INTO products (id, barcode, plu, name, category_id, price, cost
 CREATE TABLE IF NOT EXISTS keyboard_buttons (
   id              TEXT PRIMARY KEY,
   label           TEXT NOT NULL,
-  type            TEXT NOT NULL,  -- product: open_price|fixed_price|section|nav  function: return|hold|nosale|supervisor|reprint|pricecheck|recall|pctdiscount|pctone|movedrawer|ubereats|endofday  numpad: digit|clear|qtyx|codeenter  payment: subtotal|pay_cash|pay_card|park  nav: page_link|back_home
+  type            TEXT NOT NULL,  -- product: open_price|fixed_price|section|nav  function: return|hold|nosale|reprint|pricecheck|recall|discount|movedrawer|endofday  numpad: digit|clear|qtyx|codeenter  payment: subtotal|pay_cash|pay_card|park  nav: page_link|back_home
   price           REAL DEFAULT 0,
   image           TEXT,
   color           TEXT DEFAULT '#fff',
@@ -266,8 +266,7 @@ INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_o
   ('fn-reprint',    'REPRINT\nRECEIPT', 'reprint',   '#000', '#dddddd', 9,  'grid', 1, 1, 0, 1, 1, NULL),
   ('fn-discount',   'DISCOUNT',       'discount',    '#fff', '#d8a820', 10, 'grid', 1, 1, 1, 1, 1, NULL),
   ('fn-movedrawer', 'LOG OUT',        'movedrawer',  '#fff', '#e07020', 12, 'grid', 1, 1, 2, 1, 1, NULL),
-  ('fn-recall',     'FIND\nSALE',     'recall',      '#000', '#dddddd', 14, 'grid', 1, 1, 3, 1, 1, NULL),
-  ('fn-ubereats',   'UBER EATS\nADJ', 'ubereats',    '#000', '#dddddd', 15, 'grid', 1, 1, 4, 1, 1, NULL);
+  ('fn-recall',     'FIND\nSALE',     'recall',      '#000', '#dddddd', 14, 'grid', 1, 1, 3, 1, 1, NULL);
 
 -- Cart display area (cols 0-2, rows 2-5)
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, category_filter) VALUES
