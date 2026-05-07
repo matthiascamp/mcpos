@@ -1041,6 +1041,7 @@ function setupIPC() {
   ipcMain.handle('db:specials:delete', (_e, id) => {
     dbRun("INSERT OR IGNORE INTO deleted_records (table_name, record_id) VALUES ('specials', ?1)", [id])
     dbRun("DELETE FROM specials WHERE id = ?1", [id])
+    lanSync.bumpVersion()
     return true
   })
 
@@ -1073,6 +1074,7 @@ function setupIPC() {
       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, datetime('now'))
     `, [id, deal.name, deal.type, JSON.stringify(deal.config || {}),
         deal.start_date || null, deal.end_date || null, deal.active !== false ? 1 : 0])
+    lanSync.bumpVersion()
     return { id }
   })
 
@@ -1080,6 +1082,7 @@ function setupIPC() {
     dbRun("INSERT OR IGNORE INTO deleted_records (table_name, record_id) VALUES ('deals', ?1)", [id])
     dbRun("DELETE FROM deal_products WHERE deal_id = ?1", [id])
     dbRun("DELETE FROM deals WHERE id = ?1", [id])
+    lanSync.bumpVersion()
     return true
   })
 
@@ -1097,6 +1100,7 @@ function setupIPC() {
     for (const pid of productIds) {
       dbRun("INSERT INTO deal_products (deal_id, product_id, role) VALUES (?1, ?2, 'trigger')", [dealId, pid])
     }
+    lanSync.bumpVersion()
     return true
   })
 
@@ -1420,6 +1424,7 @@ function setupIPC() {
     if (!skipSync.includes(key)) {
       dbRun(`INSERT INTO sync_queue (table_name, record_id, action, payload) VALUES (?1, ?2, ?3, ?4)`,
             ['settings', key, 'update', JSON.stringify({ key, value })])
+      lanSync.bumpVersion()
     }
     return true
   })
@@ -1561,18 +1566,21 @@ function setupIPC() {
     dbRun("INSERT INTO keyboard_pages (page, name, cols, rows) VALUES (?1, ?2, ?3, ?4)",
       [nextPage, opts?.name || 'Untitled', opts?.cols || 13, opts?.rows || 7])
     scheduleSave()
+    lanSync.bumpVersion()
     return { page: nextPage, name: opts?.name || 'Untitled', cols: opts?.cols || 13, rows: opts?.rows || 7 }
   })
 
   ipcMain.handle('db:keyboard:renamePage', (_e, page, name) => {
     dbRun("UPDATE keyboard_pages SET name = ?2 WHERE page = ?1", [page, name])
     scheduleSave()
+    lanSync.bumpVersion()
     return true
   })
 
   ipcMain.handle('db:keyboard:updatePageSize', (_e, page, cols, rows) => {
     dbRun("INSERT OR REPLACE INTO keyboard_pages (page, name, cols, rows) VALUES (?1, COALESCE((SELECT name FROM keyboard_pages WHERE page = ?1), 'Untitled'), ?2, ?3)", [page, cols, rows])
     scheduleSave()
+    lanSync.bumpVersion()
     return true
   })
 
@@ -1609,6 +1617,7 @@ function setupIPC() {
     dbRun("DELETE FROM keyboard_pages WHERE page = ?1", [page])
     dbRun("UPDATE keyboard_buttons SET active = 0 WHERE type = 'page_link' AND parent_id = ?1", [String(page)])
     scheduleSave()
+    lanSync.bumpVersion()
     return true
   })
 
@@ -2174,4 +2183,5 @@ function queueSync(table, recordId, action) {
     dbRun(`INSERT INTO sync_queue (table_name, record_id, action, payload) VALUES (?1, ?2, ?3, ?4)`,
           [table, recordId, action, JSON.stringify(row)])
   }
+  lanSync.bumpVersion()
 }

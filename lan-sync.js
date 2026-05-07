@@ -8,13 +8,16 @@ const dgram = require('dgram')
 const os = require('os')
 
 const UDP_PORT = 5556
-const SYNC_INTERVAL = 15000 // 15 seconds
+const SYNC_INTERVAL = 3000 // 3 seconds — fast version check, full pull only when changed
 
 let server = null
 let udpSocket = null
 let udpBroadcastTimer = null
 let clientSyncTimer = null
 let db = null // { dbAll, dbGet, dbRun, saveDB, uuid }
+
+let dataVersion = 0 // bumps on any server-side data change
+let lastKnownVersion = -1 // client tracks server version to skip unchanged polls
 
 let state = {
   mode: 'off',       // 'off' | 'server' | 'client'
@@ -30,7 +33,9 @@ let state = {
 
 // ─── Exports ─────────────────────────────────────────────────────────────────
 
-module.exports = { startServer, startClient, stopAll, getStatus, testConnection, discoverServer, networkDiagnostic }
+module.exports = { startServer, startClient, stopAll, getStatus, testConnection, discoverServer, networkDiagnostic, bumpVersion }
+
+function bumpVersion () { dataVersion++ }
 
 function getStatus () {
   const now = Date.now()
@@ -150,7 +155,10 @@ async function handleRoute (req, res, url, path) {
   if (req.method === 'GET') {
     switch (path) {
       case '/api/heartbeat':
-        return jsonReply(res, { ok: true, time: new Date().toISOString(), ip: getLocalIp(), secret: state.secret, port: state.port })
+        return jsonReply(res, { ok: true, time: new Date().toISOString(), ip: getLocalIp(), secret: state.secret, port: state.port, version: dataVersion })
+
+      case '/api/version':
+        return jsonReply(res, { version: dataVersion })
 
       case '/api/products':
         return jsonReply(res, db.dbAll(
@@ -577,6 +585,27 @@ async function doFullSync () {
 }
 
 async function doSyncCycle () {
+  // Step 0: Quick version check — skip full pull if server data hasn't changed
+  let serverVersion = null
+  try {
+    const vRes = await httpGet('/api/version', 3000)
+    serverVersion = vRes.version
+    state.connected = true
+    state.error = null
+  } catch (e) {
+    if (e.message.includes('Unauthorized') || e.message.includes('401')) {
+      const refreshed = await refreshSecret()
+      if (!refreshed) { state.error = 'Unauthorized'; state.connected = false; return }
+      try {
+        const vRes = await httpGet('/api/version', 3000)
+        serverVersion = vRes.version
+      } catch (_) {}
+    } else {
+      state.error = e.message
+      state.connected = false
+    }
+  }
+
   // Step 1: Push pending transactions to server
   const pending = db.dbAll("SELECT * FROM sync_queue WHERE synced = 0 AND table_name IN ('transactions', 'cash_drawer') ORDER BY id")
 
@@ -619,7 +648,11 @@ async function doSyncCycle () {
     }
   } catch (_) {}
 
-  // Step 2: Pull master data updates from server
+  // Step 2: Pull master data updates from server (skip if version unchanged)
+  if (serverVersion !== null && serverVersion === lastKnownVersion && pending.length === 0) {
+    return // Nothing changed on server, nothing to push — skip expensive pull
+  }
+
   const lastPull = db.dbGet("SELECT value FROM settings WHERE key = 'lan_last_pull'")?.value || '1970-01-01T00:00:00'
 
   try {
@@ -720,6 +753,7 @@ async function doSyncCycle () {
     state.lastPull = new Date().toISOString()
     db.dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('lan_last_pull', ?1)", [state.lastPull])
 
+    if (serverVersion !== null) lastKnownVersion = serverVersion
     state.connected = true
     state.error = null
   } catch (e) {
