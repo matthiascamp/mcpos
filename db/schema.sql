@@ -255,19 +255,6 @@ CREATE TABLE IF NOT EXISTS keyboard_buttons (
   updated_at      TEXT DEFAULT (datetime('now'))
 );
 
--- Default Page 1 layout — matches Profit Track register
--- Row 0-1: Function buttons (10 cols)
-INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, category_filter) VALUES
-  ('fn-endofday',   'END OF\nDAY',    'endofday',    '#fff', '#8b5cf6', 1,  'grid', 1, 0, 0, 1, 1, NULL),
-  ('fn-return',     'RETURN\nITEM',   'return',      '#000', '#dddddd', 3,  'grid', 1, 0, 1, 1, 1, NULL),
-  ('fn-hold',       'HOLD\nSALE',     'hold',        '#000', '#dddddd', 5,  'grid', 1, 0, 2, 1, 1, NULL),
-  ('fn-nosale',     'OPEN\nDRAWER',   'nosale',      '#fff', '#e07020', 6,  'grid', 1, 0, 3, 1, 1, NULL),
-  ('fn-pricecheck', 'PRICE\nCHECK',   'pricecheck',  '#000', '#dddddd', 8,  'grid', 1, 0, 8, 2, 2, NULL),
-  ('fn-reprint',    'REPRINT\nRECEIPT', 'reprint',   '#000', '#dddddd', 9,  'grid', 1, 1, 0, 1, 1, NULL),
-  ('fn-discount',   'DISCOUNT',       'discount',    '#fff', '#d8a820', 10, 'grid', 1, 1, 1, 1, 1, NULL),
-  ('fn-movedrawer', 'LOG OUT',        'movedrawer',  '#fff', '#e07020', 12, 'grid', 1, 1, 2, 1, 1, NULL),
-  ('fn-recall',     'FIND\nSALE',     'recall',      '#000', '#dddddd', 14, 'grid', 1, 1, 3, 1, 1, NULL);
-
 CREATE TABLE IF NOT EXISTS keyboard_pages (
   page    INTEGER PRIMARY KEY,
   name    TEXT NOT NULL DEFAULT 'Untitled',

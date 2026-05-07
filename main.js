@@ -332,6 +332,28 @@ async function initDatabase() {
     }
   } catch (e) { console.error('Keyboard layout v4 migration error:', e.message) }
 
+  // V5: Fix duplicate schema seed — old 10-col block was inserted before correct 13-col block
+  try {
+    const v5Check = db.prepare("SELECT value FROM settings WHERE key = 'layout_v5_fix'")
+    v5Check.bind([])
+    const v5Row = v5Check.step() ? v5Check.getAsObject() : null
+    v5Check.free()
+    if (!v5Row) {
+      db.run("DELETE FROM keyboard_buttons WHERE page IN (1, 2, 3, 4, 5)")
+      db.run("DELETE FROM keyboard_buttons WHERE page >= 7")
+      const schema = fs.readFileSync(SCHEMA_PATH, 'utf-8')
+      const statements = schema.split(';').filter(s => s.trim())
+      for (const stmt of statements) {
+        const stripped = stmt.replace(/^\s*(--[^\n]*\n\s*)*/g, '').trim()
+        if (stripped.toUpperCase().startsWith('INSERT') && (stmt.includes('keyboard_pages') || stmt.includes('keyboard_buttons'))) {
+          try { db.run(stmt) } catch (_) {}
+        }
+      }
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('layout_v5_fix', '1')")
+      console.log('Applied keyboard layout fix (v5 — removed old seed conflict)')
+    }
+  } catch (e) { console.error('Keyboard layout v5 fix error:', e.message) }
+
   // Link keyboard buttons to products by matching names (best image match)
   relinkKeyboardProducts()
 
