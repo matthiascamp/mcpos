@@ -5053,6 +5053,8 @@
         '11101011110','11110101110','11010000100','11010010000','11010011100',
         '11000111010'
       ]
+      const MW = 2
+      const QUIET = 10 * MW
       let encoded = PATTERNS[104]; let checksum = 104
       for (let i = 0; i < text.length; i++) {
         const val = text.charCodeAt(i) - 32
@@ -5060,10 +5062,15 @@
         encoded += PATTERNS[val]; checksum += val * (i + 1)
       }
       encoded += PATTERNS[checksum % 103] + PATTERNS[106] + '11'
-      const tw = encoded.length
-      let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${tw}" height="${height}" viewBox="0 0 ${tw} ${height}" preserveAspectRatio="none">`
-      let x = 0
-      for (const bit of encoded) { if (bit === '1') svg += `<rect x="${x}" y="0" width="1" height="${height}" fill="#000"/>`; x++ }
+      const barcodeW = encoded.length * MW
+      const totalW = barcodeW + QUIET * 2
+      let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${totalW}" height="${height}" viewBox="0 0 ${totalW} ${height}" preserveAspectRatio="xMidYMid meet" style="shape-rendering:crispEdges">`
+      svg += `<rect x="0" y="0" width="${totalW}" height="${height}" fill="#fff"/>`
+      let x = QUIET
+      for (const bit of encoded) {
+        if (bit === '1') svg += `<rect x="${x}" y="0" width="${MW}" height="${height}" fill="#000"/>`
+        x += MW
+      }
       svg += '</svg>'
       return `data:image/svg+xml;base64,${btoa(svg)}`
     }
@@ -5095,7 +5102,7 @@
           html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}font-size:${el.size * TAG_SCALE / 3}px;color:#000">${money(p.price)}</div>`
         } else if (el.type === 'barcode') {
           const svg = generateBarcodeSVG(barcodeVal, h)
-          html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}">${svg ? `<img src="${svg}" style="width:100%;height:100%;object-fit:fill">` : '<span style="font-size:10px;color:#999">barcode</span>'}</div>`
+          html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}">${svg ? `<img src="${svg}" style="width:100%;height:100%;object-fit:contain">` : '<span style="font-size:10px;color:#999">barcode</span>'}</div>`
         } else if (el.type === 'barcode_text') {
           html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}font-size:${el.size * TAG_SCALE / 3}px;font-family:monospace;color:#444">${esc(barcodeVal)}</div>`
         } else if (el.type === 'unit') {
@@ -5235,7 +5242,7 @@
         else if (el.type === 'price') html += `<div style="${base}font-size:${el.size}pt">${money(product.active_price ?? product.price)}</div>`
         else if (el.type === 'barcode') {
           const svg = generateBarcodeSVG(barcodeVal, Math.round(el.h * tagH / 100 * 3.78))
-          if (svg) html += `<div style="${base}"><img src="${svg}" style="width:100%;height:100%;object-fit:fill"></div>`
+          if (svg) html += `<div style="${base}"><img src="${svg}" style="width:100%;height:100%;object-fit:contain"></div>`
         }
         else if (el.type === 'barcode_text') html += `<div style="${base}font-size:${el.size}pt;font-family:monospace;color:#444">${esc(barcodeVal)}</div>`
         else if (el.type === 'unit') html += `<div style="${base}font-size:${el.size}pt;color:#666">${product.unit === 'each' ? 'each' : 'per ' + product.unit}</div>`
@@ -5375,7 +5382,7 @@
       content += `@page { size: A4; margin: ${margin}mm; } body { margin: 0; font-family: Arial, sans-serif; }`
       content += `.sheet { display: grid; grid-template-columns: repeat(${cfg.cols}, 1fr); grid-template-rows: repeat(${cfg.rows}, 1fr); width: ${usableW}mm; height: ${usableH}mm; gap: 0; }`
       content += `.tag { position: relative; border: 0.3px solid #ccc; overflow: hidden; box-sizing: border-box; }`
-      content += `.tag img { image-rendering: pixelated; }`
+      content += `.tag img { image-rendering: crisp-edges; -webkit-print-color-adjust: exact; }`
       content += '</style></head><body>'
 
       const totalSlots = cfg.cols * cfg.rows
