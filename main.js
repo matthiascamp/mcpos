@@ -222,6 +222,115 @@ async function initDatabase() {
     db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('nav_buttons_fixed', '3')")
   } catch (e) { console.error('Nav fix migration error:', e.message) }
 
+  // Create keyboard_pages table and populate from existing data
+  try {
+    db.run("CREATE TABLE IF NOT EXISTS keyboard_pages (page INTEGER PRIMARY KEY, name TEXT NOT NULL DEFAULT 'Untitled', cols INTEGER DEFAULT 13, rows INTEGER DEFAULT 7)")
+    const hasPages = db.prepare("SELECT COUNT(*) as c FROM keyboard_pages")
+    hasPages.bind([])
+    const pgCount = hasPages.step() ? hasPages.getAsObject().c : 0
+    hasPages.free()
+    if (pgCount === 0) {
+      const existingPages = db.exec("SELECT DISTINCT page FROM keyboard_buttons WHERE active = 1 ORDER BY page")
+      const defaultNames = { 1: 'Main Register', 2: 'Fruit A-M', 3: 'Fruit N-Z', 4: 'Vegetables A-G', 5: 'Vegetables H-Z', 6: 'Grocery' }
+      if (existingPages.length && existingPages[0].values.length) {
+        for (const [pg] of existingPages[0].values) {
+          db.run("INSERT OR IGNORE INTO keyboard_pages (page, name, cols, rows) VALUES (?, ?, 13, 7)", [pg, defaultNames[pg] || `Page ${pg}`])
+        }
+      }
+      console.log('Created keyboard_pages table')
+    }
+  } catch (e) { console.error('keyboard_pages migration error:', e.message) }
+
+  // Expand fruit/veg pages to full 13-col grid (was 8-col, now uses cols 0-9 + nav at 10-12)
+  try {
+    const pgCheck = db.prepare("SELECT value FROM settings WHERE key = 'pages_expanded_v1'")
+    pgCheck.bind([])
+    const pgRow = pgCheck.step() ? pgCheck.getAsObject() : null
+    pgCheck.free()
+    if (!pgRow) {
+      // Page 2: Fruit A-M — reflow 20 products into 10-col rows
+      const pg2Map = [
+        ['pg2-apples',0,0],['pg2-apricots',0,1],['pg2-avocados',0,2],['pg2-bananas',0,3],['pg2-cherries',0,4],
+        ['pg2-coconut',0,5],['pg2-custard-apple',0,6],['pg2-dragon-fruit',0,7],['pg2-figs',0,8],['pg2-grapes',0,9],
+        ['pg2-grapefruit',1,0],['pg2-guava',1,1],['pg2-kiwi',1,2],['pg2-lemons',1,3],['pg2-limes',1,4],
+        ['pg2-longan',1,5],['pg2-lychee',1,6],['pg2-mandarins',1,7],['pg2-mangoes',1,8],['pg2-melons',1,9],
+        ['pg2-back',0,10],['pg2-veg-menu',1,10],['pg2-next-fruit',2,10]
+      ]
+      for (const [id, r, c] of pg2Map) {
+        db.run("UPDATE keyboard_buttons SET grid_row = ?, grid_col = ?, col_span = CASE WHEN id IN ('pg2-back','pg2-veg-menu','pg2-next-fruit') THEN 3 ELSE 1 END, row_span = 1 WHERE id = ?", [r, c, id])
+      }
+      db.run("UPDATE keyboard_buttons SET label = 'VEG\\nMENU' WHERE id = 'pg2-veg-menu'")
+      db.run("UPDATE keyboard_buttons SET label = 'FRUIT\\nN-Z >' WHERE id = 'pg2-next-fruit'")
+
+      // Page 3: Fruit N-Z — reflow 16 products
+      const pg3Map = [
+        ['pg3-nectarines',0,0],['pg3-oranges',0,1],['pg3-passion-fruit',0,2],['pg3-papaya',0,3],['pg3-pawpaw',0,4],
+        ['pg3-peaches',0,5],['pg3-pears',0,6],['pg3-persimmons',0,7],['pg3-pineapple-sm',0,8],['pg3-pineapple-md',0,9],
+        ['pg3-pineapple-xl',1,0],['pg3-plums',1,1],['pg3-pomegranate',1,2],['pg3-pommelo',1,3],['pg3-quince',1,4],['pg3-tangello',1,5],
+        ['pg3-back',0,10],['pg3-prev-fruit',1,10]
+      ]
+      for (const [id, r, c] of pg3Map) {
+        db.run("UPDATE keyboard_buttons SET grid_row = ?, grid_col = ?, col_span = CASE WHEN id IN ('pg3-back','pg3-prev-fruit') THEN 3 ELSE 1 END, row_span = 1 WHERE id = ?", [r, c, id])
+      }
+      db.run("UPDATE keyboard_buttons SET label = '< FRUIT\\nA-M' WHERE id = 'pg3-prev-fruit'")
+
+      // Page 4: Veg A-G — reflow 23 products
+      const pg4Map = [
+        ['pg4-asian-vege',0,0],['pg4-asparagus',0,1],['pg4-beans',0,2],['pg4-beetroot',0,3],['pg4-bottle-gourd',0,4],
+        ['pg4-broccoli',0,5],['pg4-brussels',0,6],['pg4-cabbage',0,7],['pg4-capsicum',0,8],['pg4-carrots',0,9],
+        ['pg4-carrot-bag',1,0],['pg4-cauliflower',1,1],['pg4-celery',1,2],['pg4-celeriac',1,3],['pg4-chillies',1,4],
+        ['pg4-chokos',1,5],['pg4-corn',1,6],['pg4-cucumbers',1,7],['pg4-eggplant',1,8],['pg4-leb-eggplant',1,9],
+        ['pg4-fennel',2,0],['pg4-garlic',2,1],['pg4-ginger',2,2],
+        ['pg4-back',0,10],['pg4-fruit-menu',1,10],['pg4-next-veg',2,10]
+      ]
+      for (const [id, r, c] of pg4Map) {
+        db.run("UPDATE keyboard_buttons SET grid_row = ?, grid_col = ?, col_span = CASE WHEN id IN ('pg4-back','pg4-fruit-menu','pg4-next-veg') THEN 3 ELSE 1 END, row_span = 1 WHERE id = ?", [r, c, id])
+      }
+      db.run("UPDATE keyboard_buttons SET label = 'VEG\\nH-Z >' WHERE id = 'pg4-next-veg'")
+
+      // Page 5: Veg H-Z — reflow 24 products
+      const pg5Map = [
+        ['pg5-herbs',0,0],['pg5-kale',0,1],['pg5-leeks',0,2],['pg5-lettuces',0,3],['pg5-lettuce-bags',0,4],
+        ['pg5-lobok',0,5],['pg5-mushrooms',0,6],['pg5-olives',0,7],['pg5-onions',0,8],['pg5-parsnip',0,9],
+        ['pg5-peas',1,0],['pg5-potatoes',1,1],['pg5-pumpkins',1,2],['pg5-radish',1,3],['pg5-rhubarb',1,4],
+        ['pg5-shallots',1,5],['pg5-silverbeet',1,6],['pg5-snow-peas',1,7],['pg5-sugar-snap',1,8],['pg5-swedes',1,9],
+        ['pg5-sweet-potato',2,0],['pg5-tomatoes',2,1],['pg5-turnip',2,2],['pg5-zucchini',2,3],
+        ['pg5-back',0,10],['pg5-fruit-menu',1,10],['pg5-prev-veg',2,10]
+      ]
+      for (const [id, r, c] of pg5Map) {
+        db.run("UPDATE keyboard_buttons SET grid_row = ?, grid_col = ?, col_span = CASE WHEN id IN ('pg5-back','pg5-fruit-menu','pg5-prev-veg') THEN 3 ELSE 1 END, row_span = 1 WHERE id = ?", [r, c, id])
+      }
+      db.run("UPDATE keyboard_buttons SET label = '< VEG\\nA-G' WHERE id = 'pg5-prev-veg'")
+
+      // Update page sizes to use full 13-col grid
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('keyboard_page_sizes', '{\"1\":{\"cols\":13,\"rows\":7},\"2\":{\"cols\":13,\"rows\":7},\"3\":{\"cols\":13,\"rows\":7},\"4\":{\"cols\":13,\"rows\":7},\"5\":{\"cols\":13,\"rows\":7},\"6\":{\"cols\":13,\"rows\":7}}')")
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('pages_expanded_v1', '1')")
+      console.log('Expanded fruit/veg pages to full 13-col grid')
+    }
+  } catch (e) { console.error('Page expansion migration error:', e.message) }
+
+  // V4: Restore correct page 1-5 layout from backup + category page_links + sub-pages
+  try {
+    const v4Check = db.prepare("SELECT value FROM settings WHERE key = 'pages_expanded_v4'")
+    v4Check.bind([])
+    const v4Row = v4Check.step() ? v4Check.getAsObject() : null
+    v4Check.free()
+    if (!v4Row) {
+      db.run("DELETE FROM keyboard_buttons WHERE page IN (1, 2, 3, 4, 5)")
+      db.run("DELETE FROM keyboard_buttons WHERE page >= 7")
+      const schema = fs.readFileSync(SCHEMA_PATH, 'utf-8')
+      const statements = schema.split(';').filter(s => s.trim())
+      for (const stmt of statements) {
+        const stripped = stmt.replace(/^\s*(--[^\n]*\n\s*)*/g, '').trim()
+        if (stripped.toUpperCase().startsWith('INSERT') && (stmt.includes('keyboard_pages') || stmt.includes('keyboard_buttons'))) {
+          try { db.run(stmt) } catch (_) {}
+        }
+      }
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('pages_expanded_v4', '1')")
+      console.log('Applied keyboard layout migration (v4)')
+    }
+  } catch (e) { console.error('Keyboard layout v4 migration error:', e.message) }
+
   // Link keyboard buttons to products by matching names (best image match)
   relinkKeyboardProducts()
 
@@ -1420,7 +1529,28 @@ function setupIPC() {
   })
 
   ipcMain.handle('db:keyboard:getPages', () => {
-    return dbAll("SELECT DISTINCT page FROM keyboard_buttons WHERE active = 1 ORDER BY page")
+    return dbAll("SELECT kp.page, kp.name, kp.cols, kp.rows FROM keyboard_pages kp ORDER BY kp.page")
+  })
+
+  ipcMain.handle('db:keyboard:createPage', (_e, opts) => {
+    const existing = dbAll("SELECT page FROM keyboard_pages ORDER BY page DESC LIMIT 1")
+    const nextPage = (existing.length ? existing[0].page : 0) + 1
+    dbRun("INSERT INTO keyboard_pages (page, name, cols, rows) VALUES (?1, ?2, ?3, ?4)",
+      [nextPage, opts?.name || 'Untitled', opts?.cols || 13, opts?.rows || 7])
+    scheduleSave()
+    return { page: nextPage, name: opts?.name || 'Untitled', cols: opts?.cols || 13, rows: opts?.rows || 7 }
+  })
+
+  ipcMain.handle('db:keyboard:renamePage', (_e, page, name) => {
+    dbRun("UPDATE keyboard_pages SET name = ?2 WHERE page = ?1", [page, name])
+    scheduleSave()
+    return true
+  })
+
+  ipcMain.handle('db:keyboard:updatePageSize', (_e, page, cols, rows) => {
+    dbRun("INSERT OR REPLACE INTO keyboard_pages (page, name, cols, rows) VALUES (?1, COALESCE((SELECT name FROM keyboard_pages WHERE page = ?1), 'Untitled'), ?2, ?3)", [page, cols, rows])
+    scheduleSave()
+    return true
   })
 
   ipcMain.handle('db:keyboard:upsert', (_e, btn) => {
@@ -1453,6 +1583,9 @@ function setupIPC() {
 
   ipcMain.handle('db:keyboard:deletePage', (_e, page) => {
     dbRun("DELETE FROM keyboard_buttons WHERE page = ?1", [page])
+    dbRun("DELETE FROM keyboard_pages WHERE page = ?1", [page])
+    dbRun("UPDATE keyboard_buttons SET active = 0 WHERE type = 'page_link' AND parent_id = ?1", [String(page)])
+    scheduleSave()
     return true
   })
 
@@ -1489,6 +1622,14 @@ function setupIPC() {
   })
 
   ipcMain.handle('db:keyboard:copyPage', (_e, srcPage, destPage) => {
+    const srcInfo = dbGet("SELECT * FROM keyboard_pages WHERE page = ?1", [srcPage])
+    let newPage = destPage
+    if (!newPage) {
+      const last = dbAll("SELECT page FROM keyboard_pages ORDER BY page DESC LIMIT 1")
+      newPage = (last.length ? last[0].page : 0) + 1
+      dbRun("INSERT INTO keyboard_pages (page, name, cols, rows) VALUES (?1, ?2, ?3, ?4)",
+        [newPage, (srcInfo?.name || 'Page') + ' (copy)', srcInfo?.cols || 13, srcInfo?.rows || 7])
+    }
     const buttons = dbAll("SELECT * FROM keyboard_buttons WHERE page = ?1 AND active = 1", [srcPage])
     for (const btn of buttons) {
       const newId = uuid()
@@ -1496,31 +1637,26 @@ function setupIPC() {
         VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,1,datetime('now'))`,
         [newId, btn.label, btn.type, btn.price, btn.image, btn.color, btn.bg_color,
          btn.parent_id, btn.category_filter, btn.alpha_range, btn.sort_order, btn.position || 'grid',
-         destPage, btn.grid_row, btn.grid_col, btn.col_span, btn.row_span])
+         newPage, btn.grid_row, btn.grid_col, btn.col_span, btn.row_span])
     }
-    return { count: buttons.length }
+    scheduleSave()
+    return { count: buttons.length, newPage }
   })
 
-  const KEYBOARD_GRID_DEFAULT = { columns: 10, rows: 7 }
+  const KEYBOARD_GRID_DEFAULT = { columns: 13, rows: 7 }
 
   function getPageGridSize (page) {
-    const raw = dbGet("SELECT value FROM settings WHERE key = 'keyboard_page_sizes'")
-    const sizes = raw ? JSON.parse(raw.value) : {}
-    const ps = sizes[page] || {}
-    return { cols: ps.cols || KEYBOARD_GRID_DEFAULT.columns, rows: ps.rows || KEYBOARD_GRID_DEFAULT.rows }
+    const row = dbGet("SELECT cols, rows FROM keyboard_pages WHERE page = ?1", [page])
+    return { cols: row?.cols || KEYBOARD_GRID_DEFAULT.columns, rows: row?.rows || KEYBOARD_GRID_DEFAULT.rows }
   }
 
   ipcMain.handle('db:keyboard:export', () => {
     const buttons = dbAll("SELECT * FROM keyboard_buttons ORDER BY page, sort_order")
-    const pageNames = dbGet("SELECT value FROM settings WHERE key = 'keyboard_page_names'")
-    const pageSizes = dbGet("SELECT value FROM settings WHERE key = 'keyboard_page_sizes'")
+    const pages = dbAll("SELECT * FROM keyboard_pages ORDER BY page")
     return {
-      version: 2,
+      version: 3,
       exported_at: new Date().toISOString(),
-      grid_cols: String(KEYBOARD_GRID_DEFAULT.columns),
-      grid_rows: String(KEYBOARD_GRID_DEFAULT.rows),
-      page_names: pageNames ? pageNames.value : '{}',
-      page_sizes: pageSizes ? pageSizes.value : '{}',
+      pages,
       buttons
     }
   })
@@ -1529,15 +1665,21 @@ function setupIPC() {
     if (!data || !data.buttons || !Array.isArray(data.buttons)) {
       return { error: 'Invalid keyboard layout data' }
     }
-    // Clear existing buttons
     dbRun("DELETE FROM keyboard_buttons")
-    // Insert imported buttons, clamping to fixed grid bounds
+    dbRun("DELETE FROM keyboard_pages")
+    if (data.pages && Array.isArray(data.pages)) {
+      for (const pg of data.pages) {
+        dbRun("INSERT OR REPLACE INTO keyboard_pages (page, name, cols, rows) VALUES (?1, ?2, ?3, ?4)",
+          [pg.page, pg.name || 'Untitled', pg.cols || 13, pg.rows || 7])
+      }
+    } else {
+      dbRun("INSERT INTO keyboard_pages (page, name, cols, rows) VALUES (1, 'Main Register', 13, 7)")
+    }
     let count = 0
     let skipped = 0
     for (const btn of data.buttons) {
       const row = btn.grid_row || 0, col = btn.grid_col || 0
       const rs = btn.row_span || 1, cs = btn.col_span || 1
-      // Skip buttons that exceed page grid bounds
       const pg = getPageGridSize(btn.page || 1)
       if (col + cs > pg.cols || row + rs > pg.rows) {
         skipped++; continue
@@ -1551,25 +1693,23 @@ function setupIPC() {
          btn.page || 1, row, col, cs, rs, btn.active !== undefined ? btn.active : 1])
       count++
     }
-    if (data.page_names) dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('keyboard_page_names', ?1)", [data.page_names])
-    if (data.page_sizes) dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('keyboard_page_sizes', ?1)", [data.page_sizes])
+    scheduleSave()
     return { count, skipped }
   })
 
   ipcMain.handle('db:keyboard:reset', () => {
-    // Delete all keyboard buttons
     dbRun("DELETE FROM keyboard_buttons")
-    // Re-run keyboard seed from schema
+    dbRun("DELETE FROM keyboard_pages")
     const schema = fs.readFileSync(SCHEMA_PATH, 'utf-8')
     const statements = schema.split(';').filter(s => s.trim())
     let count = 0
     for (const stmt of statements) {
-      if (stmt.includes('keyboard_buttons') && stmt.trim().toUpperCase().startsWith('INSERT')) {
+      const stripped = stmt.replace(/^\s*(--[^\n]*\n\s*)*/g, '').trim().toUpperCase()
+      if ((stmt.includes('keyboard_buttons') || stmt.includes('keyboard_pages')) && stripped.startsWith('INSERT')) {
         try { db.run(stmt); count++ } catch (_) {}
       }
     }
-    dbRun("DELETE FROM settings WHERE key = 'keyboard_page_names'")
-    dbRun("DELETE FROM settings WHERE key = 'keyboard_page_sizes'")
+    scheduleSave()
     return { count }
   })
 

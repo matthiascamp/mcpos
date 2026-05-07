@@ -33,6 +33,11 @@ let state = {
 module.exports = { startServer, startClient, stopAll, getStatus, testConnection, discoverServer }
 
 function getStatus () {
+  const now = Date.now()
+  state.clients = state.clients.filter(c => {
+    const age = now - new Date(c.lastSeen).getTime()
+    return age < 5 * 60 * 1000
+  })
   return { ...state }
 }
 

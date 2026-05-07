@@ -385,7 +385,11 @@
     ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
     /* ── Keyboard Layout Editor ───────────────────────────────── */
-    .kb-editor { display: grid; grid-template-columns: 1fr 320px; gap: 16px; align-items: start; }
+    .kb-editor { display: flex; gap: 12px; align-items: start; }
+    .kb-editor .kb-grid-wrap { flex: 1; min-width: 0; }
+    .kb-editor .kb-sidebar { width: 300px; min-width: 300px; }
+    .kb-page-tree .kb-tree-node:hover { background: var(--surface2); }
+    .kb-page-tree .kb-tree-node.active { background: var(--green); color: #000; }
     .kb-grid-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; overflow-x: auto; }
     .kb-grid-outer { display: flex; gap: 0; }
     .kb-row-headers { display: flex; flex-direction: column; gap: 3px; padding-top: 24px; }
@@ -995,15 +999,15 @@
 
     <!-- ── Deals ─────────────────────────────────────────────────── -->
     <div class="tab-content" id="tab-deals">
-      <h1>Deals &amp; Promotions</h1>
-      <p style="color:var(--text-dim);font-size:13px;margin-bottom:16px">Create multi-buy, buy-one-get-one, percentage or dollar-off deals. Assign products and set optional date ranges.</p>
+      <h1>Deals</h1>
+      <p style="color:var(--text-dim);font-size:13px;margin-bottom:16px">Simple multi-buy deals: X for $Y. Add multiple tiers for the same product (e.g. 2 for $10, 3 for $12).</p>
       <div class="section">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
           <h2 style="margin:0">Active Deals</h2>
           <button class="btn btn-green" id="addDealBtn">+ New Deal</button>
         </div>
         <table>
-          <thead><tr><th>Name</th><th>Type</th><th>Details</th><th>Products</th><th>Dates</th><th>Status</th><th style="width:80px"></th></tr></thead>
+          <thead><tr><th>Name</th><th>Pricing</th><th>Products</th><th>Dates</th><th>Status</th><th style="width:80px"></th></tr></thead>
           <tbody id="dealsTable"></tbody>
         </table>
       </div>
@@ -1014,35 +1018,12 @@
           <button class="modal-close" id="dealCloseModal">&times;</button>
         </div>
         <div class="modal-body">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div class="form-field"><label>Deal Name</label><input type="text" id="dName" placeholder="e.g. Apples 2 for $4"></div>
-          <div class="form-field">
-            <label>Deal Type</label>
-            <select id="dType">
-              <option value="multi_buy">Multi-buy (X for $Y)</option>
-              <option value="buy_x_get_y">Buy X Get Y Free</option>
-              <option value="discount_pct">% Off</option>
-              <option value="discount_amt">$ Off</option>
-              <option value="combo">Combo Deal</option>
-            </select>
-          </div>
-        </div>
+        <div class="form-field" style="margin-bottom:10px"><label>Deal Name</label><input type="text" id="dName" placeholder="e.g. Apples 2 for $4"></div>
 
-        <div id="dealConfigArea" style="margin-top:10px">
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px" id="multiBuyConfig">
-            <div class="form-field"><label>Buy Qty</label><input type="number" id="dBuyQty" min="1" value="2"></div>
-            <div class="form-field"><label>For Price ($)</label><input type="number" id="dForPrice" step="0.01" min="0" value="4.00"></div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;display:none" id="bxgyConfig">
-            <div class="form-field"><label>Buy Qty</label><input type="number" id="dBxgyBuy" min="1" value="2"></div>
-            <div class="form-field"><label>Get Free Qty</label><input type="number" id="dBxgyGet" min="1" value="1"></div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr;gap:10px;display:none" id="pctConfig">
-            <div class="form-field"><label>Discount %</label><input type="number" id="dDiscPct" min="0" max="100" value="10"></div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr;gap:10px;display:none" id="amtConfig">
-            <div class="form-field"><label>Discount $</label><input type="number" id="dDiscAmt" step="0.01" min="0" value="1.00"></div>
-          </div>
+        <div style="margin-top:10px">
+          <label style="font-size:12px;color:var(--text-dim);text-transform:uppercase;display:block;margin-bottom:6px">Price Tiers</label>
+          <div id="dealTiersArea"></div>
+          <button class="btn btn-outline" id="dAddTierBtn" style="margin-top:6px;font-size:12px;padding:4px 12px">+ Add Tier</button>
         </div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
@@ -1200,27 +1181,36 @@
     <!-- ── Keyboard Layout ───────────────────────────────────────── -->
     <div class="tab-content" id="tab-keyboard">
       <!-- Toolbar -->
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
         <h1 style="margin:0;font-size:20px">Keyboard Layout</h1>
-        <div id="pageTabs" style="display:flex;gap:3px;align-items:center;margin-left:6px"></div>
-        <button class="btn btn-outline" style="padding:4px 10px;font-size:11px" id="addPageBtn">+ Page</button>
-        <button class="btn btn-outline" style="padding:4px 10px;font-size:11px" id="copyPageBtn">Copy Page</button>
+        <span style="font-size:13px;color:var(--text-dim)" id="kbCurrentPageLabel"></span>
         <div style="flex:1"></div>
-        <button class="btn btn-outline" style="padding:4px 8px;font-size:10px" id="validateKbBtn" title="Check for issues">Validate</button>
-        <button class="btn btn-outline" style="padding:4px 8px;font-size:10px" id="exportKbBtn" title="Export layout as JSON">Export</button>
-        <button class="btn btn-outline" style="padding:4px 8px;font-size:10px" id="importKbBtn" title="Import layout from JSON">Import</button>
-        <button class="btn btn-outline" style="padding:4px 8px;font-size:10px;color:var(--red)" id="resetKbBtn" title="Reset to factory default">Reset</button>
-        <input type="file" id="importKbFile" accept=".json" style="display:none">
-        <input type="number" id="kbGridCols" min="2" max="20" value="10" style="width:48px;padding:2px 4px;font-size:11px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--text);text-align:center" title="Columns">
+        <input type="number" id="kbGridCols" min="2" max="20" value="13" style="width:42px;padding:2px 4px;font-size:11px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--text);text-align:center" title="Columns">
         <span style="color:var(--text-dim);font-size:11px">×</span>
-        <input type="number" id="kbGridRows" min="2" max="20" value="7" style="width:48px;padding:2px 4px;font-size:11px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--text);text-align:center" title="Rows">
+        <input type="number" id="kbGridRows" min="2" max="20" value="7" style="width:42px;padding:2px 4px;font-size:11px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--text);text-align:center" title="Rows">
         <button class="btn btn-outline" style="padding:4px 8px;font-size:10px" id="selectAllBtn" title="Select all buttons on page">Select All</button>
-        <button class="btn btn-outline" style="padding:4px 8px;font-size:10px" id="pageTreeBtn" title="Show page link tree">Page Map</button>
-        <button class="btn" style="padding:4px 10px;font-size:11px;background:var(--red);color:#fff" id="deletePageBtn">Delete Page</button>
+        <button class="btn btn-outline" style="padding:4px 8px;font-size:10px" id="validateKbBtn" title="Check for issues">Validate</button>
+        <button class="btn btn-outline" style="padding:4px 8px;font-size:10px" id="exportKbBtn" title="Export">Export</button>
+        <button class="btn btn-outline" style="padding:4px 8px;font-size:10px" id="importKbBtn" title="Import">Import</button>
+        <input type="file" id="importKbFile" accept=".json" style="display:none">
+        <button class="btn btn-outline" style="padding:4px 8px;font-size:10px;color:var(--red)" id="resetKbBtn" title="Reset to factory default">Reset</button>
       </div>
 
-      <!-- Main editor: grid + sidebar -->
+      <!-- Main editor: page tree + grid + sidebar -->
       <div class="kb-editor">
+        <!-- Page Tree (left) -->
+        <div class="kb-page-tree" style="width:180px;min-width:180px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px;overflow-y:auto;max-height:calc(100vh - 160px)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-dim)">Pages</span>
+            <button class="btn btn-outline" style="padding:2px 8px;font-size:10px" id="addPageBtn" title="New page">+</button>
+          </div>
+          <div id="pageTree" style="font-size:12px"></div>
+          <div style="margin-top:8px;border-top:1px solid var(--border);padding-top:8px">
+            <button class="btn btn-outline" style="width:100%;padding:4px;font-size:10px;margin-bottom:4px" id="addSubPageBtn">+ Sub-page</button>
+            <button class="btn btn-outline" style="width:100%;padding:4px;font-size:10px;margin-bottom:4px" id="copyPageBtn">Duplicate</button>
+            <button class="btn" style="width:100%;padding:4px;font-size:10px;background:var(--red);color:#fff" id="deletePageBtn">Delete Page</button>
+          </div>
+        </div>
         <div class="kb-grid-wrap">
           <div class="kb-col-headers" id="kbColHeaders"></div>
           <div class="kb-grid-outer">
@@ -2239,35 +2229,61 @@
     // ── Deals ───────────────────────────────────────────────────────
 
     let dealProducts = []
+    let dealTiers = []
+
+    function renderDealTiers () {
+      $('#dealTiersArea').innerHTML = dealTiers.map((t, i) =>
+        `<div style="display:flex;gap:8px;align-items:end;margin-bottom:6px">
+          <div class="form-field" style="flex:1"><label style="font-size:11px">Buy Qty</label><input type="number" min="1" value="${t.qty}" data-tier-qty="${i}" style="padding:6px 8px"></div>
+          <div style="padding-bottom:8px;font-weight:bold;color:var(--text-dim)">for</div>
+          <div class="form-field" style="flex:1"><label style="font-size:11px">Price ($)</label><input type="number" step="0.01" min="0" value="${t.price.toFixed(2)}" data-tier-price="${i}" style="padding:6px 8px"></div>
+          ${dealTiers.length > 1 ? `<button class="btn" style="background:var(--red);color:#fff;padding:6px 10px;margin-bottom:4px;font-size:11px" data-remove-tier="${i}">&times;</button>` : ''}
+        </div>`
+      ).join('')
+    }
+
+    $('#dealTiersArea').addEventListener('input', e => {
+      const qi = e.target.dataset.tierQty
+      const pi = e.target.dataset.tierPrice
+      if (qi !== undefined) dealTiers[parseInt(qi)].qty = parseInt(e.target.value) || 1
+      if (pi !== undefined) dealTiers[parseInt(pi)].price = parseFloat(e.target.value) || 0
+    })
+
+    $('#dealTiersArea').addEventListener('click', e => {
+      const rm = e.target.closest('[data-remove-tier]')
+      if (!rm) return
+      dealTiers.splice(parseInt(rm.dataset.removeTier), 1)
+      renderDealTiers()
+    })
+
+    $('#dAddTierBtn').addEventListener('click', () => {
+      const lastTier = dealTiers[dealTiers.length - 1]
+      dealTiers.push({ qty: (lastTier?.qty || 2) + 1, price: 0 })
+      renderDealTiers()
+    })
 
     async function loadDeals () {
       const deals = await window.pos.getDeals()
-      const typeLabels = { multi_buy: 'Multi-buy', buy_x_get_y: 'BOGO', discount_pct: '% Off', discount_amt: '$ Off', combo: 'Combo' }
       $('#dealsTable').innerHTML = deals.length ? deals.map(d => {
         const cfg = JSON.parse(d.config || '{}')
-        let detail = ''
-        if (d.type === 'multi_buy') detail = `${cfg.qty} for $${cfg.price?.toFixed(2)}`
-        else if (d.type === 'buy_x_get_y') detail = `Buy ${cfg.buy} get ${cfg.free} free`
-        else if (d.type === 'discount_pct') detail = `${cfg.pct}% off`
-        else if (d.type === 'discount_amt') detail = `$${cfg.amt?.toFixed(2)} off`
-        else if (d.type === 'combo') detail = `Combo $${cfg.price?.toFixed(2)}`
+        const tiers = cfg.tiers || [{ qty: cfg.qty || 2, price: cfg.price || 0 }]
+        const detail = tiers.map(t => `${t.qty} for $${t.price.toFixed(2)}`).join(', ')
         const dates = d.start_date || d.end_date
           ? `${d.start_date || '...'} to ${d.end_date || '...'}`
           : '<span style="color:var(--text-dim)">Always</span>'
         return `<tr style="cursor:pointer" data-edit-deal="${esc(d.id)}">
           <td><strong>${esc(d.name)}</strong></td>
-          <td><span class="badge" style="background:var(--surface2);font-size:11px">${typeLabels[d.type] || d.type}</span></td>
           <td>${detail}</td>
           <td><span class="badge badge-green" style="cursor:pointer" data-deal-products="${esc(d.id)}">View</span></td>
           <td style="font-size:11px">${dates}</td>
           <td><span class="badge ${d.active ? 'badge-green' : 'badge-red'}">${d.active ? 'Active' : 'Off'}</span></td>
           <td><button class="btn btn-outline" style="padding:3px 10px;font-size:11px">Edit</button></td>
         </tr>`
-      }).join('') : '<tr><td colspan="7" style="color:var(--text-dim)">No deals yet — click "+ New Deal" to create one</td></tr>'
+      }).join('') : '<tr><td colspan="6" style="color:var(--text-dim)">No deals yet — click "+ New Deal" to create one</td></tr>'
     }
 
     $('#dealsTable').addEventListener('click', async e => {
-      if (e.target.closest('[data-deal-products]')) return // let product view handle itself
+      if (e.target.closest('[data-deal-products]')) return
       const row = e.target.closest('[data-edit-deal]')
       if (!row) return
       const deals = await window.pos.getDeals()
@@ -2277,34 +2293,18 @@
 
     $('#addDealBtn').addEventListener('click', () => openDealEdit(null))
 
-    function showDealConfig (type) {
-      ;['multiBuyConfig','bxgyConfig','pctConfig','amtConfig'].forEach(id => $(`#${id}`).style.display = 'none')
-      if (type === 'multi_buy' || type === 'combo') $('#multiBuyConfig').style.display = 'grid'
-      else if (type === 'buy_x_get_y') $('#bxgyConfig').style.display = 'grid'
-      else if (type === 'discount_pct') $('#pctConfig').style.display = 'grid'
-      else if (type === 'discount_amt') $('#amtConfig').style.display = 'grid'
-    }
-
-    $('#dType').addEventListener('change', () => showDealConfig($('#dType').value))
-
     async function openDealEdit (deal) {
       dealProducts = []
+      dealTiers = []
       if (deal) {
         $('#dealEditTitle').textContent = 'Edit Deal'
         $('#dEditId').value = deal.id
         $('#dName').value = deal.name
-        $('#dType').value = deal.type
         const cfg = JSON.parse(deal.config || '{}')
-        if (deal.type === 'multi_buy' || deal.type === 'combo') {
-          $('#dBuyQty').value = cfg.qty || 2
-          $('#dForPrice').value = cfg.price || 0
-        } else if (deal.type === 'buy_x_get_y') {
-          $('#dBxgyBuy').value = cfg.buy || 2
-          $('#dBxgyGet').value = cfg.free || 1
-        } else if (deal.type === 'discount_pct') {
-          $('#dDiscPct').value = cfg.pct || 10
-        } else if (deal.type === 'discount_amt') {
-          $('#dDiscAmt').value = cfg.amt || 1
+        if (cfg.tiers) {
+          dealTiers = cfg.tiers.map(t => ({ qty: t.qty, price: t.price }))
+        } else {
+          dealTiers = [{ qty: cfg.qty || 2, price: cfg.price || 0 }]
         }
         $('#dStartDate').value = deal.start_date || ''
         $('#dEndDate').value = deal.end_date || ''
@@ -2315,14 +2315,12 @@
         $('#dealEditTitle').textContent = 'New Deal'
         $('#dEditId').value = ''
         $('#dName').value = ''
-        $('#dType').value = 'multi_buy'
-        $('#dBuyQty').value = 2
-        $('#dForPrice').value = '4.00'
+        dealTiers = [{ qty: 2, price: 4.00 }]
         $('#dStartDate').value = ''
         $('#dEndDate').value = ''
         $('#dDeleteBtn').style.display = 'none'
       }
-      showDealConfig($('#dType').value)
+      renderDealTiers()
       renderDealProducts()
       openModal('dealEditPanel')
     }
@@ -2365,16 +2363,15 @@
     $('#dSaveBtn').addEventListener('click', async () => {
       const name = $('#dName').value.trim()
       if (!name) { showToast('Deal name is required', 'error'); return }
-      const type = $('#dType').value
-      let config = {}
-      if (type === 'multi_buy' || type === 'combo') config = { qty: parseInt($('#dBuyQty').value), price: parseFloat($('#dForPrice').value) }
-      else if (type === 'buy_x_get_y') config = { buy: parseInt($('#dBxgyBuy').value), free: parseInt($('#dBxgyGet').value) }
-      else if (type === 'discount_pct') config = { pct: parseFloat($('#dDiscPct').value) }
-      else if (type === 'discount_amt') config = { amt: parseFloat($('#dDiscAmt').value) }
+      if (!dealTiers.length || dealTiers.some(t => !t.qty || t.qty < 1)) {
+        showToast('Each tier needs a quantity of at least 1', 'error'); return
+      }
+      const tiers = dealTiers.sort((a, b) => a.qty - b.qty)
+      const config = { tiers }
 
       const deal = {
         id: $('#dEditId').value || undefined,
-        name, type, config,
+        name, type: 'multi_buy', config,
         start_date: $('#dStartDate').value || null,
         end_date: $('#dEndDate').value || null,
         active: true
@@ -2977,10 +2974,10 @@
       const supaConnected = !!status?.supabaseConnected || isOnline
 
       const clientNodes = clients.length > 0
-        ? clients.map((c, i) => `
+        ? clients.map((c) => `
           <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
             <div style="width:52px;height:44px;background:rgba(59,130,246,0.08);border:2px solid var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;">💻</div>
-            <span style="font-size:11px;font-weight:600;color:var(--blue);">Register ${i+1}</span>
+            <span style="font-size:11px;font-weight:600;color:var(--blue);">${esc(c.registerId || 'Register')}</span>
             <span style="font-size:10px;color:var(--text-dim);">${esc(c.ip || '')}</span>
           </div>`).join('')
         : `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;opacity:0.4;">
@@ -3222,16 +3219,13 @@
     // ── Page Layout Editor (Unified Grid) ─────────────────────────
 
     let kbButtons = []
-    // Fixed keyboard grid dimensions — single source of truth
-    const KEYBOARD_GRID_DEFAULT = { columns: 10, rows: 7 }
+    const KEYBOARD_GRID_DEFAULT = { columns: 13, rows: 7 }
     let gridCols = KEYBOARD_GRID_DEFAULT.columns
     let gridRows = KEYBOARD_GRID_DEFAULT.rows
     let currentPage = 1
     let selectedBtnId = null
     let dragSrcId = null
-    let allPages = [1]
-    let pageNames = {}
-    let pageSizes = {} // {pageNum: {cols, rows}}
+    let allPages = [] // [{page, name, cols, rows}]
     let kbProductCache = []
     let kbSelectedProduct = null
     let isDragSelecting = false
@@ -3242,30 +3236,30 @@
 
     // ── Load & Init ────────────────────────────────────────────────
 
+    function getPageInfo (page) { return allPages.find(p => p.page === page) || { page, name: `Page ${page}`, cols: 13, rows: 7 } }
+
     function applyPageSize () {
-      const ps = pageSizes[currentPage] || {}
-      gridCols = ps.cols || KEYBOARD_GRID_DEFAULT.columns
-      gridRows = ps.rows || KEYBOARD_GRID_DEFAULT.rows
+      const info = getPageInfo(currentPage)
+      gridCols = info.cols || KEYBOARD_GRID_DEFAULT.columns
+      gridRows = info.rows || KEYBOARD_GRID_DEFAULT.rows
       $('#kbGridCols').value = gridCols
       $('#kbGridRows').value = gridRows
+      $('#kbCurrentPageLabel').textContent = info.name || `Page ${currentPage}`
     }
 
     async function savePageSize () {
-      pageSizes[currentPage] = { cols: gridCols, rows: gridRows }
-      await window.pos.setSetting('keyboard_page_sizes', JSON.stringify(pageSizes))
+      await window.pos.updatePageSize(currentPage, gridCols, gridRows)
+      const info = getPageInfo(currentPage)
+      if (info) { info.cols = gridCols; info.rows = gridRows }
     }
 
     async function loadKeyboard () {
       kbButtons = await window.pos.getAllButtons()
       const pageRows = await window.pos.getPages()
-      allPages = pageRows.length ? pageRows.map(p => p.page) : [1]
-      if (!allPages.includes(currentPage)) currentPage = allPages[0] || 1
-      const pnRaw = await window.pos.getSetting('keyboard_page_names')
-      pageNames = pnRaw ? JSON.parse(pnRaw) : {}
-      const psRaw = await window.pos.getSetting('keyboard_page_sizes')
-      pageSizes = psRaw ? JSON.parse(psRaw) : {}
+      allPages = pageRows.length ? pageRows : [{ page: 1, name: 'Main Register', cols: 13, rows: 7 }]
+      if (!allPages.find(p => p.page === currentPage)) currentPage = allPages[0]?.page || 1
       applyPageSize()
-      renderPageTabs()
+      renderPageTree()
       renderGrid()
       closeEditPanel()
 
@@ -3308,71 +3302,124 @@
 
     // ── Page Management ─────────────────────────────────────────���──
 
-    function renderPageTabs () {
-      $('#pageTabs').innerHTML = allPages.map(p => {
-        const name = pageNames[p] || `Page ${p}`
-        return `<button class="btn ${p === currentPage ? 'btn-green' : 'btn-outline'}" style="padding:4px 12px;font-size:11px" data-page="${p}" title="Double-click to rename">${esc(name)}</button>`
-      }).join('')
+    function renderPageTree () {
+      const linkBtns = kbButtons.filter(b => b.type === 'page_link' && b.parent_id && b.active)
+      const childMap = {}
+      for (const b of linkBtns) {
+        const parentPage = b.page || 1
+        const childPage = parseInt(b.parent_id)
+        if (!childMap[parentPage]) childMap[parentPage] = []
+        if (!childMap[parentPage].includes(childPage)) childMap[parentPage].push(childPage)
+      }
+
+      const allPageNums = new Set(allPages.map(p => p.page))
+      const childPages = new Set()
+      for (const kids of Object.values(childMap)) kids.forEach(k => childPages.add(k))
+      const rootPages = allPages.filter(p => !childPages.has(p.page))
+
+      function renderNode (pageInfo, depth) {
+        const pg = pageInfo.page
+        const name = pageInfo.name || `Page ${pg}`
+        const active = pg === currentPage ? 'background:var(--green);color:#000;' : ''
+        const pad = depth * 12
+        let html = `<div class="kb-tree-node" data-tree-page="${pg}" style="padding:4px 6px 4px ${6 + pad}px;cursor:pointer;border-radius:4px;margin-bottom:2px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${active}" title="${esc(name)} (Page ${pg})">`
+        html += `${depth > 0 ? '└ ' : ''}${esc(name)}</div>`
+        const kids = childMap[pg] || []
+        for (const kid of kids) {
+          const kidInfo = allPages.find(p => p.page === kid)
+          if (kidInfo) html += renderNode(kidInfo, depth + 1)
+        }
+        return html
+      }
+
+      let tree = ''
+      for (const rp of rootPages) tree += renderNode(rp, 0)
+      const orphans = allPages.filter(p => !rootPages.includes(p) && !childPages.has(p.page))
+      for (const op of orphans) tree += renderNode(op, 0)
+      $('#pageTree').innerHTML = tree || '<div style="color:var(--text-dim);font-size:11px;padding:6px">No pages</div>'
     }
 
-    $('#pageTabs').addEventListener('click', e => {
-      const btn = e.target.closest('[data-page]')
-      if (!btn) return
-      currentPage = parseInt(btn.dataset.page)
-      applyPageSize(); renderPageTabs(); renderGrid(); closeEditPanel()
+    // Alias for compatibility
+    function renderPageTabs () { renderPageTree() }
+
+    $('#pageTree').addEventListener('click', e => {
+      const node = e.target.closest('[data-tree-page]')
+      if (!node) return
+      currentPage = parseInt(node.dataset.treePage)
+      applyPageSize(); renderPageTree(); renderGrid(); closeEditPanel()
     })
 
-    $('#pageTabs').addEventListener('dblclick', async e => {
-      const btn = e.target.closest('[data-page]')
-      if (!btn) return
-      const page = parseInt(btn.dataset.page)
-      const current = pageNames[page] || `Page ${page}`
-      const name = prompt('Page name:', current)
-      if (name === null) return
-      if (name.trim()) {
-        pageNames[page] = name.trim()
-      } else {
-        delete pageNames[page]
-      }
-      await window.pos.setSetting('keyboard_page_names', JSON.stringify(pageNames))
-      renderPageTabs()
+    $('#pageTree').addEventListener('dblclick', async e => {
+      const node = e.target.closest('[data-tree-page]')
+      if (!node) return
+      const page = parseInt(node.dataset.treePage)
+      const info = getPageInfo(page)
+      const name = prompt('Page name:', info.name || `Page ${page}`)
+      if (name === null || !name.trim()) return
+      await window.pos.renamePage(page, name.trim())
+      info.name = name.trim()
+      renderPageTree()
+      applyPageSize()
       showToast('Page renamed', 'success')
     })
 
-    $('#addPageBtn').addEventListener('click', () => {
-      const newPage = Math.max(...allPages, 0) + 1
-      allPages.push(newPage); currentPage = newPage
-      renderPageTabs(); renderGrid()
-      showToast(`Page ${newPage} created`, 'success')
+    $('#addPageBtn').addEventListener('click', async () => {
+      const name = prompt('Page name:', 'New Page')
+      if (name === null) return
+      const res = await window.pos.createPage({ name: name.trim() || 'New Page', cols: 13, rows: 7 })
+      allPages.push(res)
+      currentPage = res.page
+      applyPageSize(); renderPageTree(); renderGrid()
+      showToast(`"${res.name}" created`, 'success')
+    })
+
+    $('#addSubPageBtn').addEventListener('click', async () => {
+      const name = prompt('Sub-page name:', '')
+      if (name === null || !name.trim()) return
+      const res = await window.pos.createPage({ name: name.trim(), cols: 13, rows: 7 })
+      allPages.push(res)
+      const btnId = 'link-' + Date.now()
+      await window.pos.upsertButton({
+        id: btnId, label: name.trim(), type: 'page_link', page: currentPage,
+        parent_id: String(res.page), bg_color: '#86efac', color: '#000',
+        grid_row: 0, grid_col: 0, col_span: 2, row_span: 1
+      })
+      kbButtons = await window.pos.getAllButtons()
+      await window.pos.upsertButton({
+        id: 'back-' + Date.now(), label: 'BACK', type: 'back_home', page: res.page,
+        bg_color: '#22c55e', color: '#000', grid_row: 0, grid_col: 10, col_span: 3, row_span: 1
+      })
+      kbButtons = await window.pos.getAllButtons()
+      currentPage = res.page
+      applyPageSize(); renderPageTree(); renderGrid()
+      showToast(`Sub-page "${name.trim()}" created with link + BACK button`, 'success')
     })
 
     $('#deletePageBtn').addEventListener('click', async () => {
       if (allPages.length <= 1) { showToast('Cannot delete the only page', 'error'); return }
-      if (!confirm(`Delete Page ${currentPage} and all its buttons?`)) return
+      const info = getPageInfo(currentPage)
+      if (!confirm(`Delete "${info.name}" and all its buttons?`)) return
       // Track each button as deleted so sync won't bring them back
       const pageBtns = kbButtons.filter(b => (b.page || 1) === currentPage)
       for (const b of pageBtns) await window.pos.deleteButton(b.id)
       await window.pos.deletePage(currentPage)
       kbButtons = await window.pos.getAllButtons()
-      allPages = allPages.filter(p => p !== currentPage)
-      currentPage = allPages[0] || 1
-      renderPageTabs(); renderGrid(); closeEditPanel()
+      allPages = allPages.filter(p => p.page !== currentPage)
+      currentPage = allPages[0]?.page || 1
+      applyPageSize(); renderPageTree(); renderGrid(); closeEditPanel()
       showToast('Page deleted', 'success')
     })
 
     $('#copyPageBtn').addEventListener('click', async () => {
-      const newPage = Math.max(...allPages, 0) + 1
-      const result = await window.pos.copyPage(currentPage, newPage)
-      const srcName = pageNames[currentPage] || `Page ${currentPage}`
-      pageNames[newPage] = `${srcName} (copy)`
-      if (pageSizes[currentPage]) pageSizes[newPage] = { ...pageSizes[currentPage] }
-      await window.pos.setSetting('keyboard_page_names', JSON.stringify(pageNames))
-      await window.pos.setSetting('keyboard_page_sizes', JSON.stringify(pageSizes))
-      allPages.push(newPage)
+      const info = getPageInfo(currentPage)
+      const result = await window.pos.copyPage(currentPage, 0)
+      const newPage = result.newPage
+      const newInfo = { page: newPage, name: `${info.name} (copy)`, cols: info.cols, rows: info.rows }
+      allPages.push(newInfo)
       currentPage = newPage
       kbButtons = await window.pos.getAllButtons()
-      renderPageTabs(); renderGrid()
-      showToast(`Copied ${result.count} buttons to new page`, 'success')
+      applyPageSize(); renderPageTree(); renderGrid()
+      showToast(`Duplicated page`, 'success')
     })
 
     let gridSaveTimer = null
@@ -3542,10 +3589,10 @@
 
     // ── Page Map (Tree View) ────────────────────────────────────────
 
-    $('#pageTreeBtn').addEventListener('click', () => {
-      renderPageTree()
+    if ($('#pageTreeBtn')) $('#pageTreeBtn').addEventListener('click', () => {
+      renderPageMapModal()
       const modal = $('#pageTreeModal')
-      modal.style.display = 'flex'
+      if (modal) modal.style.display = 'flex'
     })
 
     $('#closePageTree').addEventListener('click', () => {
@@ -3556,7 +3603,7 @@
       if (e.target === e.currentTarget) $('#pageTreeModal').style.display = 'none'
     })
 
-    function renderPageTree () {
+    function renderPageMapModal () {
       const allActive = kbButtons.filter(b => b.active)
       const links = allActive.filter(b => b.type === 'page_link' && b.parent_id)
       const backLinks = allActive.filter(b => b.type === 'back_home')
@@ -3583,9 +3630,9 @@
         if (visited.has(page)) return `<div style="padding-left:${depth * 24}px;color:var(--text-dim)">&#8635; ${pageName(page)} <span style="font-size:10px">(circular)</span></div>`
         visited.add(page)
         const name = pageName(page)
-        const ps = pageSizes[page] || {}
-        const cols = ps.cols || KEYBOARD_GRID_DEFAULT.columns
-        const rows = ps.rows || KEYBOARD_GRID_DEFAULT.rows
+        const pi = getPageInfo(page)
+        const cols = pi.cols || KEYBOARD_GRID_DEFAULT.columns
+        const rows = pi.rows || KEYBOARD_GRID_DEFAULT.rows
         const btnCount = allActive.filter(b => (b.page || 1) === page).length
         const hasBack = backLinks.some(b => (b.page || 1) === page)
         const icon = depth === 0 ? '&#127968;' : '&#128196;'
@@ -3626,7 +3673,7 @@
     }
 
     function pageName (p) {
-      return pageNames[p] || `Page ${p}`
+      return getPageInfo(p).name || `Page ${p}`
     }
 
     $('#exportKbBtn').addEventListener('click', async () => {
@@ -3726,7 +3773,7 @@
             const sel = btn.id === selectedBtnId ? ' selected' : ''
             let extra = ''
             if (btn.type === 'page_link' && btn.parent_id) {
-              const tgtName = pageNames[parseInt(btn.parent_id)] || `Page ${btn.parent_id}`
+              const tgtName = getPageInfo(parseInt(btn.parent_id)).name || `Page ${btn.parent_id}`
               extra = `<div class="kb-cell-price" style="font-size:8px;opacity:.7">&rarr; ${esc(tgtName)}</div>`
             } else if (btn.price > 0) {
               extra = `<div class="kb-cell-price">$${btn.price.toFixed(2)}</div>`
@@ -4214,8 +4261,7 @@
         // Populate target page options
         const sel = $('#kbTargetPage')
         sel.innerHTML = allPages.map(p => {
-          const name = pageNames[p] || `Page ${p}`
-          return `<option value="${p}">${esc(name)} (${p})</option>`
+          return `<option value="${p.page}">${esc(p.name || 'Page ' + p.page)} (${p.page})</option>`
         }).join('')
       } else {
         pageLinkRow.style.display = 'none'

@@ -1163,10 +1163,13 @@ function updateNumDisplay () {
 async function renderPosKeyboard () {
   posAllButtons = await window.pos.getAllButtons()
 
-  const pnRaw = await window.pos.getSetting('keyboard_page_names')
-  posPageNames = pnRaw ? JSON.parse(pnRaw) : {}
-  const psRaw = await window.pos.getSetting('keyboard_page_sizes')
-  posPageSizes = psRaw ? JSON.parse(psRaw) : {}
+  const pages = await window.pos.getPages()
+  posPageSizes = {}
+  posPageNames = {}
+  for (const p of pages) {
+    posPageSizes[String(p.page)] = { cols: p.cols || 13, rows: p.rows || 7 }
+    posPageNames[String(p.page)] = p.name || `Page ${p.page}`
+  }
 
   renderPosGrid()
 }
@@ -1983,63 +1986,28 @@ function applyDeals () {
     const matchingItems = cart.items.filter(i => dealProductIds.includes(i.product_id) && i.qty > 0)
     if (!matchingItems.length) continue
 
-    if (deal.type === 'multi_buy') {
-      const qty = cfg.qty || 2, price = cfg.price || 0
-      for (const item of matchingItems) {
-        const groups = Math.floor(item.qty / qty)
+    const tiers = cfg.tiers
+      ? cfg.tiers.slice().sort((a, b) => b.qty - a.qty)
+      : (cfg.qty ? [{ qty: cfg.qty, price: cfg.price || 0 }] : [])
+    if (!tiers.length) continue
+
+    for (const item of matchingItems) {
+      let remaining = item.qty
+      let totalCost = 0
+      for (const tier of tiers) {
+        const groups = Math.floor(remaining / tier.qty)
         if (groups > 0) {
-          const remainder = item.qty - groups * qty
-          const dealTotal = groups * price + remainder * item.unit_price
-          const fullTotal = item.qty * item.unit_price
-          const saving = fullTotal - dealTotal
-          if (saving > 0) {
-            item.discount = +saving.toFixed(2)
-            item.deal_id = deal.id; item.deal_name = deal.name
-            cart._recalcItem(item)
-          }
+          totalCost += groups * tier.price
+          remaining -= groups * tier.qty
         }
       }
-    } else if (deal.type === 'buy_x_get_y') {
-      const buyQty = cfg.buy || 2, freeQty = cfg.free || 1
-      for (const item of matchingItems) {
-        const totalNeeded = buyQty + freeQty
-        const groups = Math.floor(item.qty / totalNeeded)
-        if (groups > 0) {
-          const saving = groups * freeQty * item.unit_price
-          item.discount = +saving.toFixed(2)
-          item.deal_id = deal.id; item.deal_name = deal.name
-          cart._recalcItem(item)
-        }
-      }
-    } else if (deal.type === 'discount_pct') {
-      const pct = cfg.pct || 0
-      for (const item of matchingItems) {
-        const saving = item.qty * item.unit_price * pct / 100
+      totalCost += remaining * item.unit_price
+      const fullTotal = item.qty * item.unit_price
+      const saving = fullTotal - totalCost
+      if (saving > 0) {
         item.discount = +saving.toFixed(2)
         item.deal_id = deal.id; item.deal_name = deal.name
         cart._recalcItem(item)
-      }
-    } else if (deal.type === 'discount_amt') {
-      const amt = cfg.amt || 0
-      for (const item of matchingItems) {
-        item.discount = +Math.min(amt, item.qty * item.unit_price).toFixed(2)
-        item.deal_id = deal.id; item.deal_name = deal.name
-        cart._recalcItem(item)
-      }
-    } else if (deal.type === 'combo') {
-      const allPresent = dealProductIds.every(pid => cart.items.some(i => i.product_id === pid && i.qty > 0))
-      if (allPresent) {
-        const comboPrice = cfg.price || 0
-        const currentTotal = matchingItems.reduce((s, i) => s + i.unit_price, 0)
-        if (comboPrice < currentTotal) {
-          const saving = currentTotal - comboPrice
-          const perItem = saving / matchingItems.length
-          for (const item of matchingItems) {
-            item.discount = +perItem.toFixed(2)
-            item.deal_id = deal.id; item.deal_name = deal.name
-            cart._recalcItem(item)
-          }
-        }
       }
     }
   }
