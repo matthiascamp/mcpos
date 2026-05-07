@@ -33,7 +33,10 @@ let state = {
 
 // ─── Exports ─────────────────────────────────────────────────────────────────
 
-module.exports = { startServer, startClient, stopAll, getStatus, testConnection, discoverServer, networkDiagnostic, bumpVersion }
+module.exports = { startServer, startClient, stopAll, getStatus, testConnection, discoverServer, networkDiagnostic, bumpVersion, onDataChanged }
+
+let _dataChangedCallback = null
+function onDataChanged (cb) { _dataChangedCallback = cb }
 
 function bumpVersion () { dataVersion++ }
 
@@ -582,6 +585,8 @@ async function doFullSync () {
 
   // Store last pull timestamp
   db.dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('lan_last_pull', ?1)", [state.lastPull])
+
+  if (_dataChangedCallback) _dataChangedCallback()
 }
 
 async function doSyncCycle () {
@@ -756,6 +761,8 @@ async function doSyncCycle () {
     if (serverVersion !== null) lastKnownVersion = serverVersion
     state.connected = true
     state.error = null
+
+    if (_dataChangedCallback) _dataChangedCallback()
   } catch (e) {
     // If 401, try refreshing secret and do a full sync instead
     if (e.message.includes('Unauthorized') || e.message.includes('401')) {

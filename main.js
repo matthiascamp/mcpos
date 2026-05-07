@@ -686,6 +686,15 @@ app.whenReady().then(async () => {
     }
   } catch (e) { appLog('error', 'lan-sync', 'LAN sync startup error', e.message) }
 
+  lanSync.onDataChanged(() => {
+    const windows = [mainWindow, customerWindow]
+    for (const win of windows) {
+      if (win && !win.isDestroyed()) {
+        win.webContents.send('lan:data-changed')
+      }
+    }
+  })
+
   // Supabase cloud pull — only on server or standalone (not client registers)
   // Server pulls from Supabase, then LAN clients pull from server
   try {

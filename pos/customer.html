@@ -360,6 +360,11 @@ body{font-family:'Inter',system-ui,sans-serif;background:linear-gradient(160deg,
       renderDeals()
     }, 5000)
   })
+
+  ipcRenderer.on('lan:data-changed', () => {
+    renderDeals()
+    renderSidebarDeals()
+  })
 </script>
 </body>
 </html>

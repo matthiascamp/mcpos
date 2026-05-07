@@ -3478,6 +3478,12 @@ async function init () {
   setInterval(updateClock, 15000)
 }
 init()
+
+window.pos.onDataChanged(async () => {
+  allCategories = await window.pos.getCategories()
+  await renderPosKeyboard()
+  await loadDeals()
+})
 </script>
 </body>
 </html>

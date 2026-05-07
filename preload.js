@@ -150,4 +150,7 @@ contextBridge.exposeInMainWorld('pos', {
   linklyCancel:       ()                    => ipcRenderer.invoke('linkly:cancel'),
   linklySettlement:   ()                    => ipcRenderer.invoke('linkly:settlement'),
   onLinklyStatus:     (cb)                  => ipcRenderer.on('linkly:status', (_e, data) => cb(data)),
+
+  // LAN data changed (server pushed new data)
+  onDataChanged:      (cb)                  => ipcRenderer.on('lan:data-changed', () => cb()),
 })
