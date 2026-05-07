@@ -627,6 +627,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
         Exit Fullscreen
       </a>
+      <span id="adminVersion" style="color:var(--text-muted);font-size:9px;opacity:0.4;margin-top:4px"></span>
     </div>
   </aside>
 
@@ -861,9 +862,9 @@
               <h2 style="margin:0">Tag Designer</h2>
               <span style="font-size:11px;color:var(--text-dim)">Drag elements to position them</span>
               <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
-                <div class="form-field" style="margin:0"><label style="font-size:9px">Width mm</label><input type="number" id="labelWidth" value="38" min="20" max="100" style="width:50px;padding:3px 5px;font-size:11px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--text)"></div>
+                <div class="form-field" style="margin:0"><label style="font-size:9px">Width mm</label><input type="number" id="labelWidth" value="66" min="20" max="100" style="width:50px;padding:3px 5px;font-size:11px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--text)"></div>
                 <span style="color:var(--text-dim);font-size:10px">×</span>
-                <div class="form-field" style="margin:0"><label style="font-size:9px">Height mm</label><input type="number" id="labelHeight" value="25" min="15" max="80" style="width:50px;padding:3px 5px;font-size:11px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--text)"></div>
+                <div class="form-field" style="margin:0"><label style="font-size:9px">Height mm</label><input type="number" id="labelHeight" value="28" min="15" max="80" style="width:50px;padding:3px 5px;font-size:11px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--text)"></div>
               </div>
             </div>
             <div style="display:flex;gap:14px;align-items:start">
@@ -903,16 +904,17 @@
               <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
                 <div class="form-field" style="margin:0"><label style="font-size:9px">Cols</label>
                   <select id="labelCols" style="padding:3px;font-size:11px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--text)">
-                    <option value="3">3</option><option value="4">4</option><option value="5">5</option>
+                    <option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
                     <option value="6">6</option><option value="7">7</option><option value="8">8</option>
-                    <option value="10" selected>10</option>
+                    <option value="10">10</option>
                   </select>
                 </div>
                 <span style="color:var(--text-dim);font-size:10px">×</span>
                 <div class="form-field" style="margin:0"><label style="font-size:9px">Rows</label>
                   <select id="labelRows" style="padding:3px;font-size:11px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--text)">
-                    <option value="2">2</option><option value="3" selected>3</option><option value="4">4</option>
+                    <option value="2">2</option><option value="3">3</option><option value="4">4</option>
                     <option value="5">5</option><option value="6">6</option><option value="7">7</option>
+                    <option value="8">8</option><option value="10" selected>10</option>
                   </select>
                 </div>
                 <button class="btn btn-blue" id="labelPrintBtn" style="padding:5px 14px;font-size:12px">Print</button>
@@ -1394,6 +1396,17 @@
         <div id="lanDiagram" style="padding:20px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border);text-align:center;min-height:200px;"></div>
       </div>
 
+      <!-- Connected Registers -->
+      <div class="section" id="lanPeersSection" style="margin-top:16px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <h2 style="margin:0">Connected Registers</h2>
+          <button class="btn btn-outline" id="lanRefreshPeers" style="font-size:10px;padding:4px 10px">Refresh</button>
+        </div>
+        <div id="lanPeersList" style="display:flex;gap:12px;flex-wrap:wrap">
+          <span style="color:var(--text-dim);font-size:13px">Loading...</span>
+        </div>
+      </div>
+
       <div class="section" id="lanSetupSection">
         <h2>Setup</h2>
         <p style="color:var(--text-dim);margin-bottom:16px;font-size:14px;">
@@ -1570,6 +1583,14 @@
           <div style="font-size:13px;color:var(--text-dim)" id="scaleInfo">Not probed yet</div>
           <div id="scaleReading" style="font-size:20px;font-weight:700;color:var(--green);margin-top:6px;display:none"></div>
         </div>
+      </div>
+
+      <!-- Printer Queue Picker (shown when auto-detect fails) -->
+      <div class="section" id="queuePickerSection" style="margin-top:20px;display:none;border:2px solid var(--amber);border-radius:var(--radius)">
+        <h2 style="margin-bottom:8px;color:var(--amber)">Select Your Printer</h2>
+        <p style="font-size:12px;color:var(--text-dim);margin-bottom:12px">Auto-detection couldn't confirm a working printer. Select your receipt printer from the list below and click Test to verify.</p>
+        <div id="queueList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px"></div>
+        <div id="queueTestResult" style="font-size:13px;min-height:20px;margin-top:8px"></div>
       </div>
 
       <!-- Hardware Configuration -->
@@ -3081,7 +3102,39 @@
       }
 
       updateLanRoleBanner(mode, status)
+      loadLanPeers()
     }
+
+    async function loadLanPeers () {
+      try {
+        const peers = await window.pos.getLanPeers()
+        const list = $('#lanPeersList')
+        if (!peers || !peers.length) {
+          list.innerHTML = '<span style="color:var(--text-dim);font-size:13px">No registers connected</span>'
+          return
+        }
+        list.innerHTML = peers.map(p => {
+          const isServer = p.role === 'server'
+          const color = isServer ? 'var(--green)' : 'var(--blue)'
+          const icon = isServer ? '🖥️' : '💻'
+          const age = p.lastSeen ? Math.round((Date.now() - new Date(p.lastSeen).getTime()) / 1000) : 0
+          const status = age < 30 ? 'Online' : age < 300 ? `${Math.round(age / 60)}m ago` : 'Offline'
+          const statusColor = age < 30 ? 'var(--green)' : age < 300 ? 'var(--amber)' : 'var(--red)'
+          const ip = (p.ip || '').replace('::ffff:', '')
+          return `<div style="padding:12px 16px;border-radius:var(--radius);background:var(--surface2);border:1px solid var(--border);min-width:180px;display:flex;align-items:center;gap:10px">
+            <span style="font-size:24px">${icon}</span>
+            <div>
+              <div style="font-weight:600;font-size:14px;color:${color}">${esc(p.registerId || 'Register')}</div>
+              <div style="font-size:11px;color:var(--text-dim)">${esc(ip)} · ${isServer ? 'Server' : 'Client'}</div>
+              <div style="font-size:10px;color:${statusColor};font-weight:600">${status}</div>
+            </div>
+          </div>`
+        }).join('')
+      } catch (_) {
+        $('#lanPeersList').innerHTML = '<span style="color:var(--text-dim);font-size:12px">Could not load peer list</span>'
+      }
+    }
+    $('#lanRefreshPeers').addEventListener('click', loadLanPeers)
 
     function updateLanRoleBanner (mode, status) {
       const icon = $('#lanRoleIcon')
@@ -4705,6 +4758,7 @@
         $('#dotPrinter').style.background = 'var(--green)'
         let info = `<span style="color:var(--green)">Connected</span> — ${esc(result.printer.name || 'Unknown')}`
         if (result.printer.vendor) info += ` <span style="font-size:11px;color:var(--text-dim)">(${esc(result.printer.vendor)})</span>`
+        if (result.printer.tested) info += ` <span class="badge badge-green" style="font-size:9px">VERIFIED</span>`
         $('#printerInfo').innerHTML = info
         $('#testPrinterBtn').style.display = ''
         const details = []
@@ -4718,13 +4772,31 @@
         if (!$('#hwPrinterName').value) $('#hwPrinterName').value = result.printer.name || ''
         if (!$('#hwPrinterPort').value) $('#hwPrinterPort').value = result.printer.port || ''
         if (!$('#hwPrinterInterface').value && result.printer.interface) { $('#hwPrinterInterface').value = result.printer.interface; togglePrinterFields() }
+        $('#queuePickerSection').style.display = 'none'
       } else {
         $('#dotPrinter').style.background = result.printer.needsSetup ? 'var(--amber)' : 'var(--red)'
         $('#printerInfo').innerHTML = result.printer.needsSetup
-          ? `<span style="color:var(--amber)">Found but needs setup</span> — ${esc(result.printer.error || '')}`
+          ? `<span style="color:var(--amber)">Needs manual selection</span> — ${esc(result.printer.error || '')}`
           : `<span style="color:var(--red)">Not found</span> — ${esc(result.printer.error || 'No ESC/POS printer detected')}`
         $('#testPrinterBtn').style.display = 'none'
         $('#printerDetails').style.display = 'none'
+
+        // Show queue picker if we have available queues
+        const queues = result.printer.availableQueues || []
+        if (queues.length) {
+          $('#queuePickerSection').style.display = ''
+          $('#queueList').innerHTML = queues.map((q, i) => `
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--radius);background:var(--surface2);border:1px solid var(--border)">
+              <div style="flex:1">
+                <div style="font-weight:600;font-size:14px">${esc(q.name)}</div>
+                <div style="font-size:11px;color:var(--text-dim)">Port: ${esc(q.port || 'N/A')} | Driver: ${esc(q.driver || 'N/A')}</div>
+              </div>
+              <button class="btn btn-green" style="padding:6px 16px;font-size:12px" data-test-queue="${esc(q.name)}">Test & Use</button>
+              <span class="queue-test-status" data-queue-idx="${i}" style="font-size:11px;min-width:60px"></span>
+            </div>`).join('')
+        } else {
+          $('#queuePickerSection').style.display = 'none'
+        }
       }
 
       // Drawer
@@ -4784,15 +4856,47 @@
     })
 
     $('#testPrinterBtn').addEventListener('click', async () => {
-      $('#testPrinterBtn').textContent = 'Testing...'
+      $('#testPrinterBtn').textContent = 'Printing...'
       $('#testPrinterBtn').disabled = true
       try {
         const r = await window.pos.testPrinter()
-        if (r.ok) showToast('Printer responded OK', 'success')
-        else showToast('Printer test failed: ' + (r.error || 'No response'), 'error')
+        if (r.ok) showToast('Test page printed!', 'success')
+        else showToast('Print failed: ' + (r.error || 'No response'), 'error')
       } catch (e) { showToast('Test error: ' + e.message, 'error') }
-      $('#testPrinterBtn').textContent = 'Test'
+      $('#testPrinterBtn').textContent = 'Test Print'
       $('#testPrinterBtn').disabled = false
+    })
+
+    $('#queueList').addEventListener('click', async e => {
+      const btn = e.target.closest('[data-test-queue]')
+      if (!btn) return
+      const queueName = btn.dataset.testQueue
+      btn.textContent = 'Testing...'
+      btn.disabled = true
+      try {
+        const r = await window.pos.testQueue(queueName)
+        if (r.ok) {
+          showToast(`Printer "${queueName}" is working! Saved as default.`, 'success')
+          btn.textContent = 'Working!'
+          btn.style.background = 'var(--green)'
+          $('#dotPrinter').style.background = 'var(--green)'
+          $('#printerInfo').innerHTML = `<span style="color:var(--green)">Connected</span> — ${esc(queueName)} <span class="badge badge-green" style="font-size:9px">VERIFIED</span>`
+          $('#testPrinterBtn').style.display = ''
+          $('#hwPrinterName').value = queueName
+          $('#hwPrinterInterface').value = 'windows'
+          togglePrinterFields()
+          $('#queueTestResult').innerHTML = `<span style="color:var(--green)">Saved "${esc(queueName)}" as receipt printer</span>`
+        } else {
+          btn.textContent = 'Failed'
+          btn.style.background = 'var(--red)'
+          showToast(r.error || 'Queue did not respond', 'error')
+          setTimeout(() => { btn.textContent = 'Test & Use'; btn.style.background = ''; btn.disabled = false }, 2000)
+        }
+      } catch (e) {
+        showToast('Test error: ' + e.message, 'error')
+        btn.textContent = 'Test & Use'
+        btn.disabled = false
+      }
     })
 
     $('#readScaleBtn').addEventListener('click', async () => {
@@ -5100,10 +5204,10 @@
 
     function getLabelConfig () {
       return {
-        cols: parseInt($('#labelCols').value) || 10,
-        rows: parseInt($('#labelRows').value) || 3,
-        width: parseInt($('#labelWidth').value) || 38,
-        height: parseInt($('#labelHeight').value) || 25,
+        cols: parseInt($('#labelCols').value) || 3,
+        rows: parseInt($('#labelRows').value) || 10,
+        width: parseInt($('#labelWidth').value) || 66,
+        height: parseInt($('#labelHeight').value) || 28,
       }
     }
 
@@ -5262,11 +5366,15 @@
       const flat = expandQueue()
       if (!flat.length) { showToast('Add products to print', 'error'); return }
       const cfg = getLabelConfig()
+      const pageW = 210, pageH = 297, margin = 5
+      const usableW = pageW - margin * 2, usableH = pageH - margin * 2
+      const cellW = Math.floor((usableW / cfg.cols) * 100) / 100
+      const cellH = Math.floor((usableH / cfg.rows) * 100) / 100
       const printWin = window.open('', '_blank', 'width=900,height=600')
       let content = '<html><head><title>Price Tags</title><style>'
-      content += `@page { margin: 5mm; } body { margin: 0; font-family: Arial, sans-serif; }`
-      content += `.sheet { display: grid; grid-template-columns: repeat(${cfg.cols}, ${cfg.width}mm); grid-template-rows: repeat(${cfg.rows}, ${cfg.height}mm); gap: 0; }`
-      content += `.tag { position: relative; border: 0.5px solid #ccc; overflow: hidden; page-break-inside: avoid; }`
+      content += `@page { size: A4; margin: ${margin}mm; } body { margin: 0; font-family: Arial, sans-serif; }`
+      content += `.sheet { display: grid; grid-template-columns: repeat(${cfg.cols}, 1fr); grid-template-rows: repeat(${cfg.rows}, 1fr); width: ${usableW}mm; height: ${usableH}mm; gap: 0; }`
+      content += `.tag { position: relative; border: 0.3px solid #ccc; overflow: hidden; box-sizing: border-box; }`
       content += `.tag img { image-rendering: pixelated; }`
       content += '</style></head><body>'
 
@@ -5276,7 +5384,7 @@
         content += '<div class="sheet">'
         for (let i = 0; i < totalSlots; i++) {
           const p = flat[page * totalSlots + i]
-          content += `<div class="tag">${p ? renderTagHTML(p, cfg.width, cfg.height) : ''}</div>`
+          content += `<div class="tag">${p ? renderTagHTML(p, cellW, cellH) : ''}</div>`
         }
         content += '</div>'
       }
@@ -5376,6 +5484,7 @@
     // -- Init -----------------------------------------------------------
 
     setDashDate(dashboardDate)
+    window.pos.getVersion().then(v => { const el = $('#adminVersion'); if (el) el.textContent = v }).catch(() => {})
 
     window.pos.onDataChanged(() => {
       const active = $('.sidebar a.active')?.dataset.tab

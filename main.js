@@ -843,6 +843,15 @@ function setupIPC() {
     return { ...appHealth }
   })
 
+  ipcMain.handle('app:version', () => {
+    try {
+      const { execSync } = require('child_process')
+      const hash = execSync('git rev-parse --short HEAD', { cwd: __dirname, encoding: 'utf-8', timeout: 3000 }).trim()
+      const count = execSync('git rev-list --count HEAD', { cwd: __dirname, encoding: 'utf-8', timeout: 3000 }).trim()
+      return `v${count}.${hash}`
+    } catch (_) { return 'dev' }
+  })
+
   // ── Audit Log ──────────────────────────────────────────────────────────
 
   ipcMain.handle('db:audit:log', (_e, entry) => {
@@ -2011,10 +2020,35 @@ function setupIPC() {
 
   // ── Printer auto-detection ─────────────────────────────────────────────────
 
+  function getWindowsQueues () {
+    if (!isWin) return []
+    try {
+      const raw = hwExec(`powershell -NoProfile -Command "Get-Printer | Select-Object Name,PortName,DriverName,PrinterStatus | ConvertTo-Json -Compress"`, { timeout: 10000, encoding: 'utf-8' }).trim()
+      if (!raw) return []
+      const parsed = JSON.parse(raw)
+      return Array.isArray(parsed) ? parsed : [parsed]
+    } catch (e) {
+      appLog('warn', 'hardware', 'Printer queue scan failed', e.message)
+      return []
+    }
+  }
+
+  function testQueueRaw (queueName) {
+    const tmpFile = path.join(os.tmpdir(), `crisp-test-${Date.now()}.bin`)
+    fs.writeFileSync(tmpFile, ESCPOS.INIT)
+    try {
+      const result = hwExec(`powershell -ExecutionPolicy Bypass -NoProfile -File "${RAWPRINT_SCRIPT}" -PrinterName "${queueName.replace(/"/g, '`"')}" -FilePath "${tmpFile}"`, { timeout: 8000, encoding: 'utf-8' }).trim()
+      return result.startsWith('OK')
+    } catch (_) {
+      return false
+    } finally {
+      try { fs.unlinkSync(tmpFile) } catch (_) {}
+    }
+  }
+
   function detectPrinter (devices) {
     if (hwPrinter?.configured) return hwPrinter
 
-    // Find printer USB device
     let usbPrinter = null
     for (const d of devices) {
       if (!d.vendorId) continue
@@ -2023,7 +2057,6 @@ function setupIPC() {
     }
 
     if (!isWin) {
-      // macOS/Linux: check CUPS
       try {
         const raw = hwExec('lpstat -p 2>/dev/null', { timeout: 5000, encoding: 'utf-8' })
         for (const line of raw.split('\n')) {
@@ -2039,82 +2072,47 @@ function setupIPC() {
       return usbPrinter ? { name: usbPrinter.product || usbPrinter.vendor, interface: 'unknown', vid: usbPrinter.vendorId, pid: usbPrinter.productId, vendor: usbPrinter.vendor, error: 'USB printer found but no CUPS queue' } : null
     }
 
-    // Windows: scan printer queues and match to USB devices
-    let queues = []
-    try {
-      const raw = hwExec(`powershell -NoProfile -Command "Get-Printer | Select-Object Name,PortName,DriverName,PrinterStatus | ConvertTo-Json -Compress"`, { timeout: 10000, encoding: 'utf-8' }).trim()
-      if (raw) {
-        const parsed = JSON.parse(raw)
-        queues = Array.isArray(parsed) ? parsed : [parsed]
-      }
-    } catch (e) { appLog('warn', 'hardware', 'Printer queue scan failed', e.message) }
+    const queues = getWindowsQueues()
 
-    // Match by keyword (receipt/thermal/pos/brand names)
-    for (const q of queues) {
+    // Score and sort queues: keyword match first, then USB-port queues, then others
+    const scored = queues.map(q => {
       const name = (q.Name || '').toLowerCase()
       const driver = (q.DriverName || '').toLowerCase()
-      if (RECEIPT_KEYWORDS.some(k => name.includes(k) || driver.includes(k))) {
-        return { name: q.Name, port: q.PortName, driver: q.DriverName, interface: 'windows', vid: usbPrinter?.vendorId, pid: usbPrinter?.productId, vendor: usbPrinter?.vendor || '' }
+      const port = q.PortName || ''
+      let score = 0
+      if (RECEIPT_KEYWORDS.some(k => name.includes(k) || driver.includes(k))) score += 100
+      if (port.startsWith('USB')) score += 50
+      if (driver.includes('generic')) score += 20
+      return { ...q, score }
+    }).sort((a, b) => b.score - a.score)
+
+    // Try each candidate queue by actually sending data through rawprint.ps1
+    for (const q of scored) {
+      if (q.score > 0 || scored.length <= 3) {
+        const works = testQueueRaw(q.Name)
+        if (works) {
+          hwPrinterReady = true
+          hwPrinterCheckTime = Date.now()
+          appLog('info', 'hardware', `Auto-detected working printer: ${q.Name} (${q.PortName})`)
+          return { name: q.Name, port: q.PortName, driver: q.DriverName, interface: 'windows', vid: usbPrinter?.vendorId, pid: usbPrinter?.productId, vendor: usbPrinter?.vendor || '', tested: true }
+        }
       }
     }
 
-    // Match by USB port (if we found a printer USB device, grab any USB-port queue)
-    if (usbPrinter) {
-      const usbQueues = queues.filter(q => (q.PortName || '').startsWith('USB'))
-      if (usbQueues.length === 1) {
-        return { name: usbQueues[0].Name, port: usbQueues[0].PortName, driver: usbQueues[0].DriverName, interface: 'windows', vid: usbPrinter.vendorId, pid: usbPrinter.productId, vendor: usbPrinter.vendor }
-      }
-      // Multiple USB queues — pick the one with Generic/Text driver (raw-capable)
-      const generic = usbQueues.find(q => (q.DriverName || '').toLowerCase().includes('generic'))
-      if (generic) return { name: generic.Name, port: generic.PortName, driver: generic.DriverName, interface: 'windows', vid: usbPrinter.vendorId, pid: usbPrinter.productId, vendor: usbPrinter.vendor }
-    }
-
-    // Last resort: any queue on a USB port
-    const anyUsb = queues.find(q => (q.PortName || '').startsWith('USB'))
-    if (anyUsb) return { name: anyUsb.Name, port: anyUsb.PortName, driver: anyUsb.DriverName, interface: 'windows' }
-
-    // Found USB hardware but no matching queue — report so UI can help configure
-    if (usbPrinter) return { name: usbPrinter.product || usbPrinter.vendor, interface: 'windows', vid: usbPrinter.vendorId, pid: usbPrinter.productId, vendor: usbPrinter.vendor, needsSetup: true, error: 'USB printer found but no matching print queue. Auto-setup will try to register it.' }
-
+    // None worked — return all queues for user selection
+    if (usbPrinter) return { name: usbPrinter.product || usbPrinter.vendor, interface: 'windows', vid: usbPrinter.vendorId, pid: usbPrinter.productId, vendor: usbPrinter.vendor, needsSetup: true, availableQueues: scored.map(q => ({ name: q.Name, port: q.PortName, driver: q.DriverName })), error: 'USB printer found but no queue responded. Select your printer below.' }
+    if (queues.length) return { name: '', interface: 'windows', needsSetup: true, availableQueues: scored.map(q => ({ name: q.Name, port: q.PortName, driver: q.DriverName })), error: 'No receipt printer auto-detected. Select your printer below.' }
     return null
   }
 
-  // Auto-register Windows printer queue if needed
   function ensurePrinterQueue () {
     if (!isWin || !hwPrinter) return
     if (hwPrinterReady && Date.now() - hwPrinterCheckTime < 60000) return
-    try {
-      const check = hwExec(`powershell -NoProfile -Command "Get-Printer -Name '${hwPrinter.name.replace(/'/g, "''")}' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name"`, { timeout: 5000, encoding: 'utf-8' }).trim()
-      if (check) { hwPrinterReady = true; hwPrinterCheckTime = Date.now(); return }
-    } catch (_) {}
-
-    if (!hwPrinter.needsSetup) { hwPrinterCheckTime = Date.now(); return }
-
-    // Find an available USB port
-    let portName = hwPrinter.port
-    if (!portName) {
-      for (let i = 1; i <= 10; i++) {
-        const p = `USB${String(i).padStart(3, '0')}`
-        try {
-          hwExec(`powershell -NoProfile -Command "Get-PrinterPort -Name '${p}' -ErrorAction Stop"`, { timeout: 3000, encoding: 'utf-8' })
-          portName = p; break
-        } catch (_) {}
-      }
-    }
-    if (!portName) { hwPrinterCheckTime = Date.now(); return }
-
-    const printerName = hwPrinter.name || `Receipt Printer (${hwPrinter.vendor || 'USB'})`
-    try {
-      hwExec(`powershell -NoProfile -Command "Add-Printer -Name '${printerName.replace(/'/g, "''")}' -DriverName 'Generic / Text Only' -PortName '${portName}'"`, { timeout: 5000, encoding: 'utf-8' })
-      hwPrinter.name = printerName
-      hwPrinter.port = portName
-      hwPrinter.needsSetup = false
-      hwPrinterReady = true; hwPrinterCheckTime = Date.now()
-      appLog('info', 'hardware', `Auto-registered printer: ${printerName} on ${portName}`)
-    } catch (e) {
-      hwPrinterCheckTime = Date.now()
-      appLog('error', 'hardware', 'Auto-register printer failed', e.message)
-    }
+    if (!hwPrinter.name) { hwPrinterCheckTime = Date.now(); return }
+    const works = testQueueRaw(hwPrinter.name)
+    hwPrinterReady = works
+    hwPrinterCheckTime = Date.now()
+    if (!works) appLog('warn', 'hardware', `Printer queue ${hwPrinter.name} not responding`)
   }
 
   // ── Send raw bytes to printer (multi-backend) ─────────────────────────────
@@ -2295,14 +2293,10 @@ function setupIPC() {
     const scale = detectScale(devices)
     const scanner = detectScanner(devices)
 
-    hwPrinter = printer
+    if (!printer?.needsSetup) hwPrinter = printer
     hwScale = scale
     hwScanner = scanner
 
-    // Auto-register printer queue if needed
-    if (printer?.needsSetup) ensurePrinterQueue()
-
-    // Classify all devices for display
     const classified = devices.filter(d => d.vendorId > 0).map(d => {
       const cls = classifyDevice(d)
       return { vendorId: d.vendorId, productId: d.productId, product: d.product || '', manufacturer: d.manufacturer || '', deviceClass: d.deviceClass || '', usagePage: d.usagePage || 0, type: cls.type, vendor: cls.vendor }
@@ -2310,28 +2304,27 @@ function setupIPC() {
 
     const result = {
       usbDevices: classified,
-      printer: { found: !!printer, name: printer?.name || '', port: printer?.port || '', interface: printer?.interface || '', driver: printer?.driver || '', vid: printer?.vid, pid: printer?.pid, vendor: printer?.vendor || '', configured: !!printer?.configured, needsSetup: !!printer?.needsSetup, error: printer?.error || '' },
+      printer: {
+        found: !!printer && !printer.needsSetup, name: printer?.name || '', port: printer?.port || '',
+        interface: printer?.interface || '', driver: printer?.driver || '', vid: printer?.vid,
+        pid: printer?.pid, vendor: printer?.vendor || '', configured: !!printer?.configured,
+        needsSetup: !!printer?.needsSetup, error: printer?.error || '',
+        tested: !!printer?.tested, status: printer?.tested ? 'OK (raw send confirmed)' : '',
+        availableQueues: printer?.availableQueues || [],
+      },
       scale: { found: !!scale, name: scale?.product || '', vendor: scale?.vendor || '', path: scale?.path || '', hasHID: !!HID, noHID: !!scale?.noHID },
       scanner: { found: !!scanner, name: scanner?.product || '', vendor: scanner?.vendor || '' },
-      drawer: { found: !!printer, via: printer ? 'printer DK port' : '' },
+      drawer: { found: !!printer && !printer.needsSetup, via: printer ? 'printer DK port' : '' },
       hidAvailable: !!HID,
     }
 
-    // Non-destructive printer test (verify queue is accessible)
-    if (printer && printer.interface === 'windows' && !printer.needsSetup) {
-      try {
-        const check = hwExec(`powershell -NoProfile -Command "(Get-Printer -Name '${printer.name.replace(/'/g, "''")}' -ErrorAction Stop).PrinterStatus"`, { timeout: 5000, encoding: 'utf-8' }).trim()
-        result.printer.status = check || 'Normal'
-        result.printer.tested = true
-      } catch (e) { result.printer.status = e.message; result.printer.tested = true }
-    }
     if (printer && printer.interface === 'network') {
       const tcp = await sendViaTCP(Buffer.from([DLE, 0x04, 0x01]), printer.ip, printer.networkPort || 9100)
       result.printer.status = tcp.ok ? 'Responding' : tcp.detail
-      result.printer.tested = true
+      result.printer.tested = tcp.ok
+      result.printer.found = tcp.ok
     }
 
-    // Non-destructive scale test (read weight)
     if (scale && scale.path && HID) {
       const reading = readScale()
       result.scale.tested = true
@@ -2386,10 +2379,36 @@ function setupIPC() {
 
   ipcMain.handle('hardware:testPrinter', async () => {
     if (!hwPrinter) return { ok: false, error: 'No printer detected' }
-    ensurePrinterQueue()
-    const buf = Buffer.from([DLE, 0x04, 0x01])
+    const parts = [ESCPOS.INIT, ESCPOS.ALIGN_CENTER, ESCPOS.BOLD_ON]
+    parts.push(Buffer.from('=== TEST PRINT ===\n', 'utf-8'))
+    parts.push(ESCPOS.BOLD_OFF)
+    parts.push(Buffer.from(`Printer: ${hwPrinter.name || 'Unknown'}\n`, 'utf-8'))
+    parts.push(Buffer.from(`Port: ${hwPrinter.port || hwPrinter.interface || 'N/A'}\n`, 'utf-8'))
+    parts.push(Buffer.from(`Date: ${new Date().toLocaleString('en-AU')}\n`, 'utf-8'))
+    parts.push(Buffer.from('If you see this, printing works!\n', 'utf-8'))
+    parts.push(ESCPOS.FEED_3, ESCPOS.PARTIAL_CUT)
+    const buf = Buffer.concat(parts)
     const result = await sendToPrinter(buf)
-    return result.ok ? { ok: true, status: 'Printer responded to status request' } : { ok: false, error: result.detail }
+    return result.ok ? { ok: true, status: 'Test page printed successfully' } : { ok: false, error: result.detail }
+  })
+
+  ipcMain.handle('hardware:testQueue', (_e, queueName) => {
+    if (!isWin) return { ok: false, error: 'Queue test only available on Windows' }
+    const works = testQueueRaw(queueName)
+    if (works) {
+      hwPrinter = { name: queueName, interface: 'windows', tested: true }
+      hwPrinterReady = true
+      hwPrinterCheckTime = Date.now()
+      dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('hw_printer_name', ?1)", [queueName])
+      dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('hw_printer_interface', 'windows')", [])
+      scheduleSave()
+      return { ok: true, status: `Queue "${queueName}" responds to raw data` }
+    }
+    return { ok: false, error: `Queue "${queueName}" did not respond — may be offline, wrong port, or wrong driver` }
+  })
+
+  ipcMain.handle('hardware:getQueues', () => {
+    return getWindowsQueues().map(q => ({ name: q.Name, port: q.PortName, driver: q.DriverName }))
   })
 
   ipcMain.handle('hardware:configure', (_e, config) => {
@@ -2417,6 +2436,8 @@ function setupIPC() {
   // ── LAN Sync ────────────────────────────────────────────────────────────────
 
   ipcMain.handle('lan:getStatus', () => lanSync.getStatus())
+  ipcMain.handle('lan:getPeers', () => lanSync.getPeers())
+  ipcMain.handle('lan:sessionAction', (_e, action, staffId, staffName, registerId) => lanSync.sessionAction(action, staffId, staffName, registerId))
 
   ipcMain.handle('lan:testConnection', (_e, ip, port) => lanSync.testConnection(ip, port))
 

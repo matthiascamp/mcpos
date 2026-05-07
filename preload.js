@@ -116,6 +116,8 @@ contextBridge.exposeInMainWorld('pos', {
   probeDevices:       ()      => ipcRenderer.invoke('hardware:probe'),
   readScale:          ()      => ipcRenderer.invoke('hardware:readScale'),
   testPrinter:        ()      => ipcRenderer.invoke('hardware:testPrinter'),
+  testQueue:          (name)  => ipcRenderer.invoke('hardware:testQueue', name),
+  getQueues:          ()      => ipcRenderer.invoke('hardware:getQueues'),
   configureHardware:  (cfg)   => ipcRenderer.invoke('hardware:configure', cfg),
   getHardwareConfig:  ()      => ipcRenderer.invoke('hardware:getConfig'),
 
@@ -135,9 +137,12 @@ contextBridge.exposeInMainWorld('pos', {
 
   // App Update
   updateApp:          ()      => ipcRenderer.invoke('app:update'),
+  getVersion:         ()      => ipcRenderer.invoke('app:version'),
 
   // LAN Sync
   getLanStatus:       ()           => ipcRenderer.invoke('lan:getStatus'),
+  getLanPeers:        ()           => ipcRenderer.invoke('lan:getPeers'),
+  lanSessionAction:   (action, staffId, staffName, registerId) => ipcRenderer.invoke('lan:sessionAction', action, staffId, staffName, registerId),
   testLanConnection:  (ip, port)   => ipcRenderer.invoke('lan:testConnection', ip, port),
   restartLan:         ()           => ipcRenderer.invoke('lan:restart'),
   discoverServer:     ()           => ipcRenderer.invoke('lan:discover'),

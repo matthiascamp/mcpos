@@ -9,11 +9,11 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;touch-action:manipulation}
-body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;display:flex;flex-direction:column;user-select:none;font-size:13px;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:rgba(0,0,0,.06)}
+body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;display:flex;flex-direction:column;user-select:none;font-size:clamp(11px,1.2vw,14px);-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:rgba(0,0,0,.06)}
 ::-webkit-scrollbar{width:0px;display:none}*{scrollbar-width:none}
 
 /* ═══ Status Bar ═══════════════════════════════════════════════════ */
-.status-bar{height:48px;background:linear-gradient(180deg,#22252f 0%,#1a1d27 100%);display:flex;align-items:center;padding:0 12px;gap:10px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.04);box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.status-bar{height:clamp(36px,5vh,48px);background:linear-gradient(180deg,#22252f 0%,#1a1d27 100%);display:flex;align-items:center;padding:0 clamp(6px,1vw,12px);gap:clamp(4px,0.8vw,10px);flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.04);box-shadow:0 2px 8px rgba(0,0,0,.2)}
 .status-left{display:flex;align-items:center;gap:10px;flex:1}
 .store-name{color:#a8adb8;font-family:'Inter',sans-serif;font-weight:600;font-size:13px;white-space:nowrap;letter-spacing:-.2px}
 .scan-input{width:200px;padding:9px 12px;border:1px solid #3a3d48;border-radius:8px;background:#2a2d38;color:#e0e2e8;font-size:13px;outline:none;font-family:inherit;min-height:36px;transition:border-color .15s}
@@ -29,21 +29,21 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .health-dots span{display:flex;align-items:center;gap:3px}
 .health-dot{width:7px;height:7px;border-radius:50%;background:#34d399}
 .subtotal-label{background:rgba(91,141,239,.15);color:#5b8def;font-weight:700;font-size:11px;padding:5px 12px;border-radius:6px;white-space:nowrap;text-transform:uppercase;letter-spacing:.5px}
-.subtotal-amount{font-family:'Inter',sans-serif;font-weight:800;font-size:28px;color:#34d399;min-width:130px;text-align:right;letter-spacing:-1px;text-shadow:0 0 18px rgba(52,211,153,.25)}
+.subtotal-amount{font-family:'Inter',sans-serif;font-weight:800;font-size:clamp(18px,2.5vw,28px);color:#34d399;min-width:clamp(80px,10vw,130px);text-align:right;letter-spacing:-1px;text-shadow:0 0 18px rgba(52,211,153,.25)}
 
 /* ═══ Main Layout ══════════════════════════════════════════════════ */
 .main-row{display:flex;flex:1;overflow:hidden}
 
 /* ═══ Cart Panel (LEFT) ══════════════════════════════════════════ */
-.cart-panel{width:320px;display:flex;flex-direction:column;background:#fff;border-right:none;flex-shrink:0;box-shadow:4px 0 20px rgba(0,0,0,.15)}
-.cart-header{padding:10px 12px;border-bottom:1px solid #eef0f4;display:flex;justify-content:space-between;align-items:center;background:#fafbfc;flex-shrink:0}
+.cart-panel{width:clamp(240px,22vw,350px);display:flex;flex-direction:column;background:#fff;border-right:none;flex-shrink:0;box-shadow:4px 0 20px rgba(0,0,0,.15)}
+.cart-header{padding:clamp(6px,1vh,10px) clamp(8px,1vw,12px);border-bottom:1px solid #eef0f4;display:flex;justify-content:space-between;align-items:center;background:#fafbfc;flex-shrink:0}
 .cart-header-left{display:flex;align-items:center;gap:8px}
 .cart-title{font-weight:700;font-size:13px;color:#1a1a2e;letter-spacing:-.2px}
 .cart-count{background:#5b8def;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
 .cart-clear{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;color:#ef4444;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;padding:8px 14px;min-height:38px;transition:all .15s}
 .cart-clear:active{color:#fff;background:#ef4444;border-color:#ef4444}
 .cart-items{flex:1;overflow-y:auto}
-.cart-item{display:flex;align-items:center;padding:10px 12px;gap:8px;border-bottom:1px solid #f4f5f7;font-size:12px;min-height:52px;transition:background .1s}
+.cart-item{display:flex;align-items:center;padding:clamp(5px,1vh,10px) clamp(6px,0.8vw,12px);gap:clamp(4px,0.6vw,8px);border-bottom:1px solid #f4f5f7;font-size:clamp(10px,1.1vw,13px);min-height:clamp(38px,5.5vh,52px);transition:background .1s}
 .cart-item:active{background:#f0f7ff}
 .cart-item-info{flex:1;min-width:0}
 .cart-item-name{font-weight:600;color:#1a1a2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
@@ -51,20 +51,20 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .meta-special{color:#ef4444;font-weight:700;font-size:9px;background:rgba(239,68,68,.08);padding:1px 4px;border-radius:3px}
 .cart-item-price{font-weight:700;color:#1a1a2e;min-width:50px;text-align:right;font-size:14px}
 .cart-item-qty{display:flex;align-items:center;gap:3px}
-.qty-btn{width:40px;height:40px;border-radius:10px;border:1px solid #e2e4e8;background:#fff;color:#4a5068;font-size:20px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;transition:all .1s;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.qty-btn{width:clamp(28px,3.5vw,40px);height:clamp(28px,3.5vh,40px);border-radius:10px;border:1px solid #e2e4e8;background:#fff;color:#4a5068;font-size:clamp(14px,1.8vw,20px);font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;transition:all .1s;box-shadow:0 1px 2px rgba(0,0,0,.04)}
 .qty-btn:active{background:#f0f1f3;border-color:#c0c4cc;transform:scale(.95)}
 .qty-btn.remove{color:#ef4444;border-color:#fecaca;background:#fff5f5}
 .qty-btn.remove:active{background:#fee2e2;border-color:#ef4444}
 .qty-val{font-size:12px;font-weight:700;min-width:20px;text-align:center;color:#1a1a2e}
 .cart-empty{flex:1;display:flex;align-items:center;justify-content:center;color:#c0c4cc;font-size:13px;flex-direction:column;gap:4px}
-.cart-totals{padding:10px 12px;border-top:1px solid #eef0f4;background:#fafbfc;flex-shrink:0}
+.cart-totals{padding:clamp(5px,1vh,10px) clamp(6px,0.8vw,12px);border-top:1px solid #eef0f4;background:#fafbfc;flex-shrink:0}
 .total-row{display:flex;justify-content:space-between;padding:2px 0;font-size:11px;color:#8891a5}
 .total-row.grand{padding:8px 0 2px;border-top:2px solid #e2e4e8;margin-top:4px}
 .total-row.grand span:first-child{font-weight:700;font-size:14px;color:#1a1a2e}
-.total-amount{font-family:'Inter',sans-serif;font-size:24px;font-weight:800;color:#059669;letter-spacing:-0.5px}
-.cart-actions{padding:10px 12px;display:flex;flex-direction:column;gap:6px;flex-shrink:0;background:#fff;border-top:1px solid #eef0f4}
+.total-amount{font-family:'Inter',sans-serif;font-size:clamp(16px,2.2vw,24px);font-weight:800;color:#059669;letter-spacing:-0.5px}
+.cart-actions{padding:clamp(5px,1vh,10px) clamp(6px,0.8vw,12px);display:flex;flex-direction:column;gap:clamp(3px,0.5vh,6px);flex-shrink:0;background:#fff;border-top:1px solid #eef0f4}
 .action-row{display:flex;gap:6px}
-.action-btn{padding:12px;border-radius:10px;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;flex:1;min-height:48px;transition:all .12s;letter-spacing:-.2px}
+.action-btn{padding:clamp(6px,1.2vh,12px);border-radius:10px;border:none;font-size:clamp(11px,1.3vw,14px);font-weight:700;cursor:pointer;font-family:inherit;flex:1;min-height:clamp(36px,5vh,48px);transition:all .12s;letter-spacing:-.2px}
 .action-btn:active:not(:disabled){transform:scale(.97)}
 .btn-pay{background:linear-gradient(135deg,#10b981 0%,#059669 60%,#047857 100%);color:#fff;box-shadow:0 4px 14px rgba(5,150,105,.3),inset 0 1px 0 rgba(255,255,255,.15)}
 .btn-pay:active:not(:disabled){background:linear-gradient(135deg,#059669 0%,#047857 100%);box-shadow:0 1px 4px rgba(5,150,105,.2)}.btn-pay:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
@@ -75,11 +75,11 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 /* ═══ Keyboard Panel (RIGHT — all buttons) ════════════════════════ */
 .keyboard-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;background:radial-gradient(ellipse at 30% 20%,#1f2333 0%,#13151d 60%,#0d0f14 100%)}
 
-.keyboard-home{flex:1;display:flex;flex-direction:column;padding:6px;gap:5px}
+.keyboard-home{flex:1;display:flex;flex-direction:column;padding:clamp(3px,0.5vw,6px);gap:clamp(2px,0.4vw,5px)}
 
 /* Dynamic POS grid from keyboard_buttons DB */
-.pos-grid{flex:1;display:grid;gap:5px;padding:0}
-.pos-grid-btn{border:none;border-radius:12px;font-weight:600;font-size:12px;cursor:pointer;text-align:center;line-height:1.2;font-family:'Inter',sans-serif;transition:transform .1s cubic-bezier(.4,0,.2,1),box-shadow .1s,filter .1s;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:5px 6px;word-break:break-word;position:relative;overflow:hidden;user-select:none;box-shadow:0 4px 8px rgba(0,0,0,.3),0 1px 3px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.06)}
+.pos-grid{flex:1;display:grid;gap:clamp(2px,0.4vw,5px);padding:0}
+.pos-grid-btn{border:none;border-radius:clamp(6px,0.8vw,12px);font-weight:600;font-size:clamp(9px,1.1vw,13px);cursor:pointer;text-align:center;line-height:1.2;font-family:'Inter',sans-serif;transition:transform .1s cubic-bezier(.4,0,.2,1),box-shadow .1s,filter .1s;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:clamp(2px,0.5vh,5px) clamp(3px,0.5vw,6px);word-break:break-word;position:relative;overflow:hidden;user-select:none;box-shadow:0 4px 8px rgba(0,0,0,.3),0 1px 3px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.06)}
 .pos-grid-btn:active{transform:scale(.94) translateY(2px);box-shadow:0 1px 2px rgba(0,0,0,.3),inset 0 2px 4px rgba(0,0,0,.15);filter:brightness(.88)}
 .pos-grid-btn img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:12px}
 .pos-grid-btn.has-img{position:relative}
@@ -87,29 +87,29 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .pos-grid-btn.has-img span{position:relative;z-index:2;font-size:12px;font-weight:700;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.9),0 0 12px rgba(0,0,0,.5);align-self:flex-end;padding-bottom:4px}
 
 /* ─── Function buttons (utility keys) ────────────────────────────── */
-.pos-grid-btn.func-key{background:linear-gradient(180deg,#2e3242 0%,#232736 100%);color:#a8b0c4;font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;border:1px solid #3d4255;box-shadow:0 3px 6px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.06)}
+.pos-grid-btn.func-key{background:linear-gradient(180deg,#2e3242 0%,#232736 100%);color:#a8b0c4;font-size:clamp(8px,0.9vw,11px);font-weight:700;letter-spacing:.3px;text-transform:uppercase;border:1px solid #3d4255;box-shadow:0 3px 6px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.06)}
 .pos-grid-btn.func-key:active{background:linear-gradient(180deg,#252838 0%,#1c1f2a 100%);box-shadow:0 1px 2px rgba(0,0,0,.3),inset 0 2px 4px rgba(0,0,0,.2)}
 .pos-grid-btn.func-key.func-danger{background:linear-gradient(180deg,#4a2020 0%,#351818 100%);color:#ff7b7b;border-color:#6b2f2f;box-shadow:0 3px 8px rgba(220,50,50,.15),inset 0 1px 0 rgba(255,150,150,.06)}
 .pos-grid-btn.func-key.func-warn{background:linear-gradient(180deg,#4a3d1a 0%,#362c12 100%);color:#fcd34d;border-color:#6b5a24;box-shadow:0 3px 8px rgba(250,190,20,.1),inset 0 1px 0 rgba(255,220,100,.06)}
 .pos-grid-btn.func-key.func-accent{background:linear-gradient(180deg,#1a4034 0%,#132e26 100%);color:#4ade80;border-color:#2d5e4a;box-shadow:0 3px 8px rgba(52,211,153,.1),inset 0 1px 0 rgba(100,255,180,.06)}
 
 /* ─── Department / product buttons ───────────────────────────────── */
-.pos-grid-btn.dept-key{font-size:13px;font-weight:700;letter-spacing:-.2px;border:1px solid rgba(255,255,255,.1);box-shadow:0 4px 12px rgba(0,0,0,.4),0 2px 4px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.12),inset 0 -1px 0 rgba(0,0,0,.15)}
+.pos-grid-btn.dept-key{font-size:clamp(10px,1.2vw,14px);font-weight:700;letter-spacing:-.2px;border:1px solid rgba(255,255,255,.1);box-shadow:0 4px 12px rgba(0,0,0,.4),0 2px 4px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.12),inset 0 -1px 0 rgba(0,0,0,.15)}
 .pos-grid-btn.dept-key:active{box-shadow:0 1px 3px rgba(0,0,0,.4),inset 0 2px 6px rgba(0,0,0,.2);filter:brightness(.82)}
 
 /* ─── Numpad zone ────────────────────────────────────────────────── */
-.pos-grid-btn.digit-btn{font-size:26px;font-weight:700;background:linear-gradient(180deg,#ffffff 0%,#f0f1f3 100%);color:#1a1a2e;border:1px solid rgba(0,0,0,.08);border-radius:12px;box-shadow:0 4px 8px rgba(0,0,0,.12),0 2px 3px rgba(0,0,0,.06),inset 0 -3px 0 rgba(0,0,0,.05),inset 0 1px 0 rgba(255,255,255,.9)}
+.pos-grid-btn.digit-btn{font-size:clamp(18px,2.5vw,28px);font-weight:700;background:linear-gradient(180deg,#ffffff 0%,#f0f1f3 100%);color:#1a1a2e;border:1px solid rgba(0,0,0,.08);border-radius:clamp(6px,0.8vw,12px);box-shadow:0 4px 8px rgba(0,0,0,.12),0 2px 3px rgba(0,0,0,.06),inset 0 -3px 0 rgba(0,0,0,.05),inset 0 1px 0 rgba(255,255,255,.9)}
 .pos-grid-btn.digit-btn:active{background:linear-gradient(180deg,#e9ecef 0%,#dee2e6 100%);box-shadow:0 1px 2px rgba(0,0,0,.08),inset 0 2px 4px rgba(0,0,0,.06);transform:scale(.96) translateY(2px)}
 .pos-grid-btn.digit-btn.num-action{font-size:11px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;background:linear-gradient(180deg,#e2e5ea 0%,#ced3da 100%);color:#4a5068;box-shadow:0 3px 6px rgba(0,0,0,.1),inset 0 -2px 0 rgba(0,0,0,.05),inset 0 1px 0 rgba(255,255,255,.6)}
 .pos-grid-btn.digit-btn.num-action:active{background:linear-gradient(180deg,#cdd1d8 0%,#bec4cc 100%);box-shadow:0 1px 2px rgba(0,0,0,.08),inset 0 2px 3px rgba(0,0,0,.06);transform:scale(.96) translateY(2px)}
 .pos-grid-btn.digit-btn.num-orange{background:linear-gradient(135deg,#ff9500 0%,#f97316 50%,#e8650e 100%);color:#fff;font-size:12px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;border:1px solid rgba(255,160,0,.4);box-shadow:0 4px 12px rgba(249,115,22,.35),0 2px 4px rgba(249,115,22,.2),inset 0 1px 0 rgba(255,255,255,.25),inset 0 -2px 0 rgba(0,0,0,.1)}
 .pos-grid-btn.digit-btn.num-orange:active{filter:brightness(.85);box-shadow:0 1px 4px rgba(249,115,22,.3),inset 0 2px 4px rgba(0,0,0,.15);transform:scale(.96) translateY(2px)}
-.pos-grid-btn.num-display-cell{background:linear-gradient(180deg,#080b10 0%,#0f1318 100%);color:#34d399;font-family:'JetBrains Mono','Courier New',monospace;font-size:24px;font-weight:700;text-align:right;justify-content:flex-end;padding:6px 16px;border-radius:12px;cursor:default;border:2px solid #1e2a35;box-shadow:inset 0 3px 12px rgba(0,0,0,.6),inset 0 0 30px rgba(52,211,153,.04),0 1px 0 rgba(255,255,255,.03)}
+.pos-grid-btn.num-display-cell{background:linear-gradient(180deg,#080b10 0%,#0f1318 100%);color:#34d399;font-family:'JetBrains Mono','Courier New',monospace;font-size:clamp(16px,2.2vw,24px);font-weight:700;text-align:right;justify-content:flex-end;padding:clamp(3px,0.6vh,6px) clamp(8px,1.2vw,16px);border-radius:clamp(6px,0.8vw,12px);cursor:default;border:2px solid #1e2a35;box-shadow:inset 0 3px 12px rgba(0,0,0,.6),inset 0 0 30px rgba(52,211,153,.04),0 1px 0 rgba(255,255,255,.03)}
 .pos-grid-btn.num-display-cell.qty-mode{color:#f97316;border-color:#3a2510;box-shadow:inset 0 3px 12px rgba(0,0,0,.6),inset 0 0 30px rgba(249,115,22,.06),0 1px 0 rgba(255,255,255,.03)}
 .pos-grid-btn.empty-cell{background:transparent;border:none;cursor:default;box-shadow:none}
 
 /* ─── Payment / nav buttons ──────────────────────────────────────── */
-.pos-grid-btn.pay-key{font-size:14px;font-weight:800;letter-spacing:-.3px;border:1px solid rgba(255,255,255,.18);box-shadow:0 4px 12px rgba(0,0,0,.35),0 2px 4px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.18),inset 0 -1px 0 rgba(0,0,0,.15)}
+.pos-grid-btn.pay-key{font-size:clamp(10px,1.3vw,14px);font-weight:800;letter-spacing:-.3px;border:1px solid rgba(255,255,255,.18);box-shadow:0 4px 12px rgba(0,0,0,.35),0 2px 4px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.18),inset 0 -1px 0 rgba(0,0,0,.15)}
 .pos-grid-btn.pay-key:active{filter:brightness(.8);transform:scale(.96) translateY(2px);box-shadow:0 1px 3px rgba(0,0,0,.3),inset 0 2px 6px rgba(0,0,0,.2)}
 
 /* Cart embedded in grid */
@@ -128,11 +128,11 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .section-title-text{font-weight:700;font-size:16px;flex:1;padding:0 12px;color:#e8eaef}
 .section-price{font-family:'Inter',sans-serif;font-weight:800;font-size:20px;color:#34d399;text-shadow:0 0 12px rgba(52,211,153,.2)}
 
-.product-grid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:12px;align-content:start;background:transparent}
-.product-btn{background:linear-gradient(180deg,#2e3242 0%,#252838 100%);border:1px solid rgba(255,255,255,.06);border-radius:14px;display:flex;flex-direction:column;align-items:center;padding:12px 8px;cursor:pointer;min-height:100px;justify-content:center;font-family:inherit;transition:transform .1s cubic-bezier(.4,0,.2,1),box-shadow .1s;box-shadow:0 4px 12px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.05)}
+.product-grid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(4px,0.6vw,8px);padding:clamp(6px,1vw,12px);align-content:start;background:transparent}
+.product-btn{background:linear-gradient(180deg,#2e3242 0%,#252838 100%);border:1px solid rgba(255,255,255,.06);border-radius:clamp(8px,1vw,14px);display:flex;flex-direction:column;align-items:center;padding:clamp(6px,1vh,12px) clamp(4px,0.6vw,8px);cursor:pointer;min-height:clamp(60px,10vh,100px);justify-content:center;font-family:inherit;transition:transform .1s cubic-bezier(.4,0,.2,1),box-shadow .1s;box-shadow:0 4px 12px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.05)}
 .product-btn:active{transform:scale(.95);box-shadow:0 1px 4px rgba(0,0,0,.3),inset 0 2px 4px rgba(0,0,0,.15)}
-.product-btn img{width:72px;height:72px;object-fit:cover;border-radius:12px;box-shadow:0 3px 8px rgba(0,0,0,.3)}
-.product-btn .p-placeholder{width:72px;height:72px;background:linear-gradient(135deg,#1a2030 0%,#151a25 100%);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#555a68;text-align:center;line-height:1.1;padding:4px;border:1px solid rgba(255,255,255,.03)}
+.product-btn img{width:clamp(48px,6vw,72px);height:clamp(48px,6vh,72px);object-fit:cover;border-radius:clamp(6px,0.8vw,12px);box-shadow:0 3px 8px rgba(0,0,0,.3)}
+.product-btn .p-placeholder{width:clamp(48px,6vw,72px);height:clamp(48px,6vh,72px);background:linear-gradient(135deg,#1a2030 0%,#151a25 100%);border-radius:clamp(6px,0.8vw,12px);display:flex;align-items:center;justify-content:center;font-size:clamp(7px,0.8vw,9px);color:#555a68;text-align:center;line-height:1.1;padding:4px;border:1px solid rgba(255,255,255,.03)}
 .product-btn .p-name{font-size:11px;font-weight:600;margin-top:7px;text-align:center;line-height:1.2;color:#e0e2e8}
 .product-btn .p-price{font-size:12px;color:#4ade80;margin-top:3px;font-weight:700}
 .product-btn.group-btn{background:linear-gradient(180deg,#262a3a 0%,#1e2130 100%);border:2px solid #3a3d48}
@@ -151,7 +151,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .nav-spacer{width:10px;flex-shrink:0}
 
 /* ═══ Footer ═════════════════════════════════════════════════════ */
-.pos-footer{height:24px;background:#0d0f14;color:#4a5068;display:flex;align-items:center;padding:0 12px;gap:14px;font-size:10px;flex-shrink:0}
+.pos-footer{height:clamp(18px,2.5vh,24px);background:#0d0f14;color:#4a5068;display:flex;align-items:center;padding:0 clamp(6px,1vw,12px);gap:clamp(6px,1vw,14px);font-size:clamp(8px,0.9vw,10px);flex-shrink:0}
 .footer-spacer{flex:1}
 
 /* ═══ Modals ═════════════════════════════════════════════════════ */
@@ -244,8 +244,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .login-store{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:800;color:#1a1a2e;margin-bottom:4px}
 .login-subtitle{color:#8891a5;margin-bottom:32px;font-size:13px}
 .pin-display{font-size:2rem;letter-spacing:14px;margin-bottom:24px;min-height:40px;color:#1a1a2e;font-weight:700}
-.pin-pad{display:grid;grid-template-columns:repeat(3,80px);gap:8px}
-.pin-btn{width:80px;height:64px;border-radius:12px;border:1px solid #e2e4e8;background:#fff;color:#1a1a2e;font-size:1.3rem;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 2px 6px rgba(0,0,0,.04);transition:all .1s}
+.pin-pad{display:grid;grid-template-columns:repeat(3,clamp(60px,7vw,80px));gap:clamp(4px,0.8vw,8px)}
+.pin-btn{width:clamp(60px,7vw,80px);height:clamp(48px,6vh,64px);border-radius:12px;border:1px solid #e2e4e8;background:#fff;color:#1a1a2e;font-size:clamp(1rem,1.5vw,1.3rem);font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 2px 6px rgba(0,0,0,.04);transition:all .1s}
 .pin-btn:active{background:#f0f1f3;transform:scale(.96)}
 .pin-btn.enter{background:#059669;color:#fff;border-color:#059669;box-shadow:0 2px 8px rgba(5,150,105,.25)}
 .pin-btn.enter:active{background:#047857}
@@ -449,6 +449,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
   <span id="clerkInfo"></span>
   <div class="footer-spacer"></div>
   <span id="clock"></span>
+  <span id="appVersion" style="color:#333;font-size:8px"></span>
 </div>
 
 <!-- ═══ Payment Options Modal ══════════════════════════════════════ -->
@@ -1033,6 +1034,11 @@ updateSync()
 // ═══ PIN Login ═════════════════════════════════════════════════════
 let pinBuf = ''
 function showLogin () {
+  if (currentStaff) {
+    window.pos.getSetting('register_id').then(regId => {
+      window.pos.lanSessionAction('logout', currentStaff.id, currentStaff.name, regId || 'LANE01').catch(() => {})
+    }).catch(() => {})
+  }
   currentStaff = null
   try { localStorage.removeItem('crisp_staff') } catch (_) {}
   pinBuf = ''
@@ -1055,6 +1061,16 @@ async function attemptPinLogin () {
   if (pinBuf.length < 4) return
   const s = await window.pos.staffLogin(pinBuf)
   if (s) {
+    const regId = await window.pos.getSetting('register_id') || 'LANE01'
+    try {
+      const check = await window.pos.lanSessionAction('login', s.id, s.name, regId)
+      if (check && !check.allowed) {
+        $('#loginError').textContent = check.error || 'Already logged in elsewhere'
+        pinBuf = ''
+        $('#pinDisplay').textContent = ''
+        return
+      }
+    } catch (_) {}
     completeLogin(s)
     showToast(`Welcome, ${s.name}`, 'success')
     showFloatPrompt()
@@ -3498,6 +3514,8 @@ async function init () {
   }
   updateClock()
   setInterval(updateClock, 15000)
+
+  window.pos.getVersion().then(v => { const el = document.getElementById('appVersion'); if (el) el.textContent = v }).catch(() => {})
 }
 init()
 

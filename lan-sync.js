@@ -28,12 +28,13 @@ let state = {
   port: 5555,
   secret: null,
   error: null,
-  clients: []         // server tracks connected client IPs
+  clients: [],        // server tracks connected client IPs
+  activeSessions: {}  // server tracks active staff: { staffId: { registerId, staffName, loginTime } }
 }
 
 // ─── Exports ─────────────────────────────────────────────────────────────────
 
-module.exports = { startServer, startClient, stopAll, getStatus, testConnection, discoverServer, networkDiagnostic, bumpVersion, onDataChanged }
+module.exports = { startServer, startClient, stopAll, getStatus, testConnection, discoverServer, networkDiagnostic, bumpVersion, onDataChanged, getPeers, sessionAction }
 
 let _dataChangedCallback = null
 function onDataChanged (cb) { _dataChangedCallback = cb }
@@ -159,6 +160,42 @@ async function handleRoute (req, res, url, path) {
     switch (path) {
       case '/api/heartbeat':
         return jsonReply(res, { ok: true, time: new Date().toISOString(), ip: getLocalIp(), secret: state.secret, port: state.port, version: dataVersion })
+
+      case '/api/peers': {
+        const regRow = db.dbGet("SELECT value FROM settings WHERE key = 'register_id'")
+        const serverName = regRow?.value || 'Server'
+        const peers = [
+          { registerId: serverName, ip: getLocalIp(), role: 'server', lastSeen: new Date().toISOString() },
+          ...state.clients.map(c => ({ registerId: c.registerId || 'Register', ip: c.ip, role: 'client', lastSeen: c.lastSeen }))
+        ]
+        return jsonReply(res, peers)
+      }
+
+      case '/api/session': {
+        if (req.method === 'GET') {
+          return jsonReply(res, state.activeSessions)
+        }
+        const { staffId, staffName, registerId: regId, action: sessAction } = body || {}
+        if (sessAction === 'login') {
+          const existing = state.activeSessions[staffId]
+          if (existing && existing.registerId !== regId) {
+            return jsonReply(res, { allowed: false, error: `${staffName || 'This user'} is already logged in on ${existing.registerId}` })
+          }
+          state.activeSessions[staffId] = { registerId: regId, staffName: staffName || '', loginTime: new Date().toISOString() }
+          return jsonReply(res, { allowed: true })
+        }
+        if (sessAction === 'logout') {
+          if (staffId) delete state.activeSessions[staffId]
+          return jsonReply(res, { ok: true })
+        }
+        if (sessAction === 'logout_register') {
+          for (const [sid, sess] of Object.entries(state.activeSessions)) {
+            if (sess.registerId === regId) delete state.activeSessions[sid]
+          }
+          return jsonReply(res, { ok: true })
+        }
+        return jsonReply(res, { error: 'Invalid session action' }, 400)
+      }
 
       case '/api/version':
         return jsonReply(res, { version: dataVersion })
@@ -857,6 +894,79 @@ function httpPost (path, body) {
     req.write(data)
     req.end()
   })
+}
+
+async function sessionAction (action, staffId, staffName, registerId) {
+  if (state.mode === 'server') {
+    if (action === 'login') {
+      const existing = state.activeSessions[staffId]
+      if (existing && existing.registerId !== registerId) {
+        return { allowed: false, error: `${staffName || 'This user'} is already logged in on ${existing.registerId}` }
+      }
+      state.activeSessions[staffId] = { registerId, staffName: staffName || '', loginTime: new Date().toISOString() }
+      return { allowed: true }
+    }
+    if (action === 'logout') { delete state.activeSessions[staffId]; return { ok: true } }
+    if (action === 'logout_register') {
+      for (const [sid, sess] of Object.entries(state.activeSessions)) {
+        if (sess.registerId === registerId) delete state.activeSessions[sid]
+      }
+      return { ok: true }
+    }
+  }
+  if (state.mode === 'client' && state.serverIp) {
+    try {
+      return await new Promise((resolve, reject) => {
+        const data = JSON.stringify({ action, staffId, staffName, registerId })
+        const opts = {
+          hostname: state.serverIp, port: state.port || 5555,
+          path: '/api/session', method: 'POST', timeout: 3000,
+          headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(data), 'X-POS-Secret': state.secret || '' }
+        }
+        const req = http.request(opts, res => {
+          const chunks = []
+          res.on('data', c => chunks.push(c))
+          res.on('end', () => { try { resolve(JSON.parse(Buffer.concat(chunks).toString())) } catch (e) { reject(e) } })
+        })
+        req.on('error', reject)
+        req.on('timeout', () => { req.destroy(); reject(new Error('timeout')) })
+        req.write(data)
+        req.end()
+      })
+    } catch (_) { return { allowed: true } }
+  }
+  return { allowed: true }
+}
+
+async function getPeers () {
+  if (state.mode === 'server') {
+    const regRow = state.db?.dbGet?.("SELECT value FROM settings WHERE key = 'register_id'")
+    const serverName = regRow?.value || 'Server'
+    return [
+      { registerId: serverName, ip: state.serverIp || getLocalIp(), role: 'server', lastSeen: new Date().toISOString() },
+      ...state.clients.map(c => ({ registerId: c.registerId || 'Register', ip: c.ip, role: 'client', lastSeen: c.lastSeen }))
+    ]
+  }
+  if (state.mode === 'client' && state.serverIp) {
+    try {
+      return await new Promise((resolve, reject) => {
+        const opts = {
+          hostname: state.serverIp, port: state.port || 5555,
+          path: '/api/peers', method: 'GET', timeout: 3000,
+          headers: { 'X-POS-Secret': state.secret || '' }
+        }
+        const req = http.request(opts, res => {
+          const chunks = []
+          res.on('data', c => chunks.push(c))
+          res.on('end', () => { try { resolve(JSON.parse(Buffer.concat(chunks).toString())) } catch (e) { reject(e) } })
+        })
+        req.on('error', reject)
+        req.on('timeout', () => { req.destroy(); reject(new Error('timeout')) })
+        req.end()
+      })
+    } catch (_) { return [] }
+  }
+  return []
 }
 
 async function testConnection (ip, port) {
