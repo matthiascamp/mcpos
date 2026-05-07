@@ -2059,6 +2059,10 @@ function setupIPC() {
     return result
   })
 
+  ipcMain.handle('lan:networkDiagnostic', async () => {
+    return await lanSync.networkDiagnostic()
+  })
+
   // ── Linkly Payment Terminal ─────────────────────────────────────────────────
 
   ipcMain.handle('linkly:getStatus', () => linkly.getStatus())

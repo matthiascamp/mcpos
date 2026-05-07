@@ -1461,6 +1461,64 @@
           </div>
         </div>
       </div>
+
+      <!-- Network Diagnostic Probe -->
+      <div class="section" style="margin-top:20px">
+        <h2>Network Diagnostic</h2>
+        <p style="color:var(--text-dim);font-size:13px;margin-bottom:14px">
+          Run a thorough probe of this PC's network to diagnose connectivity issues between registers.
+        </p>
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px">
+          <button class="btn btn-blue" id="netDiagBtn" style="padding:10px 24px;font-size:14px">Run Network Diagnostic</button>
+          <span id="netDiagStatus" style="font-size:13px;color:var(--text-dim)"></span>
+        </div>
+        <div id="netDiagResults" style="display:none">
+          <!-- Recommendations -->
+          <div id="netDiagRecommendations" style="margin-bottom:16px"></div>
+
+          <!-- Interface cards -->
+          <div style="margin-bottom:16px">
+            <h3 style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:8px">Network Interfaces</h3>
+            <div id="netDiagInterfaces" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px"></div>
+          </div>
+
+          <!-- Port & UDP row -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+            <div class="stat-card" id="netDiagPort">
+              <div class="stat-label" style="margin-bottom:4px">LAN Port (TCP)</div>
+              <div id="netPortResult" style="font-size:14px"></div>
+            </div>
+            <div class="stat-card" id="netDiagUdp">
+              <div class="stat-label" style="margin-bottom:4px">UDP Broadcast</div>
+              <div id="netUdpResult" style="font-size:14px"></div>
+            </div>
+          </div>
+
+          <!-- Discovered servers -->
+          <div style="margin-bottom:16px">
+            <h3 style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:8px">Discovered Servers (UDP)</h3>
+            <div id="netDiagDiscovered" style="font-size:13px;color:var(--text-dim)">None</div>
+          </div>
+
+          <!-- Subnet scan -->
+          <div style="margin-bottom:16px">
+            <h3 style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:8px">Subnet Scan</h3>
+            <div id="netDiagSubnet"></div>
+          </div>
+
+          <!-- Firewall hints -->
+          <div style="margin-bottom:16px">
+            <h3 style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:8px">Firewall</h3>
+            <div id="netDiagFirewall" style="font-size:13px"></div>
+          </div>
+
+          <!-- Raw JSON (collapsible) -->
+          <details style="margin-top:12px">
+            <summary style="cursor:pointer;font-size:13px;color:var(--text-dim);user-select:none">Raw diagnostic data (JSON)</summary>
+            <pre id="netDiagRaw" style="margin-top:8px;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-size:11px;overflow-x:auto;max-height:400px;overflow-y:auto;color:var(--text-dim);white-space:pre-wrap;word-break:break-all"></pre>
+          </details>
+        </div>
+      </div>
     </div>
 
     <!-- ── Hardware ────────────────────────────────────────────────── -->
@@ -2934,7 +2992,7 @@
         const clients = status.clients?.length || 0
         $('#lanServerStatus').innerHTML = status.connected
           ? `<span style="color:#4a4;">${clients} register(s) connected</span>`
-          : '<span style="color:var(--text-dim);">Waiting for registers...</span>'
+          : `<span style="color:${status.error ? '#a44' : 'var(--text-dim)'};">${status.error ? esc(status.error) : 'Waiting for registers...'}</span>`
       } else if (mode === 'client') {
         $('#lanServerIp').value = s.lan_server_ip || ''
         $('#lanClientPort').value = s.lan_port || '5555'
@@ -3164,6 +3222,135 @@
       await window.pos.restartLan()
       showToast('Disconnected. Role reset.', 'info')
       loadLanSettings()
+    })
+
+    // ── Network Diagnostic ──────────────────────────────────────────
+
+    $('#netDiagBtn').addEventListener('click', async () => {
+      const btn = $('#netDiagBtn')
+      const status = $('#netDiagStatus')
+      btn.disabled = true
+      status.textContent = 'Running diagnostic... (scanning subnet, this takes ~10s)'
+      status.style.color = 'var(--amber)'
+      $('#netDiagResults').style.display = 'none'
+
+      try {
+        const r = await window.pos.networkDiagnostic()
+        $('#netDiagResults').style.display = ''
+        status.textContent = 'Diagnostic complete'
+        status.style.color = 'var(--green)'
+
+        // Recommendations
+        const recEl = $('#netDiagRecommendations')
+        if (r.recommendations && r.recommendations.length > 0) {
+          const hasIssue = r.recommendations.some(r => !r.includes('passed') && !r.includes('Found') && !r.includes('Self-test passed'))
+          recEl.innerHTML = `
+            <div style="padding:14px 16px;border-radius:var(--radius);border:1px solid ${hasIssue ? 'rgba(245,158,11,0.3)' : 'rgba(16,185,129,0.3)'};background:${hasIssue ? 'rgba(245,158,11,0.06)' : 'rgba(16,185,129,0.06)'};">
+              <div style="font-weight:700;font-size:14px;margin-bottom:8px;color:${hasIssue ? 'var(--amber)' : 'var(--green)'};">${hasIssue ? '⚠ Issues Found' : '✓ Network Healthy'}</div>
+              ${r.recommendations.map(rec => {
+                const isGood = rec.includes('passed') || rec.includes('Self-test passed') || rec.includes('looks healthy')
+                const isInfo = rec.includes('Found') || rec.includes('Multiple')
+                const color = isGood ? 'var(--green)' : isInfo ? 'var(--blue)' : 'var(--amber)'
+                const icon = isGood ? '✓' : isInfo ? 'ℹ' : '⚠'
+                return `<div style="font-size:13px;color:var(--text);padding:4px 0;display:flex;gap:8px;align-items:start"><span style="color:${color};flex-shrink:0;font-weight:700">${icon}</span><span>${esc(rec)}</span></div>`
+              }).join('')}
+            </div>`
+        }
+
+        // Interfaces
+        const ifEl = $('#netDiagInterfaces')
+        const ipv4External = (r.interfaces || []).filter(i => i.family === 'IPv4' && !i.internal)
+        const ipv4Internal = (r.interfaces || []).filter(i => i.family === 'IPv4' && i.internal)
+        const allInterfaces = [...ipv4External, ...ipv4Internal]
+        ifEl.innerHTML = allInterfaces.map(iface => {
+          const isMain = !iface.internal && iface.family === 'IPv4'
+          const borderColor = isMain ? 'rgba(16,185,129,0.3)' : 'var(--border)'
+          const label = iface.internal ? 'Loopback' : 'Active'
+          return `<div class="stat-card" style="border-color:${borderColor}">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+              <div style="width:10px;height:10px;border-radius:50%;background:${isMain ? 'var(--green)' : '#555'};flex-shrink:0"></div>
+              <span style="font-weight:700;font-size:14px">${esc(iface.name)}</span>
+              <span class="badge ${isMain ? 'badge-green' : ''}" style="font-size:10px;margin-left:auto">${label}</span>
+            </div>
+            <div style="font-size:13px;color:var(--text)">IP: <strong>${esc(iface.address)}</strong></div>
+            <div style="font-size:12px;color:var(--text-dim)">Mask: ${esc(iface.netmask)} | MAC: ${esc(iface.mac)}</div>
+          </div>`
+        }).join('')
+
+        // Port check
+        const portEl = $('#netPortResult')
+        const pc = r.portCheck || {}
+        if (pc.available) {
+          portEl.innerHTML = `<span style="color:var(--green)">✓ Port ${pc.port} is available</span>`
+        } else if (pc.inUse && r.lanServerStatus?.mode === 'server') {
+          portEl.innerHTML = `<span style="color:var(--green)">✓ Port ${pc.port} in use by this server</span>`
+        } else {
+          portEl.innerHTML = `<span style="color:var(--red)">✕ Port ${pc.port} is in use${pc.error ? ' — ' + esc(pc.error) : ''}</span>`
+        }
+
+        // UDP
+        const udpEl = $('#netUdpResult')
+        const udp = r.udpBroadcast || {}
+        udpEl.innerHTML = udp.working
+          ? '<span style="color:var(--green)">✓ UDP broadcast works</span>'
+          : `<span style="color:var(--red)">✕ UDP broadcast failed${udp.error ? ' — ' + esc(udp.error) : ''}</span>`
+
+        // Discovered servers
+        const discEl = $('#netDiagDiscovered')
+        if (r.discoveredServers && r.discoveredServers.length > 0) {
+          discEl.innerHTML = r.discoveredServers.map(s =>
+            `<div style="padding:8px 12px;background:var(--surface);border:1px solid rgba(16,185,129,0.2);border-radius:6px;margin-bottom:6px;display:flex;align-items:center;gap:10px">
+              <span style="color:var(--green);font-size:16px">🖥️</span>
+              <div>
+                <div style="font-weight:600;font-size:13px">${esc(s.ip)}:${s.port}</div>
+                <div style="font-size:11px;color:var(--text-dim)">Register: ${esc(s.registerId || 'unknown')}</div>
+              </div>
+            </div>`
+          ).join('')
+        } else {
+          discEl.innerHTML = '<span style="color:var(--text-dim)">No POS servers detected via UDP broadcast</span>'
+        }
+
+        // Subnet scan
+        const subEl = $('#netDiagSubnet')
+        const sub = r.subnetScan || {}
+        let subHtml = `<div style="font-size:12px;color:var(--text-dim);margin-bottom:8px">Scanned ${sub.scanned || 0} IPs on local subnet</div>`
+        if (sub.reachable && sub.reachable.length > 0) {
+          subHtml += sub.reachable.map(h => {
+            const isPOS = h.isPosServer
+            return `<div style="padding:8px 12px;background:var(--surface);border:1px solid ${isPOS ? 'rgba(16,185,129,0.25)' : 'var(--border)'};border-radius:6px;margin-bottom:6px;display:flex;align-items:center;gap:10px">
+              <div style="width:10px;height:10px;border-radius:50%;background:${isPOS ? 'var(--green)' : 'var(--amber)'};flex-shrink:0"></div>
+              <div style="flex:1">
+                <span style="font-weight:600;font-size:13px">${esc(h.ip)}:${h.port}</span>
+                ${isPOS ? '<span style="margin-left:8px;font-size:11px;color:var(--green);font-weight:700">POS SERVER</span>' : '<span style="margin-left:8px;font-size:11px;color:var(--text-dim)">Port open (not POS)</span>'}
+              </div>
+            </div>`
+          }).join('')
+        } else {
+          subHtml += '<div style="color:var(--text-dim)">No hosts with port ' + (sub.port || 5555) + ' open found on subnet</div>'
+        }
+        if (sub.error) subHtml += `<div style="color:var(--red);font-size:12px;margin-top:4px">${esc(sub.error)}</div>`
+        subEl.innerHTML = subHtml
+
+        // Firewall
+        const fwEl = $('#netDiagFirewall')
+        if (r.firewallHints && r.firewallHints.length > 0) {
+          fwEl.innerHTML = r.firewallHints.map(h => {
+            const isWarning = h.includes('ON') || h.includes('blocking') || h.includes('No firewall rule') || h.includes('No inbound')
+            return `<div style="padding:4px 0;font-size:13px;color:${isWarning ? 'var(--amber)' : 'var(--text-dim)'}">${isWarning ? '⚠ ' : '• '}${esc(h)}</div>`
+          }).join('')
+        } else {
+          fwEl.innerHTML = '<span style="color:var(--text-dim)">No firewall information available for this platform</span>'
+        }
+
+        // Raw JSON
+        $('#netDiagRaw').textContent = JSON.stringify(r, null, 2)
+
+      } catch (e) {
+        status.textContent = 'Diagnostic failed: ' + e.message
+        status.style.color = 'var(--red)'
+      }
+      btn.disabled = false
     })
 
     // ── Z Report ────────────────────────────────────────────────────

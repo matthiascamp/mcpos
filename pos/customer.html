@@ -11,97 +11,110 @@
 html,body{height:100%;overflow:hidden}
 body{font-family:'Inter',system-ui,sans-serif;background:linear-gradient(160deg,#0f1a14 0%,#1a1d27 40%,#1a2218 100%);color:#f5f0e8;display:flex;flex-direction:column;user-select:none;-webkit-font-smoothing:antialiased}
 
-.header{padding:18px 32px;display:flex;align-items:center;gap:16px;border-bottom:1px solid rgba(16,185,129,.15);background:rgba(0,0,0,.25)}
-.brand-circle-img{width:52px;height:52px;border-radius:50%;object-fit:cover;box-shadow:0 2px 12px rgba(16,185,129,.2)}
-.store-name{font-family:'Playfair Display',serif;font-weight:700;font-size:26px;color:#f5f0e8}
-.store-sub{font-size:14px;color:rgba(245,240,232,.5);margin-top:2px;letter-spacing:.5px;text-transform:uppercase}
+.header{padding:clamp(10px,1.8vh,18px) clamp(16px,2.5vw,32px);display:flex;align-items:center;gap:clamp(8px,1.2vw,16px);border-bottom:1px solid rgba(16,185,129,.15);background:rgba(0,0,0,.25)}
+.brand-circle-img{width:clamp(32px,5vh,52px);height:clamp(32px,5vh,52px);border-radius:50%;object-fit:cover;box-shadow:0 2px 12px rgba(16,185,129,.2)}
+.store-name{font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(16px,2.4vw,26px);color:#f5f0e8}
+.store-sub{font-size:clamp(10px,1.2vw,14px);color:rgba(245,240,232,.5);margin-top:2px;letter-spacing:.5px;text-transform:uppercase}
 
 .content{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
 
 /* ═══ Idle / Deals Screen ═══════════════════════════════════════════════════ */
-.idle-screen{flex:1;display:flex;flex-direction:column;padding:32px 40px;overflow:hidden;animation:fadeIn .6s ease}
-.deals-header{text-align:center;margin-bottom:28px}
-.deals-title{font-family:'Playfair Display',serif;font-size:48px;font-weight:800;color:#f5f0e8;margin-bottom:6px}
-.deals-subtitle{font-size:18px;color:rgba(245,240,232,.5);letter-spacing:.5px;text-transform:uppercase}
+.idle-screen{flex:1;display:flex;flex-direction:column;padding:clamp(16px,3vh,32px) clamp(20px,3vw,40px);overflow:hidden;animation:fadeIn .6s ease}
+.deals-header{text-align:center;margin-bottom:clamp(12px,2.5vh,28px)}
+.deals-title{font-family:'Playfair Display',serif;font-size:clamp(24px,4.5vw,48px);font-weight:800;color:#f5f0e8;margin-bottom:6px}
+.deals-subtitle{font-size:clamp(12px,1.6vw,18px);color:rgba(245,240,232,.5);letter-spacing:.5px;text-transform:uppercase}
 
-.deals-grid{flex:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;align-content:start;overflow-y:auto;padding-bottom:16px}
+.deals-grid{flex:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,45vw),1fr));gap:clamp(10px,1.5vw,18px);align-content:start;overflow-y:auto;padding-bottom:16px}
 
-.deal-card{background:linear-gradient(145deg,rgba(27,67,50,.45),rgba(27,67,50,.12));border:1px solid rgba(16,185,129,.2);border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden}
+.deal-card{background:linear-gradient(145deg,rgba(27,67,50,.45),rgba(27,67,50,.12));border:1px solid rgba(16,185,129,.2);border-radius:clamp(10px,1.5vw,18px);padding:clamp(14px,2vw,24px);display:flex;flex-direction:column;gap:clamp(6px,1vh,12px);position:relative;overflow:hidden}
 .deal-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#10b981,#f59e0b);border-radius:18px 18px 0 0;opacity:.6}
-.deal-card-top{display:flex;align-items:center;gap:14px}
-.deal-emoji{font-size:52px;line-height:1;flex-shrink:0}
+.deal-card-top{display:flex;align-items:center;gap:clamp(8px,1.2vw,14px)}
+.deal-emoji{font-size:clamp(28px,4.5vw,52px);line-height:1;flex-shrink:0}
 .deal-info{flex:1;min-width:0}
-.deal-name{font-weight:700;font-size:22px;color:#f5f0e8;margin-bottom:5px}
-.deal-badge{display:inline-block;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.deal-name{font-weight:700;font-size:clamp(14px,2vw,22px);color:#f5f0e8;margin-bottom:5px}
+.deal-badge{display:inline-block;padding:clamp(2px,.4vh,4px) clamp(6px,1vw,10px);border-radius:6px;font-size:clamp(9px,1vw,12px);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
 .badge-special{background:rgba(239,68,68,.2);color:#fca5a5;border:1px solid rgba(239,68,68,.3)}
 .badge-today{background:rgba(245,158,11,.15);color:#fcd34d;border:1px solid rgba(245,158,11,.3)}
 .badge-fresh{background:rgba(16,185,129,.15);color:#6ee7b7;border:1px solid rgba(16,185,129,.3)}
 .badge-popular{background:rgba(139,92,246,.15);color:#c4b5fd;border:1px solid rgba(139,92,246,.3)}
-.deal-pricing{display:flex;align-items:baseline;gap:10px;margin-top:4px}
-.deal-special-price{font-size:32px;font-weight:800;color:#10b981}
-.deal-special-text{font-size:24px;font-weight:700;color:#f59e0b}
-.deal-normal-price{font-size:18px;color:rgba(245,240,232,.4);text-decoration:line-through}
-.deal-unit{font-size:16px;color:rgba(245,240,232,.5);font-weight:500}
+.deal-pricing{display:flex;align-items:baseline;gap:clamp(6px,1vw,10px);margin-top:4px}
+.deal-special-price{font-size:clamp(20px,3vw,32px);font-weight:800;color:#10b981}
+.deal-special-text{font-size:clamp(16px,2.2vw,24px);font-weight:700;color:#f59e0b}
+.deal-normal-price{font-size:clamp(12px,1.5vw,18px);color:rgba(245,240,232,.4);text-decoration:line-through}
+.deal-unit{font-size:clamp(11px,1.3vw,16px);color:rgba(245,240,232,.5);font-weight:500}
 
-.idle-footer{display:flex;align-items:center;justify-content:space-between;padding-top:20px;border-top:1px solid rgba(16,185,129,.1);margin-top:auto}
-.idle-footer-left{display:flex;align-items:center;gap:12px}
-.idle-footer-logo{width:40px;height:40px;border-radius:50%;object-fit:cover}
-.idle-footer-text{font-size:16px;color:rgba(245,240,232,.5)}
-.qr-area{display:flex;align-items:center;gap:12px}
-.qr-placeholder{width:60px;height:60px;border-radius:8px;border:1px dashed rgba(245,240,232,.25);display:flex;align-items:center;justify-content:center}
-.qr-placeholder-text{font-size:11px;color:rgba(245,240,232,.3)}
-.qr-label{font-size:13px;color:rgba(245,240,232,.4);line-height:1.4}
-.qr-label-bold{font-size:15px;color:rgba(245,240,232,.6);font-weight:600}
+.idle-footer{display:flex;align-items:center;justify-content:space-between;padding-top:clamp(10px,2vh,20px);border-top:1px solid rgba(16,185,129,.1);margin-top:auto}
+.idle-footer-left{display:flex;align-items:center;gap:clamp(6px,1vw,12px)}
+.idle-footer-logo{width:clamp(24px,4vh,40px);height:clamp(24px,4vh,40px);border-radius:50%;object-fit:cover}
+.idle-footer-text{font-size:clamp(11px,1.3vw,16px);color:rgba(245,240,232,.5)}
+.qr-area{display:flex;align-items:center;gap:clamp(6px,1vw,12px)}
+.qr-placeholder{width:clamp(40px,6vh,60px);height:clamp(40px,6vh,60px);border-radius:8px;border:1px dashed rgba(245,240,232,.25);display:flex;align-items:center;justify-content:center}
+.qr-placeholder-text{font-size:clamp(8px,1vw,11px);color:rgba(245,240,232,.3)}
+.qr-label{font-size:clamp(10px,1.1vw,13px);color:rgba(245,240,232,.4);line-height:1.4}
+.qr-label-bold{font-size:clamp(11px,1.3vw,15px);color:rgba(245,240,232,.6);font-weight:600}
 
 /* ═══ Active Sale — Split Layout ═══════════════════════════════════════════ */
 .sale-view{flex:1;display:none;flex-direction:row;overflow:hidden;animation:fadeIn .3s ease}
 
 .sale-left{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
-.items-header{padding:16px 28px;font-size:20px;color:rgba(245,240,232,.5);text-transform:uppercase;letter-spacing:.5px;font-weight:700;border-bottom:1px solid rgba(16,185,129,.08)}
-.items-list{flex:1;overflow-y:auto;padding:12px 24px}
-.item-row{display:flex;align-items:center;padding:20px 22px;margin-bottom:10px;border-radius:14px;background:rgba(27,67,50,.12);border:1px solid rgba(16,185,129,.06);gap:16px;transition:all .2s}
+.items-header{padding:clamp(8px,1.5vh,16px) clamp(14px,2.5vw,28px);font-size:clamp(14px,1.8vw,20px);color:rgba(245,240,232,.5);text-transform:uppercase;letter-spacing:.5px;font-weight:700;border-bottom:1px solid rgba(16,185,129,.08)}
+.items-list{flex:1;overflow-y:auto;padding:clamp(6px,1.2vh,12px) clamp(12px,2vw,24px)}
+.item-row{display:flex;align-items:center;padding:clamp(10px,2vh,20px) clamp(12px,2vw,22px);margin-bottom:clamp(5px,1vh,10px);border-radius:clamp(8px,1.2vw,14px);background:rgba(27,67,50,.12);border:1px solid rgba(16,185,129,.06);gap:clamp(8px,1.4vw,16px);transition:all .2s}
 .item-row:last-child{margin-bottom:0}
 .item-row.item-new{animation:slideIn .3s ease}
-.item-qty{background:rgba(16,185,129,.15);color:#6ee7b7;font-size:24px;font-weight:700;padding:8px 12px;border-radius:8px;min-width:52px;text-align:center}
+.item-qty{background:rgba(16,185,129,.15);color:#6ee7b7;font-size:clamp(16px,2.2vw,24px);font-weight:700;padding:clamp(4px,.8vh,8px) clamp(6px,1vw,12px);border-radius:8px;min-width:clamp(36px,4.5vw,52px);text-align:center}
 .item-details{flex:1;min-width:0}
-.item-name{font-weight:600;font-size:28px;color:#f5f0e8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.item-unit-price{font-size:18px;color:rgba(245,240,232,.4);margin-top:3px}
-.item-price{font-weight:800;font-size:30px;color:#10b981;min-width:110px;text-align:right}
+.item-name{font-weight:600;font-size:clamp(16px,2.5vw,28px);color:#f5f0e8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item-unit-price{font-size:clamp(12px,1.5vw,18px);color:rgba(245,240,232,.4);margin-top:3px}
+.item-price{font-weight:800;font-size:clamp(18px,2.8vw,30px);color:#10b981;min-width:clamp(70px,10vw,110px);text-align:right}
 
-.totals-bar{padding:24px 28px;background:rgba(0,0,0,.4);border-top:3px solid rgba(16,185,129,.4)}
-.total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:22px;color:rgba(245,240,232,.5)}
+.totals-bar{padding:clamp(12px,2.5vh,24px) clamp(14px,2.5vw,28px);background:rgba(0,0,0,.4);border-top:3px solid rgba(16,185,129,.4)}
+.total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:clamp(5px,1vh,10px);font-size:clamp(14px,2vw,22px);color:rgba(245,240,232,.5)}
 .total-row:last-child{margin-bottom:0}
-.total-row.grand{font-size:40px;font-weight:800;color:#f5f0e8;margin-top:14px;padding-top:16px;border-top:2px solid rgba(16,185,129,.25)}
-.total-row.grand .total-amount{color:#10b981;font-family:'Playfair Display',serif;font-size:60px}
+.total-row.grand{font-size:clamp(22px,3.5vw,40px);font-weight:800;color:#f5f0e8;margin-top:clamp(6px,1.4vh,14px);padding-top:clamp(8px,1.6vh,16px);border-top:2px solid rgba(16,185,129,.25)}
+.total-row.grand .total-amount{color:#10b981;font-family:'Playfair Display',serif;font-size:clamp(32px,5.5vw,60px)}
 
 /* Right sidebar — mini deals */
-.sale-right{width:320px;flex-shrink:0;display:flex;flex-direction:column;background:rgba(0,0,0,.15);border-left:1px solid rgba(16,185,129,.1);overflow:hidden}
-.sidebar-header{padding:18px 20px;text-align:center;border-bottom:1px solid rgba(16,185,129,.08)}
-.sidebar-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#f5f0e8}
-.sidebar-sub{font-size:13px;color:rgba(245,240,232,.4);margin-top:3px;text-transform:uppercase;letter-spacing:.3px}
-.sidebar-deals{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.sale-right{width:clamp(200px,25vw,320px);flex-shrink:0;display:flex;flex-direction:column;background:rgba(0,0,0,.15);border-left:1px solid rgba(16,185,129,.1);overflow:hidden}
+.sidebar-header{padding:clamp(10px,1.8vh,18px) clamp(12px,1.8vw,20px);text-align:center;border-bottom:1px solid rgba(16,185,129,.08)}
+.sidebar-title{font-family:'Playfair Display',serif;font-size:clamp(14px,2vw,22px);font-weight:700;color:#f5f0e8}
+.sidebar-sub{font-size:clamp(10px,1.1vw,13px);color:rgba(245,240,232,.4);margin-top:3px;text-transform:uppercase;letter-spacing:.3px}
+.sidebar-deals{flex:1;overflow-y:auto;padding:clamp(6px,1.2vh,12px) clamp(8px,1.2vw,14px);display:flex;flex-direction:column;gap:clamp(5px,.9vh,10px)}
 
-.mini-deal{background:rgba(27,67,50,.25);border:1px solid rgba(16,185,129,.12);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px}
-.mini-deal-emoji{font-size:36px;flex-shrink:0}
+.mini-deal{background:rgba(27,67,50,.25);border:1px solid rgba(16,185,129,.12);border-radius:clamp(8px,1vw,12px);padding:clamp(8px,1.4vh,14px) clamp(10px,1.4vw,16px);display:flex;align-items:center;gap:clamp(6px,1vw,12px)}
+.mini-deal-emoji{font-size:clamp(22px,3.2vw,36px);flex-shrink:0}
 .mini-deal-info{flex:1;min-width:0}
-.mini-deal-name{font-weight:600;font-size:16px;color:#f5f0e8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mini-deal-price{font-size:20px;font-weight:700;color:#10b981;margin-top:2px}
-.mini-deal-unit{font-size:13px;color:rgba(245,240,232,.4);font-weight:400}
-.mini-deal-badge{font-size:10px;font-weight:700;text-transform:uppercase;color:#fcd34d;letter-spacing:.3px;margin-top:2px}
+.mini-deal-name{font-weight:600;font-size:clamp(12px,1.4vw,16px);color:#f5f0e8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini-deal-price{font-size:clamp(14px,1.8vw,20px);font-weight:700;color:#10b981;margin-top:2px}
+.mini-deal-unit{font-size:clamp(10px,1.1vw,13px);color:rgba(245,240,232,.4);font-weight:400}
+.mini-deal-badge{font-size:clamp(8px,.9vw,10px);font-weight:700;text-transform:uppercase;color:#fcd34d;letter-spacing:.3px;margin-top:2px}
 
-.sidebar-footer{padding:14px 20px;border-top:1px solid rgba(16,185,129,.08);text-align:center}
-.sidebar-footer-text{font-size:13px;color:rgba(245,240,232,.3);line-height:1.5}
+.sidebar-footer{padding:clamp(8px,1.4vh,14px) clamp(12px,1.8vw,20px);border-top:1px solid rgba(16,185,129,.08);text-align:center}
+.sidebar-footer-text{font-size:clamp(10px,1.1vw,13px);color:rgba(245,240,232,.3);line-height:1.5}
 
 /* ═══ Sale Complete ════════════════════════════════════════════════════════ */
-.sale-complete{flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:40px}
+.sale-complete{flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;gap:clamp(12px,2.5vh,24px);padding:clamp(20px,4vh,40px)}
 .sale-complete.active{display:flex}
-.check-circle{width:110px;height:110px;border-radius:50%;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;animation:popIn .4s ease;box-shadow:0 4px 30px rgba(16,185,129,.3)}
-.check-circle svg{width:56px;height:56px;stroke:#fff;stroke-width:3;fill:none}
-.thank-you{font-family:'Playfair Display',serif;font-size:42px;font-weight:700;color:#f5f0e8;animation:fadeIn .6s ease}
-.thank-store{font-size:20px;color:rgba(245,240,232,.5);margin-top:-4px}
-.change-display{font-size:36px;color:#10b981;font-weight:700;margin-top:8px}
-.total-paid{font-size:22px;color:rgba(245,240,232,.5)}
-.goodbye{font-size:16px;color:rgba(245,240,232,.35);margin-top:12px}
+.check-circle{width:clamp(60px,12vh,110px);height:clamp(60px,12vh,110px);border-radius:50%;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;animation:popIn .4s ease;box-shadow:0 4px 30px rgba(16,185,129,.3)}
+.check-circle svg{width:clamp(30px,6vh,56px);height:clamp(30px,6vh,56px);stroke:#fff;stroke-width:3;fill:none}
+.thank-you{font-family:'Playfair Display',serif;font-size:clamp(24px,4vw,42px);font-weight:700;color:#f5f0e8;animation:fadeIn .6s ease}
+.thank-store{font-size:clamp(14px,2vw,20px);color:rgba(245,240,232,.5);margin-top:-4px}
+.change-display{font-size:clamp(22px,3.5vw,36px);color:#10b981;font-weight:700;margin-top:8px}
+.total-paid{font-size:clamp(16px,2vw,22px);color:rgba(245,240,232,.5)}
+.goodbye{font-size:clamp(12px,1.5vw,16px);color:rgba(245,240,232,.35);margin-top:12px}
+
+/* ═══ Small screen: hide sidebar, stack deals ════════════════════════════ */
+@media (max-width:800px) {
+  .sale-right{display:none}
+  .deals-grid{grid-template-columns:1fr}
+}
+@media (max-height:500px) {
+  .header{padding:6px 16px}
+  .brand-circle-img{width:28px;height:28px}
+  .deals-header{margin-bottom:8px}
+  .idle-footer{padding-top:6px}
+  .sale-complete{gap:8px;padding:10px}
+}
 
 @keyframes popIn{0%{transform:scale(0)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}

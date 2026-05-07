@@ -30,7 +30,7 @@ let state = {
 
 // ─── Exports ─────────────────────────────────────────────────────────────────
 
-module.exports = { startServer, startClient, stopAll, getStatus, testConnection, discoverServer }
+module.exports = { startServer, startClient, stopAll, getStatus, testConnection, discoverServer, networkDiagnostic }
 
 function getStatus () {
   const now = Date.now()
@@ -362,21 +362,25 @@ function startClient (serverIp, port, secret, dbHelpers) {
     })
   }, SYNC_INTERVAL)
 
-  // UDP listener for server discovery — auto-update IP if server moves
+  // UDP listener for server discovery — auto-update IP/secret if server changes
   startUdpListener(data => {
+    let changed = false
     if (data.ip !== state.serverIp) {
       console.log(`LAN: server moved to ${data.ip}:${data.port}`)
       state.serverIp = data.ip
       state.port = data.port
-      if (data.secret) state.secret = data.secret
-      // Save updated IP
-      if (db) {
-        db.dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('lan_server_ip', ?1)", [data.ip])
-        db.dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('lan_port', ?1)", [String(data.port)])
-        if (data.secret) db.dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('lan_secret', ?1)", [data.secret])
-        db.saveDB()
-      }
-      // Retry sync immediately with new address
+      changed = true
+    }
+    if (data.secret && data.secret !== state.secret) {
+      console.log('LAN: server secret updated')
+      state.secret = data.secret
+      changed = true
+    }
+    if (changed && db) {
+      db.dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('lan_server_ip', ?1)", [data.ip])
+      db.dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('lan_port', ?1)", [String(data.port)])
+      if (data.secret) db.dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('lan_secret', ?1)", [data.secret])
+      db.saveDB()
       if (!state.connected) attemptInitialSync()
     }
   })
@@ -397,6 +401,22 @@ function attemptInitialSync (retries = 0) {
   })
 }
 
+async function refreshSecret () {
+  try {
+    const hb = await testConnection(state.serverIp, state.port)
+    if (hb.ok && hb.secret) {
+      state.secret = hb.secret
+      if (db) {
+        db.dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('lan_secret', ?1)", [hb.secret])
+        db.saveDB()
+      }
+      console.log('LAN: secret refreshed from server heartbeat')
+      return true
+    }
+  } catch (_) {}
+  return false
+}
+
 async function doFullSync () {
   // Push local deletions first so server removes them before responding
   const localDeleted = db.dbAll("SELECT table_name, record_id FROM deleted_records")
@@ -404,7 +424,22 @@ async function doFullSync () {
     try { await httpPost('/api/deleted', localDeleted) } catch (_) {}
   }
 
-  const data = await httpGet('/api/full-sync')
+  let data
+  try {
+    data = await httpGet('/api/full-sync', 30000)
+  } catch (e) {
+    // If 401 Unauthorized, try refreshing secret from heartbeat and retry once
+    if (e.message.includes('Unauthorized') || e.message.includes('401')) {
+      const refreshed = await refreshSecret()
+      if (refreshed) {
+        data = await httpGet('/api/full-sync', 30000)
+      } else {
+        throw e
+      }
+    } else {
+      throw e
+    }
+  }
 
   // Upsert all master data into local DB (no queueSync — don't re-push to server)
   if (data.categories) {
@@ -473,13 +508,13 @@ async function doFullSync () {
 
     // Merge server buttons (upsert, not full replace — preserves local-only buttons)
     for (const b of filtered) {
-      db.dbRun(`INSERT OR REPLACE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, active, updated_at)
-                VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19)`,
+      db.dbRun(`INSERT OR REPLACE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, product_id, active, updated_at)
+                VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20)`,
                [b.id, b.label, b.type, b.price || null, b.image || null, b.color || '#fff',
                 b.bg_color || '#1B4332', b.parent_id || null, b.category_filter || null,
                 b.alpha_range || null, b.sort_order || 0, b.position || 'grid',
                 b.page || 1, b.grid_row || 0, b.grid_col || 0, b.col_span || 1, b.row_span || 1,
-                b.active ?? 1, b.updated_at || null])
+                b.product_id || null, b.active ?? 1, b.updated_at || null])
     }
 
     // Enforce all deletions (removes anything that slipped through)
@@ -603,6 +638,21 @@ async function doSyncCycle () {
     state.connected = true
     state.error = null
   } catch (e) {
+    // If 401, try refreshing secret and do a full sync instead
+    if (e.message.includes('Unauthorized') || e.message.includes('401')) {
+      console.log('LAN sync: 401 Unauthorized — refreshing secret...')
+      const refreshed = await refreshSecret()
+      if (refreshed) {
+        try {
+          await doFullSync()
+          return
+        } catch (e2) {
+          state.error = e2.message
+          state.connected = false
+          return
+        }
+      }
+    }
     state.error = e.message
     state.connected = false
   }
@@ -622,7 +672,7 @@ function getRegisterId () {
   return 'LANE01'
 }
 
-function httpGet (path) {
+function httpGet (path, timeoutMs) {
   return new Promise((resolve, reject) => {
     const opts = {
       hostname: state.serverIp,
@@ -630,7 +680,7 @@ function httpGet (path) {
       path,
       method: 'GET',
       headers: { 'X-POS-Secret': state.secret || '', 'X-Register-Id': getRegisterId() },
-      timeout: 8000
+      timeout: timeoutMs || 15000
     }
     const req = http.request(opts, res => {
       const chunks = []
@@ -663,7 +713,7 @@ function httpPost (path, body) {
         'X-POS-Secret': state.secret || '',
         'X-Register-Id': getRegisterId()
       },
-      timeout: 8000
+      timeout: 15000
     }
     const req = http.request(opts, res => {
       const chunks = []
@@ -787,6 +837,331 @@ function scanSubnet (port) {
       req.on('timeout', () => { req.destroy(); pending--; if (pending <= 0 && !found) resolve(null) })
       req.end()
     }
+  })
+}
+
+// ─── Network Diagnostic Probe ────────────────────────────────────────────────
+
+async function networkDiagnostic () {
+  const net = require('net')
+  const results = {
+    timestamp: new Date().toISOString(),
+    hostname: os.hostname(),
+    platform: os.platform(),
+    interfaces: [],
+    lanServerStatus: { ...state },
+    portCheck: { port: state.port || 5555, available: null, inUse: null, error: null },
+    udpBroadcast: { working: null, error: null },
+    discoveredServers: [],
+    subnetScan: { scanned: 0, reachable: [], error: null },
+    firewallHints: [],
+    dns: { hostname: null, error: null },
+    recommendations: []
+  }
+
+  // 1. Enumerate all network interfaces
+  const nets = os.networkInterfaces()
+  for (const [name, addrs] of Object.entries(nets)) {
+    for (const addr of addrs) {
+      const isIPv4 = addr.family === 'IPv4' || addr.family === 4
+      results.interfaces.push({
+        name,
+        address: addr.address,
+        netmask: addr.netmask,
+        mac: addr.mac,
+        internal: addr.internal,
+        family: isIPv4 ? 'IPv4' : 'IPv6',
+        cidr: addr.cidr || null
+      })
+    }
+  }
+
+  const externalIPv4 = results.interfaces.filter(i => i.family === 'IPv4' && !i.internal)
+  if (externalIPv4.length === 0) {
+    results.recommendations.push('No external IPv4 network interfaces found. Check that this PC is connected to the local network (WiFi or Ethernet).')
+  } else if (externalIPv4.length > 1) {
+    results.recommendations.push(`Multiple network adapters detected (${externalIPv4.map(i => i.name + ':' + i.address).join(', ')}). The server binds on 0.0.0.0 (all interfaces), but clients may need to know which IP to use.`)
+  }
+
+  // Check for common problematic ranges
+  for (const iface of externalIPv4) {
+    if (iface.address.startsWith('169.254.')) {
+      results.recommendations.push(`${iface.name} (${iface.address}) has a link-local address (169.254.x.x) — this means DHCP failed. Check router/network cable.`)
+    }
+    if (iface.address.startsWith('10.') || iface.address.startsWith('172.') || iface.address.startsWith('192.168.')) {
+      // Good — private range
+    } else {
+      results.recommendations.push(`${iface.name} (${iface.address}) has a public IP. LAN sync works best on private networks (192.168.x.x, 10.x.x.x).`)
+    }
+  }
+
+  // 2. Check if LAN port is available / in use
+  const port = state.port || 5555
+  try {
+    const portFree = await checkPort(port)
+    results.portCheck.available = portFree
+    results.portCheck.inUse = !portFree
+    if (!portFree && state.mode !== 'server') {
+      results.recommendations.push(`Port ${port} is already in use. Another instance of the app or another program may be using it.`)
+    }
+  } catch (e) {
+    results.portCheck.error = e.message
+  }
+
+  // 3. Test UDP broadcast
+  try {
+    results.udpBroadcast = await testUdpBroadcast()
+    if (!results.udpBroadcast.working) {
+      results.recommendations.push('UDP broadcast failed. This prevents automatic server discovery. Possible causes: firewall blocking UDP port 5556, or network doesn\'t support broadcast (some corporate networks block it).')
+    }
+  } catch (e) {
+    results.udpBroadcast = { working: false, error: e.message }
+  }
+
+  // 4. UDP discovery — listen for server broadcasts
+  try {
+    results.discoveredServers = await listenForBroadcasts(3000)
+    if (results.discoveredServers.length > 0) {
+      results.recommendations.push(`Found ${results.discoveredServers.length} server(s) broadcasting on the network.`)
+    }
+  } catch (_) {}
+
+  // 5. Subnet scan — find other POS instances
+  const primaryIp = getLocalIp()
+  if (primaryIp !== '127.0.0.1') {
+    try {
+      const scanResults = await thoroughSubnetScan(primaryIp, port)
+      results.subnetScan = scanResults
+      if (scanResults.reachable.length === 0 && state.mode === 'client') {
+        results.recommendations.push('No POS servers found on the local subnet. Make sure the server PC has the app running and is on the same network.')
+      }
+    } catch (e) {
+      results.subnetScan.error = e.message
+    }
+  } else {
+    results.subnetScan.error = 'Could not determine local IP address'
+    results.recommendations.push('Local IP resolves to 127.0.0.1. No external network detected.')
+  }
+
+  // 6. Platform-specific firewall hints
+  if (os.platform() === 'win32') {
+    results.firewallHints.push(
+      'Windows Firewall may block incoming connections on port ' + port + '.',
+      'To allow: Settings > Windows Security > Firewall > Allow an app through firewall > Add Electron.',
+      'Or run in admin PowerShell: netsh advfirewall firewall add rule name="CrispPOS" dir=in action=allow protocol=TCP localport=' + port,
+      'Also add UDP rule: netsh advfirewall firewall add rule name="CrispPOS-UDP" dir=in action=allow protocol=UDP localport=5556'
+    )
+    // Try to check firewall status
+    try {
+      const { execSync } = require('child_process')
+      const fwStatus = execSync('netsh advfirewall show allprofiles state', { timeout: 5000, encoding: 'utf-8' })
+      const profiles = fwStatus.match(/Profile.*\n.*State\s+(\w+)/gi) || []
+      const activeProfiles = profiles.filter(p => p.toLowerCase().includes('on'))
+      if (activeProfiles.length > 0) {
+        results.firewallHints.unshift(`Windows Firewall is ON for ${activeProfiles.length} profile(s). This is likely blocking LAN connections.`)
+        results.recommendations.push('Windows Firewall is active. You need to add firewall rules for TCP port ' + port + ' and UDP port 5556.')
+      }
+    } catch (_) {
+      results.firewallHints.push('Could not check firewall status (needs admin privileges).')
+    }
+
+    // Check if our port has a firewall rule
+    try {
+      const { execSync } = require('child_process')
+      const rules = execSync(`netsh advfirewall firewall show rule name=all dir=in | findstr /i "${port}"`, { timeout: 5000, encoding: 'utf-8' })
+      if (rules.trim()) {
+        results.firewallHints.push('Found existing firewall rule(s) mentioning port ' + port + '.')
+      } else {
+        results.firewallHints.push('No firewall rule found for port ' + port + '. Connections will be blocked.')
+      }
+    } catch (_) {
+      results.firewallHints.push('No inbound firewall rule found for port ' + port + '.')
+    }
+  } else if (os.platform() === 'darwin') {
+    results.firewallHints.push(
+      'macOS Application Firewall: System Settings > Network > Firewall. If enabled, allow Electron/Crisp POS.',
+      'macOS usually prompts "Allow incoming connections?" on first server start — click Allow.'
+    )
+  }
+
+  // 7. Connectivity self-test: can we reach our own server?
+  if (state.mode === 'server' && state.connected) {
+    try {
+      const selfTest = await testConnection(primaryIp, port)
+      if (selfTest.ok) {
+        results.recommendations.push('Self-test passed: this server is reachable at ' + primaryIp + ':' + port)
+      } else {
+        results.recommendations.push('Self-test FAILED: server is running but cannot connect to itself at ' + primaryIp + ':' + port + '. Firewall is likely blocking it.')
+      }
+    } catch (_) {}
+  }
+
+  // 8. DNS / hostname resolution
+  try {
+    const { execSync } = require('child_process')
+    const hostname = os.hostname()
+    results.dns.hostname = hostname
+  } catch (e) {
+    results.dns.error = e.message
+  }
+
+  // Final summary recommendations
+  if (results.recommendations.length === 0) {
+    results.recommendations.push('Network looks healthy. All checks passed.')
+  }
+
+  return results
+}
+
+function checkPort (port) {
+  return new Promise((resolve) => {
+    const net = require('net')
+    const tester = net.createServer()
+    tester.once('error', (err) => {
+      if (err.code === 'EADDRINUSE') resolve(false)
+      else resolve(false)
+    })
+    tester.once('listening', () => {
+      tester.close(() => resolve(true))
+    })
+    tester.listen(port, '0.0.0.0')
+  })
+}
+
+function testUdpBroadcast () {
+  return new Promise((resolve) => {
+    const timeout = setTimeout(() => {
+      try { sender?.close() } catch (_) {}
+      try { receiver?.close() } catch (_) {}
+      resolve({ working: false, error: 'Timeout — no broadcast received within 2s' })
+    }, 2000)
+
+    let sender, receiver
+    const testPort = 5557 // Temporary test port
+    const testMsg = 'crisp-pos-udp-test-' + Date.now()
+
+    try {
+      receiver = dgram.createSocket({ type: 'udp4', reuseAddr: true })
+      receiver.bind(testPort, () => {
+        receiver.setBroadcast(true)
+      })
+      receiver.on('message', (msg) => {
+        if (msg.toString() === testMsg) {
+          clearTimeout(timeout)
+          try { sender?.close() } catch (_) {}
+          try { receiver?.close() } catch (_) {}
+          resolve({ working: true, error: null })
+        }
+      })
+      receiver.on('error', (e) => {
+        clearTimeout(timeout)
+        try { sender?.close() } catch (_) {}
+        resolve({ working: false, error: 'Receiver error: ' + e.message })
+      })
+
+      sender = dgram.createSocket({ type: 'udp4', reuseAddr: true })
+      sender.bind(() => {
+        sender.setBroadcast(true)
+        const buf = Buffer.from(testMsg)
+        sender.send(buf, 0, buf.length, testPort, '255.255.255.255', (err) => {
+          if (err) {
+            clearTimeout(timeout)
+            try { sender?.close() } catch (_) {}
+            try { receiver?.close() } catch (_) {}
+            resolve({ working: false, error: 'Send failed: ' + err.message })
+          }
+        })
+      })
+      sender.on('error', (e) => {
+        clearTimeout(timeout)
+        try { receiver?.close() } catch (_) {}
+        resolve({ working: false, error: 'Sender error: ' + e.message })
+      })
+    } catch (e) {
+      clearTimeout(timeout)
+      resolve({ working: false, error: e.message })
+    }
+  })
+}
+
+function listenForBroadcasts (timeoutMs) {
+  return new Promise((resolve) => {
+    const servers = []
+    const seen = new Set()
+    let socket
+
+    const timer = setTimeout(() => {
+      try { socket?.close() } catch (_) {}
+      resolve(servers)
+    }, timeoutMs)
+
+    try {
+      socket = dgram.createSocket({ type: 'udp4', reuseAddr: true })
+      socket.bind(UDP_PORT, () => { socket.setBroadcast(true) })
+      socket.on('message', (msg) => {
+        try {
+          const data = JSON.parse(msg.toString())
+          if (data.service === 'crisp-pos' && data.ip && !seen.has(data.ip)) {
+            seen.add(data.ip)
+            servers.push({ ip: data.ip, port: data.port, registerId: data.register_id || 'unknown' })
+          }
+        } catch (_) {}
+      })
+      socket.on('error', () => {
+        clearTimeout(timer)
+        resolve(servers)
+      })
+    } catch (_) {
+      clearTimeout(timer)
+      resolve(servers)
+    }
+  })
+}
+
+async function thoroughSubnetScan (localIp, port) {
+  const result = { scanned: 0, reachable: [], error: null }
+  const parts = localIp.split('.')
+  if (parts.length !== 4) { result.error = 'Invalid IP format'; return result }
+
+  const subnet = parts.slice(0, 3).join('.')
+  const promises = []
+
+  for (let i = 1; i <= 254; i++) {
+    const ip = `${subnet}.${i}`
+    result.scanned++
+    promises.push(
+      quickTcpCheck(ip, port, 1200).then(reachable => {
+        if (reachable) {
+          return testConnection(ip, port).then(hb => {
+            result.reachable.push({
+              ip,
+              port,
+              isPosServer: hb.ok === true,
+              registerId: hb.register_id || null,
+              secret: hb.secret ? '***' : null,
+              responseTime: hb.time || null
+            })
+          }).catch(() => {
+            result.reachable.push({ ip, port, isPosServer: false, error: 'Port open but not POS' })
+          })
+        }
+      }).catch(() => {})
+    )
+  }
+
+  await Promise.all(promises)
+  return result
+}
+
+function quickTcpCheck (ip, port, timeoutMs) {
+  return new Promise((resolve) => {
+    const net = require('net')
+    const socket = new net.Socket()
+    socket.setTimeout(timeoutMs)
+    socket.on('connect', () => { socket.destroy(); resolve(true) })
+    socket.on('timeout', () => { socket.destroy(); resolve(false) })
+    socket.on('error', () => { socket.destroy(); resolve(false) })
+    socket.connect(port, ip)
   })
 }
 
