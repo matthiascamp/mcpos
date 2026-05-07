@@ -1819,17 +1819,47 @@ function setupIPC() {
     return { imported, categories: Object.keys(catMap).length }
   })
 
-  // ── Hardware (Windows spooler ESC/POS — Epson TM-T82II on USB003) ──────────
+  // ── Hardware — Auto-detecting, cross-platform POS peripherals ───────────────
 
   const { execSync: hwExec } = require('child_process')
+  const net = require('net')
   const os = require('os')
+  const isWin = os.platform() === 'win32'
+  const isMac = os.platform() === 'darwin'
+  const RAWPRINT_SCRIPT = path.join(__dirname, 'rawprint.ps1')
 
-  const RECEIPT_PRINTER_NAME = 'EPSON TM-T82II Receipt'
-  const RECEIPT_PRINTER_PORT = 'USB003'
+  // Optional native HID support (for scale weight reading)
+  let HID = null
+  try { HID = require('node-hid') } catch (_) {}
 
-  // ESC/POS command bytes
-  const ESC = 0x1b
-  const GS = 0x1d
+  // ── Vendor ID database (comprehensive, correctly labelled) ─────────────────
+
+  const PRINTER_VENDORS = {
+    0x04B8: 'Epson', 0x0519: 'Star Micronics', 0x1504: 'Bixolon',
+    0x2730: 'Citizen', 0x1D90: 'Citizen', 0x0DD4: 'Custom Engineering',
+    0x0416: 'Winbond/Star', 0x04E8: 'Samsung/Bixolon', 0x20D1: 'Sewoo',
+    0x0A5F: 'Zebra', 0x0483: 'STMicro (thermal)', 0x1FC9: 'NXP (thermal)',
+    0x0FE6: 'ICS Advent (USB adapter)', 0x1A86: 'QinHeng CH340',
+    0x067B: 'Prolific (USB-parallel)', 0x1CBE: 'Luminary/TI (thermal)',
+    0x0B00: 'Sewoo/Lukhan', 0x0493: 'Suyin (embedded printer)',
+  }
+  const SCALE_VENDORS = {
+    0x0EB8: 'Mettler Toledo', 0x0B67: 'Fairbanks', 0x0922: 'Dymo',
+    0x1446: 'Stamps.com/Dymo', 0x0403: 'FTDI (serial bridge)',
+    0x2474: 'CAS (USB)', 0x0B6A: 'Ishida',
+  }
+  const SCANNER_VENDORS = {
+    0x05E0: 'Symbol/Zebra', 0x0A5F: 'Zebra', 0x0C2E: 'Honeywell',
+    0x05F9: 'Datalogic (legacy)', 0x080C: 'Datalogic',
+    0x065A: 'Opticon', 0x1EAB: 'Newland', 0x2DD6: 'Generic scanner',
+    0x1A86: 'QinHeng CH340 (scanner)', 0x04B4: 'Cypress (scanner HID)',
+  }
+  const SCALE_USAGE_PAGE = 0x8D
+  const RECEIPT_KEYWORDS = ['epson', 'tm-t', 'tm-u', 'tm-m', 'star ', 'tsp', 'bixolon', 'srp-', 'citizen', 'ct-s', 'ct-e', 'custom', 'sewoo', 'slk-', 'thermal', 'receipt', 'pos printer']
+
+  // ── ESC/POS command bytes ──────────────────────────────────────────────────
+
+  const ESC = 0x1B, GS = 0x1D, DLE = 0x10
   const ESCPOS = {
     INIT: Buffer.from([ESC, 0x40]),
     ALIGN_CENTER: Buffer.from([ESC, 0x61, 0x01]),
@@ -1841,49 +1871,246 @@ function setupIPC() {
     NORMAL_SIZE: Buffer.from([GS, 0x21, 0x00]),
     PARTIAL_CUT: Buffer.from([GS, 0x56, 0x01]),
     FEED_3: Buffer.from([ESC, 0x64, 0x03]),
-    DRAWER_KICK: Buffer.from([ESC, 0x70, 0x00, 0x19, 0x78]),
-    // Barcode: CODE128, height 60, width 2, HRI below
+    DRAWER_KICK: Buffer.from([ESC, 0x70, 0x00, 0x37, 0x79]),
     BARCODE_HEIGHT: Buffer.from([GS, 0x68, 0x3C]),
     BARCODE_WIDTH: Buffer.from([GS, 0x77, 0x02]),
     BARCODE_HRI_BELOW: Buffer.from([GS, 0x48, 0x02]),
   }
 
-  // Ensure the Epson is registered as a Windows printer on USB003
-  let printerReady = false
-  let printerCheckTime = 0
-  function ensureReceiptPrinter() {
-    // Cache printer check for 60 seconds to avoid repeated slow powershell calls
-    if (printerReady && Date.now() - printerCheckTime < 60000) return
+  // ── Hardware state (populated by probe, persisted via settings) ────────────
+
+  let hwPrinter = null  // { name, port, interface, ip, networkPort, vid, pid }
+  let hwScale = null     // { path, vid, pid, vendor, product }
+  let hwScanner = null
+  let hwPrinterReady = false
+  let hwPrinterCheckTime = 0
+
+  function loadSavedHardwareConfig () {
+    const iface = dbGet("SELECT value FROM settings WHERE key='hw_printer_interface'")?.value
+    const name = dbGet("SELECT value FROM settings WHERE key='hw_printer_name'")?.value
+    const port = dbGet("SELECT value FROM settings WHERE key='hw_printer_port'")?.value
+    if (iface === 'network') {
+      const ip = dbGet("SELECT value FROM settings WHERE key='hw_printer_ip'")?.value
+      const nport = dbGet("SELECT value FROM settings WHERE key='hw_printer_network_port'")?.value || '9100'
+      if (ip) hwPrinter = { name: name || 'Network Printer', interface: 'network', ip, networkPort: parseInt(nport), configured: true }
+    } else if (name && iface) {
+      hwPrinter = { name, port: port || '', interface: iface, configured: true }
+    }
+    const scalePath = dbGet("SELECT value FROM settings WHERE key='hw_scale_path'")?.value
+    if (scalePath) hwScale = { path: scalePath, configured: true }
+  }
+
+  // ── USB device enumeration (multi-source, cross-platform) ──────────────────
+
+  function enumerateDevices () {
+    const devices = []
+    const seen = new Set()
+    function addDevice (d) {
+      const key = `${d.vendorId}:${d.productId}:${d.product || ''}`
+      if (seen.has(key)) return
+      seen.add(key)
+      devices.push(d)
+    }
+
+    // Source 1: node-hid (cross-platform, gets HID usage info for scales)
+    if (HID) {
+      try {
+        for (const d of HID.devices()) {
+          addDevice({
+            vendorId: d.vendorId, productId: d.productId,
+            manufacturer: d.manufacturer || '', product: d.product || '',
+            path: d.path || '', usagePage: d.usagePage || 0,
+            usage: d.usage || 0, release: d.release || 0,
+            interface: d.interface ?? -1, source: 'hid',
+          })
+        }
+      } catch (e) { appLog('warn', 'hardware', 'HID enumeration failed', e.message) }
+    }
+
+    // Source 2: Platform-specific (catches non-HID USB devices)
+    if (isWin) {
+      try {
+        const raw = hwExec(`powershell -NoProfile -Command "Get-PnpDevice -Status OK -ErrorAction SilentlyContinue | Where-Object { $_.Class -in @('USB','Printer','HIDClass','Ports','PrintQueue','Image','Media') } | Select-Object FriendlyName,InstanceId,Class | ConvertTo-Json -Compress"`, { timeout: 15000, encoding: 'utf-8' }).trim()
+        if (raw) {
+          const parsed = JSON.parse(raw)
+          for (const d of (Array.isArray(parsed) ? parsed : [parsed])) {
+            const vid = (d.InstanceId?.match(/VID_([0-9A-F]{4})/i) || [])[1]
+            const pid = (d.InstanceId?.match(/PID_([0-9A-F]{4})/i) || [])[1]
+            addDevice({
+              vendorId: vid ? parseInt(vid, 16) : 0, productId: pid ? parseInt(pid, 16) : 0,
+              manufacturer: '', product: d.FriendlyName || '', path: d.InstanceId || '',
+              usagePage: 0, usage: 0, deviceClass: d.Class || '', source: 'pnp',
+            })
+          }
+        }
+      } catch (e) { appLog('warn', 'hardware', 'PnP enumeration failed', e.message) }
+    } else if (isMac) {
+      try {
+        const raw = hwExec('system_profiler SPUSBDataType -json 2>/dev/null', { timeout: 10000, encoding: 'utf-8' })
+        const data = JSON.parse(raw)
+        const walk = (items) => {
+          if (!items) return
+          for (const item of items) {
+            const vid = parseInt((item.vendor_id || '').replace('0x', ''), 16) || 0
+            const pid = parseInt((item.product_id || '').replace('0x', ''), 16) || 0
+            if (vid) addDevice({ vendorId: vid, productId: pid, manufacturer: item.manufacturer || '', product: item._name || '', path: '', usagePage: 0, usage: 0, source: 'profiler' })
+            if (item._items) walk(item._items)
+          }
+        }
+        if (data.SPUSBDataType) walk(data.SPUSBDataType)
+      } catch (_) {}
+    } else {
+      try {
+        const raw = hwExec('lsusb 2>/dev/null', { timeout: 5000, encoding: 'utf-8' })
+        for (const line of raw.split('\n')) {
+          const m = line.match(/ID\s+([0-9a-f]{4}):([0-9a-f]{4})\s+(.*)/i)
+          if (m) addDevice({ vendorId: parseInt(m[1], 16), productId: parseInt(m[2], 16), manufacturer: '', product: m[3].trim(), path: '', usagePage: 0, usage: 0, source: 'lsusb' })
+        }
+      } catch (_) {}
+    }
+
+    return devices
+  }
+
+  // ── Classify devices ───────────────────────────────────────────────────────
+
+  function classifyDevice (d) {
+    if (d.vendorId && PRINTER_VENDORS[d.vendorId]) return { type: 'printer', vendor: PRINTER_VENDORS[d.vendorId] }
+    if (d.vendorId && SCALE_VENDORS[d.vendorId]) return { type: 'scale', vendor: SCALE_VENDORS[d.vendorId] }
+    if (d.vendorId && SCANNER_VENDORS[d.vendorId]) return { type: 'scanner', vendor: SCANNER_VENDORS[d.vendorId] }
+    if (d.usagePage === SCALE_USAGE_PAGE) return { type: 'scale', vendor: d.manufacturer || 'HID Scale' }
+    const name = (d.product || '').toLowerCase()
+    if (name.includes('scanner') || name.includes('barcode') || name.includes('reader')) return { type: 'scanner', vendor: d.manufacturer || '' }
+    if (RECEIPT_KEYWORDS.some(k => name.includes(k))) return { type: 'printer', vendor: d.manufacturer || '' }
+    if (name.includes('scale') || name.includes('weigh')) return { type: 'scale', vendor: d.manufacturer || '' }
+    return { type: 'unknown', vendor: d.manufacturer || '' }
+  }
+
+  // ── Printer auto-detection ─────────────────────────────────────────────────
+
+  function detectPrinter (devices) {
+    if (hwPrinter?.configured) return hwPrinter
+
+    // Find printer USB device
+    let usbPrinter = null
+    for (const d of devices) {
+      if (!d.vendorId) continue
+      const cls = classifyDevice(d)
+      if (cls.type === 'printer') { usbPrinter = { ...d, vendor: cls.vendor }; break }
+    }
+
+    if (!isWin) {
+      // macOS/Linux: check CUPS
+      try {
+        const raw = hwExec('lpstat -p 2>/dev/null', { timeout: 5000, encoding: 'utf-8' })
+        for (const line of raw.split('\n')) {
+          const name = line.match(/printer (\S+)/)?.[1]
+          if (name) {
+            const lower = name.toLowerCase()
+            if (RECEIPT_KEYWORDS.some(k => lower.includes(k)) || usbPrinter) {
+              return { name, interface: 'cups', vid: usbPrinter?.vendorId, pid: usbPrinter?.productId, vendor: usbPrinter?.vendor || '' }
+            }
+          }
+        }
+      } catch (_) {}
+      return usbPrinter ? { name: usbPrinter.product || usbPrinter.vendor, interface: 'unknown', vid: usbPrinter.vendorId, pid: usbPrinter.productId, vendor: usbPrinter.vendor, error: 'USB printer found but no CUPS queue' } : null
+    }
+
+    // Windows: scan printer queues and match to USB devices
+    let queues = []
     try {
-      const check = hwExec(`powershell -NoProfile -Command "Get-Printer -Name '${RECEIPT_PRINTER_NAME}' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name"`, { timeout: 5000, encoding: 'utf-8' })
-      if (check.trim()) { printerReady = true; printerCheckTime = Date.now(); return }
+      const raw = hwExec(`powershell -NoProfile -Command "Get-Printer | Select-Object Name,PortName,DriverName,PrinterStatus | ConvertTo-Json -Compress"`, { timeout: 10000, encoding: 'utf-8' }).trim()
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        queues = Array.isArray(parsed) ? parsed : [parsed]
+      }
+    } catch (e) { appLog('warn', 'hardware', 'Printer queue scan failed', e.message) }
+
+    // Match by keyword (receipt/thermal/pos/brand names)
+    for (const q of queues) {
+      const name = (q.Name || '').toLowerCase()
+      const driver = (q.DriverName || '').toLowerCase()
+      if (RECEIPT_KEYWORDS.some(k => name.includes(k) || driver.includes(k))) {
+        return { name: q.Name, port: q.PortName, driver: q.DriverName, interface: 'windows', vid: usbPrinter?.vendorId, pid: usbPrinter?.productId, vendor: usbPrinter?.vendor || '' }
+      }
+    }
+
+    // Match by USB port (if we found a printer USB device, grab any USB-port queue)
+    if (usbPrinter) {
+      const usbQueues = queues.filter(q => (q.PortName || '').startsWith('USB'))
+      if (usbQueues.length === 1) {
+        return { name: usbQueues[0].Name, port: usbQueues[0].PortName, driver: usbQueues[0].DriverName, interface: 'windows', vid: usbPrinter.vendorId, pid: usbPrinter.productId, vendor: usbPrinter.vendor }
+      }
+      // Multiple USB queues — pick the one with Generic/Text driver (raw-capable)
+      const generic = usbQueues.find(q => (q.DriverName || '').toLowerCase().includes('generic'))
+      if (generic) return { name: generic.Name, port: generic.PortName, driver: generic.DriverName, interface: 'windows', vid: usbPrinter.vendorId, pid: usbPrinter.productId, vendor: usbPrinter.vendor }
+    }
+
+    // Last resort: any queue on a USB port
+    const anyUsb = queues.find(q => (q.PortName || '').startsWith('USB'))
+    if (anyUsb) return { name: anyUsb.Name, port: anyUsb.PortName, driver: anyUsb.DriverName, interface: 'windows' }
+
+    // Found USB hardware but no matching queue — report so UI can help configure
+    if (usbPrinter) return { name: usbPrinter.product || usbPrinter.vendor, interface: 'windows', vid: usbPrinter.vendorId, pid: usbPrinter.productId, vendor: usbPrinter.vendor, needsSetup: true, error: 'USB printer found but no matching print queue. Auto-setup will try to register it.' }
+
+    return null
+  }
+
+  // Auto-register Windows printer queue if needed
+  function ensurePrinterQueue () {
+    if (!isWin || !hwPrinter) return
+    if (hwPrinterReady && Date.now() - hwPrinterCheckTime < 60000) return
+    try {
+      const check = hwExec(`powershell -NoProfile -Command "Get-Printer -Name '${hwPrinter.name.replace(/'/g, "''")}' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name"`, { timeout: 5000, encoding: 'utf-8' }).trim()
+      if (check) { hwPrinterReady = true; hwPrinterCheckTime = Date.now(); return }
     } catch (_) {}
-    // Add it using Generic / Text Only driver on USB003
+
+    if (!hwPrinter.needsSetup) { hwPrinterCheckTime = Date.now(); return }
+
+    // Find an available USB port
+    let portName = hwPrinter.port
+    if (!portName) {
+      for (let i = 1; i <= 10; i++) {
+        const p = `USB${String(i).padStart(3, '0')}`
+        try {
+          hwExec(`powershell -NoProfile -Command "Get-PrinterPort -Name '${p}' -ErrorAction Stop"`, { timeout: 3000, encoding: 'utf-8' })
+          portName = p; break
+        } catch (_) {}
+      }
+    }
+    if (!portName) { hwPrinterCheckTime = Date.now(); return }
+
+    const printerName = hwPrinter.name || `Receipt Printer (${hwPrinter.vendor || 'USB'})`
     try {
-      hwExec(`powershell -NoProfile -Command "Add-Printer -Name '${RECEIPT_PRINTER_NAME}' -DriverName 'Generic / Text Only' -PortName '${RECEIPT_PRINTER_PORT}'"`, { timeout: 5000, encoding: 'utf-8' })
-      printerReady = true; printerCheckTime = Date.now()
-      console.log('Added receipt printer:', RECEIPT_PRINTER_NAME, 'on', RECEIPT_PRINTER_PORT)
+      hwExec(`powershell -NoProfile -Command "Add-Printer -Name '${printerName.replace(/'/g, "''")}' -DriverName 'Generic / Text Only' -PortName '${portName}'"`, { timeout: 5000, encoding: 'utf-8' })
+      hwPrinter.name = printerName
+      hwPrinter.port = portName
+      hwPrinter.needsSetup = false
+      hwPrinterReady = true; hwPrinterCheckTime = Date.now()
+      appLog('info', 'hardware', `Auto-registered printer: ${printerName} on ${portName}`)
     } catch (e) {
-      printerCheckTime = Date.now() // Don't retry for 60s even on failure
-      console.log('Failed to add receipt printer:', e.message)
+      hwPrinterCheckTime = Date.now()
+      appLog('error', 'hardware', 'Auto-register printer failed', e.message)
     }
   }
 
-  // Send raw bytes to the printer via Windows spooler (rawprint.ps1)
-  const RAWPRINT_SCRIPT = path.join(__dirname, 'rawprint.ps1')
+  // ── Send raw bytes to printer (multi-backend) ─────────────────────────────
 
-  function sendRawToPrinter(data) {
+  function sendToPrinter (data) {
+    if (!hwPrinter) return Promise.resolve({ ok: false, detail: 'No printer detected. Run Probe All Devices in Hardware tab.' })
+    if (hwPrinter.interface === 'network') return sendViaTCP(data, hwPrinter.ip, hwPrinter.networkPort || 9100)
+    if (hwPrinter.interface === 'windows') return Promise.resolve(sendViaSpooler(data, hwPrinter.name))
+    if (hwPrinter.interface === 'cups') return Promise.resolve(sendViaCUPS(data, hwPrinter.name))
+    return Promise.resolve({ ok: false, detail: `No working print backend for interface: ${hwPrinter.interface}` })
+  }
+
+  function sendViaSpooler (data, printerName) {
     const tmpFile = path.join(os.tmpdir(), `crisp-receipt-${Date.now()}.bin`)
     fs.writeFileSync(tmpFile, data)
     try {
-      const result = hwExec(
-        `powershell -ExecutionPolicy Bypass -NoProfile -File "${RAWPRINT_SCRIPT}" -PrinterName "${RECEIPT_PRINTER_NAME}" -FilePath "${tmpFile}"`,
-        { timeout: 15000, encoding: 'utf-8' }
-      )
-      const output = result.trim()
-      console.log('rawprint.ps1 output:', output)
-      if (output.startsWith('OK')) return { ok: true, detail: output }
-      return { ok: false, detail: output }
+      const result = hwExec(`powershell -ExecutionPolicy Bypass -NoProfile -File "${RAWPRINT_SCRIPT}" -PrinterName "${printerName.replace(/"/g, '`"')}" -FilePath "${tmpFile}"`, { timeout: 15000, encoding: 'utf-8' }).trim()
+      if (result.startsWith('OK')) return { ok: true, detail: result }
+      return { ok: false, detail: result }
     } catch (e) {
       return { ok: false, detail: e.stderr || e.message }
     } finally {
@@ -1891,42 +2118,119 @@ function setupIPC() {
     }
   }
 
-  // Build receipt as a single ESC/POS byte buffer
-  function buildReceiptBuffer(receiptData) {
+  function sendViaTCP (data, ip, port) {
+    return new Promise(resolve => {
+      const client = net.createConnection({ host: ip, port }, () => {
+        client.write(data, () => { client.end(); resolve({ ok: true, detail: `Sent ${data.length} bytes to ${ip}:${port}` }) })
+      })
+      client.on('error', err => resolve({ ok: false, detail: `TCP error: ${err.message}` }))
+      client.setTimeout(5000, () => { client.destroy(); resolve({ ok: false, detail: 'TCP timeout (5s)' }) })
+    })
+  }
+
+  function sendViaCUPS (data, printerName) {
+    const tmpFile = path.join(os.tmpdir(), `crisp-receipt-${Date.now()}.bin`)
+    fs.writeFileSync(tmpFile, data)
+    try {
+      hwExec(`lp -o raw -d "${printerName}" "${tmpFile}"`, { timeout: 10000 })
+      return { ok: true, detail: `Sent via CUPS to ${printerName}` }
+    } catch (e) {
+      return { ok: false, detail: e.message }
+    } finally {
+      try { fs.unlinkSync(tmpFile) } catch (_) {}
+    }
+  }
+
+  // ── Scale detection & reading (USB HID POS protocol) ───────────────────────
+
+  function detectScale (devices) {
+    if (hwScale?.configured) return hwScale
+
+    if (HID) {
+      const hidDevs = HID.devices()
+      // Priority 1: known scale vendor IDs
+      for (const d of hidDevs) {
+        if (d.vendorId && SCALE_VENDORS[d.vendorId] && d.vendorId !== 0x0403) {
+          return { path: d.path, vid: d.vendorId, pid: d.productId, vendor: SCALE_VENDORS[d.vendorId], product: d.product || '' }
+        }
+      }
+      // Priority 2: HID usage page 0x8D (POS Scale standard — catches any brand)
+      for (const d of hidDevs) {
+        if (d.usagePage === SCALE_USAGE_PAGE) {
+          return { path: d.path, vid: d.vendorId, pid: d.productId, vendor: d.manufacturer || 'HID Scale', product: d.product || '' }
+        }
+      }
+    }
+
+    // Fallback: USB enumeration VID match only (no weight reading without node-hid)
+    for (const d of devices) {
+      if (d.vendorId && SCALE_VENDORS[d.vendorId] && d.vendorId !== 0x0403) {
+        return { vid: d.vendorId, pid: d.productId, vendor: SCALE_VENDORS[d.vendorId], product: d.product || '', noHID: true }
+      }
+    }
+    return null
+  }
+
+  const SCALE_UNITS = { 0x01: 'mg', 0x02: 'g', 0x03: 'kg', 0x04: 'ct', 0x0B: 'oz', 0x0C: 'lb' }
+  const SCALE_STATUSES = { 0x01: 'fault', 0x02: 'zero', 0x03: 'in_motion', 0x04: 'stable', 0x05: 'under_zero', 0x06: 'over_limit', 0x07: 'calibration', 0x08: 'needs_zero' }
+
+  function readScale () {
+    if (!HID) return { error: 'node-hid not installed — run: npm install node-hid' }
+    if (!hwScale?.path) return { error: 'No scale path. Run probe first.' }
+    try {
+      const device = new HID.HID(hwScale.path)
+      try {
+        const data = device.readTimeout(2000)
+        if (!data || data.length < 5) return { error: 'No data from scale (timeout)' }
+        const status = data[1]
+        const unitCode = data[2]
+        const exponent = data[3] > 127 ? data[3] - 256 : data[3]
+        const rawWeight = (data[5] << 8) | data[4]
+        const weight = rawWeight * Math.pow(10, exponent)
+        return { weight, unit: SCALE_UNITS[unitCode] || '?', status: SCALE_STATUSES[status] || 'unknown', stable: status === 0x04, zero: status === 0x02, inMotion: status === 0x03, raw: Array.from(data) }
+      } finally { device.close() }
+    } catch (e) { return { error: `Scale read failed: ${e.message}` } }
+  }
+
+  // ── Scanner detection (HID keyboard — just identify, no communication) ─────
+
+  function detectScanner (devices) {
+    for (const d of devices) {
+      if (!d.vendorId) continue
+      const cls = classifyDevice(d)
+      if (cls.type === 'scanner') return { vid: d.vendorId, pid: d.productId, vendor: cls.vendor, product: d.product || '' }
+    }
+    return null
+  }
+
+  // ── Build receipt buffer (ESC/POS) ─────────────────────────────────────────
+
+  function buildReceiptBuffer (receiptData) {
     const parts = []
-    const text = (s) => parts.push(Buffer.from(s + '\n', 'utf-8'))
-    const cmd = (buf) => parts.push(buf)
+    const text = s => parts.push(Buffer.from(s + '\n', 'utf-8'))
+    const cmd = buf => parts.push(buf)
 
     cmd(ESCPOS.INIT)
     cmd(ESCPOS.ALIGN_CENTER)
 
-    // Print barcode at top if provided (for held sales)
     if (receiptData.barcode) {
-      cmd(ESCPOS.BARCODE_HEIGHT)
-      cmd(ESCPOS.BARCODE_WIDTH)
-      cmd(ESCPOS.BARCODE_HRI_BELOW)
-      // CODE128: GS k 73 len data
+      cmd(ESCPOS.BARCODE_HEIGHT); cmd(ESCPOS.BARCODE_WIDTH); cmd(ESCPOS.BARCODE_HRI_BELOW)
       const barcodeStr = receiptData.barcode.replace(/-/g, '').substring(0, 20)
       const barcodeData = Buffer.from(barcodeStr, 'ascii')
-      cmd(Buffer.from([GS, 0x6B, 0x49, barcodeData.length]))
-      cmd(barcodeData)
-      text('')
-      text('')
+      cmd(Buffer.from([GS, 0x6B, 0x49, barcodeData.length])); cmd(barcodeData)
+      text(''); text('')
     }
 
-    cmd(ESCPOS.BOLD_ON)
-    cmd(ESCPOS.DOUBLE_SIZE)
+    cmd(ESCPOS.BOLD_ON); cmd(ESCPOS.DOUBLE_SIZE)
     text(receiptData.storeName || 'Crisp on Creek')
-    cmd(ESCPOS.NORMAL_SIZE)
-    cmd(ESCPOS.BOLD_OFF)
+    cmd(ESCPOS.NORMAL_SIZE); cmd(ESCPOS.BOLD_OFF)
 
     if (receiptData.storeAddress) text(receiptData.storeAddress)
     if (receiptData.storePhone) text(`Ph: ${receiptData.storePhone}`)
     if (receiptData.storeAbn) text(`ABN: ${receiptData.storeAbn}`)
     if (receiptData.header) { text(''); text(receiptData.header) }
 
-    text('')
-    cmd(ESCPOS.ALIGN_LEFT)
+    text(''); cmd(ESCPOS.ALIGN_LEFT)
     text(`Date:     ${receiptData.date}`)
     text(`Register: ${receiptData.registerId || 'LANE01'}`)
     text(`Txn:      ${receiptData.txnId?.slice(0, 8) || ''}`)
@@ -1941,52 +2245,112 @@ function setupIPC() {
       if (item.discount > 0) text(`  Discount: -$${item.discount.toFixed(2)}`)
     }
 
-    text('-'.repeat(42))
-    cmd(ESCPOS.ALIGN_RIGHT)
+    text('-'.repeat(42)); cmd(ESCPOS.ALIGN_RIGHT)
     if (receiptData.discount > 0) text(`Discount: -$${receiptData.discount.toFixed(2)}`)
-    cmd(ESCPOS.BOLD_ON)
-    cmd(ESCPOS.DOUBLE_SIZE)
+    cmd(ESCPOS.BOLD_ON); cmd(ESCPOS.DOUBLE_SIZE)
     text(`TOTAL: $${receiptData.total.toFixed(2)}`)
-    cmd(ESCPOS.NORMAL_SIZE)
-    cmd(ESCPOS.BOLD_OFF)
+    cmd(ESCPOS.NORMAL_SIZE); cmd(ESCPOS.BOLD_OFF)
     text(`Total includes GST of $${receiptData.tax.toFixed(2)}`)
     text('')
 
-    for (const pay of receiptData.payments) {
-      text(`${pay.method.toUpperCase()}: $${pay.amount.toFixed(2)}`)
-    }
+    for (const pay of receiptData.payments) text(`${pay.method.toUpperCase()}: $${pay.amount.toFixed(2)}`)
     if (receiptData.change > 0) text(`Change: $${receiptData.change.toFixed(2)}`)
 
-    text('')
-    cmd(ESCPOS.ALIGN_CENTER)
+    text(''); cmd(ESCPOS.ALIGN_CENTER)
     text(receiptData.footer || 'Thank you for shopping local!')
-    cmd(ESCPOS.FEED_3)
-    cmd(ESCPOS.PARTIAL_CUT)
+    cmd(ESCPOS.FEED_3); cmd(ESCPOS.PARTIAL_CUT)
 
     return Buffer.concat(parts)
   }
 
-  // Auto-setup printer on app start
-  ensureReceiptPrinter()
+  // ── Full probe (enumerate + detect + test) ─────────────────────────────────
+
+  async function probeHardware () {
+    const devices = enumerateDevices()
+
+    const printer = detectPrinter(devices)
+    const scale = detectScale(devices)
+    const scanner = detectScanner(devices)
+
+    hwPrinter = printer
+    hwScale = scale
+    hwScanner = scanner
+
+    // Auto-register printer queue if needed
+    if (printer?.needsSetup) ensurePrinterQueue()
+
+    // Classify all devices for display
+    const classified = devices.filter(d => d.vendorId > 0).map(d => {
+      const cls = classifyDevice(d)
+      return { vendorId: d.vendorId, productId: d.productId, product: d.product || '', manufacturer: d.manufacturer || '', deviceClass: d.deviceClass || '', usagePage: d.usagePage || 0, type: cls.type, vendor: cls.vendor }
+    })
+
+    const result = {
+      usbDevices: classified,
+      printer: { found: !!printer, name: printer?.name || '', port: printer?.port || '', interface: printer?.interface || '', driver: printer?.driver || '', vid: printer?.vid, pid: printer?.pid, vendor: printer?.vendor || '', configured: !!printer?.configured, needsSetup: !!printer?.needsSetup, error: printer?.error || '' },
+      scale: { found: !!scale, name: scale?.product || '', vendor: scale?.vendor || '', path: scale?.path || '', hasHID: !!HID, noHID: !!scale?.noHID },
+      scanner: { found: !!scanner, name: scanner?.product || '', vendor: scanner?.vendor || '' },
+      drawer: { found: !!printer, via: printer ? 'printer DK port' : '' },
+      hidAvailable: !!HID,
+    }
+
+    // Non-destructive printer test (verify queue is accessible)
+    if (printer && printer.interface === 'windows' && !printer.needsSetup) {
+      try {
+        const check = hwExec(`powershell -NoProfile -Command "(Get-Printer -Name '${printer.name.replace(/'/g, "''")}' -ErrorAction Stop).PrinterStatus"`, { timeout: 5000, encoding: 'utf-8' }).trim()
+        result.printer.status = check || 'Normal'
+        result.printer.tested = true
+      } catch (e) { result.printer.status = e.message; result.printer.tested = true }
+    }
+    if (printer && printer.interface === 'network') {
+      const tcp = await sendViaTCP(Buffer.from([DLE, 0x04, 0x01]), printer.ip, printer.networkPort || 9100)
+      result.printer.status = tcp.ok ? 'Responding' : tcp.detail
+      result.printer.tested = true
+    }
+
+    // Non-destructive scale test (read weight)
+    if (scale && scale.path && HID) {
+      const reading = readScale()
+      result.scale.tested = true
+      if (reading.error) { result.scale.testResult = reading.error }
+      else { result.scale.testResult = `${reading.weight} ${reading.unit} (${reading.status})`; result.scale.reading = reading }
+    }
+
+    return result
+  }
+
+  // ── Load saved config and auto-probe on startup ────────────────────────────
+
+  loadSavedHardwareConfig()
+  probeHardware().then(r => {
+    if (hwPrinter) appLog('info', 'hardware', `Printer: ${hwPrinter.name} (${hwPrinter.interface})`)
+    if (hwScale) appLog('info', 'hardware', `Scale: ${hwScale.vendor || hwScale.product}`)
+  }).catch(e => appLog('error', 'hardware', 'Auto-probe failed', e.message))
+
+  // ── IPC handlers ───────────────────────────────────────────────────────────
+
+  ipcMain.handle('hardware:probe', probeHardware)
 
   ipcMain.handle('hardware:printReceipt', async (_e, receiptData) => {
     try {
-      ensureReceiptPrinter()
+      if (!hwPrinter) await probeHardware()
+      ensurePrinterQueue()
       const buf = buildReceiptBuffer(receiptData)
-      const result = sendRawToPrinter(buf)
+      const result = await sendToPrinter(buf)
       if (!result.ok) return { error: result.detail }
       return true
     } catch (err) {
-      appLog('error', 'printer', 'Print receipt failed', err.message)
+      appLog('error', 'printer', 'Print failed', err.message)
       return { error: err.message }
     }
   })
 
   ipcMain.handle('hardware:openDrawer', async () => {
     try {
-      ensureReceiptPrinter()
+      if (!hwPrinter) await probeHardware()
+      ensurePrinterQueue()
       const buf = Buffer.concat([ESCPOS.INIT, ESCPOS.DRAWER_KICK])
-      const result = sendRawToPrinter(buf)
+      const result = await sendToPrinter(buf)
       if (!result.ok) return { error: result.detail }
       return true
     } catch (err) {
@@ -1995,80 +2359,36 @@ function setupIPC() {
     }
   })
 
-  // -- Device Probing -------------------------------------------------------
+  ipcMain.handle('hardware:readScale', () => readScale())
 
-  ipcMain.handle('hardware:probe', async () => {
-    const result = {
-      usbDevices: [],
-      printer: { found: false, name: '', error: '' },
-      drawer: { found: false },
-      scanner: { found: false, name: '' },
-      scale: { found: false, name: '' }
+  ipcMain.handle('hardware:testPrinter', async () => {
+    if (!hwPrinter) return { ok: false, error: 'No printer detected' }
+    ensurePrinterQueue()
+    const buf = Buffer.from([DLE, 0x04, 0x01])
+    const result = await sendToPrinter(buf)
+    return result.ok ? { ok: true, status: 'Printer responded to status request' } : { ok: false, error: result.detail }
+  })
+
+  ipcMain.handle('hardware:configure', (_e, config) => {
+    const keys = { printerName: 'hw_printer_name', printerPort: 'hw_printer_port', printerInterface: 'hw_printer_interface', printerIp: 'hw_printer_ip', printerNetworkPort: 'hw_printer_network_port', scalePath: 'hw_scale_path' }
+    for (const [k, dbKey] of Object.entries(keys)) {
+      if (config[k] !== undefined) dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES (?1, ?2)", [dbKey, config[k]])
     }
+    scheduleSave()
+    hwPrinterReady = false
+    loadSavedHardwareConfig()
+    return { ok: true }
+  })
 
-    const PRINTER_VIDS = [0x04b8, 0x0519, 0x0416, 0x0dd4, 0x20d1, 0x0fe6, 0x1fc9, 0x0483]
-    const SCALE_VIDS = [0x0b67, 0x0922, 0x1446, 0x0eb8]
-    const SCANNER_VIDS = [0x05e0, 0x05f9, 0x0c2e, 0x1eab, 0x2dd6, 0x1a86]
-
-    // Use PowerShell to detect all USB/HID/Printer devices
-    try {
-      const psCmd = `powershell -NoProfile -Command "Get-PnpDevice -Status OK -ErrorAction SilentlyContinue | Where-Object { $_.Class -in @('USB','Printer','HIDClass','Ports','PrintQueue') } | Select-Object FriendlyName,InstanceId,Class | ConvertTo-Json -Compress"`
-      const raw = hwExec(psCmd, { timeout: 15000, encoding: 'utf-8' })
-      const devices = JSON.parse(raw)
-      const devList = Array.isArray(devices) ? devices : [devices]
-      for (const d of devList) {
-        const vid = (d.InstanceId?.match(/VID_([0-9A-F]{4})/i) || [])[1]
-        const pid = (d.InstanceId?.match(/PID_([0-9A-F]{4})/i) || [])[1]
-        result.usbDevices.push({
-          vendorId: vid ? parseInt(vid, 16) : 0,
-          productId: pid ? parseInt(pid, 16) : 0,
-          manufacturer: '',
-          product: d.FriendlyName || '',
-          deviceClass: d.Class || ''
-        })
-      }
-    } catch (e) {
-      result.printer.error = `Device detection failed: ${e.message}`
+  ipcMain.handle('hardware:getConfig', () => {
+    return {
+      printerName: dbGet("SELECT value FROM settings WHERE key='hw_printer_name'")?.value || '',
+      printerPort: dbGet("SELECT value FROM settings WHERE key='hw_printer_port'")?.value || '',
+      printerInterface: dbGet("SELECT value FROM settings WHERE key='hw_printer_interface'")?.value || '',
+      printerIp: dbGet("SELECT value FROM settings WHERE key='hw_printer_ip'")?.value || '',
+      printerNetworkPort: dbGet("SELECT value FROM settings WHERE key='hw_printer_network_port'")?.value || '9100',
+      scalePath: dbGet("SELECT value FROM settings WHERE key='hw_scale_path'")?.value || '',
     }
-
-    // Only check real USB devices (vendorId > 0) — skip virtual printers/ports
-    for (const d of result.usbDevices) {
-      if (!d.vendorId) continue // Skip virtual devices (PrintQueue, COM ports)
-      if (PRINTER_VIDS.includes(d.vendorId)) {
-        result.printer.found = true
-        result.printer.name = d.product || `VID:0x${d.vendorId.toString(16)} PID:0x${d.productId.toString(16)}`
-        result.drawer.found = true
-      }
-      if (SCALE_VIDS.includes(d.vendorId)) {
-        result.scale.found = true
-        result.scale.name = d.product || `VID:0x${d.vendorId.toString(16)} PID:0x${d.productId.toString(16)}`
-      }
-      if (SCANNER_VIDS.includes(d.vendorId)) {
-        result.scanner.found = true
-        result.scanner.name = d.product || `VID:0x${d.vendorId.toString(16)} PID:0x${d.productId.toString(16)}`
-      }
-      // Only match physical USB printers (not virtual print queues)
-      const name = (d.product || '').toLowerCase()
-      if (!result.printer.found && d.deviceClass === 'USB' && (name.includes('receipt') || name.includes('pos') || name.includes('thermal'))) {
-        result.printer.found = true
-        result.printer.name = d.product || 'Detected printer'
-        result.drawer.found = true
-      }
-    }
-
-    // Check if our specific receipt printer queue exists (configured printer only)
-    if (!result.printer.found) {
-      try {
-        const check = hwExec(`powershell -NoProfile -Command "Get-Printer -Name '${RECEIPT_PRINTER_NAME}' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name"`, { timeout: 10000, encoding: 'utf-8' })
-        if (check.trim()) {
-          result.printer.found = true
-          result.printer.name = 'Epson TM-T82II (USB003)'
-          result.drawer.found = true
-        }
-      } catch (_) {}
-    }
-
-    return result
   })
 
   // ── LAN Sync ────────────────────────────────────────────────────────────────

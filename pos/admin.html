@@ -225,6 +225,7 @@
     .badge-green { background: rgba(16,185,129,0.12); color: var(--green); }
     .badge-amber { background: rgba(245,158,11,0.12); color: var(--amber); }
     .badge-red   { background: rgba(239,68,68,0.12); color: var(--red); }
+    .badge-blue  { background: rgba(59,130,246,0.12); color: var(--blue); }
     .badge-yellow { background: rgba(234,179,8,0.12); color: #eab308; }
 
     .btn {
@@ -1519,55 +1520,93 @@
     <div class="tab-content" id="tab-hardware">
       <h1>Hardware Devices</h1>
       <p style="color:var(--text-dim);font-size:14px;margin-bottom:20px">
-        Probe connected USB devices to detect receipt printer, cash drawer, barcode scanner, and scale.
+        Auto-detects receipt printer, cash drawer, barcode scanner, and scale across USB, HID, and network interfaces.
       </p>
 
-      <div style="margin-bottom:16px">
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
         <button class="btn btn-green" id="probeBtn" style="padding:12px 28px;font-size:15px">Probe All Devices</button>
-        <span id="probeStatus" style="margin-left:12px;color:var(--text-dim);font-size:13px"></span>
+        <span id="probeStatus" style="color:var(--text-dim);font-size:13px"></span>
+        <span id="hidStatus" style="font-size:11px;color:var(--text-dim);margin-left:auto"></span>
       </div>
 
-      <div class="stats-grid" style="grid-template-columns:repeat(auto-fit, minmax(260px, 1fr))">
+      <div class="stats-grid" style="grid-template-columns:repeat(auto-fit, minmax(280px, 1fr))">
+        <!-- Printer Card -->
         <div class="stat-card" id="hwPrinter">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
             <div id="dotPrinter" style="width:12px;height:12px;border-radius:50%;background:#555;flex-shrink:0"></div>
             <div class="stat-label" style="margin:0;font-size:15px;font-weight:600;color:var(--text)">Receipt Printer</div>
+            <button class="btn btn-outline" id="testPrinterBtn" style="margin-left:auto;font-size:10px;padding:3px 8px;display:none">Test</button>
           </div>
           <div style="font-size:13px;color:var(--text-dim)" id="printerInfo">Not probed yet</div>
+          <div id="printerDetails" style="font-size:11px;color:var(--text-dim);margin-top:6px;display:none"></div>
         </div>
+        <!-- Drawer Card -->
         <div class="stat-card" id="hwDrawer">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
             <div id="dotDrawerHw" style="width:12px;height:12px;border-radius:50%;background:#555;flex-shrink:0"></div>
             <div class="stat-label" style="margin:0;font-size:15px;font-weight:600;color:var(--text)">Cash Drawer</div>
           </div>
           <div style="font-size:13px;color:var(--text-dim)" id="drawerInfo">Not probed yet</div>
-          <div style="font-size:11px;color:var(--text-dim);margin-top:4px">Usually triggered via printer (DK port or ESC/POS pulse)</div>
+          <div style="font-size:11px;color:var(--text-dim);margin-top:4px">Opens via printer DK port (ESC/POS pulse)</div>
         </div>
+        <!-- Scanner Card -->
         <div class="stat-card" id="hwScanner">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
             <div id="dotScanner" style="width:12px;height:12px;border-radius:50%;background:#555;flex-shrink:0"></div>
             <div class="stat-label" style="margin:0;font-size:15px;font-weight:600;color:var(--text)">Barcode Scanner</div>
           </div>
           <div style="font-size:13px;color:var(--text-dim)" id="scannerInfo">Not probed yet</div>
-          <div style="font-size:11px;color:var(--text-dim);margin-top:4px">HID keyboard — scan a barcode in the box below to test:</div>
+          <div style="font-size:11px;color:var(--text-dim);margin-top:4px">HID keyboard mode — scan below to test:</div>
           <input type="text" id="scannerTest" placeholder="Scan barcode here..." style="margin-top:6px;padding:8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:14px;width:100%">
           <div id="scannerResult" style="margin-top:4px;font-size:12px;min-height:18px"></div>
         </div>
+        <!-- Scale Card -->
         <div class="stat-card" id="hwScale">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
             <div id="dotScale" style="width:12px;height:12px;border-radius:50%;background:#555;flex-shrink:0"></div>
             <div class="stat-label" style="margin:0;font-size:15px;font-weight:600;color:var(--text)">Scale</div>
+            <button class="btn btn-outline" id="readScaleBtn" style="margin-left:auto;font-size:10px;padding:3px 8px;display:none">Read Weight</button>
           </div>
           <div style="font-size:13px;color:var(--text-dim)" id="scaleInfo">Not probed yet</div>
-          <div style="font-size:11px;color:var(--text-dim);margin-top:4px">Serial or USB scale (CAS, Mettler-Toledo, etc.)</div>
+          <div id="scaleReading" style="font-size:20px;font-weight:700;color:var(--green);margin-top:6px;display:none"></div>
         </div>
       </div>
 
+      <!-- Hardware Configuration -->
       <div class="section" style="margin-top:20px">
-        <h2>USB Devices Detected</h2>
+        <h2 style="margin-bottom:12px">Printer Configuration</h2>
+        <p style="font-size:12px;color:var(--text-dim);margin-bottom:12px">Auto-detected on probe. Override here if needed.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
+          <div class="form-field" style="flex:1;min-width:140px"><label>Interface</label>
+            <select id="hwPrinterInterface" style="width:100%;padding:8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text)">
+              <option value="">Auto-detect</option>
+              <option value="windows">Windows Spooler</option>
+              <option value="network">Network (TCP/IP)</option>
+              <option value="cups">CUPS (macOS/Linux)</option>
+            </select>
+          </div>
+          <div class="form-field" style="flex:2;min-width:180px"><label>Printer Name / Queue</label>
+            <input type="text" id="hwPrinterName" placeholder="e.g. EPSON TM-T82II Receipt" style="width:100%;padding:8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text)">
+          </div>
+          <div class="form-field" id="hwPortField" style="flex:1;min-width:100px"><label>Port</label>
+            <input type="text" id="hwPrinterPort" placeholder="USB001" style="width:100%;padding:8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text)">
+          </div>
+          <div class="form-field" id="hwIpField" style="flex:1;min-width:120px;display:none"><label>IP Address</label>
+            <input type="text" id="hwPrinterIp" placeholder="192.168.1.100" style="width:100%;padding:8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text)">
+          </div>
+          <div class="form-field" id="hwNetPortField" style="min-width:70px;display:none"><label>TCP Port</label>
+            <input type="number" id="hwPrinterNetPort" value="9100" style="width:100%;padding:8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text)">
+          </div>
+          <button class="btn btn-blue" id="hwSaveBtn" style="padding:8px 16px;white-space:nowrap">Save Config</button>
+        </div>
+      </div>
+
+      <!-- USB Device Table -->
+      <div class="section" style="margin-top:20px">
+        <h2>All Detected Devices</h2>
         <table>
-          <thead><tr><th>Vendor ID</th><th>Product ID</th><th>Manufacturer</th><th>Product</th><th>Class</th></tr></thead>
-          <tbody id="usbDeviceTable"><tr><td colspan="5" style="color:var(--text-dim)">Click "Probe All Devices" to scan</td></tr></tbody>
+          <thead><tr><th>Type</th><th>Vendor</th><th>VID</th><th>PID</th><th>Product</th><th>Source</th></tr></thead>
+          <tbody id="usbDeviceTable"><tr><td colspan="6" style="color:var(--text-dim)">Click "Probe All Devices" to scan</td></tr></tbody>
         </table>
       </div>
 
@@ -4578,67 +4617,164 @@
 
     // -- Hardware Probing ---------------------------------------------------
 
-    async function loadHardware () {}
+    const TYPE_BADGES = { printer: 'badge-green', scale: 'badge-blue', scanner: 'badge-amber', unknown: '' }
+
+    async function loadHardware () {
+      const cfg = await window.pos.getHardwareConfig()
+      if (cfg.printerInterface) $('#hwPrinterInterface').value = cfg.printerInterface
+      if (cfg.printerName) $('#hwPrinterName').value = cfg.printerName
+      if (cfg.printerPort) $('#hwPrinterPort').value = cfg.printerPort
+      if (cfg.printerIp) $('#hwPrinterIp').value = cfg.printerIp
+      if (cfg.printerNetworkPort) $('#hwPrinterNetPort').value = cfg.printerNetworkPort
+      togglePrinterFields()
+    }
+
+    function togglePrinterFields () {
+      const iface = $('#hwPrinterInterface').value
+      $('#hwPortField').style.display = (iface === 'network') ? 'none' : ''
+      $('#hwIpField').style.display = (iface === 'network') ? '' : 'none'
+      $('#hwNetPortField').style.display = (iface === 'network') ? '' : 'none'
+    }
+    $('#hwPrinterInterface').addEventListener('change', togglePrinterFields)
+
+    function updateProbeUI (result) {
+      // USB device table
+      if (result.usbDevices?.length) {
+        $('#usbDeviceTable').innerHTML = result.usbDevices.map(d => {
+          const badge = TYPE_BADGES[d.type] || ''
+          return `<tr>
+            <td><span class="badge ${badge}">${d.type}</span></td>
+            <td>${esc(d.vendor || '-')}</td>
+            <td>0x${(d.vendorId || 0).toString(16).padStart(4, '0')}</td>
+            <td>0x${(d.productId || 0).toString(16).padStart(4, '0')}</td>
+            <td>${esc(d.product || '-')}</td>
+            <td style="font-size:10px;color:var(--text-dim)">${d.usagePage ? 'HID 0x' + d.usagePage.toString(16) : (d.deviceClass || '-')}</td>
+          </tr>`
+        }).join('')
+      } else {
+        $('#usbDeviceTable').innerHTML = '<tr><td colspan="6" style="color:var(--text-dim)">No USB devices found</td></tr>'
+      }
+
+      // HID status
+      $('#hidStatus').textContent = result.hidAvailable ? 'node-hid: available (scale weight reading enabled)' : 'node-hid: not installed (scale weight reading disabled)'
+
+      // Printer
+      if (result.printer.found) {
+        $('#dotPrinter').style.background = 'var(--green)'
+        let info = `<span style="color:var(--green)">Connected</span> — ${esc(result.printer.name || 'Unknown')}`
+        if (result.printer.vendor) info += ` <span style="font-size:11px;color:var(--text-dim)">(${esc(result.printer.vendor)})</span>`
+        $('#printerInfo').innerHTML = info
+        $('#testPrinterBtn').style.display = ''
+        const details = []
+        if (result.printer.interface) details.push(`Interface: ${result.printer.interface}`)
+        if (result.printer.port) details.push(`Port: ${result.printer.port}`)
+        if (result.printer.driver) details.push(`Driver: ${result.printer.driver}`)
+        if (result.printer.status) details.push(`Status: ${result.printer.status}`)
+        if (result.printer.configured) details.push('(saved config)')
+        if (details.length) { $('#printerDetails').style.display = ''; $('#printerDetails').textContent = details.join(' | ') }
+
+        if (!$('#hwPrinterName').value) $('#hwPrinterName').value = result.printer.name || ''
+        if (!$('#hwPrinterPort').value) $('#hwPrinterPort').value = result.printer.port || ''
+        if (!$('#hwPrinterInterface').value && result.printer.interface) { $('#hwPrinterInterface').value = result.printer.interface; togglePrinterFields() }
+      } else {
+        $('#dotPrinter').style.background = result.printer.needsSetup ? 'var(--amber)' : 'var(--red)'
+        $('#printerInfo').innerHTML = result.printer.needsSetup
+          ? `<span style="color:var(--amber)">Found but needs setup</span> — ${esc(result.printer.error || '')}`
+          : `<span style="color:var(--red)">Not found</span> — ${esc(result.printer.error || 'No ESC/POS printer detected')}`
+        $('#testPrinterBtn').style.display = 'none'
+        $('#printerDetails').style.display = 'none'
+      }
+
+      // Drawer
+      if (result.drawer.found) {
+        $('#dotDrawerHw').style.background = 'var(--green)'
+        $('#drawerInfo').innerHTML = `<span style="color:var(--green)">Available</span> — ${esc(result.drawer.via)}`
+      } else {
+        $('#dotDrawerHw').style.background = 'var(--red)'
+        $('#drawerInfo').innerHTML = `<span style="color:var(--red)">Not available</span> — needs a connected printer`
+      }
+
+      // Scanner
+      if (result.scanner.found) {
+        $('#dotScanner').style.background = 'var(--green)'
+        $('#scannerInfo').innerHTML = `<span style="color:var(--green)">Detected</span> — ${esc(result.scanner.vendor)} ${esc(result.scanner.name)}`
+      } else {
+        $('#dotScanner').style.background = 'var(--amber)'
+        $('#scannerInfo').innerHTML = `<span style="color:var(--amber)">HID keyboard mode</span> — scanner appears as keyboard. Test below.`
+      }
+
+      // Scale
+      if (result.scale.found) {
+        $('#dotScale').style.background = 'var(--green)'
+        let scaleText = `<span style="color:var(--green)">Detected</span> — ${esc(result.scale.vendor)} ${esc(result.scale.name)}`
+        if (result.scale.noHID) scaleText += ` <span style="color:var(--amber)">(install node-hid for weight reading)</span>`
+        $('#scaleInfo').innerHTML = scaleText
+        if (result.scale.reading) {
+          $('#scaleReading').style.display = ''
+          $('#scaleReading').textContent = `${result.scale.reading.weight} ${result.scale.reading.unit}`
+        } else if (result.scale.testResult) {
+          $('#scaleReading').style.display = ''
+          $('#scaleReading').textContent = result.scale.testResult
+          $('#scaleReading').style.color = 'var(--amber)'
+        }
+        if (result.scale.path) $('#readScaleBtn').style.display = ''
+      } else {
+        $('#dotScale').style.background = 'var(--red)'
+        $('#scaleInfo').innerHTML = `<span style="color:var(--red)">Not found</span> — No compatible scale detected`
+        $('#scaleReading').style.display = 'none'
+        $('#readScaleBtn').style.display = 'none'
+      }
+    }
 
     $('#probeBtn').addEventListener('click', async () => {
       $('#probeStatus').textContent = 'Probing...'
       $('#probeBtn').disabled = true
-
       try {
         const result = await window.pos.probeDevices()
-
-        if (result.usbDevices && result.usbDevices.length) {
-          $('#usbDeviceTable').innerHTML = result.usbDevices.map(d => `
-            <tr>
-              <td>0x${d.vendorId.toString(16).padStart(4, '0')}</td>
-              <td>0x${d.productId.toString(16).padStart(4, '0')}</td>
-              <td>${esc(d.manufacturer || '-')}</td>
-              <td>${esc(d.product || '-')}</td>
-              <td>${d.deviceClass || '-'}</td>
-            </tr>`).join('')
-        } else {
-          $('#usbDeviceTable').innerHTML = '<tr><td colspan="5" style="color:var(--text-dim)">No USB devices found</td></tr>'
-        }
-
-        if (result.printer.found) {
-          $('#dotPrinter').style.background = 'var(--green)'
-          $('#printerInfo').innerHTML = `<span style="color:var(--green)">Connected</span> - ${esc(result.printer.name || 'ESC/POS printer')}`
-        } else {
-          $('#dotPrinter').style.background = 'var(--red)'
-          $('#printerInfo').innerHTML = `<span style="color:var(--red)">Not found</span> - ${esc(result.printer.error || 'No ESC/POS printer detected')}`
-        }
-
-        if (result.drawer.found) {
-          $('#dotDrawerHw').style.background = 'var(--green)'
-          $('#drawerInfo').innerHTML = `<span style="color:var(--green)">Available</span> - via printer DK port`
-        } else {
-          $('#dotDrawerHw').style.background = result.printer.found ? 'var(--amber)' : 'var(--red)'
-          $('#drawerInfo').innerHTML = result.printer.found
-            ? `<span style="color:var(--amber)">Assumed available</span> - printer found, drawer should be on DK port`
-            : `<span style="color:var(--red)">Not available</span> - needs a connected printer`
-        }
-
-        if (result.scanner.found) {
-          $('#dotScanner').style.background = 'var(--green)'
-          $('#scannerInfo').innerHTML = `<span style="color:var(--green)">Detected</span> - ${esc(result.scanner.name || 'HID keyboard device')}`
-        } else {
-          $('#dotScanner').style.background = 'var(--amber)'
-          $('#scannerInfo').innerHTML = `<span style="color:var(--amber)">HID mode</span> - scanner appears as keyboard. Test with the box below.`
-        }
-
-        if (result.scale.found) {
-          $('#dotScale').style.background = 'var(--green)'
-          $('#scaleInfo').innerHTML = `<span style="color:var(--green)">Detected</span> - ${esc(result.scale.name || 'USB/Serial scale')}`
-        } else {
-          $('#dotScale').style.background = 'var(--red)'
-          $('#scaleInfo').innerHTML = `<span style="color:var(--red)">Not found</span> - No compatible scale detected`
-        }
-
-        $('#probeStatus').textContent = `Probe complete - ${result.usbDevices?.length || 0} USB device(s) found`
+        updateProbeUI(result)
+        const counts = { printer: 0, scale: 0, scanner: 0, unknown: 0 }
+        for (const d of (result.usbDevices || [])) counts[d.type] = (counts[d.type] || 0) + 1
+        $('#probeStatus').textContent = `Found ${result.usbDevices?.length || 0} device(s): ${counts.printer} printer, ${counts.scanner} scanner, ${counts.scale} scale`
       } catch (e) {
         $('#probeStatus').textContent = 'Probe failed: ' + e.message
       }
       $('#probeBtn').disabled = false
+    })
+
+    $('#testPrinterBtn').addEventListener('click', async () => {
+      $('#testPrinterBtn').textContent = 'Testing...'
+      $('#testPrinterBtn').disabled = true
+      try {
+        const r = await window.pos.testPrinter()
+        if (r.ok) showToast('Printer responded OK', 'success')
+        else showToast('Printer test failed: ' + (r.error || 'No response'), 'error')
+      } catch (e) { showToast('Test error: ' + e.message, 'error') }
+      $('#testPrinterBtn').textContent = 'Test'
+      $('#testPrinterBtn').disabled = false
+    })
+
+    $('#readScaleBtn').addEventListener('click', async () => {
+      try {
+        const r = await window.pos.readScale()
+        if (r.error) { showToast(r.error, 'error'); return }
+        $('#scaleReading').style.display = ''
+        $('#scaleReading').style.color = r.stable ? 'var(--green)' : r.inMotion ? 'var(--amber)' : 'var(--text)'
+        $('#scaleReading').textContent = `${r.weight} ${r.unit} (${r.status})`
+      } catch (e) { showToast('Scale error: ' + e.message, 'error') }
+    })
+
+    $('#hwSaveBtn').addEventListener('click', async () => {
+      const config = {
+        printerInterface: $('#hwPrinterInterface').value,
+        printerName: $('#hwPrinterName').value.trim(),
+        printerPort: $('#hwPrinterPort').value.trim(),
+        printerIp: $('#hwPrinterIp').value.trim(),
+        printerNetworkPort: $('#hwPrinterNetPort').value.trim(),
+      }
+      try {
+        await window.pos.configureHardware(config)
+        showToast('Hardware config saved', 'success')
+      } catch (e) { showToast('Save failed: ' + e.message, 'error') }
     })
 
     $('#scannerTest').addEventListener('keydown', e => {
@@ -4648,7 +4784,7 @@
         if (code) {
           $('#scannerResult').innerHTML = `<span style="color:var(--green)">Scanned: <b>${esc(code)}</b></span>`
           $('#dotScanner').style.background = 'var(--green)'
-          $('#scannerInfo').innerHTML = `<span style="color:var(--green)">Working</span> - last scan: ${esc(code)}`
+          $('#scannerInfo').innerHTML = `<span style="color:var(--green)">Working</span> — last scan: ${esc(code)}`
           $('#scannerTest').value = ''
         }
       }

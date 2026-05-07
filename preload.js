@@ -114,6 +114,10 @@ contextBridge.exposeInMainWorld('pos', {
   printReceipt:       (data)  => ipcRenderer.invoke('hardware:printReceipt', data),
   openDrawer:         ()      => ipcRenderer.invoke('hardware:openDrawer'),
   probeDevices:       ()      => ipcRenderer.invoke('hardware:probe'),
+  readScale:          ()      => ipcRenderer.invoke('hardware:readScale'),
+  testPrinter:        ()      => ipcRenderer.invoke('hardware:testPrinter'),
+  configureHardware:  (cfg)   => ipcRenderer.invoke('hardware:configure', cfg),
+  getHardwareConfig:  ()      => ipcRenderer.invoke('hardware:getConfig'),
 
   // Cash Drawer
   logCashDrawer:      (entry) => ipcRenderer.invoke('db:cash_drawer:log', entry),
