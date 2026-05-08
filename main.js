@@ -2466,6 +2466,101 @@ function setupIPC() {
     return null
   }
 
+  // ── Spooler repair: stop service, purge spool dir, restart, re-check queues ──
+  let _repairing = false
+  function repairPrinterQueue () {
+    if (_repairing) return null
+    _repairing = true
+    appLog('info', 'printer', 'Starting printer spooler repair...')
+    try {
+      // Single PowerShell block: stop spooler → purge → restart → check queues → recreate if needed
+      const script = `
+        $ErrorActionPreference = 'SilentlyContinue'
+        # Stop spooler
+        Stop-Service Spooler -Force -ErrorAction SilentlyContinue
+        Start-Sleep -Seconds 1
+        # Purge spool directory
+        Remove-Item "$env:SystemRoot\\System32\\spool\\PRINTERS\\*" -Force -ErrorAction SilentlyContinue
+        # Restart spooler
+        Start-Service Spooler -ErrorAction SilentlyContinue
+        Start-Sleep -Seconds 2
+        # Check which queues recovered
+        $queues = Get-Printer -ErrorAction SilentlyContinue | Where-Object { $_.PortName -like 'USB*' }
+        $working = $null
+        foreach ($q in $queues) {
+          if ($q.PrinterStatus -eq 0 -or $q.PrinterStatus -eq 3) {
+            $working = $q.Name
+            break
+          }
+        }
+        if ($working) {
+          Write-Output "OK:$working"
+        } else {
+          # Delete errored USB queues and create a fresh one
+          $usbPort = ($queues | Select-Object -First 1).PortName
+          if (-not $usbPort) { $usbPort = 'USB001' }
+          foreach ($q in $queues) {
+            if ($q.PrinterStatus -ne 0 -and $q.PrinterStatus -ne 3) {
+              Remove-Printer -Name $q.Name -ErrorAction SilentlyContinue
+            }
+          }
+          $genName = 'Crisp Receipt Printer'
+          $existing = Get-Printer -Name $genName -ErrorAction SilentlyContinue
+          if ($existing) { Remove-Printer -Name $genName -ErrorAction SilentlyContinue }
+          Add-Printer -Name $genName -DriverName 'Generic / Text Only' -PortName $usbPort -ErrorAction SilentlyContinue
+          Start-Sleep -Seconds 1
+          $check = Get-Printer -Name $genName -ErrorAction SilentlyContinue
+          if ($check) { Write-Output "CREATED:$genName" } else { Write-Output "FAIL" }
+        }
+      `
+      const result = hwExec(`powershell -NoProfile -NonInteractive -Command "${script.replace(/"/g, '\\"')}"`, { timeout: 20000, encoding: 'utf-8' }).trim()
+      appLog('info', 'printer', `Spooler repair result: ${result}`)
+      if (result.startsWith('OK:')) {
+        const queueName = result.substring(3)
+        hwPrinterReady = true
+        hwPrinterCheckTime = Date.now()
+        return queueName
+      } else if (result.startsWith('CREATED:')) {
+        const queueName = result.substring(8)
+        hwPrinterReady = true
+        hwPrinterCheckTime = Date.now()
+        return queueName
+      }
+      appLog('warn', 'printer', 'Spooler repair could not restore any queue')
+      return null
+    } catch (e) {
+      appLog('error', 'printer', `Spooler repair error: ${e.message}`)
+      return null
+    } finally {
+      _repairing = false
+    }
+  }
+
+  // ── Direct USB fallback: bypass spooler entirely ──────────────────────────
+  function findUSBPrinterPort () {
+    if (!isWin) return null
+    try {
+      // Check which USB port the printer is on
+      const raw = hwExec(`powershell -NoProfile -NonInteractive -Command "Get-Printer -ErrorAction SilentlyContinue | Where-Object { $_.PortName -like 'USB*' } | Select-Object -ExpandProperty PortName -First 1"`, { timeout: 3000, encoding: 'utf-8' }).trim()
+      if (raw && raw.startsWith('USB')) return raw
+    } catch (_) {}
+    return 'USB001' // Default fallback
+  }
+
+  function sendViaDirectUSB (data) {
+    const port = hwPrinter?.port || findUSBPrinterPort()
+    const devicePath = `\\\\.\\${port}`
+    appLog('info', 'printer', `Direct USB write: ${data.length} bytes to ${devicePath}`)
+    try {
+      fs.writeFileSync(devicePath, data)
+      appLog('info', 'printer', 'Direct USB write succeeded')
+      return { ok: true, detail: `Direct USB write to ${devicePath}` }
+    } catch (e) {
+      appLog('error', 'printer', `Direct USB write failed: ${e.message}`)
+      return { ok: false, detail: `Direct USB error: ${e.message}` }
+    }
+  }
+
   function testQueueRaw (queueName) {
     // Clear stuck jobs and resume queue first
     clearPrinterQueue(queueName)
@@ -2603,7 +2698,14 @@ function setupIPC() {
   function sendToPrinter (data) {
     if (!hwPrinter) return Promise.resolve({ ok: false, detail: 'No printer detected. Run Probe All Devices in Hardware tab.' })
     if (hwPrinter.interface === 'network') return sendViaTCP(data, hwPrinter.ip, hwPrinter.networkPort || 9100)
-    if (hwPrinter.interface === 'windows') return Promise.resolve(sendViaSpooler(data, hwPrinter.name))
+    if (hwPrinter.interface === 'windows') {
+      const spoolerResult = sendViaSpooler(data, hwPrinter.name)
+      if (spoolerResult.ok) return Promise.resolve(spoolerResult)
+      // Spooler failed — try direct USB as fallback
+      appLog('warn', 'printer', 'Spooler failed, trying direct USB fallback...')
+      const usbResult = sendViaDirectUSB(data)
+      return Promise.resolve(usbResult)
+    }
     if (hwPrinter.interface === 'cups') return Promise.resolve(sendViaCUPS(data, hwPrinter.name))
     return Promise.resolve({ ok: false, detail: `No working print backend for interface: ${hwPrinter.interface}` })
   }
@@ -2620,7 +2722,29 @@ function setupIPC() {
       // Check if job got stuck
       const post = getQueueStatus(printerName)
       if (post && post.JobCount > 0) {
-        appLog('warn', 'printer', `Spooler said OK but ${post.JobCount} jobs stuck (status ${post.PrinterStatus}). Printer may be offline or wrong queue.`)
+        appLog('warn', 'printer', `Spooler said OK but ${post.JobCount} jobs stuck (status ${post.PrinterStatus}). Attempting spooler repair...`)
+        // Try repair and retry once
+        const repairedQueue = repairPrinterQueue()
+        if (repairedQueue) {
+          appLog('info', 'printer', `Spooler repaired, retrying with queue: ${repairedQueue}`)
+          hwPrinter.name = repairedQueue
+          // Save repaired queue name to settings
+          dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('hw_printer_name', ?1)", [repairedQueue])
+          scheduleSave()
+          // Retry send on repaired queue
+          const tmpFile2 = path.join(os.tmpdir(), `crisp-receipt-retry-${Date.now()}.bin`)
+          fs.writeFileSync(tmpFile2, data)
+          try {
+            const retry = hwExec(`powershell -ExecutionPolicy Bypass -NoProfile -NonInteractive -File "${RAWPRINT_SCRIPT}" -PrinterName "${repairedQueue.replace(/"/g, '`"')}" -FilePath "${tmpFile2}"`, { timeout: 15000, encoding: 'utf-8' }).trim()
+            appLog('info', 'printer', `Retry result: ${retry}`)
+            if (retry.startsWith('OK')) return { ok: true, detail: `${retry} (after repair)` }
+          } catch (e2) {
+            appLog('error', 'printer', `Retry after repair failed: ${e2.message}`)
+          } finally {
+            try { fs.unlinkSync(tmpFile2) } catch (_) {}
+          }
+        }
+        return { ok: false, detail: 'Spooler accepted data but jobs stuck — printer offline or errored' }
       }
       if (result.startsWith('OK')) return { ok: true, detail: result }
       return { ok: false, detail: result }
@@ -3267,13 +3391,32 @@ function setupIPC() {
   // ── Load saved config and auto-probe on startup ────────────────────────────
 
   loadSavedHardwareConfig()
+
+  // Step 5: Startup queue health check — repair errored queue before first print
+  if (isWin && hwPrinter?.name && hwPrinter.interface === 'windows') {
+    const startupStatus = getQueueStatus(hwPrinter.name)
+    if (startupStatus && startupStatus.PrinterStatus !== 0 && startupStatus.PrinterStatus !== 3) {
+      appLog('warn', 'printer', `Startup: saved queue "${hwPrinter.name}" is in error state (status ${startupStatus.PrinterStatus}). Repairing...`)
+      const repaired = repairPrinterQueue()
+      if (repaired) {
+        hwPrinter.name = repaired
+        dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('hw_printer_name', ?1)", [repaired])
+        scheduleSave()
+        appLog('info', 'printer', `Startup: repaired queue → ${repaired}`)
+      }
+    } else if (startupStatus && (startupStatus.JobCount || 0) > 0) {
+      appLog('info', 'printer', `Startup: clearing ${startupStatus.JobCount} stuck jobs from "${hwPrinter.name}"`)
+      clearPrinterQueue(hwPrinter.name)
+    }
+  }
+
   probeHardware().then(r => {
     if (hwPrinter) appLog('info', 'hardware', `Printer: ${hwPrinter.name} (${hwPrinter.interface})`)
     if (hwScale) appLog('info', 'hardware', `Scale: ${hwScale.vendor || hwScale.product}`)
     startScalePolling()
   }).catch(e => appLog('error', 'hardware', 'Auto-probe failed', e.message))
 
-  // Auto-reprobe every 30s so hot-plugged devices are found automatically
+  // Auto-reprobe every 30s — also checks printer queue health
   setInterval(async () => {
     try {
       const hadPrinter = !!hwPrinter, hadScale = !!hwScale
@@ -3282,6 +3425,21 @@ function setupIPC() {
       if (!hadScale && hwScale) {
         appLog('info', 'hardware', `Scale connected: ${hwScale.vendor || hwScale.product}`)
         startScalePolling()
+      }
+      // Step 6: Check printer queue health on each reprobe
+      if (isWin && hwPrinter?.name && hwPrinter.interface === 'windows') {
+        const qs = getQueueStatus(hwPrinter.name)
+        if (qs && qs.PrinterStatus !== 0 && qs.PrinterStatus !== 3) {
+          appLog('warn', 'printer', `Reprobe: queue "${hwPrinter.name}" errored (status ${qs.PrinterStatus}), triggering repair`)
+          const repaired = repairPrinterQueue()
+          if (repaired && repaired !== hwPrinter.name) {
+            hwPrinter.name = repaired
+            dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('hw_printer_name', ?1)", [repaired])
+            scheduleSave()
+          }
+        } else if (qs && (qs.JobCount || 0) > 0) {
+          clearPrinterQueue(hwPrinter.name)
+        }
       }
     } catch (_) {}
   }, 30000)
