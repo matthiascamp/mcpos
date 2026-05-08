@@ -102,7 +102,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .pos-grid-btn img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit}
 .pos-grid-btn.has-img{position:relative}
 .pos-grid-btn.has-img::after{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(to top,rgba(0,0,0,.8) 0%,rgba(0,0,0,.35) 30%,rgba(0,0,0,.08) 55%,transparent 100%);pointer-events:none}
-.pos-grid-btn.has-img span{position:relative;z-index:2;font-size:clamp(10px,1.1vw,13px);font-weight:700;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.9),0 0 16px rgba(0,0,0,.5);align-self:flex-end;padding-bottom:clamp(3px,0.5vh,6px);letter-spacing:-.2px}
+.pos-grid-btn.has-img span{position:relative;z-index:2;font-size:clamp(10px,1.1vw,13px);font-weight:700;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.9),0 0 16px rgba(0,0,0,.5);margin-top:auto;padding-bottom:clamp(3px,0.5vh,6px);letter-spacing:-.2px;text-align:center}
 
 /* ─── Function buttons (utility keys) ────────────────────────────── */
 .pos-grid-btn.func-key{font-size:clamp(8px,0.9vw,11px);font-weight:700;letter-spacing:.3px;text-transform:uppercase;border:1px solid rgba(255,255,255,.1);box-shadow:0 3px 8px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.12)}
@@ -119,10 +119,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .pos-grid-btn.dept-key.has-img{border-bottom:3px solid var(--cat-color,transparent);box-shadow:0 4px 16px rgba(0,0,0,.5),0 0 20px var(--cat-glow,transparent)}
 .pos-grid-btn.dept-key.has-img::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,var(--cat-glow,transparent) 0%,transparent 40%);z-index:1;pointer-events:none;opacity:.5}
 
-/* ─── Price tag on item buttons ──────────────────────────────────── */
-.pos-grid-btn.dept-key.has-price{flex-direction:column;gap:1px}
-.btn-price{font-size:clamp(9px,0.85vw,11px);font-weight:600;opacity:.75;letter-spacing:0}
-.pos-grid-btn.dept-key.has-img .btn-price{font-size:clamp(8px,0.75vw,10px);opacity:.85}
+/* ─── Price badge (bottom-right corner) ─────────────────────────── */
+.btn-price-badge{position:absolute;bottom:3px;right:4px;z-index:3;font-size:clamp(9px,0.85vw,12px);font-weight:700;color:#4ade80;background:rgba(0,0,0,.55);padding:1px 5px;border-radius:4px;letter-spacing:-.3px;pointer-events:none}
 
 /* ─── Numpad zone ────────────────────────────────────────────────── */
 .pos-grid-btn.digit-btn{font-size:clamp(18px,2.5vw,28px);font-weight:700;background:linear-gradient(180deg,#ffffff 0%,#f4f5f7 100%);color:#1a1a2e;border:1px solid rgba(0,0,0,.06);border-radius:clamp(8px,1vw,14px);box-shadow:0 4px 10px rgba(0,0,0,.12),0 2px 3px rgba(0,0,0,.06),inset 0 -3px 0 rgba(0,0,0,.04),inset 0 1px 0 rgba(255,255,255,.95)}
@@ -149,11 +147,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 
 /* ═══ Section View ════════════════════════════════════════════════ */
 .section-view{flex:1;display:flex;flex-direction:column;background:radial-gradient(ellipse at 50% 0%,#1f2333 0%,#13151d 100%)}
-.section-nav{display:flex;gap:8px;padding:10px 14px;background:linear-gradient(180deg,#22252f 0%,#1a1d27 100%);flex-shrink:0;align-items:center;border-bottom:1px solid rgba(255,255,255,.04)}
-.section-nav-btn{padding:10px 20px;background:linear-gradient(135deg,#10b981 0%,#059669 50%,#047857 100%);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;line-height:1.15;text-align:center;box-shadow:0 4px 12px rgba(5,150,105,.3),inset 0 1px 0 rgba(255,255,255,.2);transition:all .1s}
-.section-nav-btn:active{transform:scale(.96);filter:brightness(.8);box-shadow:0 1px 4px rgba(5,150,105,.2)}
-.section-title-text{font-weight:700;font-size:16px;flex:1;padding:0 12px;color:#e8eaef}
-.section-price{font-family:'Inter',sans-serif;font-weight:800;font-size:20px;color:#34d399;text-shadow:0 0 12px rgba(52,211,153,.2)}
+.section-back-btn{background:linear-gradient(135deg,#10b981 0%,#059669 50%,#047857 100%);color:#fff;border:none;border-radius:clamp(8px,1vw,14px);font-weight:700;font-size:clamp(12px,1.3vw,16px);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;min-height:clamp(60px,10vh,100px);box-shadow:0 4px 12px rgba(5,150,105,.3),inset 0 1px 0 rgba(255,255,255,.2);transition:all .1s}
+.section-back-btn:active{transform:scale(.96);filter:brightness(.8);box-shadow:0 1px 4px rgba(5,150,105,.2)}
 
 .product-grid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(4px,0.6vw,8px);padding:clamp(6px,1vw,12px);align-content:start;background:transparent}
 .product-btn{background:linear-gradient(180deg,#2e3242 0%,#252838 100%);border:1px solid rgba(255,255,255,.06);border-radius:clamp(8px,1vw,14px);display:flex;flex-direction:column;align-items:center;padding:clamp(6px,1vh,12px) clamp(4px,0.6vw,8px);cursor:pointer;min-height:clamp(60px,10vh,100px);justify-content:center;font-family:inherit;transition:transform .1s cubic-bezier(.4,0,.2,1),box-shadow .1s;box-shadow:0 4px 12px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.05)}
@@ -462,12 +457,6 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 
     <!-- Section View (products) -->
     <div class="section-view" id="sectionView" style="display:none">
-      <div class="section-nav">
-        <button class="section-nav-btn" id="sectionBack">&#8592; BACK</button>
-        <span class="section-title-text" id="sectionTitle"></span>
-        <span class="section-price" id="sectionPrice">$0.00</span>
-        <button class="section-nav-btn" id="sectionHome">&#8592; BACK<br>KEYBOARD</button>
-      </div>
       <div class="product-grid" id="productGrid"></div>
     </div>
 
@@ -1378,20 +1367,25 @@ function renderPosButton (btn, gridStyle) {
 
   // Page link buttons
   if (type === 'page_link' && btn.parent_id) {
+    let dispLabel = label.replace(/\\n/g,'<br>')
+    // Extract embedded price from label (e.g. "MANGOES<br>$3.50 ea")
+    let priceBadge = ''
+    const priceMatch = dispLabel.match(/<br>(\$[\d.]+.*)$/)
+    if (priceMatch) { priceBadge = `<span class="btn-price-badge">${priceMatch[1]}</span>`; dispLabel = dispLabel.replace(/<br>\$[\d.]+.*$/, '') }
+    else if (btn.price > 0) { priceBadge = `<span class="btn-price-badge">${money(btn.price)}</span>` }
     return `<div class="pos-grid-btn dept-key${imgClass}" data-type="${esc(type)}" data-page-link="${btn.parent_id}"
-      style="${gridStyle};background:${bg};color:${color}${catColorStyle}">${imgHtml}<span>${label.replace(/\\n/g,'<br>')}</span></div>`
+      style="${gridStyle};background:${bg};color:${color}${catColorStyle}">${imgHtml}<span>${dispLabel}</span>${priceBadge}</div>`
   }
 
   // Department / product / nav — everything else
   const isItem = type === 'fixed_price' || type === 'open_price' || type === 'product'
   const priceVal = btn.price || 0
-  const priceTag = isItem && priceVal > 0 ? `<small class="btn-price">${money(priceVal)}</small>` : ''
-  const priceClass = priceTag ? ' has-price' : ''
+  const priceBadge = isItem && priceVal > 0 ? `<span class="btn-price-badge">${money(priceVal)}</span>` : ''
   // Strip embedded price line from label when we have a proper price tag
   let displayLabel = label.replace(/\\n/g,'<br>')
-  if (priceTag) displayLabel = displayLabel.replace(/<br>\$[\d.]+.*$/, '')
-  const labelHtml = imgSrc ? `<span>${displayLabel}${priceTag}</span>` : `${displayLabel}${priceTag}`
-  return `<div class="pos-grid-btn dept-key${imgClass}${priceClass}" data-type="${esc(type)}" data-cat="${esc(btn.category_filter || '')}"
+  if (priceBadge) displayLabel = displayLabel.replace(/<br>\$[\d.]+.*$/, '')
+  const labelHtml = `<span>${displayLabel}</span>${priceBadge}`
+  return `<div class="pos-grid-btn dept-key${imgClass}" data-type="${esc(type)}" data-cat="${esc(btn.category_filter || '')}"
     data-alpha="${esc(btn.alpha_range || '')}" data-label2="${label}" data-price="${priceVal}"
     data-action="${esc(type)}" data-page-link="${btn.parent_id || ''}"
     style="${gridStyle};background:${bg};color:${color}${catColorStyle}">${imgHtml}${labelHtml}</div>`
@@ -1678,17 +1672,21 @@ function showSectionView () { $('#keyboardView').style.display = 'none'; $('#sec
 
 function pushSection (title, renderFn) {
   sectionStack.push({ title, renderFn }); showSectionView()
-  $('#sectionTitle').textContent = title; renderFn()
+  renderFn()
+  // Inject back button as first item in product grid
+  const grid = $('#productGrid')
+  const backBtn = document.createElement('button')
+  backBtn.className = 'section-back-btn'
+  backBtn.dataset.type = 'back'
+  backBtn.textContent = '\u2190 BACK'
+  grid.insertBefore(backBtn, grid.firstChild)
 }
 function popSection () {
   sectionStack.pop()
-  if (sectionStack.length > 0) { const s = sectionStack[sectionStack.length - 1]; $('#sectionTitle').textContent = s.title; s.renderFn() }
+  if (sectionStack.length > 0) { const s = sectionStack[sectionStack.length - 1]; s.renderFn(); const g = $('#productGrid'); const b = document.createElement('button'); b.className = 'section-back-btn'; b.dataset.type = 'back'; b.textContent = '\u2190 BACK'; g.insertBefore(b, g.firstChild) }
   else showKeyboardView()
 }
 function goHome () { sectionStack = []; showKeyboardView() }
-
-$('#sectionBack').addEventListener('click', popSection)
-$('#sectionHome').addEventListener('click', goHome)
 
 async function navigateToSection (catName) {
   if (catName === '__all__' || !catName) {
@@ -1767,6 +1765,7 @@ function drillIntoGroup (groupName) {
 }
 
 $('#productGrid').addEventListener('click', async e => {
+  if (e.target.closest('.section-back-btn')) { popSection(); return }
   const btn = e.target.closest('.product-btn'); if (!btn) return
   const type = btn.dataset.type
   if (type === 'product') {
@@ -2032,7 +2031,6 @@ function updateTotals () {
   if ($('#btnPay')) $('#btnPay').disabled = cart.isEmpty
   if ($('#btnCard')) $('#btnCard').disabled = cart.isEmpty
   $('#topTotal').textContent = money(cart.total)
-  $('#sectionPrice').textContent = money(cart.total)
 }
 
 $('#cartClear').addEventListener('click', () => {
