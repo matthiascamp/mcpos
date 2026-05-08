@@ -2619,7 +2619,7 @@ function setupIPC() {
       // Verify saved config actually works — don't blindly trust stale config
       if (hwScale.type === 'serial' && hwScale.port && SerialPortLib) {
         try {
-          const verify = await testSerialScale(hwScale.port, hwScale.baud || 9600, hwScale.protocol || 'sics')
+          const verify = await testSerialScale(hwScale.port, hwScale.baud || 9600, hwScale.protocol || 'sics', 2000)
           if (verify.ok) {
             appLog('info', 'hardware', `Saved scale config verified: ${hwScale.port} (${hwScale.protocol} @ ${hwScale.baud})`)
             return hwScale
@@ -2667,30 +2667,42 @@ function setupIPC() {
       })
       const portErrors = []
       for (const sp of sorted) {
-        let portTested = false
-        for (const [protocol, baud] of [['sics', 9600], ['mt8217', 9600], ['sics', 19200], ['mt8217', 19200], ['sics', 4800], ['mt8217', 4800]]) {
+        // Quick open test: try opening at default baud to check access before brute-forcing
+        let canOpen = true
+        try {
+          const quickTest = await testSerialScale(sp.path, 9600, 'sics', 1500)
+          if (quickTest.ok) {
+            appLog('info', 'hardware', `Scale auto-detected on ${sp.path} — sics @ 9600 baud`)
+            return { type: 'serial', port: sp.path, protocol: 'sics', baud: 9600, vendor: sp.manufacturer || 'Serial Scale', product: sp.path, detected: true }
+          }
+          if (quickTest.error && /access denied|permission|locked|busy|open timeout/i.test(quickTest.error)) {
+            appLog('warn', 'hardware', `${sp.path}: ${quickTest.error} — skipping`)
+            portErrors.push({ port: sp.path, error: quickTest.error })
+            canOpen = false
+          }
+        } catch (e) {
+          if (/access denied|permission|locked|busy/i.test(e.message)) {
+            portErrors.push({ port: sp.path, error: e.message })
+            canOpen = false
+          }
+        }
+        if (!canOpen) continue
+        // Port opens but sics@9600 didn't respond — try remaining combos
+        let found = false
+        for (const [protocol, baud] of [['mt8217', 9600], ['sics', 19200], ['mt8217', 19200], ['sics', 4800], ['mt8217', 4800]]) {
           try {
-            const result = await testSerialScale(sp.path, baud, protocol)
+            const result = await testSerialScale(sp.path, baud, protocol, 1500)
             if (result.ok) {
               appLog('info', 'hardware', `Scale auto-detected on ${sp.path} — ${protocol} @ ${baud} baud`)
               return { type: 'serial', port: sp.path, protocol, baud, vendor: sp.manufacturer || 'Serial Scale', product: sp.path, detected: true }
             }
-            portTested = true
-            // If access denied or port locked, skip remaining combos for this port
             if (result.error && /access denied|permission|locked|busy/i.test(result.error)) {
-              appLog('warn', 'hardware', `${sp.path}: ${result.error}`)
               portErrors.push({ port: sp.path, error: result.error })
-              break
+              found = true; break
             }
-          } catch (e) {
-            if (/access denied|permission|locked|busy/i.test(e.message)) {
-              appLog('warn', 'hardware', `${sp.path}: ${e.message}`)
-              portErrors.push({ port: sp.path, error: e.message })
-              break
-            }
-          }
+          } catch (_) {}
         }
-        if (!portTested) portErrors.push({ port: sp.path, error: 'No protocol responded' })
+        if (!found) portErrors.push({ port: sp.path, error: 'No protocol responded' })
       }
       // No scale found — return error info so probe can display it
       if (portErrors.length > 0) {
@@ -2989,25 +3001,30 @@ function setupIPC() {
     } catch (e) { return { error: e.message } }
   }
 
-  async function testSerialScale (portPath, baud, protocol) {
+  async function testSerialScale (portPath, baud, protocol, timeoutMs) {
+    const cmdTimeout = timeoutMs || 3000
     let testPort = null
     const closePort = () => new Promise(resolve => {
       if (!testPort || !testPort.isOpen) return resolve()
-      testPort.close(err => { if (err) appLog('warn', 'hardware', `Port close error: ${err.message}`); resolve() })
+      const timer = setTimeout(() => { try { testPort.destroy() } catch (_) {} resolve() }, 2000)
+      testPort.close(() => { clearTimeout(timer); resolve() })
     })
     try {
       const serialOpts = PROTOCOL_SERIAL_OPTS[protocol] || PROTOCOL_SERIAL_OPTS.sics
       testPort = new SerialPortLib.SerialPort({ path: portPath, baudRate: baud || 9600, ...serialOpts, autoOpen: false })
-      await new Promise((resolve, reject) => testPort.open(err => err ? reject(err) : resolve()))
+      await new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error(`Open timeout on ${portPath}`)), 3000)
+        testPort.open(err => { clearTimeout(timer); err ? reject(err) : resolve() })
+      })
       if (protocol === 'mt8217') {
-        const data = await send8217Command(testPort, 'W', 3000)
+        const data = await send8217Command(testPort, 'W', cmdTimeout)
         const parsed = parse8217Response(data)
         await closePort()
         if (parsed) return { ok: true, reading: parsed, protocol: 'mt8217', raw: Array.from(data).map(b => b.toString(16)).join(' ') }
         return { ok: false, error: `Got 8217 response but couldn't parse: ${Array.from(data).map(b => b.toString(16)).join(' ')}` }
       }
       if (protocol === 'sics' || !protocol) {
-        const resp = await sendSerialCommand(testPort, 'S\r\n', 3000)
+        const resp = await sendSerialCommand(testPort, 'S\r\n', cmdTimeout)
         const parsed = parseSICSResponse(resp)
         await closePort()
         if (parsed) return { ok: true, reading: parsed, protocol: 'sics', raw: resp }
@@ -3197,7 +3214,19 @@ function setupIPC() {
 
   // ── IPC handlers ───────────────────────────────────────────────────────────
 
-  ipcMain.handle('hardware:probe', probeHardware)
+  ipcMain.handle('hardware:probe', () => {
+    return Promise.race([
+      probeHardware(),
+      new Promise(resolve => setTimeout(() => resolve({
+        timeout: true,
+        printer: { found: !!hwPrinter, name: hwPrinter?.name || '', error: 'Probe timed out (20s) — serial port scan may be hanging' },
+        scale: { found: false, error: 'Probe timed out — a serial port may be held by another application (e.g. Profit Track)' },
+        scanner: { found: !!hwScanner },
+        drawer: { found: !!hwPrinter },
+        usbDevices: [], serialPorts: [],
+      }), 20000))
+    ])
+  })
 
   // Full hardware diagnostic — dumps everything raw for debugging
   ipcMain.handle('hardware:diagnostic', async () => {
