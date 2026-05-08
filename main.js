@@ -2918,8 +2918,8 @@ function setupIPC() {
     const weightStr = data.slice(1).toString('ascii').replace(/[^0-9]/g, '')
     if (!weightStr) return { weight: 0, unit: 'kg', status: overCap ? 'over_limit' : underZero ? 'under_zero' : 'fault', stable: false, inMotion, zero: atZero }
 
-    // Default: 3 decimal places for kg (configurable via hwScale.decimals)
-    const decimals = 3
+    // Decimal places configured in the scale's service menu (typically 3 for kg)
+    const decimals = hwScale?.decimals || parseInt(dbGet("SELECT value FROM settings WHERE key='hw_scale_decimals'")?.value || '3')
     let weight = parseInt(weightStr, 10) / Math.pow(10, decimals)
     if (negative) weight = -weight
 
