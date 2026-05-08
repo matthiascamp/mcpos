@@ -5182,9 +5182,17 @@
         }
       } else {
         $('#dotScale').style.background = result.serialPorts?.length ? 'var(--amber)' : 'var(--red)'
-        const msg = result.serialPorts?.length
-          ? `<span style="color:var(--amber)">Not auto-detected</span> — ${result.serialPorts.length} serial port(s) available. Configure below.`
-          : `<span style="color:var(--red)">Not found</span> — No USB scale or serial ports detected`
+        let msg = ''
+        if (result.scale.portErrors && result.scale.portErrors.length > 0) {
+          msg = `<span style="color:var(--red)">Scale scan failed</span>`
+          for (const pe of result.scale.portErrors) {
+            msg += `<br><span style="font-size:11px;color:var(--amber)">${esc(pe.port)}: ${esc(pe.error)}</span>`
+          }
+        } else if (result.serialPorts?.length) {
+          msg = `<span style="color:var(--amber)">Not auto-detected</span> — ${result.serialPorts.length} serial port(s) available. Configure below.`
+        } else {
+          msg = `<span style="color:var(--red)">Not found</span> — No USB scale or serial ports detected`
+        }
         $('#scaleInfo').innerHTML = msg
         $('#scaleReading').style.display = 'none'
         $('#readScaleBtn').style.display = 'none'
@@ -5327,7 +5335,10 @@
         output.textContent = json
         output.style.display = 'block'
         copyBtn.style.display = 'inline-block'
-        status.textContent = `Done. ${diag.hidDevices?.length || 0} HID devices, ${diag.serialPorts?.length || 0} serial ports, ${diag.serialScaleScan?.length || 0} serial tests, ${diag.hidScaleScan?.length || 0} HID scale tests.`
+        let statusMsg = `Done. ${diag.hidDevices?.length || 0} HID devices, ${diag.serialPorts?.length || 0} serial ports, ${diag.serialScaleScan?.length || 0} serial tests, ${diag.hidScaleScan?.length || 0} HID scale tests.`
+        if (diag._savedTo) statusMsg += ` Saved to: ${diag._savedTo}`
+        if (diag._saveError) statusMsg += ` (save failed: ${diag._saveError})`
+        status.textContent = statusMsg
       } catch (e) {
         status.textContent = 'Diagnostic failed: ' + e.message
       }

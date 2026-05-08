@@ -2646,7 +2646,9 @@ function setupIPC() {
         const bKnown = b.vendorId && scaleAdapterVids.has(b.vendorId) ? 0 : 1
         return aKnown - bKnown
       })
+      const portErrors = []
       for (const sp of sorted) {
+        let portTested = false
         for (const [protocol, baud] of [['sics', 9600], ['mt8217', 9600], ['sics', 19200], ['mt8217', 19200], ['sics', 4800], ['mt8217', 4800]]) {
           try {
             const result = await testSerialScale(sp.path, baud, protocol)
@@ -2654,8 +2656,26 @@ function setupIPC() {
               appLog('info', 'hardware', `Scale auto-detected on ${sp.path} — ${protocol} @ ${baud} baud`)
               return { type: 'serial', port: sp.path, protocol, baud, vendor: sp.manufacturer || 'Serial Scale', product: sp.path, detected: true }
             }
-          } catch (_) {}
+            portTested = true
+            // If access denied or port locked, skip remaining combos for this port
+            if (result.error && /access denied|permission|locked|busy/i.test(result.error)) {
+              appLog('warn', 'hardware', `${sp.path}: ${result.error}`)
+              portErrors.push({ port: sp.path, error: result.error })
+              break
+            }
+          } catch (e) {
+            if (/access denied|permission|locked|busy/i.test(e.message)) {
+              appLog('warn', 'hardware', `${sp.path}: ${e.message}`)
+              portErrors.push({ port: sp.path, error: e.message })
+              break
+            }
+          }
         }
+        if (!portTested) portErrors.push({ port: sp.path, error: 'No protocol responded' })
+      }
+      // No scale found — return error info so probe can display it
+      if (portErrors.length > 0) {
+        return { type: 'none', portErrors, error: portErrors.map(e => `${e.port}: ${e.error}`).join('; ') }
       }
     }
 
@@ -3074,8 +3094,9 @@ function setupIPC() {
 
     if (!printer?.needsSetup) hwPrinter = printer
     // Close cached HID scale if path changed
-    if (scale?.path !== hwScale?.path) closeHidScale()
-    hwScale = scale
+    const scaleOk = scale && scale.type !== 'none'
+    if (scaleOk && scale.path !== hwScale?.path) closeHidScale()
+    if (scaleOk) hwScale = scale
     hwScanner = scanner
 
     const classified = devices.filter(d => d.vendorId > 0).map(d => {
@@ -3093,7 +3114,7 @@ function setupIPC() {
         tested: !!printer?.tested, status: printer?.tested ? 'OK (raw send confirmed)' : '',
         availableQueues: printer?.availableQueues || [],
       },
-      scale: { found: !!scale, name: scale?.product || '', vendor: scale?.vendor || '', path: scale?.path || '', port: scale?.port || '', type: scale?.type || '', protocol: scale?.protocol || '', baud: scale?.baud || 0, hasHID: !!HID, hasSerial: !!SerialPortLib, noHID: !!scale?.noHID },
+      scale: { found: !!scale && scale.type !== 'none', name: scale?.product || '', vendor: scale?.vendor || '', path: scale?.path || '', port: scale?.port || '', type: scale?.type || '', protocol: scale?.protocol || '', baud: scale?.baud || 0, hasHID: !!HID, hasSerial: !!SerialPortLib, noHID: !!scale?.noHID, error: scale?.error || '', portErrors: scale?.portErrors || [] },
       serialPorts: serialPorts.map(p => ({ path: p.path, manufacturer: p.manufacturer, vendorId: p.vendorId, productId: p.productId })),
       scanner: { found: !!scanner, name: scanner?.product || '', vendor: scanner?.vendor || '' },
       drawer: { found: !!printer && !printer.needsSetup, via: printer ? 'printer DK port' : '' },
@@ -3157,7 +3178,7 @@ function setupIPC() {
 
   // Full hardware diagnostic — dumps everything raw for debugging
   ipcMain.handle('hardware:diagnostic', async () => {
-    const diag = { timestamp: new Date().toISOString(), platform: process.platform, arch: process.arch, nodeVersion: process.version }
+    const diag = { timestamp: new Date().toISOString(), platform: process.platform, arch: process.arch, nodeVersion: process.version, electronVersion: process.versions.electron || '' }
 
     // All HID devices (raw, unfiltered)
     diag.hidAvailable = !!HID
@@ -3195,6 +3216,26 @@ function setupIPC() {
           locationId: p.locationId || '',
         }))
       } catch (e) { diag.serialError = e.message }
+    }
+
+    // Windows-level COM port scan (catches ports serialport might miss)
+    diag.windowsComPorts = []
+    if (isWin) {
+      try {
+        const raw = hwExec(`powershell -NoProfile -NonInteractive -Command "Get-CimInstance Win32_PnPEntity -Filter \\"Name LIKE '%(COM%'\\" -ErrorAction SilentlyContinue | Select-Object Name,DeviceID,Status | ConvertTo-Json -Compress"`, { timeout: 8000, encoding: 'utf-8' }).trim()
+        if (raw) {
+          const parsed = JSON.parse(raw)
+          diag.windowsComPorts = (Array.isArray(parsed) ? parsed : [parsed]).map(d => ({
+            name: d.Name || '', deviceId: d.DeviceID || '', status: d.Status || '',
+            comPort: (d.Name?.match(/\((COM\d+)\)/) || [])[1] || '',
+          }))
+        }
+      } catch (e) { diag.windowsComPortsError = e.message }
+      // Also try registry
+      try {
+        const raw = hwExec(`powershell -NoProfile -NonInteractive -Command "Get-ItemProperty 'HKLM:\\HARDWARE\\DEVICEMAP\\SERIALCOMM' -ErrorAction SilentlyContinue | ConvertTo-Json -Compress"`, { timeout: 5000, encoding: 'utf-8' }).trim()
+        if (raw) diag.registryComPorts = JSON.parse(raw)
+      } catch (e) { diag.registryComPortsError = e.message }
     }
 
     // Current hardware state
@@ -3292,6 +3333,14 @@ function setupIPC() {
       const row = dbGet("SELECT value FROM settings WHERE key = ?1", [key])
       if (row) diag.savedConfig[key] = row.value
     }
+
+    // Auto-save to desktop for easy sharing
+    try {
+      const desktop = path.join(os.homedir(), 'Desktop')
+      const filePath = path.join(desktop, `crisp-hw-diag-${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}.json`)
+      fs.writeFileSync(filePath, JSON.stringify(diag, null, 2))
+      diag._savedTo = filePath
+    } catch (e) { diag._saveError = e.message }
 
     return diag
   })
