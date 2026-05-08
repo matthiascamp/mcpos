@@ -2263,7 +2263,7 @@ function setupIPC() {
     0x04B4: 'Cypress (scanner HID)',
   }
   const SCALE_USAGE_PAGE = 0x8D
-  const RECEIPT_KEYWORDS = ['epson', 'tm-t', 'tm-u', 'tm-m', 'star ', 'tsp', 'bixolon', 'srp-', 'citizen', 'ct-s', 'ct-e', 'custom', 'sewoo', 'slk-', 'thermal', 'receipt', 'pos printer']
+  const RECEIPT_KEYWORDS = ['epson', 'tm-t', 'tm-u', 'tm-m', 'star ', 'tsp', 'bixolon', 'srp-', 'citizen', 'ct-s', 'ct-e', 'custom', 'sewoo', 'slk-', 'thermal', 'receipt', 'pos printer', '80mm', '58mm', '80normal', '58normal']
   const EPSON_MODELS = {
     0x0E03: 'TM-T20', 0x0E15: 'TM-T20II', 0x0E20: 'TM-T20III', 0x0E22: 'TM-T20IIIL',
     0x0E11: 'TM-T82', 0x0E14: 'TM-T82II', 0x0E32: 'TM-T82III', 0x0E38: 'TM-T82IIIL',
@@ -2504,10 +2504,17 @@ function setupIPC() {
       const name = (q.Name || '').toLowerCase()
       const driver = (q.DriverName || '').toLowerCase()
       const port = q.PortName || ''
+      const status = q.PrinterStatus || 0
       let score = 0
       if (RECEIPT_KEYWORDS.some(k => name.includes(k) || driver.includes(k))) score += 100
       if (port.startsWith('USB')) score += 50
       if (driver.includes('generic')) score += 20
+      // Prefer ready printers (status 0 or 3=idle) over errored/paused ones
+      if (status === 0 || status === 3) score += 10
+      // Penalise virtual/system queues
+      if (/xps|pdf|fax|onenote|send to/i.test(name)) score -= 200
+      // Prefer the base name over numbered copies like "Printer(2)", "Printer(3)"
+      if (/\(\d+\)/.test(q.Name)) score -= 5
       return { ...q, score }
     }).sort((a, b) => b.score - a.score)
 
@@ -2553,11 +2560,14 @@ function setupIPC() {
   function sendViaSpooler (data, printerName) {
     const tmpFile = path.join(os.tmpdir(), `crisp-receipt-${Date.now()}.bin`)
     fs.writeFileSync(tmpFile, data)
+    appLog('info', 'printer', `Sending ${data.length} bytes to "${printerName}" via spooler`)
     try {
       const result = hwExec(`powershell -ExecutionPolicy Bypass -NoProfile -NonInteractive -File "${RAWPRINT_SCRIPT}" -PrinterName "${printerName.replace(/"/g, '`"')}" -FilePath "${tmpFile}"`, { timeout: 15000, encoding: 'utf-8' }).trim()
+      appLog('info', 'printer', `Spooler result: ${result}`)
       if (result.startsWith('OK')) return { ok: true, detail: result }
       return { ok: false, detail: result }
     } catch (e) {
+      appLog('error', 'printer', `Spooler error: ${e.stderr || e.message}`)
       return { ok: false, detail: e.stderr || e.message }
     } finally {
       try { fs.unlinkSync(tmpFile) } catch (_) {}
@@ -3415,9 +3425,11 @@ function setupIPC() {
     try {
       if (!hwPrinter) await probeHardware()
       ensurePrinterQueue()
+      appLog('info', 'drawer', `Opening drawer via "${hwPrinter?.name}" (${hwPrinter?.interface})`)
       const buf = Buffer.concat([ESCPOS.INIT, ESCPOS.DRAWER_KICK])
       const result = await sendToPrinter(buf)
-      if (!result.ok) return { error: result.detail }
+      if (!result.ok) { appLog('error', 'drawer', `Drawer open failed: ${result.detail}`); return { error: result.detail } }
+      appLog('info', 'drawer', 'Drawer kick sent OK')
       return true
     } catch (err) {
       appLog('error', 'drawer', 'Open drawer failed', err.message)
@@ -3447,7 +3459,24 @@ function setupIPC() {
 
   ipcMain.handle('hardware:testQueue', (_e, queueName) => {
     if (!isWin) return { ok: false, error: 'Queue test only available on Windows' }
-    const works = testQueueRaw(queueName)
+    // Send a visible test page so user can confirm which queue actually prints
+    const testBuf = Buffer.concat([
+      ESCPOS.INIT, Buffer.from([0x1B, 0x74, 0x00]),
+      ESCPOS.ALIGN_CENTER, ESCPOS.BOLD_ON,
+      Buffer.from('=== QUEUE TEST ===\n', 'latin1'), ESCPOS.BOLD_OFF,
+      Buffer.from(`Queue: ${queueName}\n`, 'latin1'),
+      Buffer.from(`Time: ${new Date().toLocaleString('en-AU')}\n`, 'latin1'),
+      Buffer.from('This queue works!\n', 'latin1'),
+      ESCPOS.FEED_3, ESCPOS.PARTIAL_CUT
+    ])
+    const tmpFile = path.join(os.tmpdir(), `crisp-test-${Date.now()}.bin`)
+    fs.writeFileSync(tmpFile, testBuf)
+    let works = false
+    try {
+      const result = hwExec(`powershell -ExecutionPolicy Bypass -NoProfile -NonInteractive -File "${RAWPRINT_SCRIPT}" -PrinterName "${queueName.replace(/"/g, '`"')}" -FilePath "${tmpFile}"`, { timeout: 8000, encoding: 'utf-8' }).trim()
+      works = result.startsWith('OK')
+    } catch (_) {}
+    try { fs.unlinkSync(tmpFile) } catch (_) {}
     if (works) {
       hwPrinter = { name: queueName, interface: 'windows', tested: true }
       hwPrinterReady = true
