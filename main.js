@@ -152,6 +152,15 @@ async function initDatabase() {
     "DELETE FROM keyboard_buttons WHERE id = 'fn-ubereats'",
     // ── Upgrade all fruit/veg button images to Pexels photography ──
     "UPDATE keyboard_buttons SET image = NULL WHERE id LIKE 'pg2-%' OR id LIKE 'pg3-%' OR id LIKE 'pg4-%' OR id LIKE 'pg5-%'",
+    // ── Intentional colour scheme for fruit/veg pages ──
+    // Fruit pages: warm earthy tones (dark olive) instead of flat #1B4332
+    "UPDATE keyboard_buttons SET bg_color = '#2d3a2e' WHERE (id LIKE 'pg2-%' OR id LIKE 'pg3-%') AND bg_color = '#1B4332'",
+    // Veg pages: cool forest green
+    "UPDATE keyboard_buttons SET bg_color = '#1e3328' WHERE (id LIKE 'pg4-%' OR id LIKE 'pg5-%') AND bg_color = '#1B4332'",
+    // Nav buttons on fruit/veg pages: fresh green tones
+    "UPDATE keyboard_buttons SET bg_color = '#16a34a', color = '#fff' WHERE id IN ('pg2-back','pg3-back','pg4-back','pg5-back')",
+    "UPDATE keyboard_buttons SET bg_color = '#22c55e', color = '#000' WHERE id IN ('pg2-veg-menu','pg3-prev-fruit','pg4-fruit-menu','pg5-fruit-menu')",
+    "UPDATE keyboard_buttons SET bg_color = '#4ade80', color = '#000' WHERE id IN ('pg2-next-fruit','pg4-next-veg','pg5-prev-veg')",
     // ── Vibrant colour coding for main register page ──
     // Department buttons — rich, distinct category colors
     "UPDATE keyboard_buttons SET bg_color = '#e63946' WHERE id = 'btn-meat'",       // vivid red
@@ -188,6 +197,30 @@ async function initDatabase() {
   for (const m of migrations) {
     try { db.run(m) } catch (_) {}
   }
+
+  // Strip prices from page_link/section labels: "APPLES\n$5.99/kg" → "APPLES"
+  try {
+    const navBtns = dbAll("SELECT id, label FROM keyboard_buttons WHERE type IN ('page_link','section') AND label LIKE '%$%'")
+    for (const b of navBtns) {
+      const clean = b.label.split('\n')[0].replace(/\s*\$[\d.]+.*$/, '').trim()
+      if (clean && clean !== b.label) {
+        db.run("UPDATE keyboard_buttons SET label = ? WHERE id = ?", [clean, b.id])
+      }
+    }
+  } catch (_) {}
+
+  // Convert fruit/veg page_link buttons (pages 2-5) to section type
+  // so they open the category product view instead of navigating to empty sub-pages
+  // Also title-case labels on all section buttons on these pages
+  try {
+    const navIds = new Set(['pg2-back','pg2-veg-menu','pg2-next-fruit','pg3-back','pg3-prev-fruit','pg4-back','pg4-fruit-menu','pg4-next-veg','pg5-back','pg5-fruit-menu','pg5-prev-veg'])
+    const fvBtns = dbAll("SELECT id, label, type FROM keyboard_buttons WHERE (type = 'page_link' OR type = 'section') AND (id LIKE 'pg2-%' OR id LIKE 'pg3-%' OR id LIKE 'pg4-%' OR id LIKE 'pg5-%')")
+    for (const b of fvBtns) {
+      if (navIds.has(b.id)) continue
+      const catName = b.label.split('\n')[0].replace(/\b\w+/g, w => w[0].toUpperCase() + w.slice(1).toLowerCase()).trim()
+      db.run("UPDATE keyboard_buttons SET type = 'section', category_filter = ?, label = ? WHERE id = ?", [catName, catName, b.id])
+    }
+  } catch (_) {}
 
   // Layout v3: Shift Page 1 buttons to make room for in-grid cart at cols 0-2
   // Uses position-based detection (not a flag) so it can never double-shift
