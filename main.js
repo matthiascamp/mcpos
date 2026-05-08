@@ -2616,8 +2616,24 @@ function setupIPC() {
 
   async function detectScale (devices, serialPorts) {
     if (hwScale?.configured) {
-      appLog('info', 'hardware', `Using saved scale config: ${hwScale.type} ${hwScale.port || hwScale.path || ''}`)
-      return hwScale
+      // Verify saved config actually works — don't blindly trust stale config
+      if (hwScale.type === 'serial' && hwScale.port && SerialPortLib) {
+        try {
+          const verify = await testSerialScale(hwScale.port, hwScale.baud || 9600, hwScale.protocol || 'sics')
+          if (verify.ok) {
+            appLog('info', 'hardware', `Saved scale config verified: ${hwScale.port} (${hwScale.protocol} @ ${hwScale.baud})`)
+            return hwScale
+          }
+          appLog('warn', 'hardware', `Saved scale config FAILED on ${hwScale.port}: ${verify.error} — scanning for scale...`)
+        } catch (e) {
+          appLog('warn', 'hardware', `Saved scale config error on ${hwScale.port}: ${e.message} — scanning for scale...`)
+        }
+        // Clear bad config so we don't keep retrying it
+        hwScale = null
+      } else if (hwScale.type === 'hid' && hwScale.path && HID) {
+        appLog('info', 'hardware', `Using saved HID scale config: ${hwScale.path}`)
+        return hwScale
+      }
     }
 
     // Priority 1: USB HID scale (direct weight reading via HID protocol)
@@ -2640,8 +2656,11 @@ function setupIPC() {
     // Priority 2: Serial ports — brute-force test all ports with all protocol/baud combos
     if (serialPorts && serialPorts.length > 0 && SerialPortLib) {
       const scaleAdapterVids = new Set([0x0403, 0x10C4])
+      // Skip ports that are known non-scale devices (payment terminals, etc.)
+      const skipVids = new Set([0x11CA]) // VeriFone payment terminals
+      const candidates = serialPorts.filter(sp => !sp.vendorId || !skipVids.has(sp.vendorId))
       // Try known adapter VIDs first, then all other ports
-      const sorted = [...serialPorts].sort((a, b) => {
+      const sorted = [...candidates].sort((a, b) => {
         const aKnown = a.vendorId && scaleAdapterVids.has(a.vendorId) ? 0 : 1
         const bKnown = b.vendorId && scaleAdapterVids.has(b.vendorId) ? 0 : 1
         return aKnown - bKnown
@@ -2972,6 +2991,10 @@ function setupIPC() {
 
   async function testSerialScale (portPath, baud, protocol) {
     let testPort = null
+    const closePort = () => new Promise(resolve => {
+      if (!testPort || !testPort.isOpen) return resolve()
+      testPort.close(err => { if (err) appLog('warn', 'hardware', `Port close error: ${err.message}`); resolve() })
+    })
     try {
       const serialOpts = PROTOCOL_SERIAL_OPTS[protocol] || PROTOCOL_SERIAL_OPTS.sics
       testPort = new SerialPortLib.SerialPort({ path: portPath, baudRate: baud || 9600, ...serialOpts, autoOpen: false })
@@ -2979,21 +3002,21 @@ function setupIPC() {
       if (protocol === 'mt8217') {
         const data = await send8217Command(testPort, 'W', 3000)
         const parsed = parse8217Response(data)
-        testPort.close()
+        await closePort()
         if (parsed) return { ok: true, reading: parsed, protocol: 'mt8217', raw: Array.from(data).map(b => b.toString(16)).join(' ') }
         return { ok: false, error: `Got 8217 response but couldn't parse: ${Array.from(data).map(b => b.toString(16)).join(' ')}` }
       }
       if (protocol === 'sics' || !protocol) {
         const resp = await sendSerialCommand(testPort, 'S\r\n', 3000)
         const parsed = parseSICSResponse(resp)
-        testPort.close()
+        await closePort()
         if (parsed) return { ok: true, reading: parsed, protocol: 'sics', raw: resp }
         return { ok: false, error: `Got response but couldn't parse: ${resp}`, raw: resp }
       }
-      testPort.close()
+      await closePort()
       return { ok: false, error: `Unknown protocol: ${protocol}` }
     } catch (e) {
-      if (testPort?.isOpen) try { testPort.close() } catch (_) {}
+      await closePort()
       return { ok: false, error: e.message }
     }
   }
