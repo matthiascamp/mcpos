@@ -413,6 +413,10 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
   </div>
   <div class="status-right">
     <span id="statusClock" style="font-size:14px;font-weight:600;color:#ccc;font-family:'Courier New',monospace;margin-right:6px"></span>
+    <div id="scaleDisplay" style="display:none;background:#111;border:1px solid #333;border-radius:6px;padding:2px 10px;font-family:'Courier New',monospace;min-width:100px;text-align:right;margin-right:4px">
+      <span style="font-size:9px;color:#666;text-transform:uppercase;letter-spacing:1px">Scale</span>
+      <span id="scaleWeight" style="font-size:18px;font-weight:700;color:#4ade80;margin-left:6px">0.000 kg</span>
+    </div>
     <div class="health-dots">
       <span><span class="health-dot" id="dotServer"></span>Server</span>
       <span><span class="health-dot" id="dotDrawer"></span>Drawer</span>
@@ -3646,6 +3650,28 @@ window.pos.onDataChanged(async () => {
   allCategories = await window.pos.getCategories()
   await renderPosKeyboard()
   await loadDeals()
+})
+
+// ── Continuous scale weight display ──────────────────────────────────────
+window.pos.onScaleWeight((data) => {
+  const el = document.getElementById('scaleDisplay')
+  const wt = document.getElementById('scaleWeight')
+  if (!el || !wt) return
+  if (data.connected === false) {
+    el.style.display = 'none'
+    return
+  }
+  el.style.display = ''
+  const w = typeof data.weight === 'number' ? data.weight.toFixed(3) : '---'
+  const u = data.unit || 'kg'
+  wt.textContent = `${w} ${u}`
+  if (data.stable) {
+    wt.style.color = '#4ade80'  // green = stable
+  } else if (data.inMotion) {
+    wt.style.color = '#fbbf24'  // amber = in motion
+  } else {
+    wt.style.color = '#f87171'  // red = error/over/under
+  }
 })
 </script>
 </body>

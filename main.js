@@ -3270,6 +3270,7 @@ function setupIPC() {
   probeHardware().then(r => {
     if (hwPrinter) appLog('info', 'hardware', `Printer: ${hwPrinter.name} (${hwPrinter.interface})`)
     if (hwScale) appLog('info', 'hardware', `Scale: ${hwScale.vendor || hwScale.product}`)
+    startScalePolling()
   }).catch(e => appLog('error', 'hardware', 'Auto-probe failed', e.message))
 
   // Auto-reprobe every 30s so hot-plugged devices are found automatically
@@ -3278,9 +3279,76 @@ function setupIPC() {
       const hadPrinter = !!hwPrinter, hadScale = !!hwScale
       await probeHardware()
       if (!hadPrinter && hwPrinter) appLog('info', 'hardware', `Printer connected: ${hwPrinter.name}`)
-      if (!hadScale && hwScale) appLog('info', 'hardware', `Scale connected: ${hwScale.vendor || hwScale.product}`)
+      if (!hadScale && hwScale) {
+        appLog('info', 'hardware', `Scale connected: ${hwScale.vendor || hwScale.product}`)
+        startScalePolling()
+      }
     } catch (_) {}
   }, 30000)
+
+  // ── Continuous scale weight polling ──────────────────────────────────────
+  let scalePollingTimer = null
+  let lastScaleWeight = null
+  let scaleErrorCount = 0
+
+  function startScalePolling () {
+    if (scalePollingTimer) return  // already running
+    if (!hwScale) return
+    appLog('info', 'hardware', 'Starting continuous scale polling')
+    scalePollingTimer = setInterval(pollScale, 200)  // ~5 reads per second
+  }
+
+  function stopScalePolling () {
+    if (scalePollingTimer) { clearInterval(scalePollingTimer); scalePollingTimer = null }
+    lastScaleWeight = null
+    scaleErrorCount = 0
+  }
+
+  let scalePollingBusy = false
+  async function pollScale () {
+    if (scalePollingBusy) return  // skip if previous read hasn't finished
+    if (!hwScale) { stopScalePolling(); return }
+    scalePollingBusy = true
+    try {
+      const reading = await readScale()
+      if (reading.error) {
+        scaleErrorCount++
+        // After 10 consecutive errors, slow down and notify UI
+        if (scaleErrorCount === 10) {
+          appLog('warn', 'hardware', `Scale read errors: ${reading.error}`)
+        }
+        if (scaleErrorCount >= 10) {
+          broadcastScaleWeight({ error: reading.error, connected: false })
+          // Don't spam — slow poll when erroring
+          if (scalePollingTimer) { clearInterval(scalePollingTimer); scalePollingTimer = setInterval(pollScale, 2000) }
+        }
+        scalePollingBusy = false
+        return
+      }
+      // Scale read succeeded
+      if (scaleErrorCount >= 10) {
+        // Was in slow mode, resume fast polling
+        if (scalePollingTimer) { clearInterval(scalePollingTimer); scalePollingTimer = setInterval(pollScale, 200) }
+        appLog('info', 'hardware', 'Scale reconnected')
+      }
+      scaleErrorCount = 0
+      // Only broadcast if weight changed (avoid flooding)
+      const key = `${reading.weight}|${reading.status}|${reading.unit}`
+      if (key !== lastScaleWeight) {
+        lastScaleWeight = key
+        broadcastScaleWeight({ ...reading, connected: true })
+      }
+    } catch (_) {
+      scaleErrorCount++
+    }
+    scalePollingBusy = false
+  }
+
+  function broadcastScaleWeight (data) {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('scale:weight', data)
+    }
+  }
 
   // ── IPC handlers ───────────────────────────────────────────────────────────
 

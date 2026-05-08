@@ -174,6 +174,9 @@ contextBridge.exposeInMainWorld('pos', {
   linklySettlement:   ()                    => ipcRenderer.invoke('linkly:settlement'),
   onLinklyStatus:     (cb)                  => { ipcRenderer.removeAllListeners('linkly:status'); ipcRenderer.on('linkly:status', (_e, data) => cb(data)) },
 
+  // Scale weight (continuous polling from main process)
+  onScaleWeight:      (cb)                  => { ipcRenderer.removeAllListeners('scale:weight'); ipcRenderer.on('scale:weight', (_e, data) => cb(data)) },
+
   // LAN data changed (server pushed new data)
   onDataChanged:      (cb)                  => { ipcRenderer.removeAllListeners('lan:data-changed'); ipcRenderer.on('lan:data-changed', () => cb()) },
 })
