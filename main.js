@@ -2591,70 +2591,10 @@ function setupIPC() {
     fs.writeFileSync(tmpFile, data)
     // Resume queue via WMI (clears Error state without admin)
     resumePrinterQueue(printerName)
-    appLog('info', 'printer', `Sending ${data.length} bytes to "${printerName}" via P/Invoke`)
+    appLog('info', 'printer', `Sending ${data.length} bytes to "${printerName}" via rawprint.ps1`)
     try {
-      // Inline winspool.drv P/Invoke — same approach as working commit 52cbd7a
-      const psScript = `
-$PrinterName = '${printerName.replace(/'/g, "''")}'
-$FilePath = '${tmpFile.replace(/\\/g, '\\\\')}'
-$bytes = [System.IO.File]::ReadAllBytes($FilePath)
-
-Add-Type -TypeDefinition @'
-using System;
-using System.Runtime.InteropServices;
-
-public class RawPrint {
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-    public struct DOCINFOW {
-        public string pDocName;
-        public string pOutputFile;
-        public string pDatatype;
-    }
-
-    [DllImport("winspool.Drv", CharSet = CharSet.Unicode, SetLastError = true)]
-    public static extern bool OpenPrinter(string szPrinter, out IntPtr hPrinter, IntPtr pd);
-
-    [DllImport("winspool.Drv", CharSet = CharSet.Unicode, SetLastError = true)]
-    public static extern bool StartDocPrinter(IntPtr hPrinter, int level, ref DOCINFOW di);
-
-    [DllImport("winspool.Drv", SetLastError = true)]
-    public static extern bool StartPagePrinter(IntPtr hPrinter);
-
-    [DllImport("winspool.Drv", SetLastError = true)]
-    public static extern bool WritePrinter(IntPtr hPrinter, IntPtr pBytes, int dwCount, out int dwWritten);
-
-    [DllImport("winspool.Drv", SetLastError = true)]
-    public static extern bool EndPagePrinter(IntPtr hPrinter);
-
-    [DllImport("winspool.Drv", SetLastError = true)]
-    public static extern bool EndDocPrinter(IntPtr hPrinter);
-
-    [DllImport("winspool.Drv", SetLastError = true)]
-    public static extern bool ClosePrinter(IntPtr hPrinter);
-
-    public static bool SendRaw(string printerName, byte[] data) {
-        IntPtr hPrinter;
-        if (!OpenPrinter(printerName, out hPrinter, IntPtr.Zero)) return false;
-        var di = new DOCINFOW { pDocName = "Receipt", pDatatype = "RAW" };
-        if (!StartDocPrinter(hPrinter, 1, ref di)) { ClosePrinter(hPrinter); return false; }
-        StartPagePrinter(hPrinter);
-        IntPtr pBuf = Marshal.AllocHGlobal(data.Length);
-        Marshal.Copy(data, 0, pBuf, data.Length);
-        int written;
-        WritePrinter(hPrinter, pBuf, data.Length, out written);
-        Marshal.FreeHGlobal(pBuf);
-        EndPagePrinter(hPrinter);
-        EndDocPrinter(hPrinter);
-        ClosePrinter(hPrinter);
-        return written == data.Length;
-    }
-}
-'@ -ErrorAction SilentlyContinue
-
-$ok = [RawPrint]::SendRaw($PrinterName, $bytes)
-if ($ok) { Write-Output "OK:$($bytes.Length) bytes written" } else { Write-Output "FAIL:WritePrinter returned false" }
-`
-      const result = hwExec(`powershell -NoProfile -NonInteractive -Command "${psScript.replace(/"/g, '\\"')}"`, { timeout: 15000, encoding: 'utf-8' }).trim()
+      // Use external rawprint.ps1 to avoid quote-escaping issues with inline C# P/Invoke
+      const result = hwExec(`powershell -ExecutionPolicy Bypass -NoProfile -NonInteractive -File "${RAWPRINT_SCRIPT}" -PrinterName "${printerName.replace(/"/g, '`"')}" -FilePath "${tmpFile}"`, { timeout: 15000, encoding: 'utf-8' }).trim()
       appLog('info', 'printer', `P/Invoke result: ${result}`)
       if (result.includes('OK')) return { ok: true, detail: result }
       return { ok: false, detail: result || 'P/Invoke returned no output' }

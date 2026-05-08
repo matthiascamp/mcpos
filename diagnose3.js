@@ -102,78 +102,15 @@ async function main() {
     const tmpFile = path.join(os.tmpdir(), `crisp-test-${Date.now()}.bin`)
     fs.writeFileSync(tmpFile, testBuf)
     console.log(`  Wrote ${testBuf.length} bytes to ${tmpFile}`)
-    console.log(`  Sending to "${receiptPrinter}" via winspool.drv P/Invoke...`)
+    console.log(`  Sending to "${receiptPrinter}" via rawprint.ps1...`)
 
-    const psScript = `
-$PrinterName = '${receiptPrinter.replace(/'/g, "''")}'
-$FilePath = '${tmpFile.replace(/\\/g, '\\\\')}'
-$bytes = [System.IO.File]::ReadAllBytes($FilePath)
-
-Add-Type -TypeDefinition @'
-using System;
-using System.Runtime.InteropServices;
-public class RawPrint {
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-    public struct DOCINFOW {
-        public string pDocName;
-        public string pOutputFile;
-        public string pDatatype;
+    const rawprintScript = path.join(__dirname, 'rawprint.ps1')
+    if (!fs.existsSync(rawprintScript)) {
+      console.log(`  !! rawprint.ps1 not found at ${rawprintScript}`)
     }
-    [DllImport("winspool.Drv", CharSet = CharSet.Unicode, SetLastError = true)]
-    public static extern bool OpenPrinter(string szPrinter, out IntPtr hPrinter, IntPtr pd);
-    [DllImport("winspool.Drv", CharSet = CharSet.Unicode, SetLastError = true)]
-    public static extern bool StartDocPrinter(IntPtr hPrinter, int level, ref DOCINFOW di);
-    [DllImport("winspool.Drv", SetLastError = true)]
-    public static extern bool StartPagePrinter(IntPtr hPrinter);
-    [DllImport("winspool.Drv", SetLastError = true)]
-    public static extern bool WritePrinter(IntPtr hPrinter, IntPtr pBytes, int dwCount, out int dwWritten);
-    [DllImport("winspool.Drv", SetLastError = true)]
-    public static extern bool EndPagePrinter(IntPtr hPrinter);
-    [DllImport("winspool.Drv", SetLastError = true)]
-    public static extern bool EndDocPrinter(IntPtr hPrinter);
-    [DllImport("winspool.Drv", SetLastError = true)]
-    public static extern bool ClosePrinter(IntPtr hPrinter);
-
-    public static string SendRaw(string printerName, byte[] data) {
-        IntPtr hPrinter;
-        if (!OpenPrinter(printerName, out hPrinter, IntPtr.Zero)) {
-            int err = Marshal.GetLastWin32Error();
-            return "FAIL:OpenPrinter failed, Win32 error " + err;
-        }
-        var di = new DOCINFOW { pDocName = "Crisp Test", pDatatype = "RAW" };
-        if (!StartDocPrinter(hPrinter, 1, ref di)) {
-            int err = Marshal.GetLastWin32Error();
-            ClosePrinter(hPrinter);
-            return "FAIL:StartDocPrinter failed, Win32 error " + err;
-        }
-        if (!StartPagePrinter(hPrinter)) {
-            int err = Marshal.GetLastWin32Error();
-            EndDocPrinter(hPrinter);
-            ClosePrinter(hPrinter);
-            return "FAIL:StartPagePrinter failed, Win32 error " + err;
-        }
-        IntPtr pBuf = Marshal.AllocHGlobal(data.Length);
-        Marshal.Copy(data, 0, pBuf, data.Length);
-        int written;
-        bool ok = WritePrinter(hPrinter, pBuf, data.Length, out written);
-        int writeErr = Marshal.GetLastWin32Error();
-        Marshal.FreeHGlobal(pBuf);
-        EndPagePrinter(hPrinter);
-        EndDocPrinter(hPrinter);
-        ClosePrinter(hPrinter);
-        if (!ok) return "FAIL:WritePrinter returned false, Win32 error " + writeErr;
-        if (written != data.Length) return "FAIL:WritePrinter wrote " + written + "/" + data.Length + " bytes";
-        return "OK:" + written + " bytes written";
-    }
-}
-'@ -ErrorAction Stop
-
-$result = [RawPrint]::SendRaw($PrinterName, $bytes)
-Write-Output $result
-`
     try {
       const result = execSync(
-        `powershell -NoProfile -NonInteractive -Command "${psScript.replace(/"/g, '\\"')}"`,
+        `powershell -ExecutionPolicy Bypass -NoProfile -NonInteractive -File "${rawprintScript}" -PrinterName "${receiptPrinter.replace(/"/g, '`"')}" -FilePath "${tmpFile}"`,
         { timeout: 20000, encoding: 'utf-8' }
       ).trim()
       console.log(`\n  >>> RESULT: ${result}`)
@@ -214,30 +151,12 @@ Write-Output $result
     ])
     const tmpFile = path.join(os.tmpdir(), `crisp-drawer-${Date.now()}.bin`)
     fs.writeFileSync(tmpFile, drawerBuf)
-    console.log(`  Sending drawer kick to "${receiptPrinter}"...`)
+    console.log(`  Sending drawer kick to "${receiptPrinter}" via rawprint.ps1...`)
 
-    const psScript = `
-$PrinterName = '${receiptPrinter.replace(/'/g, "''")}'
-$bytes = [System.IO.File]::ReadAllBytes('${tmpFile.replace(/\\/g, '\\\\')}')
-Add-Type -TypeDefinition @'
-using System;using System.Runtime.InteropServices;
-public class DK{
-  [StructLayout(LayoutKind.Sequential,CharSet=CharSet.Unicode)]public struct DI{public string n;public string o;public string d;}
-  [DllImport("winspool.Drv",CharSet=CharSet.Unicode,SetLastError=true)]public static extern bool OpenPrinter(string s,out IntPtr h,IntPtr p);
-  [DllImport("winspool.Drv",CharSet=CharSet.Unicode,SetLastError=true)]public static extern bool StartDocPrinter(IntPtr h,int l,ref DI d);
-  [DllImport("winspool.Drv",SetLastError=true)]public static extern bool StartPagePrinter(IntPtr h);
-  [DllImport("winspool.Drv",SetLastError=true)]public static extern bool WritePrinter(IntPtr h,IntPtr p,int c,out int w);
-  [DllImport("winspool.Drv",SetLastError=true)]public static extern bool EndPagePrinter(IntPtr h);
-  [DllImport("winspool.Drv",SetLastError=true)]public static extern bool EndDocPrinter(IntPtr h);
-  [DllImport("winspool.Drv",SetLastError=true)]public static extern bool ClosePrinter(IntPtr h);
-  public static string Go(string n,byte[] d){IntPtr h;if(!OpenPrinter(n,out h,IntPtr.Zero))return "FAIL:Open "+Marshal.GetLastWin32Error();var i=new DI{n="Drawer",o=null,d="RAW"};if(!StartDocPrinter(h,1,ref i)){ClosePrinter(h);return "FAIL:StartDoc "+Marshal.GetLastWin32Error();}StartPagePrinter(h);IntPtr b=Marshal.AllocHGlobal(d.Length);Marshal.Copy(d,0,b,d.Length);int w;WritePrinter(h,b,d.Length,out w);Marshal.FreeHGlobal(b);EndPagePrinter(h);EndDocPrinter(h);ClosePrinter(h);return w==d.Length?"OK:drawer kick sent":"FAIL:wrote "+w+"/"+d.Length;}
-}
-'@ -ErrorAction Stop
-Write-Output ([DK]::Go($PrinterName,$bytes))
-`
+    const rawprintScript = path.join(__dirname, 'rawprint.ps1')
     try {
       const result = execSync(
-        `powershell -NoProfile -NonInteractive -Command "${psScript.replace(/"/g, '\\"')}"`,
+        `powershell -ExecutionPolicy Bypass -NoProfile -NonInteractive -File "${rawprintScript}" -PrinterName "${receiptPrinter.replace(/"/g, '`"')}" -FilePath "${tmpFile}"`,
         { timeout: 15000, encoding: 'utf-8' }
       ).trim()
       console.log(`  >>> RESULT: ${result}`)
