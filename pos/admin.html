@@ -475,6 +475,7 @@
     }
     .kb-prod-item:hover { background: var(--surface2); }
     .kb-prod-item.sel-highlight { background: rgba(59,130,246,.15); outline: 1px solid #3b82f6; }
+    .af-size-btn.active { background: rgba(59,130,246,.2); border-color: #3b82f6; color: #3b82f6; }
     .kb-prod-item .prod-price { margin-left: auto; color: var(--green); font-weight: 600; font-size: 11px; }
 
     /* Toast */
@@ -1360,6 +1361,19 @@
               <p style="color:var(--text-dim);font-size:11px;padding:6px">Loading...</p>
             </div>
             <p style="color:var(--text-dim);font-size:9px;margin-top:4px">Select product, then click empty cell</p>
+            <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+              <label style="font-size:11px;font-weight:600;color:var(--text-dim);display:block;margin-bottom:6px">Auto Fill Empty Cells</label>
+              <div style="display:flex;gap:4px;margin-bottom:6px">
+                <button class="btn btn-outline af-size-btn active" data-af-size="1" style="flex:1;padding:4px;font-size:10px">1×1</button>
+                <button class="btn btn-outline af-size-btn" data-af-size="2" style="flex:1;padding:4px;font-size:10px">2×2</button>
+                <button class="btn btn-outline af-size-btn" data-af-size="3" style="flex:1;padding:4px;font-size:10px">3×3</button>
+              </div>
+              <div style="display:flex;gap:4px">
+                <button class="btn btn-green" id="kbAutoFillBtn" style="flex:1;padding:6px;font-size:11px">Reflow</button>
+                <button class="btn btn-blue" id="kbSortAlphaBtn" style="flex:1;padding:6px;font-size:11px">A-Z Sort</button>
+              </div>
+              <p style="color:var(--text-dim);font-size:9px;margin-top:4px">Reflow resizes &amp; packs buttons. A-Z sorts alphabetically.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -3751,7 +3765,78 @@
       item.classList.add('sel-highlight')
     })
 
-    // ── Page Management ─────────────────────────────────────────���──
+    // ── Auto Fill ───────────────────────────────────────────────
+    let autoFillSize = 1
+
+    $$('.af-size-btn').forEach(btn => btn.addEventListener('click', () => {
+      $$('.af-size-btn').forEach(b => b.classList.remove('active'))
+      btn.classList.add('active')
+      autoFillSize = parseInt(btn.dataset.afSize) || 1
+    }))
+
+    $('#kbAutoFillBtn').addEventListener('click', async () => {
+      const sz = autoFillSize
+      const pageButtons = kbButtons.filter(b => (b.page || 1) === currentPage && b.active)
+      if (!pageButtons.length) { showToast('No buttons on this page', 'error'); return }
+
+      // Calculate how many sz×sz slots fit in the grid
+      const slotsPerRow = Math.floor(gridCols / sz)
+      const slotsPerCol = Math.floor(gridRows / sz)
+      const totalSlots = slotsPerRow * slotsPerCol
+
+      if (totalSlots === 0) { showToast(`Grid too small for ${sz}\u00d7${sz} buttons`, 'error'); return }
+      if (pageButtons.length > totalSlots) {
+        showToast(`${pageButtons.length} buttons but only ${totalSlots} ${sz}\u00d7${sz} slots fit — remove some first`, 'error'); return
+      }
+
+      if (!confirm(`Reflow ${pageButtons.length} button${pageButtons.length > 1 ? 's' : ''} as ${sz}\u00d7${sz}? This rearranges all buttons on this page.`)) return
+
+      pushUndo()
+
+      // Assign each button a slot, left-to-right top-to-bottom
+      for (let i = 0; i < pageButtons.length; i++) {
+        const slotRow = Math.floor(i / slotsPerRow)
+        const slotCol = i % slotsPerRow
+        const btn = pageButtons[i]
+        btn.grid_row = slotRow * sz
+        btn.grid_col = slotCol * sz
+        btn.col_span = sz
+        btn.row_span = sz
+        await window.pos.upsertButton(btn)
+      }
+
+      showToast(`Reflowed ${pageButtons.length} buttons as ${sz}\u00d7${sz}`, 'success')
+      kbButtons = await window.pos.getAllButtons()
+      renderGrid()
+      closeEditPanel()
+    })
+
+    $('#kbSortAlphaBtn').addEventListener('click', async () => {
+      const pageButtons = kbButtons.filter(b => (b.page || 1) === currentPage && b.active)
+      if (pageButtons.length < 2) { showToast('Nothing to sort', 'error'); return }
+      if (!confirm(`Sort ${pageButtons.length} buttons alphabetically on this page?`)) return
+
+      pushUndo()
+      // Sort by label alphabetically, keep positions from current layout order
+      const positions = pageButtons.map(b => ({ row: b.grid_row, col: b.grid_col, cs: b.col_span || 1, rs: b.row_span || 1 }))
+      positions.sort((a, b) => a.row - b.row || a.col - b.col)
+      const sorted = [...pageButtons].sort((a, b) => (a.label || '').localeCompare(b.label || '', undefined, { sensitivity: 'base' }))
+
+      for (let i = 0; i < sorted.length; i++) {
+        sorted[i].grid_row = positions[i].row
+        sorted[i].grid_col = positions[i].col
+        sorted[i].col_span = positions[i].cs
+        sorted[i].row_span = positions[i].rs
+        await window.pos.upsertButton(sorted[i])
+      }
+
+      showToast(`Sorted ${sorted.length} buttons A-Z`, 'success')
+      kbButtons = await window.pos.getAllButtons()
+      renderGrid()
+      closeEditPanel()
+    })
+
+    // ── Page Management ──────────────────────────────────────────
 
     function renderPageTree () {
       const linkBtns = kbButtons.filter(b => b.type === 'page_link' && b.parent_id && b.active)

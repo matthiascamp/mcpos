@@ -34,7 +34,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .status-bar{height:clamp(36px,5vh,48px);background:linear-gradient(180deg,#22252f 0%,#1a1d27 100%);display:flex;align-items:center;padding:0 clamp(6px,1vw,12px);gap:clamp(4px,0.8vw,10px);flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.04);box-shadow:0 2px 8px rgba(0,0,0,.2)}
 .status-left{display:flex;align-items:center;gap:10px;flex:1}
 .store-name{color:#a8adb8;font-family:'Inter',sans-serif;font-weight:600;font-size:13px;white-space:nowrap;letter-spacing:-.2px}
-.scan-input{width:200px;padding:9px 12px;border:1px solid #3a3d48;border-radius:8px;background:#2a2d38;color:#e0e2e8;font-size:13px;outline:none;font-family:inherit;min-height:36px;transition:border-color .15s}
+.scan-input{width:clamp(140px,16vw,220px);padding:clamp(6px,0.8vh,10px) clamp(8px,1vw,14px);border:1px solid #3a3d48;border-radius:8px;background:#2a2d38;color:#e0e2e8;font-size:clamp(11px,1.1vw,14px);outline:none;font-family:inherit;min-height:clamp(30px,4vh,40px);transition:border-color .15s}
 .scan-input:focus{border-color:#5b8def;background:#22252f;box-shadow:0 0 0 2px rgba(91,141,239,.2)}
 .scan-input::placeholder{color:#555a68}
 .staff-info{color:#6b7080;font-size:11px;white-space:nowrap}
@@ -91,44 +91,44 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .btn-park{background:#fff;color:#8891a5;border:1px solid #e2e4e8}.btn-park:active{background:#f4f5f7}
 
 /* ═══ Keyboard Panel (RIGHT — all buttons) ════════════════════════ */
-.keyboard-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;background:radial-gradient(ellipse at 30% 20%,#1f2333 0%,#13151d 60%,#0d0f14 100%)}
+.keyboard-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;background:linear-gradient(165deg,#1a1d28 0%,#12141c 40%,#0e1017 100%)}
 
 .keyboard-home{flex:1;display:flex;flex-direction:column;padding:clamp(3px,0.5vw,6px);gap:clamp(2px,0.4vw,5px)}
 
 /* Dynamic POS grid from keyboard_buttons DB */
-.pos-grid{flex:1;display:grid;gap:clamp(2px,0.4vw,5px);padding:0}
-.pos-grid-btn{border:none;border-radius:clamp(6px,0.8vw,12px);font-weight:600;font-size:clamp(9px,1.1vw,13px);cursor:pointer;text-align:center;line-height:1.2;font-family:'Inter',sans-serif;transition:transform .1s cubic-bezier(.4,0,.2,1),box-shadow .1s,filter .1s;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:clamp(2px,0.5vh,5px) clamp(3px,0.5vw,6px);word-break:break-word;position:relative;overflow:hidden;user-select:none;box-shadow:0 4px 8px rgba(0,0,0,.3),0 1px 3px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.06)}
-.pos-grid-btn:active{transform:scale(.94) translateY(2px);box-shadow:0 1px 2px rgba(0,0,0,.3),inset 0 2px 4px rgba(0,0,0,.15);filter:brightness(.88)}
-.pos-grid-btn img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:12px}
+.pos-grid{flex:1;display:grid;gap:clamp(3px,0.45vw,6px);padding:0}
+.pos-grid-btn{border:none;border-radius:clamp(8px,1vw,14px);font-weight:600;font-size:clamp(9px,1.1vw,13px);cursor:pointer;text-align:center;line-height:1.2;font-family:'Inter',sans-serif;transition:transform .12s cubic-bezier(.2,0,0,1),box-shadow .12s,filter .12s;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:clamp(2px,0.5vh,5px) clamp(3px,0.5vw,6px);word-break:break-word;position:relative;overflow:hidden;user-select:none;box-shadow:0 4px 10px rgba(0,0,0,.35),0 1px 3px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.07)}
+.pos-grid-btn:active{transform:scale(.94) translateY(2px);box-shadow:0 1px 2px rgba(0,0,0,.3),inset 0 2px 4px rgba(0,0,0,.15);filter:brightness(.85)}
+.pos-grid-btn img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit}
 .pos-grid-btn.has-img{position:relative}
-.pos-grid-btn.has-img::after{content:'';position:absolute;inset:0;border-radius:12px;background:linear-gradient(to top,rgba(0,0,0,.75) 0%,rgba(0,0,0,.3) 35%,rgba(0,0,0,.05) 60%,transparent 100%);pointer-events:none}
-.pos-grid-btn.has-img span{position:relative;z-index:2;font-size:12px;font-weight:700;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.9),0 0 12px rgba(0,0,0,.5);align-self:flex-end;padding-bottom:4px}
+.pos-grid-btn.has-img::after{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(to top,rgba(0,0,0,.8) 0%,rgba(0,0,0,.35) 30%,rgba(0,0,0,.08) 55%,transparent 100%);pointer-events:none}
+.pos-grid-btn.has-img span{position:relative;z-index:2;font-size:clamp(10px,1.1vw,13px);font-weight:700;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.9),0 0 16px rgba(0,0,0,.5);align-self:flex-end;padding-bottom:clamp(3px,0.5vh,6px);letter-spacing:-.2px}
 
 /* ─── Function buttons (utility keys) ────────────────────────────── */
-.pos-grid-btn.func-key{background:linear-gradient(180deg,#2e3242 0%,#232736 100%);color:#a8b0c4;font-size:clamp(8px,0.9vw,11px);font-weight:700;letter-spacing:.3px;text-transform:uppercase;border:1px solid #3d4255;box-shadow:0 3px 6px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.06)}
-.pos-grid-btn.func-key:active{background:linear-gradient(180deg,#252838 0%,#1c1f2a 100%);box-shadow:0 1px 2px rgba(0,0,0,.3),inset 0 2px 4px rgba(0,0,0,.2)}
-.pos-grid-btn.func-key.func-danger{background:linear-gradient(180deg,#4a2020 0%,#351818 100%);color:#ff7b7b;border-color:#6b2f2f;box-shadow:0 3px 8px rgba(220,50,50,.15),inset 0 1px 0 rgba(255,150,150,.06)}
-.pos-grid-btn.func-key.func-warn{background:linear-gradient(180deg,#4a3d1a 0%,#362c12 100%);color:#fcd34d;border-color:#6b5a24;box-shadow:0 3px 8px rgba(250,190,20,.1),inset 0 1px 0 rgba(255,220,100,.06)}
-.pos-grid-btn.func-key.func-accent{background:linear-gradient(180deg,#1a4034 0%,#132e26 100%);color:#4ade80;border-color:#2d5e4a;box-shadow:0 3px 8px rgba(52,211,153,.1),inset 0 1px 0 rgba(100,255,180,.06)}
+.pos-grid-btn.func-key{font-size:clamp(8px,0.9vw,11px);font-weight:700;letter-spacing:.3px;text-transform:uppercase;border:1px solid rgba(255,255,255,.1);box-shadow:0 3px 8px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.12)}
+.pos-grid-btn.func-key:active{filter:brightness(.75);box-shadow:0 1px 2px rgba(0,0,0,.3),inset 0 2px 4px rgba(0,0,0,.25)}
 
 /* ─── Department / product buttons ───────────────────────────────── */
-.pos-grid-btn.dept-key{font-size:clamp(10px,1.2vw,14px);font-weight:700;letter-spacing:-.2px;border:1px solid rgba(255,255,255,.1);box-shadow:0 4px 12px rgba(0,0,0,.4),0 2px 4px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.12),inset 0 -1px 0 rgba(0,0,0,.15)}
-.pos-grid-btn.dept-key:active{box-shadow:0 1px 3px rgba(0,0,0,.4),inset 0 2px 6px rgba(0,0,0,.2);filter:brightness(.82)}
+.pos-grid-btn.dept-key{font-size:clamp(10px,1.2vw,14px);font-weight:700;letter-spacing:-.2px;border:1px solid rgba(255,255,255,.12);box-shadow:0 4px 14px rgba(0,0,0,.45),0 2px 4px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.14),inset 0 -1px 0 rgba(0,0,0,.15)}
+.pos-grid-btn.dept-key:active{box-shadow:0 1px 3px rgba(0,0,0,.4),inset 0 2px 6px rgba(0,0,0,.2);filter:brightness(.8)}
+/* Category color accent on image buttons — subtle glow + bottom tint */
+.pos-grid-btn.dept-key.has-img{border-bottom:3px solid var(--cat-color,transparent);box-shadow:0 4px 16px rgba(0,0,0,.5),0 0 20px var(--cat-glow,transparent)}
+.pos-grid-btn.dept-key.has-img::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,var(--cat-glow,transparent) 0%,transparent 40%);z-index:1;pointer-events:none;opacity:.5}
 
 /* ─── Numpad zone ────────────────────────────────────────────────── */
-.pos-grid-btn.digit-btn{font-size:clamp(18px,2.5vw,28px);font-weight:700;background:linear-gradient(180deg,#ffffff 0%,#f0f1f3 100%);color:#1a1a2e;border:1px solid rgba(0,0,0,.08);border-radius:clamp(6px,0.8vw,12px);box-shadow:0 4px 8px rgba(0,0,0,.12),0 2px 3px rgba(0,0,0,.06),inset 0 -3px 0 rgba(0,0,0,.05),inset 0 1px 0 rgba(255,255,255,.9)}
-.pos-grid-btn.digit-btn:active{background:linear-gradient(180deg,#e9ecef 0%,#dee2e6 100%);box-shadow:0 1px 2px rgba(0,0,0,.08),inset 0 2px 4px rgba(0,0,0,.06);transform:scale(.96) translateY(2px)}
-.pos-grid-btn.digit-btn.num-action{font-size:11px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;background:linear-gradient(180deg,#e2e5ea 0%,#ced3da 100%);color:#4a5068;box-shadow:0 3px 6px rgba(0,0,0,.1),inset 0 -2px 0 rgba(0,0,0,.05),inset 0 1px 0 rgba(255,255,255,.6)}
-.pos-grid-btn.digit-btn.num-action:active{background:linear-gradient(180deg,#cdd1d8 0%,#bec4cc 100%);box-shadow:0 1px 2px rgba(0,0,0,.08),inset 0 2px 3px rgba(0,0,0,.06);transform:scale(.96) translateY(2px)}
-.pos-grid-btn.digit-btn.num-orange{background:linear-gradient(135deg,#ff9500 0%,#f97316 50%,#e8650e 100%);color:#fff;font-size:12px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;border:1px solid rgba(255,160,0,.4);box-shadow:0 4px 12px rgba(249,115,22,.35),0 2px 4px rgba(249,115,22,.2),inset 0 1px 0 rgba(255,255,255,.25),inset 0 -2px 0 rgba(0,0,0,.1)}
+.pos-grid-btn.digit-btn{font-size:clamp(18px,2.5vw,28px);font-weight:700;background:linear-gradient(180deg,#ffffff 0%,#f4f5f7 100%);color:#1a1a2e;border:1px solid rgba(0,0,0,.06);border-radius:clamp(8px,1vw,14px);box-shadow:0 4px 10px rgba(0,0,0,.12),0 2px 3px rgba(0,0,0,.06),inset 0 -3px 0 rgba(0,0,0,.04),inset 0 1px 0 rgba(255,255,255,.95)}
+.pos-grid-btn.digit-btn:active{background:linear-gradient(180deg,#ebedf0 0%,#dfe2e6 100%);box-shadow:0 1px 2px rgba(0,0,0,.08),inset 0 2px 4px rgba(0,0,0,.06);transform:scale(.96) translateY(2px)}
+.pos-grid-btn.digit-btn.num-action{font-size:clamp(10px,1vw,12px);font-weight:800;letter-spacing:.3px;text-transform:uppercase;background:linear-gradient(180deg,#e8eaef 0%,#d5d8e0 100%);color:#4a5068;box-shadow:0 3px 6px rgba(0,0,0,.1),inset 0 -2px 0 rgba(0,0,0,.04),inset 0 1px 0 rgba(255,255,255,.7)}
+.pos-grid-btn.digit-btn.num-action:active{background:linear-gradient(180deg,#d0d4dc 0%,#c2c7d0 100%);box-shadow:0 1px 2px rgba(0,0,0,.08),inset 0 2px 3px rgba(0,0,0,.06);transform:scale(.96) translateY(2px)}
+.pos-grid-btn.digit-btn.num-orange{background:linear-gradient(135deg,#ff9500 0%,#f97316 50%,#e8650e 100%);color:#fff;font-size:clamp(10px,1vw,12px);font-weight:800;letter-spacing:.3px;text-transform:uppercase;border:1px solid rgba(255,160,0,.4);box-shadow:0 4px 12px rgba(249,115,22,.35),0 2px 4px rgba(249,115,22,.2),inset 0 1px 0 rgba(255,255,255,.25),inset 0 -2px 0 rgba(0,0,0,.1)}
 .pos-grid-btn.digit-btn.num-orange:active{filter:brightness(.85);box-shadow:0 1px 4px rgba(249,115,22,.3),inset 0 2px 4px rgba(0,0,0,.15);transform:scale(.96) translateY(2px)}
-.pos-grid-btn.num-display-cell{background:linear-gradient(180deg,#080b10 0%,#0f1318 100%);color:#34d399;font-family:'JetBrains Mono','Courier New',monospace;font-size:clamp(16px,2.2vw,24px);font-weight:700;text-align:right;justify-content:flex-end;padding:clamp(3px,0.6vh,6px) clamp(8px,1.2vw,16px);border-radius:clamp(6px,0.8vw,12px);cursor:default;border:2px solid #1e2a35;box-shadow:inset 0 3px 12px rgba(0,0,0,.6),inset 0 0 30px rgba(52,211,153,.04),0 1px 0 rgba(255,255,255,.03)}
+.pos-grid-btn.num-display-cell{background:linear-gradient(180deg,#080b10 0%,#0f1318 100%);color:#34d399;font-family:'JetBrains Mono','Courier New',monospace;font-size:clamp(16px,2.2vw,24px);font-weight:700;text-align:right;justify-content:flex-end;padding:clamp(3px,0.6vh,6px) clamp(8px,1.2vw,16px);border-radius:clamp(8px,1vw,14px);cursor:default;border:2px solid #1e2a35;box-shadow:inset 0 3px 12px rgba(0,0,0,.6),inset 0 0 30px rgba(52,211,153,.04),0 1px 0 rgba(255,255,255,.03)}
 .pos-grid-btn.num-display-cell.qty-mode{color:#f97316;border-color:#3a2510;box-shadow:inset 0 3px 12px rgba(0,0,0,.6),inset 0 0 30px rgba(249,115,22,.06),0 1px 0 rgba(255,255,255,.03)}
 .pos-grid-btn.empty-cell{background:transparent;border:none;cursor:default;box-shadow:none}
 
 /* ─── Payment / nav buttons ──────────────────────────────────────── */
-.pos-grid-btn.pay-key{font-size:clamp(10px,1.3vw,14px);font-weight:800;letter-spacing:-.3px;border:1px solid rgba(255,255,255,.18);box-shadow:0 4px 12px rgba(0,0,0,.35),0 2px 4px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.18),inset 0 -1px 0 rgba(0,0,0,.15)}
-.pos-grid-btn.pay-key:active{filter:brightness(.8);transform:scale(.96) translateY(2px);box-shadow:0 1px 3px rgba(0,0,0,.3),inset 0 2px 6px rgba(0,0,0,.2)}
+.pos-grid-btn.pay-key{font-size:clamp(10px,1.3vw,14px);font-weight:800;letter-spacing:-.3px;border:1px solid rgba(255,255,255,.2);box-shadow:0 4px 14px rgba(0,0,0,.4),0 2px 4px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.2),inset 0 -1px 0 rgba(0,0,0,.15)}
+.pos-grid-btn.pay-key:active{filter:brightness(.78);transform:scale(.96) translateY(2px);box-shadow:0 1px 3px rgba(0,0,0,.3),inset 0 2px 6px rgba(0,0,0,.2)}
 
 /* Cart embedded in grid */
 .cart-panel.cart-in-grid{position:static;width:auto;border-right:none;z-index:2;border-radius:12px;margin:0;box-shadow:0 4px 20px rgba(0,0,0,.35),0 0 0 1px rgba(255,255,255,.05)}
@@ -158,22 +158,16 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .no-items{grid-column:1/-1;text-align:center;padding:40px;color:#555a68;font-size:14px}
 
 /* ═══ Bottom Bar ══════════════════════════════════════════════════ */
-.bottom-bar{height:62px;display:flex;gap:5px;padding:5px 6px;flex-shrink:0;background:linear-gradient(180deg,#151720 0%,#0d0f14 100%);border-top:1px solid rgba(255,255,255,.03)}
-.nav-btn{border:none;font-weight:700;font-size:13px;cursor:pointer;text-align:center;line-height:1.15;border-radius:12px;font-family:inherit;display:flex;align-items:center;justify-content:center;transition:transform .1s cubic-bezier(.4,0,.2,1),filter .1s;padding:4px 6px;box-shadow:0 3px 8px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.07)}
-.nav-btn:active{transform:scale(.95) translateY(2px);filter:brightness(.8);box-shadow:0 1px 2px rgba(0,0,0,.3),inset 0 2px 4px rgba(0,0,0,.15)}
+.bottom-bar{height:clamp(48px,7vh,68px);display:flex;gap:clamp(3px,0.4vw,6px);padding:clamp(3px,0.4vw,6px);flex-shrink:0;background:linear-gradient(180deg,#151720 0%,#0d0f14 100%);border-top:1px solid rgba(255,255,255,.03)}
+.nav-btn{border:none;font-weight:700;font-size:clamp(11px,1.2vw,14px);cursor:pointer;text-align:center;line-height:1.15;border-radius:clamp(8px,1vw,14px);font-family:inherit;display:flex;align-items:center;justify-content:center;transition:transform .12s cubic-bezier(.2,0,0,1),filter .12s;padding:clamp(3px,0.5vh,6px) clamp(4px,0.6vw,8px);box-shadow:0 3px 10px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.08)}
+.nav-btn:active{transform:scale(.95) translateY(2px);filter:brightness(.78);box-shadow:0 1px 2px rgba(0,0,0,.3),inset 0 2px 4px rgba(0,0,0,.15)}
 .nav-dark{background:linear-gradient(180deg,#424a5c 0%,#323a4a 100%);color:#e8eaef;flex:2}
 .nav-small{background:linear-gradient(180deg,#2e3242 0%,#252838 100%);color:#c8cdd8;flex:1;border-color:#3d4255}
 .nav-gold{background:linear-gradient(135deg,#fbbf24 0%,#f59e0b 40%,#d97706 100%);color:#fff;flex:2.5;border-color:rgba(251,191,36,.4);box-shadow:0 4px 14px rgba(245,158,11,.25),inset 0 1px 0 rgba(255,255,255,.2);text-shadow:0 1px 2px rgba(0,0,0,.2)}
 .nav-green{background:linear-gradient(135deg,#10b981 0%,#059669 40%,#047857 100%);color:#fff;flex:2.5;border-color:rgba(16,185,129,.4);box-shadow:0 4px 14px rgba(5,150,105,.25),inset 0 1px 0 rgba(255,255,255,.2);text-shadow:0 1px 2px rgba(0,0,0,.2)}
-.nav-red{background:linear-gradient(135deg,#f87171 0%,#ef4444 40%,#dc2626 100%);color:#fff;font-size:14px;font-weight:800;flex:2;border-color:rgba(248,113,113,.4);box-shadow:0 4px 14px rgba(239,68,68,.3),inset 0 1px 0 rgba(255,255,255,.2);text-shadow:0 1px 2px rgba(0,0,0,.2)}
-.nav-spacer{width:10px;flex-shrink:0}
+.nav-red{background:linear-gradient(135deg,#f87171 0%,#ef4444 40%,#dc2626 100%);color:#fff;font-size:clamp(12px,1.4vw,16px);font-weight:800;flex:2;border-color:rgba(248,113,113,.4);box-shadow:0 4px 14px rgba(239,68,68,.3),inset 0 1px 0 rgba(255,255,255,.2);text-shadow:0 1px 2px rgba(0,0,0,.2)}
+.nav-spacer{width:clamp(6px,0.8vw,12px);flex-shrink:0}
 
-/* ═══ Floating Pay Button ═══════════════════════════════════════ */
-.floating-pay{position:fixed;bottom:80px;right:24px;z-index:90;width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--green-dark));color:#fff;border:none;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 6px 20px rgba(5,150,105,.4),0 2px 8px rgba(0,0,0,.3);transition:all .3s var(--ease-bounce);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;opacity:0;pointer-events:none;transform:scale(.5)}
-.floating-pay.visible{opacity:1;pointer-events:auto;transform:scale(1);animation:pulse 2.5s ease-in-out infinite}
-.floating-pay:active{transform:scale(.9)!important;box-shadow:0 2px 8px rgba(5,150,105,.3)}
-.floating-pay .fp-icon{font-size:22px;line-height:1}
-.floating-pay .fp-amount{font-size:11px;font-weight:700;letter-spacing:-.3px}
 
 /* ═══ Cart Item Images + Category Colors ═══════════════════════ */
 .cart-item-img{width:36px;height:36px;border-radius:var(--radius-sm);object-fit:cover;flex-shrink:0;box-shadow:var(--shadow-sm)}
@@ -181,7 +175,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .cart-item{border-left:3px solid transparent}
 
 /* ═══ Footer ═════════════════════════════════════════════════════ */
-.pos-footer{height:clamp(18px,2.5vh,24px);background:#0d0f14;color:#4a5068;display:flex;align-items:center;padding:0 clamp(6px,1vw,12px);gap:clamp(6px,1vw,14px);font-size:clamp(8px,0.9vw,10px);flex-shrink:0}
+.pos-footer{height:clamp(16px,2.2vh,24px);background:#0d0f14;color:#4a5068;display:flex;align-items:center;padding:0 clamp(6px,1vw,12px);gap:clamp(6px,1vw,14px);font-size:clamp(8px,0.9vw,10px);flex-shrink:0}
 .footer-spacer{flex:1}
 
 /* ═══ Modals ═════════════════════════════════════════════════════ */
@@ -240,7 +234,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .search-kb-key.action{background:#1B4332;color:#fff;min-width:65px}
 .search-kb-key.del{background:#fee2e2;color:#991b1b}
 
-.modal{background:#fff;border:none;border-radius:16px;padding:24px;width:400px;box-shadow:0 20px 60px rgba(0,0,0,.2),0 0 0 1px rgba(0,0,0,.05);animation:modalIn .25s ease-out}
+.modal{background:#fff;border:none;border-radius:16px;padding:clamp(16px,2.5vw,28px);width:clamp(320px,35vw,420px);box-shadow:0 20px 60px rgba(0,0,0,.2),0 0 0 1px rgba(0,0,0,.05);animation:modalIn .25s ease-out}
 @keyframes modalIn{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
 .modal h2{font-weight:700;font-size:17px;color:#1a1a2e;margin-bottom:16px;text-align:center;letter-spacing:-.3px}
 .modal-total{font-family:'Inter',sans-serif;font-size:2rem;font-weight:800;color:#1a1a2e;text-align:center;margin-bottom:16px;letter-spacing:-1px}
@@ -426,7 +420,6 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
   </div>
 </div>
 
-<button class="floating-pay" id="floatingPay" title="Pay Now"><span class="fp-icon">$</span><span class="fp-amount" id="fpAmount">$0.00</span></button>
 <div class="qty-badge" id="qtyBadge"></div>
 <div class="mode-banner return-mode" id="returnBanner">RETURN MODE — Items will be refunded</div>
 <div class="mode-banner supervisor-mode" id="supervisorBanner">SUPERVISOR MODE</div>
@@ -1352,14 +1345,10 @@ function renderPosButton (btn, gridStyle) {
     return `<div class="pos-grid-btn ${extra}" ${dataAttr} style="${gridStyle}">${label.replace(/\\n/g,'<br>')}</div>`
   }
 
-  // Function buttons — small utility keys
+  // Function buttons — small utility keys with DB color
   if (FUNC_TYPES.has(type)) {
-    let funcMod = ''
-    if (type === 'void' || type === 'errcorrect' || type === 'return') funcMod = ' func-danger'
-    else if (type === 'pctdiscount' || type === 'pctone' || type === 'discount' || type === 'ubereats' || type === 'pricecheck') funcMod = ' func-warn'
-    else if (type === 'endofday' || type === 'recall' || type === 'item_search') funcMod = ' func-accent'
-    return `<div class="pos-grid-btn func-key${funcMod}" data-type="${esc(type)}" data-action="${esc(type)}"
-      style="${gridStyle}">${label.replace(/\\n/g,'<br>')}</div>`
+    return `<div class="pos-grid-btn func-key" data-type="${esc(type)}" data-action="${esc(type)}"
+      style="${gridStyle};background:${bg};color:${color}">${label.replace(/\\n/g,'<br>')}</div>`
   }
 
   // Payment buttons
@@ -1368,10 +1357,13 @@ function renderPosButton (btn, gridStyle) {
       style="${gridStyle};background:${bg};color:${color}">${label.replace(/\\n/g,'<br>')}</div>`
   }
 
+  // Category color glow for image buttons
+  const catColorStyle = imgSrc ? `;--cat-color:${bg};--cat-glow:${bg}33` : ''
+
   // Page link buttons
   if (type === 'page_link' && btn.parent_id) {
     return `<div class="pos-grid-btn dept-key${imgClass}" data-type="${esc(type)}" data-page-link="${btn.parent_id}"
-      style="${gridStyle};background:${bg};color:${color}">${imgHtml}<span>${label.replace(/\\n/g,'<br>')}</span></div>`
+      style="${gridStyle};background:${bg};color:${color}${catColorStyle}">${imgHtml}<span>${label.replace(/\\n/g,'<br>')}</span></div>`
   }
 
   // Department / product / nav — everything else
@@ -1379,7 +1371,7 @@ function renderPosButton (btn, gridStyle) {
   return `<div class="pos-grid-btn dept-key${imgClass}" data-type="${esc(type)}" data-cat="${esc(btn.category_filter || '')}"
     data-alpha="${esc(btn.alpha_range || '')}" data-label2="${label}" data-price="${btn.price || 0}"
     data-action="${esc(type)}" data-page-link="${btn.parent_id || ''}"
-    style="${gridStyle};background:${bg};color:${color}">${imgHtml}${labelHtml}</div>`
+    style="${gridStyle};background:${bg};color:${color}${catColorStyle}">${imgHtml}${labelHtml}</div>`
 }
 
 // ═══ Unified Grid Click Handler ════════════════════════════════════
@@ -1998,10 +1990,6 @@ function updateTotals () {
   if ($('#btnCard')) $('#btnCard').disabled = cart.isEmpty
   $('#topTotal').textContent = money(cart.total)
   $('#sectionPrice').textContent = money(cart.total)
-  // Floating pay button
-  const fp = $('#floatingPay')
-  if (!cart.isEmpty) { fp.classList.add('visible'); $('#fpAmount').textContent = money(cart.total) }
-  else fp.classList.remove('visible')
 }
 
 $('#cartClear').addEventListener('click', () => {
@@ -2803,7 +2791,6 @@ function showCashModal () {
 }
 
 if ($('#btnPay')) $('#btnPay').addEventListener('click', showCashModal)
-$('#floatingPay').addEventListener('click', showCashModal)
 
 $('#splitPayments').addEventListener('click', e => {
   const rm = e.target.closest('[data-split-remove]')

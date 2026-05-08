@@ -150,6 +150,40 @@ async function initDatabase() {
     // Upgrade department button images to Pexels high-quality photography
     "UPDATE keyboard_buttons SET image = NULL WHERE id IN ('btn-meat','btn-coffee','btn-fv','btn-cheese','btn-flowers','btn-deli','btn-nuts','btn-grocery','pg2-cherries')",
     "DELETE FROM keyboard_buttons WHERE id = 'fn-ubereats'",
+    // ── Upgrade all fruit/veg button images to Pexels photography ──
+    "UPDATE keyboard_buttons SET image = NULL WHERE id LIKE 'pg2-%' OR id LIKE 'pg3-%' OR id LIKE 'pg4-%' OR id LIKE 'pg5-%'",
+    // ── Vibrant colour coding for main register page ──
+    // Department buttons — rich, distinct category colors
+    "UPDATE keyboard_buttons SET bg_color = '#e63946' WHERE id = 'btn-meat'",       // vivid red
+    "UPDATE keyboard_buttons SET bg_color = '#e91e90' WHERE id = 'btn-flowers'",    // hot pink
+    "UPDATE keyboard_buttons SET bg_color = '#27ae60', color = '#fff' WHERE id = 'btn-fv'", // emerald green
+    "UPDATE keyboard_buttons SET bg_color = '#6f4e37' WHERE id = 'btn-coffee'",     // rich coffee brown
+    "UPDATE keyboard_buttons SET bg_color = '#d4a017' WHERE id = 'btn-bread'",      // golden wheat
+    "UPDATE keyboard_buttons SET bg_color = '#1a8a4a', color = '#fff' WHERE id = 'btn-fvkg'", // forest green
+    "UPDATE keyboard_buttons SET bg_color = '#e8a000' WHERE id = 'btn-deli'",       // rich amber
+    "UPDATE keyboard_buttons SET bg_color = '#f5c542' WHERE id = 'btn-cheese'",     // warm gold
+    "UPDATE keyboard_buttons SET bg_color = '#2c2c2c', color = '#fff' WHERE id = 'btn-bags'", // charcoal
+    // Bottom nav — category-matched colors
+    "UPDATE keyboard_buttons SET bg_color = '#3498db', color = '#fff' WHERE id = 'btn-grocery'", // bright blue
+    "UPDATE keyboard_buttons SET bg_color = '#c49a6c' WHERE id = 'btn-nuts'",       // warm tan
+    "UPDATE keyboard_buttons SET bg_color = '#7f8c8d', color = '#fff' WHERE id = 'btn-gas'", // slate
+    "UPDATE keyboard_buttons SET bg_color = '#e67e22', color = '#fff' WHERE id = 'btn-fruit-am'", // warm orange
+    "UPDATE keyboard_buttons SET bg_color = '#d35400', color = '#fff' WHERE id = 'btn-fruit-nz'", // burnt orange
+    "UPDATE keyboard_buttons SET bg_color = '#27ae60', color = '#fff' WHERE id = 'btn-veg-ag'",   // emerald green
+    "UPDATE keyboard_buttons SET bg_color = '#1e8449', color = '#fff' WHERE id = 'btn-veg-hz'",   // dark emerald
+    // Function buttons — clearer purpose colors
+    "UPDATE keyboard_buttons SET bg_color = '#8b5cf6', color = '#fff' WHERE id = 'fn-endofday'", // vivid purple
+    "UPDATE keyboard_buttons SET bg_color = '#3b82f6', color = '#fff' WHERE id = 'fn-hold'",     // blue
+    "UPDATE keyboard_buttons SET bg_color = '#059669', color = '#fff' WHERE id = 'fn-itemsearch'", // green
+    "UPDATE keyboard_buttons SET bg_color = '#f97316', color = '#fff' WHERE id = 'fn-nosale'",   // orange
+    "UPDATE keyboard_buttons SET bg_color = '#d97706', color = '#fff' WHERE id = 'fn-discount'", // amber
+    "UPDATE keyboard_buttons SET bg_color = '#dc2626', color = '#fff' WHERE id = 'fn-movedrawer'", // red
+    "UPDATE keyboard_buttons SET bg_color = '#ef4444', color = '#fff' WHERE id = 'fn-return'",   // bright red
+    "UPDATE keyboard_buttons SET bg_color = '#6366f1', color = '#fff' WHERE id = 'fn-recall'",   // indigo
+    "UPDATE keyboard_buttons SET bg_color = '#cc1818', color = '#fff' WHERE id = 'btn-subtotal'", // red (already)
+    // Reprint & Price Check — subtle but distinct
+    "UPDATE keyboard_buttons SET bg_color = '#64748b', color = '#fff' WHERE id = 'fn-reprint'",    // slate
+    "UPDATE keyboard_buttons SET bg_color = '#0ea5e9', color = '#fff' WHERE id = 'fn-pricecheck'", // sky blue
   ]
   for (const m of migrations) {
     try { db.run(m) } catch (_) {}
@@ -475,96 +509,100 @@ const KB_IMAGE_MAP = {
   'btn-nuts':    { base: 'direct', file: PX(529632) },
   'btn-grocery': { base: 'direct', file: PX(1366594) },
   'btn-gas':     { base: 'img', file: 'Coca_Cola_1.25L.jpg' },
-  // Page 2: Fruit A-M
-  'pg2-apples': { base: 'fv', file: 'Apple_Royal_Gala_Large.jpg' },
-  'pg2-apricots': { base: 'fv', file: 'Apricots.jpg' },
-  'pg2-avocados': { base: 'fv', file: 'Avocadoes_Small.jpg' },
-  'pg2-bananas': { base: 'fv', file: 'Bananas_Cavendish.jpg' },
-  'pg2-berries': { base: 'fv', file: 'Strawberries.jpg' },
-  'pg2-cherries': { base: 'direct', file: PX(1178610) },
-  'pg2-coconut': { base: 'img', file: 'MAE_MASSIMO_VUVOA_COCONUT.jpg' },
-  'pg2-custard-apple': { base: 'fv', file: 'Custard_Apples.jpg' },
-  'pg2-dragon-fruit': { base: 'img', file: 'Red_Dragon_Fruit.jpg' },
-  'pg2-figs': { base: 'fv', file: 'Figs_Fresh.jpg' },
-  'pg2-grapes': { base: 'fv', file: 'Grapes_Autumn_King.jpg' },
-  'pg2-grapefruit': { base: 'fv', file: 'Grapefruit_Ruby_Red.jpg' },
-  'pg2-guava': { base: 'fv', file: 'Passionfruit.jpg' },
-  'pg2-kiwi': { base: 'fv', file: 'Kiwi_Fruit.jpg' },
-  'pg2-lemons': { base: 'fv', file: 'Lemons_Fresh.jpg' },
-  'pg2-limes': { base: 'fv', file: 'Limes.jpg' },
-  'pg2-longan': { base: 'fv', file: 'Nectarine.jpg' },
-  'pg2-lychee': { base: 'fv', file: 'Raspberries_Punnet.jpg' },
-  'pg2-mandarins': { base: 'fv', file: 'Mandarines_Afrourer.jpg' },
-  'pg2-mangoes': { base: 'ext', file: 'MANGOES_R2E2_EA.jpg' },
-  'pg2-melons': { base: 'fv', file: 'Melon_Honey_Dew.jpg' },
-  // Page 3: Fruit N-Z
-  'pg3-nectarines': { base: 'fv', file: 'Nectarine.jpg' },
-  'pg3-oranges': { base: 'fv', file: 'Navel_Orange.jpg' },
-  'pg3-passion-fruit': { base: 'fv', file: 'Passionfruit.jpg' },
-  'pg3-papaya': { base: 'fv', file: '(S)_Red_Papaya.jpg' },
-  'pg3-pawpaw': { base: 'fv', file: 'Paw_Paw_Green.jpg' },
-  'pg3-peaches': { base: 'fv', file: 'Peach_White.jpg' },
-  'pg3-pears': { base: 'fv', file: 'Pears_Packham.jpg' },
-  'pg3-persimmons': { base: 'fv', file: 'Persimmon.jpg' },
-  'pg3-pineapple-sm': { base: 'fv', file: 'Pineapple_Smooth_Small.jpg' },
-  'pg3-pineapple-md': { base: 'fv', file: 'Pineapple_Topless_M_Small.jpg' },
-  'pg3-pineapple-xl': { base: 'fv', file: 'Pineapple_Extra_Large.jpg' },
-  'pg3-plums': { base: 'fv', file: 'Plums_Sugar.jpg' },
-  'pg3-pomegranate': { base: 'fv', file: 'Pomegranate.jpg' },
-  'pg3-raspberries': { base: 'fv', file: 'Raspberries_Punnet.jpg' },
-  'pg3-blueberries': { base: 'fv', file: 'Blueberries_Punnet.jpg' },
-  'pg3-rockmelon': { base: 'fv', file: 'Rockmelon.jpg' },
-  'pg3-strawberries': { base: 'fv', file: 'Strawberries.jpg' },
-  'pg3-watermelon': { base: 'fv', file: '(S)Seedless_Watermelon_Whole.jpg' },
-  'pg3-tangello': { base: 'fv', file: 'Cara_Cara_Orange.jpg' },
-  // Page 4: Vegetables A-G
-  'pg4-asian-vege': { base: 'fv', file: 'Cabbage_Chinese.jpg' },
-  'pg4-asparagus': { base: 'fv', file: 'Asparagus_Bunch.jpg' },
-  'pg4-beans': { base: 'fv', file: 'Beans_Fresh.jpg' },
-  'pg4-beetroot': { base: 'fv', file: 'Beetroot.jpg' },
-  'pg4-broccolini': { base: 'fv', file: 'Broccolini_Bunch.jpg' },
-  'pg4-broccoli': { base: 'fv', file: 'Broccoli.jpg' },
-  'pg4-brussels': { base: 'fv', file: 'Brussel_Sprouts.jpg' },
-  'pg4-cabbage': { base: 'fv', file: 'Cabbage_Drum_Head.jpg' },
-  'pg4-capsicum': { base: 'fv', file: 'Capsicum_Red.jpg' },
-  'pg4-carrots': { base: 'fv', file: 'Carrots.jpg' },
-  'pg4-carrot-bag': { base: 'fv', file: 'Carrot_Bag.jpg' },
-  'pg4-cauliflower': { base: 'fv', file: 'Cauliflower.jpg' },
-  'pg4-celery': { base: 'fv', file: 'Celery.jpg' },
-  'pg4-celeriac': { base: 'ext', file: 'CELERIAC_EA.jpg' },
-  'pg4-chillies': { base: 'fv', file: '(S)_Chilli_Birds_Eye.jpg' },
-  'pg4-chokos': { base: 'fv', file: 'Chokoes.jpg' },
-  'pg4-corn': { base: 'fv', file: 'Corn_Each.jpg' },
-  'pg4-cucumbers': { base: 'fv', file: 'Cucumber_Continental.jpg' },
-  'pg4-eggplant': { base: 'fv', file: 'Eggplant.jpg' },
-  'pg4-leb-eggplant': { base: 'fv', file: 'Eggplant_Baby.jpg' },
-  'pg4-fennel': { base: 'fv', file: 'Celery.jpg' },
-  'pg4-garlic': { base: 'fv', file: 'Garlic.jpg' },
-  'pg4-ginger': { base: 'fv', file: 'Ginger.jpg' },
-  // Page 5: Vegetables H-Z
-  'pg5-herbs': { base: 'fv', file: 'Basil_Large_Bunch.jpg' },
-  'pg5-kale': { base: 'fv', file: 'Kale_Bunch.jpg' },
-  'pg5-leeks': { base: 'fv', file: 'Leek_Bunch.jpg' },
-  'pg5-lettuces': { base: 'fv', file: 'Lettuce_Iceberg.jpg' },
-  'pg5-lettuce-bags': { base: 'fv', file: 'Assorted_Lettuce_Bags.jpg' },
-  'pg5-mushrooms': { base: 'fv', file: 'Mushroom_Cups.jpg' },
-  'pg5-olives': { base: 'ext', file: 'AGEAN_BLACK_BEANS.jpg' },
-  'pg5-onions': { base: 'fv', file: 'Onions_Brown.jpg' },
-  'pg5-parsnip': { base: 'fv', file: 'Parsnip.jpg' },
-  'pg5-peas': { base: 'ext', file: 'SNOW_PEAS_KG.jpg' },
-  'pg5-potatoes': { base: 'fv', file: 'Potatoes_Washed.jpg' },
-  'pg5-pumpkins': { base: 'fv', file: 'Pumpkin_Jap.jpg' },
-  'pg5-radish': { base: 'fv', file: 'Snacking_Raddish.jpg' },
-  'pg5-rhubarb': { base: 'fv', file: 'Celery.jpg' },
-  'pg5-shallots': { base: 'fv', file: 'Eshallots_Bunch.jpg' },
-  'pg5-silverbeet': { base: 'fv', file: 'Silverbeet_Bunch.jpg' },
-  'pg5-snow-peas': { base: 'ext', file: 'SNOW_PEAS_KG.jpg' },
-  'pg5-sprouts': { base: 'fv', file: 'Alfalfa_Sprout_Salad.jpg' },
-  'pg5-swedes': { base: 'fv', file: 'Swedes.jpg' },
-  'pg5-sweet-potato': { base: 'fv', file: 'Special_Sweet_Potatoes.jpg' },
-  'pg5-tomatoes': { base: 'fv', file: 'Tomatoes.jpg' },
-  'pg5-turnip': { base: 'fv', file: 'Swedes.jpg' },
-  'pg5-zucchini': { base: 'fv', file: 'Zucchini_Large.jpg' },
+  // Page 2: Fruit A-M (Pexels)
+  'pg2-apples':        { base: 'direct', file: PX(2487443) },
+  'pg2-apricots':      { base: 'direct', file: PX(31427390) },
+  'pg2-avocados':      { base: 'direct', file: PX(557659) },
+  'pg2-bananas':       { base: 'direct', file: PX(2238316) },
+  'pg2-berries':       { base: 'fv', file: 'Strawberries.jpg' },
+  'pg2-cherries':      { base: 'direct', file: PX(1178610) },
+  'pg2-coconut':       { base: 'direct', file: PX(1652001) },
+  'pg2-custard-apple': { base: 'direct', file: PX(15506342) },
+  'pg2-dragon-fruit':  { base: 'direct', file: PX(5217958) },
+  'pg2-figs':          { base: 'direct', file: PX(5419213) },
+  'pg2-grapes':        { base: 'direct', file: PX(1098529) },
+  'pg2-grapefruit':    { base: 'direct', file: PX(209549) },
+  'pg2-guava':         { base: 'direct', file: PX(5945789) },
+  'pg2-kiwi':          { base: 'direct', file: PX(7675956) },
+  'pg2-lemons':        { base: 'direct', file: PX(1414122) },
+  'pg2-limes':         { base: 'direct', file: PX(8615395) },
+  'pg2-longan':        { base: 'direct', file: PX(6870819) },
+  'pg2-lychee':        { base: 'direct', file: PX(17201891) },
+  'pg2-mandarins':     { base: 'direct', file: PX(2135677) },
+  'pg2-mangoes':       { base: 'direct', file: PX(28939331) },
+  'pg2-melons':        { base: 'direct', file: PX(4397729) },
+  // Page 3: Fruit N-Z (Pexels)
+  'pg3-nectarines':    { base: 'direct', file: PX(33589129) },
+  'pg3-oranges':       { base: 'direct', file: PX(2247142) },
+  'pg3-passion-fruit': { base: 'direct', file: PX(5945951) },
+  'pg3-papaya':        { base: 'direct', file: PX(4611443) },
+  'pg3-pawpaw':        { base: 'direct', file: PX(14100444) },
+  'pg3-peaches':       { base: 'direct', file: PX(4397924) },
+  'pg3-pears':         { base: 'direct', file: PX(1656665) },
+  'pg3-persimmons':    { base: 'direct', file: PX(5945961) },
+  'pg3-pineapple-sm':  { base: 'direct', file: PX(947879) },
+  'pg3-pineapple-md':  { base: 'direct', file: PX(947879) },
+  'pg3-pineapple-xl':  { base: 'direct', file: PX(947879) },
+  'pg3-plums':         { base: 'direct', file: PX(17964695) },
+  'pg3-pomegranate':   { base: 'direct', file: PX(7657065) },
+  'pg3-pommelo':       { base: 'direct', file: PX(7214312) },
+  'pg3-quince':        { base: 'direct', file: PX(9944541) },
+  'pg3-raspberries':   { base: 'fv', file: 'Raspberries_Punnet.jpg' },
+  'pg3-blueberries':   { base: 'fv', file: 'Blueberries_Punnet.jpg' },
+  'pg3-rockmelon':     { base: 'fv', file: 'Rockmelon.jpg' },
+  'pg3-strawberries':  { base: 'fv', file: 'Strawberries.jpg' },
+  'pg3-watermelon':    { base: 'fv', file: '(S)Seedless_Watermelon_Whole.jpg' },
+  'pg3-tangello':      { base: 'direct', file: PX(14705001) },
+  // Page 4: Vegetables A-G (Pexels)
+  'pg4-asian-vege':    { base: 'direct', file: PX(2518893) },
+  'pg4-asparagus':     { base: 'direct', file: PX(351679) },
+  'pg4-beans':         { base: 'direct', file: PX(10487661) },
+  'pg4-beetroot':      { base: 'direct', file: PX(5502852) },
+  'pg4-broccolini':    { base: 'fv', file: 'Broccolini_Bunch.jpg' },
+  'pg4-broccoli':      { base: 'direct', file: PX(1118177) },
+  'pg4-brussels':      { base: 'direct', file: PX(5662188) },
+  'pg4-cabbage':       { base: 'direct', file: PX(134877) },
+  'pg4-capsicum':      { base: 'direct', file: PX(128536) },
+  'pg4-carrots':       { base: 'direct', file: PX(1306559) },
+  'pg4-carrot-bag':    { base: 'direct', file: PX(1306559) },
+  'pg4-cauliflower':   { base: 'direct', file: PX(23235232) },
+  'pg4-celery':        { base: 'direct', file: PX(5620885) },
+  'pg4-celeriac':      { base: 'direct', file: PX(10112735) },
+  'pg4-chillies':      { base: 'direct', file: PX(221140) },
+  'pg4-chokos':        { base: 'direct', file: PX(7543109) },
+  'pg4-corn':          { base: 'direct', file: PX(1459331) },
+  'pg4-cucumbers':     { base: 'direct', file: PX(2329440) },
+  'pg4-eggplant':      { base: 'direct', file: PX(6576755) },
+  'pg4-leb-eggplant':  { base: 'direct', file: PX(6576755) },
+  'pg4-fennel':        { base: 'direct', file: PX(7511809) },
+  'pg4-garlic':        { base: 'direct', file: PX(1460862) },
+  'pg4-ginger':        { base: 'direct', file: PX(20234970) },
+  'pg4-bottle-gourd':  { base: 'direct', file: PX(36873528) },
+  // Page 5: Vegetables H-Z (Pexels)
+  'pg5-herbs':         { base: 'direct', file: PX(1391503) },
+  'pg5-kale':          { base: 'direct', file: PX(5949097) },
+  'pg5-leeks':         { base: 'direct', file: PX(8054732) },
+  'pg5-lettuces':      { base: 'direct', file: PX(26951809) },
+  'pg5-lettuce-bags':  { base: 'direct', file: PX(26951809) },
+  'pg5-mushrooms':     { base: 'direct', file: PX(5950443) },
+  'pg5-olives':        { base: 'direct', file: PX(4109908) },
+  'pg5-onions':        { base: 'direct', file: PX(144206) },
+  'pg5-parsnip':       { base: 'direct', file: PX(36517116) },
+  'pg5-peas':          { base: 'direct', file: PX(255469) },
+  'pg5-potatoes':      { base: 'direct', file: PX(2286776) },
+  'pg5-pumpkins':      { base: 'direct', file: PX(4187620) },
+  'pg5-radish':        { base: 'direct', file: PX(775207) },
+  'pg5-rhubarb':       { base: 'direct', file: PX(31930001) },
+  'pg5-shallots':      { base: 'direct', file: PX(15220072) },
+  'pg5-silverbeet':    { base: 'direct', file: PX(9005958) },
+  'pg5-snow-peas':     { base: 'direct', file: PX(4963969) },
+  'pg5-sugar-snap':    { base: 'direct', file: PX(8067748) },
+  'pg5-sprouts':       { base: 'fv', file: 'Alfalfa_Sprout_Salad.jpg' },
+  'pg5-swedes':        { base: 'fv', file: 'Swedes.jpg' },
+  'pg5-sweet-potato':  { base: 'direct', file: PX(5505462) },
+  'pg5-tomatoes':      { base: 'direct', file: PX(1327838) },
+  'pg5-turnip':        { base: 'direct', file: PX(11663131) },
+  'pg5-zucchini':      { base: 'direct', file: PX(3375263) },
 }
 
 // Apply direct image mappings to keyboard buttons
@@ -605,6 +643,7 @@ function createWindow() {
   if (process.argv.includes('--dev')) {
     mainWindow.webContents.openDevTools({ mode: 'detach' })
   }
+
 
   mainWindow.webContents.on('before-input-event', (event, input) => {
     if (input.key === 'F11') {
