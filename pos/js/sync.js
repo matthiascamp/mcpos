@@ -381,13 +381,20 @@ let realtimeChannel = null
 export function subscribeToChanges(onProductChange) {
   if (!isOnline()) return
 
+  if (realtimeChannel) {
+    supabase.removeChannel(realtimeChannel)
+    realtimeChannel = null
+  }
+
   realtimeChannel = supabase
     .channel('pos-updates')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, (payload) => {
-      if (payload.new) {
+      if (payload.eventType === 'DELETE' && payload.old?.id) {
+        window.pos.deleteProduct(payload.old.id)
+      } else if (payload.new) {
         window.pos.upsertProduct(payload.new)
-        if (onProductChange) onProductChange(payload.new)
       }
+      if (onProductChange) onProductChange(payload.new || payload.old)
     })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, (payload) => {
       if (payload.new) {
@@ -395,13 +402,17 @@ export function subscribeToChanges(onProductChange) {
       }
     })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'specials' }, (payload) => {
-      if (payload.new) {
+      if (payload.eventType === 'DELETE' && payload.old?.id) {
+        window.pos.deleteSpecial(payload.old.id)
+      } else if (payload.new) {
         window.pos.bulkUpsertSpecials([payload.new])
       }
       if (onProductChange) onProductChange()
     })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'keyboard_buttons' }, (payload) => {
-      if (payload.new) {
+      if (payload.eventType === 'DELETE' && payload.old?.id) {
+        window.pos.deleteButton(payload.old.id)
+      } else if (payload.new) {
         window.pos.upsertButton(payload.new)
       }
     })
@@ -411,7 +422,9 @@ export function subscribeToChanges(onProductChange) {
       }
     })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'deals' }, (payload) => {
-      if (payload.new) {
+      if (payload.eventType === 'DELETE' && payload.old?.id) {
+        window.pos.deleteDeal(payload.old.id)
+      } else if (payload.new) {
         const deal = { ...payload.new, config: typeof payload.new.config === 'object' ? JSON.stringify(payload.new.config) : payload.new.config }
         window.pos.bulkUpsertDeals([deal])
       }

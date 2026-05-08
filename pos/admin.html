@@ -1365,7 +1365,7 @@
           <!-- Product picker (always visible) -->
           <div class="kb-product-sidebar">
             <h3>Products</h3>
-            <input type="text" id="kbProductSearch" placeholder="Search products...">
+            <input type="text" id="kbSidebarSearch" placeholder="Search products...">
             <div class="kb-prod-list" id="kbProductList">
               <p style="color:var(--text-dim);font-size:11px;padding:6px">Loading...</p>
             </div>
@@ -1616,7 +1616,7 @@
       <!-- Scale Configuration (serial RS-232) -->
       <div class="section" id="scaleConfigSection" style="margin-top:20px">
         <h2 style="margin-bottom:12px">Scale Configuration (Serial / RS-232)</h2>
-        <p style="font-size:12px;color:var(--text-dim);margin-bottom:12px">For scales connected via serial port (DE-9 / DB-9 connector). Supports Mettler Toledo SICS protocol.</p>
+        <p style="font-size:12px;color:var(--text-dim);margin-bottom:12px">For scales connected via serial port (DE-9 / DB-9 connector). Supports Mettler Toledo Viva/Ariva (8217) and SICS protocols.</p>
         <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
           <div class="form-field" style="flex:1;min-width:140px"><label>COM Port</label>
             <select id="hwScalePort" style="width:100%;padding:8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text)">
@@ -1634,7 +1634,8 @@
           </div>
           <div class="form-field" style="min-width:120px"><label>Protocol</label>
             <select id="hwScaleProtocol" style="width:100%;padding:8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text)">
-              <option value="sics">Mettler Toledo SICS</option>
+              <option value="mt8217">MT 8217 (Viva / Ariva / bPlus)</option>
+              <option value="sics">MT-SICS (lab balances)</option>
             </select>
           </div>
           <button class="btn btn-outline" id="hwScaleTestBtn" style="padding:8px 16px;white-space:nowrap">Test Connection</button>
@@ -3661,7 +3662,7 @@
       // Hourly
       $('#zHourly').innerHTML = r.hourly.length ? r.hourly.map(h =>
         `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:13px">
-          <span>${parseInt(h.hour) > 12 ? (parseInt(h.hour) - 12) + 'pm' : parseInt(h.hour) + 'am'}</span>
+          <span>${(() => { const hr = parseInt(h.hour); if (hr === 0) return '12am'; if (hr === 12) return '12pm'; return hr > 12 ? (hr - 12) + 'pm' : hr + 'am' })()}</span>
           <span style="color:var(--text-dim)">${h.cnt} txn — ${money(h.total)}</span>
         </div>`
       ).join('') : '<p style="color:var(--text-dim)">No sales</p>'
@@ -3755,8 +3756,8 @@
         </div>`).join('')
     }
 
-    $('#kbProductSearch').addEventListener('input', debounce(async () => {
-      const q = $('#kbProductSearch').value.trim()
+    $('#kbSidebarSearch').addEventListener('input', debounce(async () => {
+      const q = $('#kbSidebarSearch').value.trim()
       renderKbProducts(q ? await window.pos.searchProducts(q) : kbProductCache)
     }, 250))
 
@@ -4580,7 +4581,7 @@
       }
     })
 
-    document.addEventListener('mouseup', async () => {
+    document.addEventListener('mouseup', async (event) => {
       if (!singleDragging) return
       singleDragging = false
       $$('#kbGrid .dragging').forEach(c => c.classList.remove('dragging'))
@@ -4635,7 +4636,7 @@
       return occ
     }
 
-    function updateSelectionHighlight () {
+    function updateSelectionHighlight (event) {
       $$('#kbGrid .empty-cell').forEach(c => c.classList.remove('sel-highlight'))
       if (!dragSelStart || !dragSelCurrent) return
       const r0 = Math.min(dragSelStart.row, dragSelCurrent.row), r1 = Math.max(dragSelStart.row, dragSelCurrent.row)
@@ -4664,14 +4665,14 @@
       isDragSelecting = true
       dragSelStart = { row: parseInt(cell.dataset.row), col: parseInt(cell.dataset.col) }
       dragSelCurrent = { ...dragSelStart }
-      updateSelectionHighlight()
+      updateSelectionHighlight(e)
       e.preventDefault()
     })
 
     document.addEventListener('mousemove', e => {
       if (!isDragSelecting) return
       const pt = getGridCellFromPoint(e.clientX, e.clientY)
-      if (pt) { dragSelCurrent = pt; updateSelectionHighlight() }
+      if (pt) { dragSelCurrent = pt; updateSelectionHighlight(e) }
     })
 
     document.addEventListener('mouseup', e => {
@@ -5825,7 +5826,7 @@
         $('#modeIcon').textContent = '\u{1F513}'
         // If current tab is hidden in register mode, switch to products
         const activeTab = $('.sidebar a.active')?.dataset.tab
-        const hiddenInRegister = ['dashboard','transactions','cashdrawer','zreport','audit','logs','settings','network']
+        const hiddenInRegister = ['dashboard','transactions','cashdrawer','zreport','audit','logs','settings','staff','keyboard','labels']
         if (hiddenInRegister.includes(activeTab)) {
           $$('.sidebar a').forEach(n => n.classList.remove('active'))
           const prodLink = $('[data-tab="products"]')

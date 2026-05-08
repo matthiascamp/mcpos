@@ -7,7 +7,7 @@ export class Cart {
   addProduct(product, qty = 1) {
     const price = product.active_price ?? product.price
     const taxRate = product.tax_rate ?? 0.10
-    const existing = this.items.find(i => i.product_id === product.id && product.unit === 'each')
+    const existing = this.items.find(i => i.product_id === product.id && product.unit === 'each' && i.unit_price === price)
     if (existing) {
       existing.qty += qty
       this._recalcItem(existing)
@@ -36,7 +36,7 @@ export class Cart {
   }
 
   updateQty(index, qty) {
-    if (qty <= 0) { this.removeItem(index); return }
+    if (qty === 0) { this.removeItem(index); return }
     const item = this.items[index]
     if (!item) return
     item.qty = qty
@@ -77,7 +77,9 @@ export class Cart {
 
   _recalcItem(item) {
     const rate = item.tax_rate ?? 0.10
-    item.line_total = +(item.qty * item.unit_price - item.discount).toFixed(2)
+    const gross = item.qty * item.unit_price
+    // For returns (negative qty), discount reduces the absolute amount (moves toward zero)
+    item.line_total = +(gross >= 0 ? Math.max(0, gross - item.discount) : Math.min(0, gross + item.discount)).toFixed(2)
     item.tax = +(item.line_total * rate / (1 + rate)).toFixed(2)
   }
 

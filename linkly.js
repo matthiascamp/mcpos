@@ -116,9 +116,13 @@ async function authenticate () {
   return result
 }
 
+let _authPromise = null
 async function ensureSession () {
   if (!state.token || !state.tokenExpiry || Date.now() > state.tokenExpiry) {
-    await authenticate()
+    if (!_authPromise) {
+      _authPromise = authenticate().finally(() => { _authPromise = null })
+    }
+    await _authPromise
   }
 }
 
@@ -329,7 +333,10 @@ async function processRefund (amountCents, txnRef, onStatus) {
   }
 
   state.polling = false
-  throw new Error('Refund timed out — check terminal')
+  if (Date.now() - startTime >= TIMEOUT) {
+    throw new Error('Refund timed out — check terminal')
+  }
+  throw new Error('Refund cancelled')
 }
 
 function cancelPolling () {

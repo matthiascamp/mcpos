@@ -10,6 +10,7 @@ let customerWindow = null
 let db
 let saveTimer = null
 let dailyBackupTimer = null
+let hardwareCleanup = null  // set by setupIPC, called on shutdown
 
 const DB_PATH = path.join(app.getPath('userData'), 'crisp-pos.sqlite')
 const SCHEMA_PATH = path.join(__dirname, 'db', 'schema.sql')
@@ -193,6 +194,12 @@ async function initDatabase() {
     // Reprint & Price Check — subtle but distinct
     "UPDATE keyboard_buttons SET bg_color = '#64748b', color = '#fff' WHERE id = 'fn-reprint'",    // slate
     "UPDATE keyboard_buttons SET bg_color = '#0ea5e9', color = '#fff' WHERE id = 'fn-pricecheck'", // sky blue
+    // Performance indexes for transaction lookups and reports
+    "CREATE INDEX IF NOT EXISTS idx_transaction_items_txn ON transaction_items(transaction_id)",
+    "CREATE INDEX IF NOT EXISTS idx_payments_txn ON payments(transaction_id)",
+    "CREATE INDEX IF NOT EXISTS idx_transactions_created ON transactions(created_at)",
+    "CREATE INDEX IF NOT EXISTS idx_transactions_status ON transactions(status)",
+    "CREATE INDEX IF NOT EXISTS idx_cash_drawer_created ON cash_drawer(created_at)",
   ]
   for (const m of migrations) {
     try { db.run(m) } catch (_) {}
@@ -583,18 +590,20 @@ function scheduleSave() {
 // sql.js helpers — wraps the slightly different API to match what we need
 
 function dbAll(sql, params = []) {
+  let stmt
   try {
-    const stmt = db.prepare(sql)
+    stmt = db.prepare(sql)
     stmt.bind(params)
     const rows = []
     while (stmt.step()) {
       rows.push(stmt.getAsObject())
     }
-    stmt.free()
     return rows
   } catch (e) {
     appLog('error', 'database', `dbAll error: ${e.message}`, sql.slice(0, 200))
     return []
+  } finally {
+    if (stmt) try { stmt.free() } catch (_) {}
   }
 }
 
@@ -888,8 +897,8 @@ app.whenReady().then(async () => {
 app.on('window-all-closed', () => {
   if (dailyBackupTimer) clearInterval(dailyBackupTimer)
   appLog('info', 'app', 'App shutting down')
-  // Close serial scale port if open
-  try { if (typeof hwScalePort !== 'undefined' && hwScalePort?.isOpen) hwScalePort.close() } catch (_) {}
+  // Close scale connections if open
+  try { if (hardwareCleanup) hardwareCleanup() } catch (_) {}
   saveDB()
   app.quit()
 })
@@ -2237,27 +2246,30 @@ function setupIPC() {
     0x2730: 'Citizen', 0x1D90: 'Citizen', 0x0DD4: 'Custom Engineering',
     0x0416: 'Winbond/Star', 0x04E8: 'Samsung/Bixolon', 0x20D1: 'Sewoo',
     0x0A5F: 'Zebra', 0x0483: 'STMicro (thermal)', 0x1FC9: 'NXP (thermal)',
-    0x0FE6: 'ICS Advent (USB adapter)', 0x1A86: 'QinHeng CH340',
+    0x0FE6: 'ICS Advent (USB adapter)',
     0x067B: 'Prolific (USB-parallel)', 0x1CBE: 'Luminary/TI (thermal)',
     0x0B00: 'Sewoo/Lukhan', 0x0493: 'Suyin (embedded printer)',
   }
   const SCALE_VENDORS = {
     0x0EB8: 'Mettler Toledo', 0x0B67: 'Fairbanks', 0x0922: 'Dymo',
     0x1446: 'Stamps.com/Dymo', 0x0403: 'FTDI (serial bridge)',
-    0x2474: 'CAS (USB)', 0x0B6A: 'Ishida',
+    0x2474: 'CAS (USB)', 0x0B6A: 'Ishida', 0x2A2B: 'Avery Berkel',
   }
   const SCANNER_VENDORS = {
     0x05E0: 'Symbol/Zebra', 0x0A5F: 'Zebra', 0x0C2E: 'Honeywell',
     0x05F9: 'Datalogic (legacy)', 0x080C: 'Datalogic',
     0x065A: 'Opticon', 0x1EAB: 'Newland', 0x2DD6: 'Generic scanner',
-    0x1A86: 'QinHeng CH340 (scanner)', 0x04B4: 'Cypress (scanner HID)',
+    0x04B4: 'Cypress (scanner HID)',
   }
   const SCALE_USAGE_PAGE = 0x8D
   const RECEIPT_KEYWORDS = ['epson', 'tm-t', 'tm-u', 'tm-m', 'star ', 'tsp', 'bixolon', 'srp-', 'citizen', 'ct-s', 'ct-e', 'custom', 'sewoo', 'slk-', 'thermal', 'receipt', 'pos printer']
   const EPSON_MODELS = {
-    0x0E03: 'TM-T20', 0x0E15: 'TM-T20II', 0x0E11: 'TM-T82',
+    0x0E03: 'TM-T20', 0x0E15: 'TM-T20II', 0x0E20: 'TM-T20III', 0x0E22: 'TM-T20IIIL',
+    0x0E11: 'TM-T82', 0x0E14: 'TM-T82II', 0x0E32: 'TM-T82III', 0x0E38: 'TM-T82IIIL',
     0x0202: 'TM-T88IV/V', 0x0E28: 'TM-T88VI', 0x0E2A: 'TM-T88VII',
-    0x0E1E: 'TM-m30',
+    0x0E1E: 'TM-m30', 0x0E36: 'TM-m30II', 0x0E40: 'TM-m30III',
+    0x0E26: 'TM-m10', 0x0E25: 'TM-m50',
+    0x0E09: 'TM-U220', 0x0E04: 'TM-U295',
   }
   const SERIAL_ADAPTER_VIDS = { 0x0403: 'FTDI', 0x067B: 'Prolific', 0x1A86: 'CH340', 0x10C4: 'Silicon Labs CP210x' }
 
@@ -2350,7 +2362,7 @@ function setupIPC() {
     // Source 3: Platform-specific (catches non-HID USB devices)
     if (isWin) {
       try {
-        const raw = hwExec(`powershell -NoProfile -Command "Get-PnpDevice -Status OK -ErrorAction SilentlyContinue | Where-Object { $_.Class -in @('USB','Printer','HIDClass','Ports','PrintQueue','Image','Media') } | Select-Object FriendlyName,InstanceId,Class | ConvertTo-Json -Compress"`, { timeout: 20000, encoding: 'utf-8' }).trim()
+        const raw = hwExec(`powershell -NoProfile -NonInteractive -Command "Get-PnpDevice -Class 'USB','Printer','HIDClass','Ports','PrintQueue','Image','Media' -Status OK -ErrorAction SilentlyContinue | Select-Object FriendlyName,InstanceId,Class | ConvertTo-Json -Compress"`, { timeout: 8000, encoding: 'utf-8' }).trim()
         if (raw) {
           const parsed = JSON.parse(raw)
           for (const d of (Array.isArray(parsed) ? parsed : [parsed])) {
@@ -2364,18 +2376,18 @@ function setupIPC() {
           }
         }
       } catch (e) {
-        appLog('warn', 'hardware', 'PnP enumeration failed, trying WMIC fallback', e.message)
+        appLog('warn', 'hardware', 'PnP enumeration failed, trying CIM fallback', e.message)
         try {
-          const raw = hwExec('wmic path Win32_PnPEntity where "PNPClass=\'USB\' or PNPClass=\'Printer\' or PNPClass=\'Ports\'" get Name,DeviceID /format:csv 2>nul', { timeout: 15000, encoding: 'utf-8' })
-          for (const line of raw.split('\n')) {
-            const parts = line.trim().split(',')
-            if (parts.length < 3) continue
-            const devId = parts[1] || '', name = parts[2] || ''
-            const vid = (devId.match(/VID_([0-9A-F]{4})/i) || [])[1]
-            const pid = (devId.match(/PID_([0-9A-F]{4})/i) || [])[1]
-            if (vid) addDevice({ vendorId: parseInt(vid, 16), productId: pid ? parseInt(pid, 16) : 0, manufacturer: '', product: name, path: devId, usagePage: 0, usage: 0, source: 'wmic' })
+          const raw = hwExec(`powershell -NoProfile -NonInteractive -Command "Get-CimInstance Win32_PnPEntity -Filter \\"PNPClass='USB' OR PNPClass='Printer' OR PNPClass='Ports'\\" -ErrorAction SilentlyContinue | Select-Object Name,DeviceID | ConvertTo-Json -Compress"`, { timeout: 8000, encoding: 'utf-8' }).trim()
+          if (raw) {
+            const parsed = JSON.parse(raw)
+            for (const d of (Array.isArray(parsed) ? parsed : [parsed])) {
+              const vid = (d.DeviceID?.match(/VID_([0-9A-F]{4})/i) || [])[1]
+              const pid = (d.DeviceID?.match(/PID_([0-9A-F]{4})/i) || [])[1]
+              if (vid) addDevice({ vendorId: parseInt(vid, 16), productId: pid ? parseInt(pid, 16) : 0, manufacturer: '', product: d.Name || '', path: d.DeviceID || '', usagePage: 0, usage: 0, source: 'cim' })
+            }
           }
-        } catch (e2) { appLog('warn', 'hardware', 'WMIC fallback also failed', e2.message) }
+        } catch (e2) { appLog('warn', 'hardware', 'CIM fallback also failed', e2.message) }
       }
     } else if (isMac) {
       try {
@@ -2428,7 +2440,7 @@ function setupIPC() {
   function getWindowsQueues () {
     if (!isWin) return []
     try {
-      const raw = hwExec(`powershell -NoProfile -Command "Get-Printer | Select-Object Name,PortName,DriverName,PrinterStatus | ConvertTo-Json -Compress"`, { timeout: 10000, encoding: 'utf-8' }).trim()
+      const raw = hwExec(`powershell -NoProfile -NonInteractive -Command "Get-Printer | Select-Object Name,PortName,DriverName,PrinterStatus | ConvertTo-Json -Compress"`, { timeout: 10000, encoding: 'utf-8' }).trim()
       if (!raw) return []
       const parsed = JSON.parse(raw)
       return Array.isArray(parsed) ? parsed : [parsed]
@@ -2442,7 +2454,7 @@ function setupIPC() {
     const tmpFile = path.join(os.tmpdir(), `crisp-test-${Date.now()}.bin`)
     fs.writeFileSync(tmpFile, ESCPOS.INIT)
     try {
-      const result = hwExec(`powershell -ExecutionPolicy Bypass -NoProfile -File "${RAWPRINT_SCRIPT}" -PrinterName "${queueName.replace(/"/g, '`"')}" -FilePath "${tmpFile}"`, { timeout: 8000, encoding: 'utf-8' }).trim()
+      const result = hwExec(`powershell -ExecutionPolicy Bypass -NoProfile -NonInteractive -File "${RAWPRINT_SCRIPT}" -PrinterName "${queueName.replace(/"/g, '`"')}" -FilePath "${tmpFile}"`, { timeout: 8000, encoding: 'utf-8' }).trim()
       return result.startsWith('OK')
     } catch (_) {
       return false
@@ -2519,7 +2531,7 @@ function setupIPC() {
 
   function ensurePrinterQueue () {
     if (!isWin || !hwPrinter) return
-    if (hwPrinterReady && Date.now() - hwPrinterCheckTime < 60000) return
+    if (hwPrinterReady && Date.now() - hwPrinterCheckTime < 15000) return
     if (!hwPrinter.name) { hwPrinterCheckTime = Date.now(); return }
     const works = testQueueRaw(hwPrinter.name)
     hwPrinterReady = works
@@ -2541,7 +2553,7 @@ function setupIPC() {
     const tmpFile = path.join(os.tmpdir(), `crisp-receipt-${Date.now()}.bin`)
     fs.writeFileSync(tmpFile, data)
     try {
-      const result = hwExec(`powershell -ExecutionPolicy Bypass -NoProfile -File "${RAWPRINT_SCRIPT}" -PrinterName "${printerName.replace(/"/g, '`"')}" -FilePath "${tmpFile}"`, { timeout: 15000, encoding: 'utf-8' }).trim()
+      const result = hwExec(`powershell -ExecutionPolicy Bypass -NoProfile -NonInteractive -File "${RAWPRINT_SCRIPT}" -PrinterName "${printerName.replace(/"/g, '`"')}" -FilePath "${tmpFile}"`, { timeout: 15000, encoding: 'utf-8' }).trim()
       if (result.startsWith('OK')) return { ok: true, detail: result }
       return { ok: false, detail: result }
     } catch (e) {
@@ -2553,11 +2565,13 @@ function setupIPC() {
 
   function sendViaTCP (data, ip, port) {
     return new Promise(resolve => {
+      let done = false
+      const finish = (result) => { if (!done) { done = true; resolve(result) } }
       const client = net.createConnection({ host: ip, port }, () => {
-        client.write(data, () => { client.end(); resolve({ ok: true, detail: `Sent ${data.length} bytes to ${ip}:${port}` }) })
+        client.write(data, () => { client.end(); finish({ ok: true, detail: `Sent ${data.length} bytes to ${ip}:${port}` }) })
       })
-      client.on('error', err => resolve({ ok: false, detail: `TCP error: ${err.message}` }))
-      client.setTimeout(5000, () => { client.destroy(); resolve({ ok: false, detail: 'TCP timeout (5s)' }) })
+      client.on('error', err => { client.destroy(); finish({ ok: false, detail: `TCP error: ${err.message}` }) })
+      client.setTimeout(5000, () => { client.destroy(); finish({ ok: false, detail: 'TCP timeout (5s)' }) })
     })
   }
 
@@ -2622,11 +2636,14 @@ function setupIPC() {
       }
     }
 
-    // Priority 2: Serial ports (RS-232 scales — Mettler Toledo, CAS, etc.)
+    // Priority 2: Serial ports with known scale adapter VID (RS-232 scales — Mettler Toledo, CAS, etc.)
     if (serialPorts && serialPorts.length > 0) {
-      appLog('info', 'hardware', `Serial ports available for scale: ${serialPorts.map(p => p.path).join(', ')}`)
-      // Return first serial port as candidate — actual protocol test happens in probeHardware
-      return { type: 'serial', port: serialPorts[0].path, protocol: 'sics', baud: 9600, vendor: 'Serial Scale', product: serialPorts[0].manufacturer || serialPorts[0].path, detected: false }
+      const scaleAdapterVids = new Set([0x0403, 0x10C4]) // FTDI, Silicon Labs — common on serial scales
+      const scalePort = serialPorts.find(p => p.vendorId && scaleAdapterVids.has(p.vendorId))
+      if (scalePort) {
+        appLog('info', 'hardware', `Serial scale adapter detected on ${scalePort.path} (VID:${scalePort.vendorId.toString(16)})`)
+        return { type: 'serial', port: scalePort.path, protocol: 'sics', baud: 9600, vendor: 'Serial Scale', product: scalePort.manufacturer || scalePort.path, detected: false }
+      }
     }
 
     // Priority 3: USB enumeration VID match only
@@ -2641,21 +2658,28 @@ function setupIPC() {
   const SCALE_UNITS = { 0x01: 'mg', 0x02: 'g', 0x03: 'kg', 0x04: 'ct', 0x0B: 'oz', 0x0C: 'lb' }
   const SCALE_STATUSES = { 0x01: 'fault', 0x02: 'zero', 0x03: 'in_motion', 0x04: 'stable', 0x05: 'under_zero', 0x06: 'over_limit', 0x07: 'calibration', 0x08: 'needs_zero' }
 
-  // ── Serial scale communication (Mettler Toledo SICS protocol) ─────────────
+  // ── Serial scale communication (SICS + MT 8217 protocols) ──────────────────
 
-  function openScaleSerialPort (portPath, baud) {
+  // Protocol-specific serial settings
+  const PROTOCOL_SERIAL_OPTS = {
+    sics:   { dataBits: 8, stopBits: 1, parity: 'none' },   // MT-SICS (lab balances)
+    mt8217: { dataBits: 7, stopBits: 1, parity: 'even' },   // MT 8217 (Viva, Ariva, bPlus retail scales)
+  }
+
+  async function openScaleSerialPort (portPath, baud, protocol) {
     if (hwScalePort) {
-      try { hwScalePort.close() } catch (_) {}
+      await new Promise(resolve => {
+        try { hwScalePort.close(resolve) } catch (_) { resolve() }
+      })
       hwScalePort = null
     }
-    if (!SerialPortLib) return Promise.reject(new Error('serialport package not available'))
+    if (!SerialPortLib) throw new Error('serialport package not available')
+    const serialOpts = PROTOCOL_SERIAL_OPTS[protocol] || PROTOCOL_SERIAL_OPTS.sics
     return new Promise((resolve, reject) => {
       const port = new SerialPortLib.SerialPort({
         path: portPath,
         baudRate: baud || 9600,
-        dataBits: 8,
-        stopBits: 1,
-        parity: 'none',
+        ...serialOpts,
         autoOpen: false,
       })
       port.open(err => {
@@ -2664,7 +2688,7 @@ function setupIPC() {
           return reject(err)
         }
         hwScalePort = port
-        appLog('info', 'hardware', `Scale serial port opened: ${portPath} @ ${baud} baud`)
+        appLog('info', 'hardware', `Scale serial port opened: ${portPath} @ ${baud} baud (${protocol || 'sics'}, ${serialOpts.dataBits}-${serialOpts.parity[0].toUpperCase()}-${serialOpts.stopBits})`)
         resolve(port)
       })
       port.on('error', err => {
@@ -2679,24 +2703,30 @@ function setupIPC() {
 
   function sendSerialCommand (port, command, timeoutMs) {
     return new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        port.removeAllListeners('data')
-        reject(new Error(`Scale timeout (${timeoutMs}ms) — no response to "${command.trim()}"`))
-      }, timeoutMs || 3000)
-
-      let buf = ''
+      let settled = false
       const onData = chunk => {
         buf += chunk.toString('ascii')
         // SICS responses end with \r\n
-        if (buf.includes('\r\n')) {
-          clearTimeout(timeout)
+        if (buf.includes('\r\n') && !settled) {
+          settled = true
+          clearTimeout(timer)
           port.removeListener('data', onData)
           resolve(buf.trim())
         }
       }
+      const timer = setTimeout(() => {
+        if (!settled) {
+          settled = true
+          port.removeListener('data', onData)
+          reject(new Error(`Scale timeout (${timeoutMs}ms) — no response to "${command.trim()}"`))
+        }
+      }, timeoutMs || 3000)
+
+      let buf = ''
       port.on('data', onData)
-      port.write(command, 'ascii')
-      port.drain()
+      port.write(command, 'ascii', () => {
+        port.drain(() => {}) // ensure bytes are flushed; errors handled by port 'error' event
+      })
     })
   }
 
@@ -2719,17 +2749,102 @@ function setupIPC() {
     return { weight, unit, status, stable, inMotion, zero: weight === 0 && stable }
   }
 
+  // ── MT 8217 protocol (Viva, Ariva, bPlus retail scales) ─────────────────
+
+  function send8217Command (port, command, timeoutMs) {
+    // 8217 protocol: send single ASCII char, response framed by STX (0x02) ... CR (0x0D)
+    return new Promise((resolve, reject) => {
+      let settled = false
+      const buf = []
+      let inFrame = false
+      const onData = chunk => {
+        for (const byte of chunk) {
+          if (byte === 0x02) { inFrame = true; buf.length = 0; continue }  // STX — start of frame
+          if (byte === 0x0D && inFrame) {  // CR — end of frame
+            if (!settled) {
+              settled = true
+              clearTimeout(timer)
+              port.removeListener('data', onData)
+              resolve(Buffer.from(buf))
+            }
+            return
+          }
+          if (inFrame) buf.push(byte)
+        }
+      }
+      const timer = setTimeout(() => {
+        if (!settled) {
+          settled = true
+          port.removeListener('data', onData)
+          reject(new Error(`Scale timeout (${timeoutMs}ms) — no 8217 response to "${command}"`))
+        }
+      }, timeoutMs || 3000)
+
+      port.on('data', onData)
+      port.write(command, 'ascii', () => { port.drain(() => {}) })
+    })
+  }
+
+  function parse8217Response (data) {
+    // MT 8217 weight response (after STX, before CR):
+    //   Byte 0: Status byte
+    //     Bit 0 (0x01): Scale in motion
+    //     Bit 1 (0x02): Scale at zero
+    //     Bit 2 (0x04): Net weight mode (tare applied)
+    //     Bit 4 (0x10): Negative weight
+    //     Bit 5 (0x20): Under zero / out of range
+    //     Bit 6 (0x40): Over capacity
+    //   Bytes 1-5+: ASCII weight digits (high to low, no decimal)
+    //   Decimal position is set in scale config (typically 3 places for kg → divide by 1000)
+    if (!data || data.length < 2) return null
+
+    const status = data[0]
+    const inMotion = !!(status & 0x01)
+    const atZero = !!(status & 0x02)
+    const netMode = !!(status & 0x04)
+    const negative = !!(status & 0x10)
+    const underZero = !!(status & 0x20)
+    const overCap = !!(status & 0x40)
+
+    // Extract weight digits — strip non-digit chars, handle variable lengths
+    const weightStr = data.slice(1).toString('ascii').replace(/[^0-9]/g, '')
+    if (!weightStr) return { weight: 0, unit: 'kg', status: overCap ? 'over_limit' : underZero ? 'under_zero' : 'fault', stable: false, inMotion, zero: atZero }
+
+    // Default: 3 decimal places for kg (configurable via hwScale.decimals)
+    const decimals = 3
+    let weight = parseInt(weightStr, 10) / Math.pow(10, decimals)
+    if (negative) weight = -weight
+
+    const scaleStatus = overCap ? 'over_limit' : underZero ? 'under_zero' : inMotion ? 'in_motion' : 'stable'
+    return { weight, unit: 'kg', status: scaleStatus, stable: !inMotion && !overCap && !underZero, inMotion, zero: atZero, net: netMode, raw: Array.from(data) }
+  }
+
+  async function readScale8217 () {
+    try {
+      const data = await send8217Command(hwScalePort, 'W', 3000)
+      const parsed = parse8217Response(data)
+      if (parsed) return parsed
+      return { error: `Unexpected 8217 response: ${Array.from(data).map(b => b.toString(16)).join(' ')}` }
+    } catch (e) {
+      return { error: e.message }
+    }
+  }
+
+  // ── Unified serial scale read ─────────────────────────────────────────────
+
   async function readScaleSerial () {
     if (!hwScalePort || !hwScalePort.isOpen) {
       if (!hwScale?.port) return { error: 'No serial scale configured. Set COM port in Hardware tab.' }
       try {
-        await openScaleSerialPort(hwScale.port, hwScale.baud || 9600)
+        await openScaleSerialPort(hwScale.port, hwScale.baud || 9600, hwScale.protocol || 'sics')
       } catch (e) {
         return { error: `Cannot open ${hwScale.port}: ${e.message}` }
       }
     }
 
     const protocol = hwScale?.protocol || 'sics'
+
+    if (protocol === 'mt8217') return readScale8217()
 
     if (protocol === 'sics') {
       try {
@@ -2750,22 +2865,49 @@ function setupIPC() {
     return { error: `Unknown scale protocol: ${protocol}` }
   }
 
+  let cachedHidScale = null
+  let hidScaleCloseTimer = null
+
+  function getHidScale () {
+    if (cachedHidScale) {
+      // Reset auto-close timer
+      if (hidScaleCloseTimer) clearTimeout(hidScaleCloseTimer)
+      hidScaleCloseTimer = setTimeout(closeHidScale, 10000)
+      return cachedHidScale
+    }
+    if (!hwScale?.path) return null
+    try {
+      cachedHidScale = new HID.HID(hwScale.path)
+      hidScaleCloseTimer = setTimeout(closeHidScale, 10000)
+      return cachedHidScale
+    } catch (e) {
+      cachedHidScale = null
+      throw e
+    }
+  }
+
+  function closeHidScale () {
+    if (hidScaleCloseTimer) { clearTimeout(hidScaleCloseTimer); hidScaleCloseTimer = null }
+    if (cachedHidScale) { try { cachedHidScale.close() } catch (_) {} cachedHidScale = null }
+  }
+
   function readScaleHID () {
     if (!HID) return { error: 'node-hid not available — USB HID scale reading disabled' }
     if (!hwScale?.path) return { error: 'No HID scale path. Run probe first.' }
     try {
-      const device = new HID.HID(hwScale.path)
-      try {
-        const data = device.readTimeout(2000)
-        if (!data || data.length < 5) return { error: 'No data from scale (timeout)' }
-        const status = data[1]
-        const unitCode = data[2]
-        const exponent = data[3] > 127 ? data[3] - 256 : data[3]
-        const rawWeight = (data[5] << 8) | data[4]
-        const weight = rawWeight * Math.pow(10, exponent)
-        return { weight, unit: SCALE_UNITS[unitCode] || '?', status: SCALE_STATUSES[status] || 'unknown', stable: status === 0x04, zero: status === 0x02, inMotion: status === 0x03, raw: Array.from(data) }
-      } finally { device.close() }
-    } catch (e) { return { error: `Scale read failed: ${e.message}` } }
+      const device = getHidScale()
+      const data = device.readTimeout(2000)
+      if (!data || data.length < 6) return { error: 'No data from scale (timeout)' }
+      const status = data[1]
+      const unitCode = data[2]
+      const exponent = data[3] > 127 ? data[3] - 256 : data[3]
+      const rawWeight = (data[5] << 8) | data[4]
+      const weight = rawWeight * Math.pow(10, exponent)
+      return { weight, unit: SCALE_UNITS[unitCode] || '?', status: SCALE_STATUSES[status] || 'unknown', stable: status === 0x04, zero: status === 0x02, inMotion: status === 0x03, raw: Array.from(data) }
+    } catch (e) {
+      closeHidScale() // force reconnect on next read
+      return { error: `Scale read failed: ${e.message}` }
+    }
   }
 
   async function readScale () {
@@ -2778,9 +2920,15 @@ function setupIPC() {
     if (!hwScale) return { error: 'No scale configured' }
     if (hwScale.type !== 'serial') return { error: 'Zero/tare only supported on serial scales' }
     if (!hwScalePort || !hwScalePort.isOpen) {
-      try { await openScaleSerialPort(hwScale.port, hwScale.baud || 9600) } catch (e) { return { error: `Cannot open ${hwScale.port}: ${e.message}` } }
+      try { await openScaleSerialPort(hwScale.port, hwScale.baud || 9600, hwScale.protocol) } catch (e) { return { error: `Cannot open ${hwScale.port}: ${e.message}` } }
     }
+    const protocol = hwScale?.protocol || 'sics'
     try {
+      if (protocol === 'mt8217') {
+        const data = await send8217Command(hwScalePort, 'Z', 3000)
+        // 8217 Z response: status byte indicating success
+        return { ok: true, status: 'Scale zeroed' }
+      }
       const resp = await sendSerialCommand(hwScalePort, 'Z\r\n', 3000)
       if (resp.startsWith('Z A')) return { ok: true, status: 'Scale zeroed' }
       if (resp.startsWith('Z I')) return { error: 'Scale busy — cannot zero right now' }
@@ -2792,8 +2940,16 @@ function setupIPC() {
   async function testSerialScale (portPath, baud, protocol) {
     let testPort = null
     try {
-      testPort = new SerialPortLib.SerialPort({ path: portPath, baudRate: baud || 9600, dataBits: 8, stopBits: 1, parity: 'none', autoOpen: false })
+      const serialOpts = PROTOCOL_SERIAL_OPTS[protocol] || PROTOCOL_SERIAL_OPTS.sics
+      testPort = new SerialPortLib.SerialPort({ path: portPath, baudRate: baud || 9600, ...serialOpts, autoOpen: false })
       await new Promise((resolve, reject) => testPort.open(err => err ? reject(err) : resolve()))
+      if (protocol === 'mt8217') {
+        const data = await send8217Command(testPort, 'W', 3000)
+        const parsed = parse8217Response(data)
+        testPort.close()
+        if (parsed) return { ok: true, reading: parsed, protocol: 'mt8217', raw: Array.from(data).map(b => b.toString(16)).join(' ') }
+        return { ok: false, error: `Got 8217 response but couldn't parse: ${Array.from(data).map(b => b.toString(16)).join(' ')}` }
+      }
       if (protocol === 'sics' || !protocol) {
         const resp = await sendSerialCommand(testPort, 'S\r\n', 3000)
         const parsed = parseSICSResponse(resp)
@@ -2824,19 +2980,13 @@ function setupIPC() {
 
   function buildReceiptBuffer (receiptData) {
     const parts = []
-    const text = s => parts.push(Buffer.from(s + '\n', 'utf-8'))
+    const text = s => parts.push(Buffer.from(s + '\n', 'latin1'))
     const cmd = buf => parts.push(buf)
 
     cmd(ESCPOS.INIT)
+    // Set codepage to PC437 (standard for thermal printers)
+    cmd(Buffer.from([ESC, 0x74, 0x00]))
     cmd(ESCPOS.ALIGN_CENTER)
-
-    if (receiptData.barcode) {
-      cmd(ESCPOS.BARCODE_HEIGHT); cmd(ESCPOS.BARCODE_WIDTH); cmd(ESCPOS.BARCODE_HRI_BELOW)
-      const barcodeStr = receiptData.barcode.replace(/-/g, '').substring(0, 20)
-      const barcodeData = Buffer.from(barcodeStr, 'ascii')
-      cmd(Buffer.from([GS, 0x6B, 0x49, barcodeData.length])); cmd(barcodeData)
-      text(''); text('')
-    }
 
     cmd(ESCPOS.BOLD_ON); cmd(ESCPOS.DOUBLE_SIZE)
     text(receiptData.storeName || 'Crisp on Creek')
@@ -2875,6 +3025,16 @@ function setupIPC() {
 
     text(''); cmd(ESCPOS.ALIGN_CENTER)
     text(receiptData.footer || 'Thank you for shopping local!')
+
+    // Transaction barcode at bottom (scannable for returns/lookups)
+    if (receiptData.barcode) {
+      text('')
+      cmd(ESCPOS.BARCODE_HEIGHT); cmd(ESCPOS.BARCODE_WIDTH); cmd(ESCPOS.BARCODE_HRI_BELOW)
+      const barcodeStr = receiptData.barcode.replace(/-/g, '').substring(0, 20)
+      const barcodeData = Buffer.from(barcodeStr, 'ascii')
+      cmd(Buffer.from([GS, 0x6B, 0x49, barcodeData.length])); cmd(barcodeData)
+    }
+
     cmd(ESCPOS.FEED_3); cmd(ESCPOS.PARTIAL_CUT)
 
     return Buffer.concat(parts)
@@ -2900,6 +3060,8 @@ function setupIPC() {
     const scanner = detectScanner(devices)
 
     if (!printer?.needsSetup) hwPrinter = printer
+    // Close cached HID scale if path changed
+    if (scale?.path !== hwScale?.path) closeHidScale()
     hwScale = scale
     hwScanner = scanner
 
@@ -2952,6 +3114,12 @@ function setupIPC() {
     return result
   }
 
+  // ── Expose cleanup for shutdown handler (module-scope can't see setupIPC locals) ─
+  hardwareCleanup = () => {
+    if (hwScalePort?.isOpen) try { hwScalePort.close() } catch (_) {}
+    try { closeHidScale() } catch (_) {}
+  }
+
   // ── Load saved config and auto-probe on startup ────────────────────────────
 
   loadSavedHardwareConfig()
@@ -2999,13 +3167,13 @@ function setupIPC() {
 
   ipcMain.handle('hardware:testPrinter', async () => {
     if (!hwPrinter) return { ok: false, error: 'No printer detected' }
-    const parts = [ESCPOS.INIT, ESCPOS.ALIGN_CENTER, ESCPOS.BOLD_ON]
-    parts.push(Buffer.from('=== TEST PRINT ===\n', 'utf-8'))
+    const parts = [ESCPOS.INIT, Buffer.from([0x1B, 0x74, 0x00]), ESCPOS.ALIGN_CENTER, ESCPOS.BOLD_ON]
+    parts.push(Buffer.from('=== TEST PRINT ===\n', 'latin1'))
     parts.push(ESCPOS.BOLD_OFF)
-    parts.push(Buffer.from(`Printer: ${hwPrinter.name || 'Unknown'}\n`, 'utf-8'))
-    parts.push(Buffer.from(`Port: ${hwPrinter.port || hwPrinter.interface || 'N/A'}\n`, 'utf-8'))
-    parts.push(Buffer.from(`Date: ${new Date().toLocaleString('en-AU')}\n`, 'utf-8'))
-    parts.push(Buffer.from('If you see this, printing works!\n', 'utf-8'))
+    parts.push(Buffer.from(`Printer: ${hwPrinter.name || 'Unknown'}\n`, 'latin1'))
+    parts.push(Buffer.from(`Port: ${hwPrinter.port || hwPrinter.interface || 'N/A'}\n`, 'latin1'))
+    parts.push(Buffer.from(`Date: ${new Date().toLocaleString('en-AU')}\n`, 'latin1'))
+    parts.push(Buffer.from('If you see this, printing works!\n', 'latin1'))
     parts.push(ESCPOS.FEED_3, ESCPOS.PARTIAL_CUT)
     const buf = Buffer.concat(parts)
     const result = await sendToPrinter(buf)
@@ -3043,8 +3211,9 @@ function setupIPC() {
     }
     scheduleSave()
     hwPrinterReady = false
-    // Close existing scale port if reconfiguring
+    // Close existing scale connections if reconfiguring
     if (hwScalePort) { try { hwScalePort.close() } catch (_) {} hwScalePort = null }
+    closeHidScale()
     loadSavedHardwareConfig()
     return { ok: true }
   })

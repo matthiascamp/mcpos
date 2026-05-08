@@ -108,6 +108,10 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .pos-grid-btn.func-key{font-size:clamp(8px,0.9vw,11px);font-weight:700;letter-spacing:.3px;text-transform:uppercase;border:1px solid rgba(255,255,255,.1);box-shadow:0 3px 8px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.12)}
 .pos-grid-btn.func-key:active{filter:brightness(.75);box-shadow:0 1px 2px rgba(0,0,0,.3),inset 0 2px 4px rgba(0,0,0,.25)}
 
+/* ─── Back / home navigation buttons ────────────────────────────── */
+.pos-grid-btn.back-key{font-size:clamp(11px,1.3vw,15px);font-weight:700;letter-spacing:-.2px;background:linear-gradient(135deg,#10b981 0%,#059669 50%,#047857 100%);color:#fff;border:none;border-radius:10px;box-shadow:0 4px 12px rgba(5,150,105,.3),inset 0 1px 0 rgba(255,255,255,.2);transition:all .1s}
+.pos-grid-btn.back-key:active{transform:scale(.96);filter:brightness(.8);box-shadow:0 1px 4px rgba(5,150,105,.2)}
+
 /* ─── Department / product buttons ───────────────────────────────── */
 .pos-grid-btn.dept-key{font-size:clamp(10px,1.2vw,14px);font-weight:700;letter-spacing:-.2px;border:1px solid rgba(255,255,255,.12);box-shadow:0 4px 14px rgba(0,0,0,.45),0 2px 4px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.14),inset 0 -1px 0 rgba(0,0,0,.15)}
 .pos-grid-btn.dept-key:active{box-shadow:0 1px 3px rgba(0,0,0,.4),inset 0 2px 6px rgba(0,0,0,.2);filter:brightness(.8)}
@@ -1332,7 +1336,7 @@ function renderPosButton (btn, gridStyle) {
   const color = esc(btn.color || '#000')
   const label = esc(btn.label || '')
   const imgSrc = btn.image || btn.product_image_url || ''
-  const imgHtml = imgSrc ? `<img src="${imgSrc}" alt="">` : ''
+  const imgHtml = imgSrc ? `<img src="${esc(imgSrc)}" alt="">` : ''
   const imgClass = imgSrc ? ' has-img' : ''
 
   // Numpad display — not a button but an indicator cell
@@ -1364,6 +1368,13 @@ function renderPosButton (btn, gridStyle) {
 
   // Category color glow for image buttons
   const catColorStyle = imgSrc ? `;--cat-color:${bg};--cat-glow:${bg}33` : ''
+
+  // Back/home navigation button — matches section-nav-btn style
+  if (type === 'back_home') {
+    const backLabel = label.includes('\u2190') ? label : '\u2190 ' + label
+    return `<div class="pos-grid-btn back-key" data-type="back_home" data-action="back_home"
+      style="${gridStyle}">${backLabel.replace(/\\n/g,'<br>')}</div>`
+  }
 
   // Page link buttons
   if (type === 'page_link' && btn.parent_id) {
@@ -2263,7 +2274,7 @@ function applyQuickDiscount (target, pctStr) {
   if (target === 'sale') {
     for (let i = 0; i < cart.items.length; i++) {
       const item = cart.items[i]
-      const amt = +(item.qty * item.unit_price * pct / 100).toFixed(2)
+      const amt = +(Math.abs(item.qty) * item.unit_price * pct / 100).toFixed(2)
       cart.setItemDiscount(i, amt)
     }
     window.pos.logAudit({ staff_id: currentStaff?.id, staff_name: currentStaff?.name, action: 'discount_sale', detail: `${pct}% off whole sale ($${cart.total.toFixed(2)} total)` })
@@ -2271,7 +2282,7 @@ function applyQuickDiscount (target, pctStr) {
   } else {
     const idx = cart.items.length - 1
     const item = cart.items[idx]
-    const amt = +(item.qty * item.unit_price * pct / 100).toFixed(2)
+    const amt = +(Math.abs(item.qty) * item.unit_price * pct / 100).toFixed(2)
     cart.setItemDiscount(idx, amt)
     window.pos.logAudit({ staff_id: currentStaff?.id, staff_name: currentStaff?.name, action: 'discount_item', detail: `${pct}% off ${item.name}` })
     showToast(`${pct}% discount on ${item.name}`, 'success')
@@ -2452,7 +2463,7 @@ $('#discountConfirm').addEventListener('click', () => {
   if (discountTarget === 'sale') {
     for (let i = 0; i < cart.items.length; i++) {
       const item = cart.items[i]
-      const amt = +(item.qty * item.unit_price * pct / 100).toFixed(2)
+      const amt = +(Math.abs(item.qty) * item.unit_price * pct / 100).toFixed(2)
       cart.setItemDiscount(i, amt)
     }
     window.pos.logAudit({ staff_id: currentStaff?.id, staff_name: currentStaff?.name, action: 'discount_sale', detail: `${pct}% off whole sale ($${cart.total.toFixed(2)} total)` })
@@ -2460,7 +2471,7 @@ $('#discountConfirm').addEventListener('click', () => {
   } else {
     const idx = cart.items.length - 1
     const item = cart.items[idx]
-    const amt = +(item.qty * item.unit_price * pct / 100).toFixed(2)
+    const amt = +(Math.abs(item.qty) * item.unit_price * pct / 100).toFixed(2)
     cart.setItemDiscount(idx, amt)
     window.pos.logAudit({ staff_id: currentStaff?.id, staff_name: currentStaff?.name, action: 'discount_item', detail: `${pct}% off ${item.name}` })
     showToast(`${pct}% discount on ${item.name}`, 'success')
@@ -3553,7 +3564,7 @@ $('#itemSearchResults').addEventListener('click', async (e) => {
   if (product.unit === 'kg' || product.unit === '100g') {
     pendingWeightProduct = product
     closeItemSearch()
-    $('#weightModal').classList.add('show')
+    showWeightModal(product)
   } else {
     addToCart(product)
     closeItemSearch()

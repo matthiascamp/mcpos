@@ -171,8 +171,8 @@ contextBridge.exposeInMainWorld('pos', {
   linklyRefund:       (amountCents, ref)    => ipcRenderer.invoke('linkly:refund', amountCents, ref),
   linklyCancel:       ()                    => ipcRenderer.invoke('linkly:cancel'),
   linklySettlement:   ()                    => ipcRenderer.invoke('linkly:settlement'),
-  onLinklyStatus:     (cb)                  => ipcRenderer.on('linkly:status', (_e, data) => cb(data)),
+  onLinklyStatus:     (cb)                  => { ipcRenderer.removeAllListeners('linkly:status'); ipcRenderer.on('linkly:status', (_e, data) => cb(data)) },
 
   // LAN data changed (server pushed new data)
-  onDataChanged:      (cb)                  => ipcRenderer.on('lan:data-changed', () => cb()),
+  onDataChanged:      (cb)                  => { ipcRenderer.removeAllListeners('lan:data-changed'); ipcRenderer.on('lan:data-changed', () => cb()) },
 })

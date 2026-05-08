@@ -159,7 +159,7 @@ async function handleRoute (req, res, url, path) {
   if (req.method === 'GET') {
     switch (path) {
       case '/api/heartbeat':
-        return jsonReply(res, { ok: true, time: new Date().toISOString(), ip: getLocalIp(), secret: state.secret, port: state.port, version: dataVersion })
+        return jsonReply(res, { ok: true, time: new Date().toISOString(), ip: getLocalIp(), port: state.port, version: dataVersion })
 
       case '/api/peers': {
         const regRow = db.dbGet("SELECT value FROM settings WHERE key = 'register_id'")
@@ -172,29 +172,7 @@ async function handleRoute (req, res, url, path) {
       }
 
       case '/api/session': {
-        if (req.method === 'GET') {
-          return jsonReply(res, state.activeSessions)
-        }
-        const { staffId, staffName, registerId: regId, action: sessAction } = body || {}
-        if (sessAction === 'login') {
-          const existing = state.activeSessions[staffId]
-          if (existing && existing.registerId !== regId) {
-            return jsonReply(res, { allowed: false, error: `${staffName || 'This user'} is already logged in on ${existing.registerId}` })
-          }
-          state.activeSessions[staffId] = { registerId: regId, staffName: staffName || '', loginTime: new Date().toISOString() }
-          return jsonReply(res, { allowed: true })
-        }
-        if (sessAction === 'logout') {
-          if (staffId) delete state.activeSessions[staffId]
-          return jsonReply(res, { ok: true })
-        }
-        if (sessAction === 'logout_register') {
-          for (const [sid, sess] of Object.entries(state.activeSessions)) {
-            if (sess.registerId === regId) delete state.activeSessions[sid]
-          }
-          return jsonReply(res, { ok: true })
-        }
-        return jsonReply(res, { error: 'Invalid session action' }, 400)
+        return jsonReply(res, state.activeSessions)
       }
 
       case '/api/version':
@@ -331,6 +309,29 @@ async function handleRoute (req, res, url, path) {
         return jsonReply(res, { ok: true })
       }
 
+      case '/api/session': {
+        const { staffId, staffName, registerId: regId, action: sessAction } = body || {}
+        if (sessAction === 'login') {
+          const existing = state.activeSessions[staffId]
+          if (existing && existing.registerId !== regId) {
+            return jsonReply(res, { allowed: false, error: `${staffName || 'This user'} is already logged in on ${existing.registerId}` })
+          }
+          state.activeSessions[staffId] = { registerId: regId, staffName: staffName || '', loginTime: new Date().toISOString() }
+          return jsonReply(res, { allowed: true })
+        }
+        if (sessAction === 'logout') {
+          if (staffId) delete state.activeSessions[staffId]
+          return jsonReply(res, { ok: true })
+        }
+        if (sessAction === 'logout_register') {
+          for (const [sid, sess] of Object.entries(state.activeSessions)) {
+            if (sess.registerId === regId) delete state.activeSessions[sid]
+          }
+          return jsonReply(res, { ok: true })
+        }
+        return jsonReply(res, { error: 'Invalid session action' }, 400)
+      }
+
       case '/api/deleted': {
         const ALLOWED_TABLES = new Set(['products','categories','specials','deals','deal_products','staff','keyboard_buttons','keyboard_pages','transactions','transaction_items','payments','cash_drawer'])
         const records = Array.isArray(body) ? body : body.records || []
@@ -365,7 +366,6 @@ function startUdpBroadcast (port) {
         service: 'crisp-pos',
         ip: getLocalIp(),
         port,
-        secret: state.secret,
         register_id: regRow?.value || 'LANE01'
       })
       const buf = Buffer.from(msg)
@@ -378,7 +378,6 @@ function startUdpBroadcast (port) {
             service: 'crisp-pos',
             ip: currentIp,
             port,
-            secret: state.secret,
             register_id: regRow?.value || 'LANE01'
           })
           const freshBuf = Buffer.from(freshMsg)
@@ -426,12 +425,15 @@ function startClient (serverIp, port, secret, dbHelpers) {
   attemptInitialSync()
 
   // Periodic sync loop (also serves as reconnection)
+  let syncInProgress = false
   clientSyncTimer = setInterval(() => {
+    if (syncInProgress) return
+    syncInProgress = true
     doSyncCycle().catch(e => {
       console.error('LAN sync error:', e.message)
       state.error = e.message
       state.connected = false
-    })
+    }).finally(() => { syncInProgress = false })
   }, SYNC_INTERVAL)
 
   // UDP listener for server discovery — auto-update IP/secret if server changes
@@ -940,7 +942,7 @@ async function sessionAction (action, staffId, staffName, registerId) {
 
 async function getPeers () {
   if (state.mode === 'server') {
-    const regRow = state.db?.dbGet?.("SELECT value FROM settings WHERE key = 'register_id'")
+    const regRow = db?.dbGet?.("SELECT value FROM settings WHERE key = 'register_id'")
     const serverName = regRow?.value || 'Server'
     return [
       { registerId: serverName, ip: state.serverIp || getLocalIp(), role: 'server', lastSeen: new Date().toISOString() },
