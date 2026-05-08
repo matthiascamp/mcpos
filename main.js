@@ -2466,6 +2466,44 @@ function setupIPC() {
     return null
   }
 
+  // ── Ensure a dedicated Generic/Text receipt printer queue exists ────────────
+  const CRISP_PRINTER_NAME = 'EPSON TM-T82II Receipt'
+
+  function ensureReceiptPrinter () {
+    if (!isWin) return null
+    try {
+      // Check if our dedicated queue already exists and is ready
+      const check = hwExec(`powershell -NoProfile -NonInteractive -Command "Get-Printer -Name '${CRISP_PRINTER_NAME}' -ErrorAction SilentlyContinue | Select-Object Name,PrinterStatus,PortName | ConvertTo-Json -Compress"`, { timeout: 3000, encoding: 'utf-8' }).trim()
+      if (check) {
+        const info = JSON.parse(check)
+        if (info.Name && (info.PrinterStatus === 0 || info.PrinterStatus === 3)) {
+          appLog('info', 'printer', `Dedicated queue "${CRISP_PRINTER_NAME}" exists and ready on ${info.PortName}`)
+          return { name: info.Name, port: info.PortName, driver: 'Generic / Text Only', interface: 'windows' }
+        }
+        // Exists but errored — delete and recreate
+        appLog('warn', 'printer', `Dedicated queue "${CRISP_PRINTER_NAME}" is errored (status ${info.PrinterStatus}), recreating...`)
+        try { hwExec(`powershell -NoProfile -NonInteractive -Command "Remove-Printer -Name '${CRISP_PRINTER_NAME}' -ErrorAction SilentlyContinue"`, { timeout: 3000, encoding: 'utf-8' }) } catch (_) {}
+      }
+    } catch (_) {}
+
+    // Find the USB port from any existing printer queue
+    let usbPort = 'USB003'
+    try {
+      const portRaw = hwExec(`powershell -NoProfile -NonInteractive -Command "Get-Printer -ErrorAction SilentlyContinue | Where-Object { $_.PortName -like 'USB*' } | Select-Object -ExpandProperty PortName -First 1"`, { timeout: 3000, encoding: 'utf-8' }).trim()
+      if (portRaw && portRaw.startsWith('USB')) usbPort = portRaw
+    } catch (_) {}
+
+    // Create the queue
+    try {
+      hwExec(`powershell -NoProfile -NonInteractive -Command "Add-Printer -Name '${CRISP_PRINTER_NAME}' -DriverName 'Generic / Text Only' -PortName '${usbPort}'"`, { timeout: 5000, encoding: 'utf-8' })
+      appLog('info', 'printer', `Created dedicated queue "${CRISP_PRINTER_NAME}" on ${usbPort}`)
+      return { name: CRISP_PRINTER_NAME, port: usbPort, driver: 'Generic / Text Only', interface: 'windows' }
+    } catch (e) {
+      appLog('warn', 'printer', `Could not create dedicated queue: ${e.message}`)
+      return null
+    }
+  }
+
   // ── Printer queue repair (no admin needed) ─────────────────────────────────
   let _repairing = false
   function repairPrinterQueue () {
@@ -2593,6 +2631,21 @@ if ($check) { Write-Output "CREATED:$genName" } else { Write-Output "FAIL" }`
       return usbPrinter ? { name: usbPrinter.product || usbPrinter.vendor, interface: 'unknown', vid: usbPrinter.vendorId, pid: usbPrinter.productId, vendor: usbPrinter.vendor, error: 'USB printer found but no CUPS queue' } : null
     }
 
+    // Strategy 1: Ensure our dedicated Generic/Text queue exists — this is the most reliable path
+    const dedicated = ensureReceiptPrinter()
+    if (dedicated) {
+      // Quick test: send INIT byte to verify the queue actually delivers data
+      const works = testQueueRaw(dedicated.name)
+      if (works) {
+        hwPrinterReady = true
+        hwPrinterCheckTime = Date.now()
+        appLog('info', 'hardware', `Using dedicated queue: ${dedicated.name} (${dedicated.port}) — tested OK`)
+        return { ...dedicated, vid: usbPrinter?.vendorId, pid: usbPrinter?.productId, vendor: usbPrinter?.vendor || '', tested: true }
+      }
+      appLog('warn', 'hardware', `Dedicated queue "${dedicated.name}" test failed, falling back to queue scan`)
+    }
+
+    // Strategy 2: Scan all Windows queues
     const queues = getWindowsQueues()
 
     // Score and sort queues: keyword match first, then USB-port queues, then others
