@@ -1376,7 +1376,10 @@ function renderPosButton (btn, gridStyle) {
   const priceVal = btn.price || 0
   const priceTag = isItem && priceVal > 0 ? `<small class="btn-price">${money(priceVal)}</small>` : ''
   const priceClass = priceTag ? ' has-price' : ''
-  const labelHtml = imgSrc ? `<span>${label.replace(/\\n/g,'<br>')}${priceTag}</span>` : `${label.replace(/\\n/g,'<br>')}${priceTag}`
+  // Strip embedded price line from label when we have a proper price tag
+  let displayLabel = label.replace(/\\n/g,'<br>')
+  if (priceTag) displayLabel = displayLabel.replace(/<br>\$[\d.]+.*$/, '')
+  const labelHtml = imgSrc ? `<span>${displayLabel}${priceTag}</span>` : `${displayLabel}${priceTag}`
   return `<div class="pos-grid-btn dept-key${imgClass}${priceClass}" data-type="${esc(type)}" data-cat="${esc(btn.category_filter || '')}"
     data-alpha="${esc(btn.alpha_range || '')}" data-label2="${label}" data-price="${priceVal}"
     data-action="${esc(type)}" data-page-link="${btn.parent_id || ''}"
@@ -1421,32 +1424,30 @@ $('#posGrid').addEventListener('click', async e => {
 
   // Department / product buttons
   if (DEPT_TYPES.has(type)) {
-    if (type === 'section') await navigateToSection(btn.dataset.cat)
-    else if (type === 'open_price') {
-      const rawLabel = btn.dataset.label2 || btn.textContent.trim()
-      const name = rawLabel.split('\\n')[0].split('\n')[0].trim()
-      const price = parseFloat(btn.dataset.price) || 0
-      // KG items → weight modal with scale support; EA items → open price modal
-      if (/\bKG\b/i.test(rawLabel)) {
-        const prod = { id: 'KB_' + Date.now(), name: name.replace(/\s*KG$/i,'').trim(), price, active_price: price, unit: 'kg', tax_rate: 0.00, is_special: false }
-        pendingWeightProduct = prod; showWeightModal(prod)
-      } else {
-        showOpenPriceModal(name, price)
-      }
+    if (type === 'section') { await navigateToSection(btn.dataset.cat); return }
+
+    // Unified product handler — covers product, open_price, fixed_price
+    const productRef = btn.dataset.cat  // product_id or PLU stored in category_filter
+    const rawLabel = btn.dataset.label2 || btn.textContent.trim()
+    const name = rawLabel.split('\\n')[0].split('\n')[0].trim()
+    const btnPrice = parseFloat(btn.dataset.price) || 0
+
+    // Try to look up linked product from DB
+    let prod = null
+    if (productRef) {
+      prod = await window.pos.getProductById(productRef) || await window.pos.getProductByBarcode(productRef)
     }
-    else if (type === 'product') {
-      const plu = btn.dataset.cat
-      if (plu) {
-        const prod = await window.pos.getProductByBarcode(plu)
-        if (prod) {
-          if (prod.unit === 'kg' || prod.unit === '100g') { pendingWeightProduct = prod; showWeightModal(prod) }
-          else { addToCart(prod) }
-        } else { showToast('Product not found: ' + plu, 'error') }
-      }
-    }
-    else if (type === 'fixed_price') {
-      const price = parseFloat(btn.dataset.price), label2 = btn.dataset.label2 || btn.textContent.trim()
-      addToCart({ id: 'FIXED_' + Date.now(), name: label2, price, active_price: price, unit: 'each', tax_rate: 0.10, is_special: false })
+
+    if (prod) {
+      // Product found — behavior determined by product data
+      if (prod.unit === 'kg' || prod.unit === '100g') { pendingWeightProduct = prod; showWeightModal(prod) }
+      else { addToCart(prod) }
+    } else if (btnPrice > 0) {
+      // No linked product but has a price — add as fixed-price item
+      addToCart({ id: 'KB_' + Date.now(), name, price: btnPrice, active_price: btnPrice, unit: 'each', tax_rate: 0.10, is_special: false })
+    } else {
+      // No product, no price — open price entry
+      showOpenPriceModal(name, 0)
     }
     return
   }

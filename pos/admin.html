@@ -1231,15 +1231,14 @@
             </h3>
             <div style="font-size:10px;color:var(--text-dim);margin:-8px 0 10px" id="kbCellInfo">Row 0, Col 0</div>
 
-            <div class="kb-field"><label>Label</label><input type="text" id="kbLabel" placeholder="Button text"></div>
+            <div class="kb-field"><label>Label</label><textarea id="kbLabel" placeholder="Button text" rows="2" style="resize:vertical;min-height:36px;font-family:inherit;font-size:12px;padding:6px 8px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);width:100%;box-sizing:border-box"></textarea></div>
 
             <div class="kb-edit-row">
               <div class="kb-field">
                 <label>Type</label>
                 <select id="kbType">
                   <optgroup label="Product">
-                    <option value="open_price">Open Price</option>
-                    <option value="fixed_price">Fixed Price</option>
+                    <option value="product">Product</option>
                     <option value="section">Category Section</option>
                     <option value="nav">Nav (filtered)</option>
                   </optgroup>
@@ -1285,7 +1284,17 @@
               <div class="kb-field"><label>Price</label><input type="number" id="kbPrice" step="0.01" min="0" value="0"></div>
             </div>
 
-            <div class="kb-edit-row">
+            <div class="kb-edit-row" id="kbProductRow" style="display:none">
+              <div class="kb-field" style="flex:1;position:relative">
+                <label>Linked Product</label>
+                <input type="text" id="kbProductSearch" placeholder="Search products..." autocomplete="off">
+                <input type="hidden" id="kbProductId">
+                <div id="kbProductName" style="font-size:11px;color:#4ade80;margin-top:2px;display:none"></div>
+                <div id="kbProductResults" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:50;max-height:160px;overflow-y:auto;background:var(--surface2);border:1px solid var(--border);border-radius:6px;margin-top:2px"></div>
+              </div>
+            </div>
+
+            <div class="kb-edit-row" id="kbCatRow">
               <div class="kb-field">
                 <label>Category / Value</label>
                 <input type="text" id="kbCatFilter" list="kbCatList" placeholder="e.g. Fruit">
@@ -4322,7 +4331,7 @@
               style="background:${esc(btn.bg_color)};color:${esc(btn.color)};grid-column:${c+1}/span ${cs};grid-row:${r+1}/span ${rs}">
               <span class="kb-cell-type">${typeLabel(btn.type)}</span>
               ${btn.image ? `<img src="${btn.image}">` : ''}
-              ${esc(btn.label)}
+              ${esc(btn.label).replace(/\\n/g, '<br>')}
               ${extra}
             </div>`
           } else if (!occupied.has(key)) {
@@ -4376,8 +4385,10 @@
         if (kbSelectedProduct) {
           openNewButton(row, col)
           $('#kbLabel').value = kbSelectedProduct.name
-          $('#kbType').value = 'fixed_price'
+          $('#kbType').value = 'product'
           $('#kbPrice').value = kbSelectedProduct.price
+          $('#kbProductId').value = kbSelectedProduct.id
+          updateTypeFields()
           updateLivePreview()
           kbSelectedProduct = null
           $$('.kb-prod-item').forEach(el => el.classList.remove('sel-highlight'))
@@ -4707,11 +4718,22 @@
       renderGrid(); openEditPanel(btn)
     }
 
+    // Convert literal \n in DB labels to real newlines for textarea, and back
+    function labelFromDb (s) { return (s || '').replace(/\\n/g, '\n') }
+    function labelToDb (s) { return (s || '').replace(/\n/g, '\\n') }
+
+    function clearProductPicker () {
+      $('#kbProductId').value = ''
+      $('#kbProductSearch').value = ''
+      $('#kbProductName').style.display = 'none'
+      $('#kbProductResults').style.display = 'none'
+    }
+
     function openNewButton (row, col) {
       selectedBtnId = null
       $('#kbEditId').value = ''
       $('#kbLabel').value = ''
-      $('#kbType').value = 'open_price'
+      $('#kbType').value = 'product'
       $('#kbPrice').value = 0
       $('#kbCatFilter').value = ''
       $('#kbAlphaRange').value = ''
@@ -4721,6 +4743,7 @@
       $('#kbRowSpan').value = 1
       $('#kbImageData').value = ''
       $('#kbImagePreview').innerHTML = ''
+      clearProductPicker()
       $('#kbDeleteBtn').style.display = 'none'
       $('#kbEditTitle').textContent = 'New Button'
       $('#kbCellInfo').textContent = `Row ${row}, Col ${col} — Page ${currentPage}`
@@ -4733,8 +4756,10 @@
 
     function openEditPanel (btn) {
       $('#kbEditId').value = btn.id
-      $('#kbLabel').value = btn.label
-      $('#kbType').value = btn.type
+      $('#kbLabel').value = labelFromDb(btn.label)
+      // Map legacy types to unified product type
+      const editType = (btn.type === 'open_price' || btn.type === 'fixed_price') ? 'product' : btn.type
+      $('#kbType').value = editType
       $('#kbPrice').value = btn.price || 0
       $('#kbCatFilter').value = btn.category_filter || ''
       $('#kbAlphaRange').value = btn.alpha_range || ''
@@ -4744,8 +4769,22 @@
       $('#kbRowSpan').value = btn.row_span || 1
       $('#kbImageData').value = btn.image || ''
       $('#kbImagePreview').innerHTML = btn.image ? `<img src="${btn.image}" style="width:36px;height:36px;border-radius:6px;object-fit:cover">` : ''
+      // Product picker state
+      clearProductPicker()
+      if (editType === 'product' && btn.category_filter) {
+        $('#kbProductId').value = btn.category_filter
+        // Try to show the linked product name
+        window.pos.getProductById(btn.category_filter).then(p => {
+          if (p) {
+            const unitTag = p.unit === 'kg' ? ' /kg' : p.unit === '100g' ? ' /100g' : ''
+            $('#kbProductName').textContent = `${p.name} — $${(p.active_price||p.price||0).toFixed(2)}${unitTag}`
+            $('#kbProductName').style.display = 'block'
+          }
+        }).catch(() => {})
+      }
       $('#kbDeleteBtn').style.display = 'inline-block'
-      $('#kbEditTitle').textContent = `Edit: ${btn.label}`
+      const cleanLabel = labelFromDb(btn.label).split('\n')[0]
+      $('#kbEditTitle').textContent = `Edit: ${cleanLabel}`
       $('#kbCellInfo').textContent = `Row ${btn.grid_row}, Col ${btn.grid_col} — ${btn.col_span||1}×${btn.row_span||1} — Page ${btn.page||1}`
       $('#kbEditPanel').classList.add('active')
       $('#kbEditPanel').dataset.row = btn.grid_row || 0
@@ -4769,7 +4808,8 @@
       const preview = $('#kbLivePreview')
       preview.style.background = $('#kbBgColor').value
       preview.style.color = $('#kbColor').value
-      preview.textContent = $('#kbLabel').value || 'Button'
+      const val = $('#kbLabel').value || 'Button'
+      preview.innerHTML = esc(val).replace(/\n/g, '<br>')
     }
 
     ;['kbLabel', 'kbBgColor', 'kbColor'].forEach(id => {
@@ -4792,22 +4832,56 @@
       })
     })
 
-    // Show/hide target page dropdown based on type
+    // Show/hide fields based on type
     function updateTypeFields () {
       const type = $('#kbType').value
-      const pageLinkRow = $('#kbPageLinkRow')
+      $('#kbPageLinkRow').style.display = type === 'page_link' ? 'flex' : 'none'
+      $('#kbProductRow').style.display = type === 'product' ? 'flex' : 'none'
+      $('#kbCatRow').style.display = (type === 'section' || type === 'nav') ? 'flex' : 'none'
       if (type === 'page_link') {
-        pageLinkRow.style.display = 'flex'
-        // Populate target page options
         const sel = $('#kbTargetPage')
         sel.innerHTML = allPages.map(p => {
           return `<option value="${p.page}">${esc(p.name || 'Page ' + p.page)} (${p.page})</option>`
         }).join('')
-      } else {
-        pageLinkRow.style.display = 'none'
       }
     }
-    $('#kbType').addEventListener('change', updateTypeFields)
+    $('#kbType').addEventListener('change', () => { updateTypeFields(); updateLivePreview() })
+
+    // Product picker for product-type buttons
+    $('#kbProductSearch').addEventListener('input', debounce(async () => {
+      const q = $('#kbProductSearch').value.trim()
+      const results = $('#kbProductResults')
+      if (q.length < 2) { results.style.display = 'none'; return }
+      const prods = await window.pos.searchProducts(q)
+      if (!prods.length) { results.innerHTML = '<div style="padding:8px;color:var(--text-dim);font-size:11px">No products found</div>'; results.style.display = 'block'; return }
+      results.innerHTML = prods.slice(0, 20).map(p => `<div class="kb-prod-pick" data-id="${esc(p.id)}" data-name="${esc(p.name)}" data-price="${p.active_price || p.price || 0}" data-unit="${esc(p.unit || 'each')}" style="padding:6px 10px;cursor:pointer;font-size:12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+        <span>${esc(p.name)}</span><span style="color:#4ade80;font-weight:600;font-size:11px">${p.unit === 'kg' ? '$' + (p.active_price||p.price||0).toFixed(2) + '/kg' : p.unit === '100g' ? '$' + (p.active_price||p.price||0).toFixed(2) + '/100g' : '$' + (p.active_price||p.price||0).toFixed(2)}</span>
+      </div>`).join('')
+      results.style.display = 'block'
+    }, 250))
+
+    $('#kbProductResults').addEventListener('click', e => {
+      const item = e.target.closest('.kb-prod-pick')
+      if (!item) return
+      const id = item.dataset.id, name = item.dataset.name
+      const price = parseFloat(item.dataset.price) || 0
+      const unit = item.dataset.unit
+      $('#kbProductId').value = id
+      $('#kbProductSearch').value = ''
+      $('#kbProductResults').style.display = 'none'
+      const unitTag = unit === 'kg' ? ' /kg' : unit === '100g' ? ' /100g' : ''
+      $('#kbProductName').textContent = `${name} — $${price.toFixed(2)}${unitTag}`
+      $('#kbProductName').style.display = 'block'
+      // Auto-fill label and price if empty
+      if (!$('#kbLabel').value.trim()) $('#kbLabel').value = name
+      $('#kbPrice').value = price
+      updateLivePreview()
+    })
+
+    // Close product results when clicking outside
+    document.addEventListener('click', e => {
+      if (!e.target.closest('#kbProductRow')) $('#kbProductResults').style.display = 'none'
+    })
 
     $('#kbCloseEdit').addEventListener('click', closeEditPanel)
     $('#kbCancelBtn').addEventListener('click', closeEditPanel)
@@ -4835,8 +4909,9 @@
     })
 
     $('#kbSaveBtn').addEventListener('click', async () => {
-      const label = $('#kbLabel').value.trim()
-      if (!label) { showToast('Label is required', 'error'); return }
+      const rawLabel = $('#kbLabel').value.trim()
+      if (!rawLabel) { showToast('Label is required', 'error'); return }
+      const label = labelToDb(rawLabel)
       const editId = $('#kbEditId').value || null
       const colSpan = parseInt($('#kbColSpan').value) || 1
       const rowSpan = parseInt($('#kbRowSpan').value) || 1
@@ -4866,13 +4941,15 @@
       }
 
       const btnType = $('#kbType').value
+      // For product type, store product_id in category_filter
+      const catFilter = btnType === 'product' ? ($('#kbProductId').value || null) : ($('#kbCatFilter').value.trim() || null)
       const btn = {
         id: editId || undefined,
         label,
         type: btnType,
         price: parseFloat($('#kbPrice').value) || 0,
-        category_filter: $('#kbCatFilter').value.trim() || null,
-        alpha_range: $('#kbAlphaRange').value.trim() || null,
+        category_filter: catFilter,
+        alpha_range: (btnType === 'nav') ? ($('#kbAlphaRange').value.trim() || null) : null,
         color: $('#kbColor').value,
         bg_color: $('#kbBgColor').value,
         col_span: colSpan,
