@@ -130,6 +130,7 @@ contextBridge.exposeInMainWorld('pos', {
   getQueues:          ()      => ipcRenderer.invoke('hardware:getQueues'),
   configureHardware:  (cfg)   => ipcRenderer.invoke('hardware:configure', cfg),
   getHardwareConfig:  ()      => ipcRenderer.invoke('hardware:getConfig'),
+  hardwareDiagnostic: ()      => ipcRenderer.invoke('hardware:diagnostic'),
 
   // Cash Drawer
   logCashDrawer:      (entry) => ipcRenderer.invoke('db:cash_drawer:log', entry),

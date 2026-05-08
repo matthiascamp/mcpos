@@ -822,11 +822,12 @@ function createCustomerWindow () {
   customerWindow.loadFile(path.join(__dirname, 'pos', 'customer.html'))
   customerWindow.on('closed', () => { customerWindow = null })
 
-  // Send store name
+  // Send store info
   customerWindow.webContents.on('did-finish-load', () => {
-    const row = dbGet("SELECT value FROM settings WHERE key = 'store_name'")
-    if (row && customerWindow) {
-      customerWindow.webContents.send('customer:update', { items: [], storeName: row.value })
+    const name = dbGet("SELECT value FROM settings WHERE key = 'store_name'")?.value
+    const address = dbGet("SELECT value FROM settings WHERE key = 'store_address'")?.value
+    if (customerWindow) {
+      customerWindow.webContents.send('customer:update', { items: [], storeName: name || '', storeAddress: address || '' })
     }
   })
 }
@@ -2613,7 +2614,7 @@ function setupIPC() {
     }
   }
 
-  function detectScale (devices, serialPorts) {
+  async function detectScale (devices, serialPorts) {
     if (hwScale?.configured) {
       appLog('info', 'hardware', `Using saved scale config: ${hwScale.type} ${hwScale.port || hwScale.path || ''}`)
       return hwScale
@@ -2636,17 +2637,29 @@ function setupIPC() {
       }
     }
 
-    // Priority 2: Serial ports with known scale adapter VID (RS-232 scales — Mettler Toledo, CAS, etc.)
-    if (serialPorts && serialPorts.length > 0) {
-      const scaleAdapterVids = new Set([0x0403, 0x10C4]) // FTDI, Silicon Labs — common on serial scales
-      const scalePort = serialPorts.find(p => p.vendorId && scaleAdapterVids.has(p.vendorId))
-      if (scalePort) {
-        appLog('info', 'hardware', `Serial scale adapter detected on ${scalePort.path} (VID:${scalePort.vendorId.toString(16)})`)
-        return { type: 'serial', port: scalePort.path, protocol: 'sics', baud: 9600, vendor: 'Serial Scale', product: scalePort.manufacturer || scalePort.path, detected: false }
+    // Priority 2: Serial ports — brute-force test all ports with all protocol/baud combos
+    if (serialPorts && serialPorts.length > 0 && SerialPortLib) {
+      const scaleAdapterVids = new Set([0x0403, 0x10C4])
+      // Try known adapter VIDs first, then all other ports
+      const sorted = [...serialPorts].sort((a, b) => {
+        const aKnown = a.vendorId && scaleAdapterVids.has(a.vendorId) ? 0 : 1
+        const bKnown = b.vendorId && scaleAdapterVids.has(b.vendorId) ? 0 : 1
+        return aKnown - bKnown
+      })
+      for (const sp of sorted) {
+        for (const [protocol, baud] of [['sics', 9600], ['mt8217', 9600], ['sics', 19200], ['mt8217', 19200], ['sics', 4800], ['mt8217', 4800]]) {
+          try {
+            const result = await testSerialScale(sp.path, baud, protocol)
+            if (result.ok) {
+              appLog('info', 'hardware', `Scale auto-detected on ${sp.path} — ${protocol} @ ${baud} baud`)
+              return { type: 'serial', port: sp.path, protocol, baud, vendor: sp.manufacturer || 'Serial Scale', product: sp.path, detected: true }
+            }
+          } catch (_) {}
+        }
       }
     }
 
-    // Priority 3: USB enumeration VID match only
+    // Priority 3: USB enumeration VID match only (no communication confirmed)
     for (const d of devices) {
       if (d.vendorId && SCALE_VENDORS[d.vendorId] && d.vendorId !== 0x0403) {
         return { type: 'hid', vid: d.vendorId, pid: d.productId, vendor: SCALE_VENDORS[d.vendorId], product: d.product || '', noHID: !HID }
@@ -3128,9 +3141,126 @@ function setupIPC() {
     if (hwScale) appLog('info', 'hardware', `Scale: ${hwScale.vendor || hwScale.product}`)
   }).catch(e => appLog('error', 'hardware', 'Auto-probe failed', e.message))
 
+  // Auto-reprobe every 30s so hot-plugged devices are found automatically
+  setInterval(async () => {
+    try {
+      const hadPrinter = !!hwPrinter, hadScale = !!hwScale
+      await probeHardware()
+      if (!hadPrinter && hwPrinter) appLog('info', 'hardware', `Printer connected: ${hwPrinter.name}`)
+      if (!hadScale && hwScale) appLog('info', 'hardware', `Scale connected: ${hwScale.vendor || hwScale.product}`)
+    } catch (_) {}
+  }, 30000)
+
   // ── IPC handlers ───────────────────────────────────────────────────────────
 
   ipcMain.handle('hardware:probe', probeHardware)
+
+  // Full hardware diagnostic — dumps everything raw for debugging
+  ipcMain.handle('hardware:diagnostic', async () => {
+    const diag = { timestamp: new Date().toISOString(), platform: process.platform, arch: process.arch, nodeVersion: process.version }
+
+    // All HID devices (raw, unfiltered)
+    diag.hidAvailable = !!HID
+    diag.hidDevices = []
+    if (HID) {
+      try {
+        diag.hidDevices = HID.devices().map(d => ({
+          vendorId: '0x' + (d.vendorId || 0).toString(16).padStart(4, '0'),
+          productId: '0x' + (d.productId || 0).toString(16).padStart(4, '0'),
+          manufacturer: d.manufacturer || '',
+          product: d.product || '',
+          usagePage: '0x' + (d.usagePage || 0).toString(16).padStart(4, '0'),
+          usage: '0x' + (d.usage || 0).toString(16).padStart(4, '0'),
+          interface: d.interface ?? -1,
+          release: d.release || 0,
+          path: d.path || '',
+        }))
+      } catch (e) { diag.hidError = e.message }
+    }
+
+    // All serial ports (raw, unfiltered)
+    diag.serialAvailable = !!SerialPortLib
+    diag.serialPorts = []
+    if (SerialPortLib) {
+      try {
+        const ports = await SerialPortLib.SerialPort.list()
+        diag.serialPorts = ports.map(p => ({
+          path: p.path,
+          manufacturer: p.manufacturer || '',
+          vendorId: p.vendorId || '',
+          productId: p.productId || '',
+          serialNumber: p.serialNumber || '',
+          pnpId: p.pnpId || '',
+          friendlyName: p.friendlyName || '',
+          locationId: p.locationId || '',
+        }))
+      } catch (e) { diag.serialError = e.message }
+    }
+
+    // Current hardware state
+    diag.currentState = {
+      printer: hwPrinter ? { name: hwPrinter.name, interface: hwPrinter.interface, port: hwPrinter.port, configured: !!hwPrinter.configured } : null,
+      scale: hwScale ? { type: hwScale.type, vendor: hwScale.vendor, port: hwScale.port, path: hwScale.path, protocol: hwScale.protocol, baud: hwScale.baud, configured: !!hwScale.configured } : null,
+      scanner: hwScanner ? { vendor: hwScanner.vendor, product: hwScanner.product } : null,
+    }
+
+    // Brute-force serial scale scan — try every port with both protocols
+    diag.serialScaleScan = []
+    if (SerialPortLib && diag.serialPorts.length > 0) {
+      for (const sp of diag.serialPorts) {
+        for (const protocol of ['sics', 'mt8217']) {
+          for (const baud of [9600, 19200, 4800, 2400]) {
+            try {
+              const result = await testSerialScale(sp.path, baud, protocol)
+              diag.serialScaleScan.push({ port: sp.path, baud, protocol, ok: result.ok, reading: result.reading || null, error: result.error || null, raw: result.raw || null })
+              if (result.ok) break // Found it at this baud, skip other baud rates for this protocol
+            } catch (e) {
+              diag.serialScaleScan.push({ port: sp.path, baud, protocol, ok: false, error: e.message })
+            }
+          }
+        }
+      }
+    }
+
+    // HID scale attempt — try reading from any device with scale usage page
+    diag.hidScaleScan = []
+    if (HID) {
+      const hidDevs = HID.devices()
+      // Try known vendor IDs
+      for (const d of hidDevs) {
+        if (SCALE_VENDORS[d.vendorId] || d.usagePage === SCALE_USAGE_PAGE) {
+          try {
+            const dev = new HID.HID(d.path)
+            const data = dev.readTimeout(2000)
+            dev.close()
+            diag.hidScaleScan.push({
+              path: d.path, vid: '0x' + d.vendorId.toString(16).padStart(4, '0'),
+              pid: '0x' + d.productId.toString(16).padStart(4, '0'),
+              vendor: SCALE_VENDORS[d.vendorId] || d.manufacturer || 'Unknown',
+              ok: !!data && data.length >= 4,
+              rawBytes: data ? Array.from(data).map(b => '0x' + b.toString(16).padStart(2, '0')).join(' ') : null,
+              error: data ? null : 'No data (timeout)',
+            })
+          } catch (e) {
+            diag.hidScaleScan.push({
+              path: d.path, vid: '0x' + d.vendorId.toString(16).padStart(4, '0'),
+              pid: '0x' + d.productId.toString(16).padStart(4, '0'),
+              error: e.message,
+            })
+          }
+        }
+      }
+    }
+
+    // Saved config from DB
+    diag.savedConfig = {}
+    for (const key of ['hw_scale_type', 'hw_scale_port', 'hw_scale_path', 'hw_scale_baud', 'hw_scale_protocol', 'hw_printer_interface', 'hw_printer_name', 'hw_printer_port', 'hw_printer_ip']) {
+      const row = dbGet("SELECT value FROM settings WHERE key = ?1", [key])
+      if (row) diag.savedConfig[key] = row.value
+    }
+
+    return diag
+  })
 
   ipcMain.handle('hardware:printReceipt', async (_e, receiptData) => {
     try {

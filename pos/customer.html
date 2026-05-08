@@ -159,7 +159,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:linear-gradient(160deg,
     <div class="idle-footer">
       <div class="idle-footer-left">
         <img src="logo.png" alt="C" class="idle-footer-logo">
-        <div class="idle-footer-text">1832 Logan Rd, Mt Gravatt QLD 4122</div>
+        <div class="idle-footer-text" id="storeAddress">1832 Logan Rd, Mt Gravatt QLD 4122</div>
       </div>
       <div class="qr-area">
         <div>
@@ -306,6 +306,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:linear-gradient(160deg,
     const { items, total, tax, count, storeName } = data
 
     if (storeName) document.getElementById('storeName').textContent = storeName
+    if (data.storeAddress) document.getElementById('storeAddress').textContent = data.storeAddress
 
     if (!items || items.length === 0) {
       document.getElementById('idleScreen').style.display = 'flex'
