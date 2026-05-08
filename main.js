@@ -198,29 +198,117 @@ async function initDatabase() {
     try { db.run(m) } catch (_) {}
   }
 
-  // Strip prices from page_link/section labels: "APPLES\n$5.99/kg" → "APPLES"
+  // ── Repair: restore open_price button labels mangled by previous migration ──
   try {
-    const navBtns = dbAll("SELECT id, label FROM keyboard_buttons WHERE type IN ('page_link','section') AND label LIKE '%$%'")
-    for (const b of navBtns) {
-      const clean = b.label.split('\n')[0].replace(/\s*\$[\d.]+.*$/, '').trim()
-      if (clean && clean !== b.label) {
-        db.run("UPDATE keyboard_buttons SET label = ? WHERE id = ?", [clean, b.id])
+    const repairDone = dbAll("SELECT value FROM settings WHERE key = 'migration_repair_labels_v1'")
+    if (!repairDone.length) {
+      // Restore original labels with price lines for open_price buttons
+      const fixes = {
+        'pg2-cherries':     'CHERRIES KG\n$14.99/kg',     'pg2-coconut':      'COCONUT EA\n$4.99 ea',
+        'pg2-custard-apple':'CUSTARD APPLE KG\n$6.99/kg', 'pg2-dragon-fruit': 'DRAGON FRUIT KG\n$14.99/kg',
+        'pg2-figs':         'FIGS KG\n$19.99/kg',         'pg2-grapefruit':   'GRAPEFRUIT KG\n$4.99/kg',
+        'pg2-guava':        'GUAVA KG\n$8.99/kg',         'pg2-longan':       'LONGAN KG\n$12.99/kg',
+        'pg2-lychee':       'LYCHEE KG\n$14.99/kg',
+        'pg3-passion-fruit':'PASSION FRUIT EA\n$1.50 ea', 'pg3-papaya':       'PAPAYA RED KG\n$5.99/kg',
+        'pg3-pawpaw':       'PAW PAW GREEN KG\n$4.99/kg', 'pg3-persimmons':   'PERSIMMONS KG\n$9.99/kg',
+        'pg3-pineapple-sm': 'SM PINEAPPLE EA\n$3.99 ea',  'pg3-pineapple-md': 'MED PINEAPPLE EA\n$4.99 ea',
+        'pg3-pineapple-xl': 'XL PINEAPPLE EA\n$6.99 ea',  'pg3-pomegranate':  'POMEGRANATE EA\n$3.99 ea',
+        'pg3-pommelo':      'POMMELO KG\n$6.99/kg',       'pg3-quince':       'QUINCE KG\n$7.99/kg',
+        'pg3-tangello':     'TANGELLO KG\n$4.99/kg',
+        'pg4-asian-vege':   'ASIAN VEGE EA\n$3.99 ea',    'pg4-asparagus':    'ASPARAGUS EA\n$4.99 ea',
+        'pg4-beans':        'BEANS KG\n$9.99/kg',         'pg4-bottle-gourd': 'BOTTLE GOURD KG\n$5.99/kg',
+        'pg4-brussels':     'BRUSSEL SPROUTS KG\n$12.99/kg','pg4-carrots':    'CARROTS LOOSE KG\n$2.49/kg',
+        'pg4-carrot-bag':   'CARROT BAG EA\n$2.99 ea',    'pg4-cauliflower':  'CAULIFLOWER EA\n$4.99 ea',
+        'pg4-celery':       'WHOLE CELERY EA\n$3.99 ea',   'pg4-celeriac':    'CELERIAC EA\n$5.99 ea',
+        'pg4-chokos':       'CHOKOS KG\n$4.99/kg',        'pg4-corn':         'CORN EA\n$1.99 ea',
+        'pg4-cucumbers':    'CUCUMBERS EA\n$2.99 ea',      'pg4-eggplant':    'EGGPLANT KG\n$5.99/kg',
+        'pg4-leb-eggplant': 'LEB EGGPLANT KG\n$7.99/kg',  'pg4-fennel':      'FENNEL EA\n$4.99 ea',
+        'pg4-ginger':       'GINGER KG\n$24.99/kg',
+        'pg5-herbs':        'HERBS EA\n$2.99 ea',          'pg5-kale':        'KALE EA\n$3.99 ea',
+        'pg5-leeks':        'LEEKS EA\n$3.99 ea',         'pg5-lettuce-bags': 'LETTUCE BAGS EA\n$3.99 ea',
+        'pg5-lobok':        'LOBOK KG\n$4.99/kg',         'pg5-olives':       'OLIVES KG\n$14.99/kg',
+        'pg5-parsnip':      'PARSNIP KG\n$7.99/kg',       'pg5-peas':         'PEAS KG\n$9.99/kg',
+        'pg5-radish':       'RADISH BUNCH EA\n$2.99 ea',   'pg5-rhubarb':     'RHUBARB EA\n$4.99 ea',
+        'pg5-shallots':     'SHALLOTS EA\n$2.99 ea',      'pg5-silverbeet':   'SILVERBEET EA\n$3.99 ea',
+        'pg5-snow-peas':    'SNOW PEAS KG\n$14.99/kg',    'pg5-sugar-snap':   'SUGAR SNAP PEAS KG\n$14.99/kg',
+        'pg5-swedes':       'SWEDES KG\n$4.99/kg',        'pg5-turnip':       'TURNIP KG\n$3.99/kg',
       }
+      for (const [id, label] of Object.entries(fixes)) {
+        db.run("UPDATE keyboard_buttons SET label = ?, type = 'open_price' WHERE id = ?", [label, id])
+      }
+      // Also clean up any bogus subcategories created by previous migration
+      db.run("DELETE FROM categories WHERE id LIKE 'cat-%' AND id NOT IN ('cat-fruit','cat-veg','cat-meat','cat-dairy','cat-bread','cat-deli','cat-flowers','cat-cheese','cat-coffee','cat-nuts','cat-grocery','cat-gas') AND name NOT IN ('Apples','Apricots','Avocados','Bananas','Grapes','Kiwi Fruit','Lemons','Limes','Mandarins','Mangoes','Melons','Nectarines','Oranges','Peaches','Pears','Plums','Beetroot','Broccoli','Cabbage','Capsicum','Chillies','Garlic','Lettuces','Mushrooms','Onions','Potatoes','Pumpkins','Sweet Potatoes','Tomatoes','Zucchini')")
+      // Restore products moved to bogus categories back to their parent
+      db.run("UPDATE products SET category_id = 'cat-fruit' WHERE category_id NOT IN (SELECT id FROM categories)")
+      db.run("UPDATE products SET category_id = 'cat-veg' WHERE category_id NOT IN (SELECT id FROM categories)")
+      // Reset the subcats flag so it re-runs cleanly
+      db.run("DELETE FROM settings WHERE key = 'migration_fv_subcats_v1'")
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('migration_repair_labels_v1', '1')")
     }
-  } catch (_) {}
+  } catch (e) { console.error('Label repair error:', e) }
 
-  // Convert fruit/veg page_link buttons (pages 2-5) to section type
-  // so they open the category product view instead of navigating to empty sub-pages
-  // Also title-case labels on all section buttons on these pages
+  // ── Create fruit/veg subcategories (one-time) ──
+  // Adds categories like "Apples", "Bananas" etc. so section buttons can navigate to them
+  // Also converts page_link buttons → section and cleans ONLY those labels
   try {
-    const navIds = new Set(['pg2-back','pg2-veg-menu','pg2-next-fruit','pg3-back','pg3-prev-fruit','pg4-back','pg4-fruit-menu','pg4-next-veg','pg5-back','pg5-fruit-menu','pg5-prev-veg'])
-    const fvBtns = dbAll("SELECT id, label, type FROM keyboard_buttons WHERE (type = 'page_link' OR type = 'section') AND (id LIKE 'pg2-%' OR id LIKE 'pg3-%' OR id LIKE 'pg4-%' OR id LIKE 'pg5-%')")
-    for (const b of fvBtns) {
-      if (navIds.has(b.id)) continue
-      const catName = b.label.split('\n')[0].replace(/\b\w+/g, w => w[0].toUpperCase() + w.slice(1).toLowerCase()).trim()
-      db.run("UPDATE keyboard_buttons SET type = 'section', category_filter = ?, label = ? WHERE id = ?", [catName, catName, b.id])
+    const done = dbAll("SELECT value FROM settings WHERE key = 'migration_fv_subcats_v1'")
+    if (!done.length) {
+      // Subcategory definitions: [buttonId, categoryName, parentCatId, colour]
+      const subcats = [
+        // Fruit (pages 2-3)
+        ['pg2-apples',    'Apples',        'cat-fruit', '#c94c4c'],
+        ['pg2-apricots',  'Apricots',      'cat-fruit', '#e8a020'],
+        ['pg2-avocados',  'Avocados',      'cat-fruit', '#6b8e23'],
+        ['pg2-bananas',   'Bananas',       'cat-fruit', '#f0c929'],
+        ['pg2-grapes',    'Grapes',        'cat-fruit', '#7b3f7d'],
+        ['pg2-kiwi',      'Kiwi Fruit',    'cat-fruit', '#6d8b3c'],
+        ['pg2-lemons',    'Lemons',        'cat-fruit', '#e2c846'],
+        ['pg2-limes',     'Limes',         'cat-fruit', '#5ca83b'],
+        ['pg2-mandarins', 'Mandarins',     'cat-fruit', '#e87820'],
+        ['pg2-mangoes',   'Mangoes',       'cat-fruit', '#e8a828'],
+        ['pg2-melons',    'Melons',        'cat-fruit', '#68a860'],
+        ['pg3-nectarines','Nectarines',    'cat-fruit', '#d87858'],
+        ['pg3-oranges',   'Oranges',       'cat-fruit', '#e87830'],
+        ['pg3-peaches',   'Peaches',       'cat-fruit', '#e8a870'],
+        ['pg3-pears',     'Pears',         'cat-fruit', '#a8b848'],
+        ['pg3-plums',     'Plums',         'cat-fruit', '#8b3a8b'],
+        // Vegetables (pages 4-5)
+        ['pg4-beetroot',  'Beetroot',      'cat-veg', '#8b2252'],
+        ['pg4-broccoli',  'Broccoli',      'cat-veg', '#3a7d3a'],
+        ['pg4-cabbage',   'Cabbage',       'cat-veg', '#5a8a5a'],
+        ['pg4-capsicum',  'Capsicum',      'cat-veg', '#cc3333'],
+        ['pg4-chillies',  'Chillies',      'cat-veg', '#cc2222'],
+        ['pg4-garlic',    'Garlic',        'cat-veg', '#c8c4bc'],
+        ['pg5-lettuces',  'Lettuces',      'cat-veg', '#66aa66'],
+        ['pg5-mushrooms', 'Mushrooms',     'cat-veg', '#8b7355'],
+        ['pg5-onions',    'Onions',        'cat-veg', '#b8860b'],
+        ['pg5-potatoes',  'Potatoes',      'cat-veg', '#b39264'],
+        ['pg5-pumpkins',  'Pumpkins',      'cat-veg', '#e87830'],
+        ['pg5-sweet-potato','Sweet Potatoes','cat-veg','#cc7744'],
+        ['pg5-tomatoes',  'Tomatoes',      'cat-veg', '#cc3333'],
+        ['pg5-zucchini',  'Zucchini',      'cat-veg', '#5a8a3a'],
+      ]
+
+      let sortOrd = 100
+      for (const [btnId, catName, parentId, colour] of subcats) {
+        const catId = 'cat-' + catName.toLowerCase().replace(/\s+/g, '-')
+
+        // Create subcategory
+        db.run("INSERT OR IGNORE INTO categories (id, name, sort_order, colour, active) VALUES (?, ?, ?, ?, 1)",
+          [catId, catName, sortOrd++, colour])
+
+        // Move matching products from parent to subcategory
+        db.run("UPDATE products SET category_id = ? WHERE category_id = ? AND LOWER(name) LIKE '%' || LOWER(?) || '%'",
+          [catId, parentId, catName.replace(/\s+/g, '%')])
+
+        // Convert button: page_link → section, set category_filter, clean label
+        db.run("UPDATE keyboard_buttons SET type = 'section', category_filter = ?, label = ? WHERE id = ?",
+          [catName, catName, btnId])
+      }
+
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('migration_fv_subcats_v1', '1')")
     }
-  } catch (_) {}
+  } catch (e) { console.error('Subcategory migration error:', e) }
 
   // Layout v3: Shift Page 1 buttons to make room for in-grid cart at cols 0-2
   // Uses position-based detection (not a flag) so it can never double-shift
@@ -729,6 +817,18 @@ function createCustomerWindow () {
     const row = dbGet("SELECT value FROM settings WHERE key = 'store_name'")
     if (row && customerWindow) {
       customerWindow.webContents.send('customer:update', { items: [], storeName: row.value })
+    }
+  })
+}
+
+// Single instance lock — focus existing window if already running
+const gotTheLock = app.requestSingleInstanceLock()
+if (!gotTheLock) { app.quit() }
+else {
+  app.on('second-instance', () => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore()
+      mainWindow.focus()
     }
   })
 }

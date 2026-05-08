@@ -115,6 +115,11 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .pos-grid-btn.dept-key.has-img{border-bottom:3px solid var(--cat-color,transparent);box-shadow:0 4px 16px rgba(0,0,0,.5),0 0 20px var(--cat-glow,transparent)}
 .pos-grid-btn.dept-key.has-img::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,var(--cat-glow,transparent) 0%,transparent 40%);z-index:1;pointer-events:none;opacity:.5}
 
+/* ─── Price tag on item buttons ──────────────────────────────────── */
+.pos-grid-btn.dept-key.has-price{flex-direction:column;gap:1px}
+.btn-price{font-size:clamp(9px,0.85vw,11px);font-weight:600;opacity:.75;letter-spacing:0}
+.pos-grid-btn.dept-key.has-img .btn-price{font-size:clamp(8px,0.75vw,10px);opacity:.85}
+
 /* ─── Numpad zone ────────────────────────────────────────────────── */
 .pos-grid-btn.digit-btn{font-size:clamp(18px,2.5vw,28px);font-weight:700;background:linear-gradient(180deg,#ffffff 0%,#f4f5f7 100%);color:#1a1a2e;border:1px solid rgba(0,0,0,.06);border-radius:clamp(8px,1vw,14px);box-shadow:0 4px 10px rgba(0,0,0,.12),0 2px 3px rgba(0,0,0,.06),inset 0 -3px 0 rgba(0,0,0,.04),inset 0 1px 0 rgba(255,255,255,.95)}
 .pos-grid-btn.digit-btn:active{background:linear-gradient(180deg,#ebedf0 0%,#dfe2e6 100%);box-shadow:0 1px 2px rgba(0,0,0,.08),inset 0 2px 4px rgba(0,0,0,.06);transform:scale(.96) translateY(2px)}
@@ -582,7 +587,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
     <button data-val="7">7</button><button data-val="8">8</button><button data-val="9">9</button>
     <button data-val=".">.</button><button data-val="0">0</button><button data-val="C">C</button>
   </div>
-  <div class="modal-actions"><button class="modal-cancel" id="weightCancel">Cancel</button><button class="modal-confirm" id="weightConfirm">Add to Cart</button></div>
+  <div class="modal-actions"><button class="modal-cancel" id="weightCancel">Cancel</button><button id="weightReadScale" style="padding:10px 20px;border:none;border-radius:8px;background:#2563eb;color:#fff;font-weight:600;cursor:pointer;font-size:14px">Read Scale</button><button class="modal-confirm" id="weightConfirm">Add to Cart</button></div>
 </div></div>
 
 <!-- ═══ Find Sale Modal ════════════════════════════════════════════ -->
@@ -1367,9 +1372,13 @@ function renderPosButton (btn, gridStyle) {
   }
 
   // Department / product / nav — everything else
-  const labelHtml = imgSrc ? `<span>${label.replace(/\\n/g,'<br>')}</span>` : label.replace(/\\n/g,'<br>')
-  return `<div class="pos-grid-btn dept-key${imgClass}" data-type="${esc(type)}" data-cat="${esc(btn.category_filter || '')}"
-    data-alpha="${esc(btn.alpha_range || '')}" data-label2="${label}" data-price="${btn.price || 0}"
+  const isItem = type === 'fixed_price' || type === 'open_price' || type === 'product'
+  const priceVal = btn.price || 0
+  const priceTag = isItem && priceVal > 0 ? `<small class="btn-price">${money(priceVal)}</small>` : ''
+  const priceClass = priceTag ? ' has-price' : ''
+  const labelHtml = imgSrc ? `<span>${label.replace(/\\n/g,'<br>')}${priceTag}</span>` : `${label.replace(/\\n/g,'<br>')}${priceTag}`
+  return `<div class="pos-grid-btn dept-key${imgClass}${priceClass}" data-type="${esc(type)}" data-cat="${esc(btn.category_filter || '')}"
+    data-alpha="${esc(btn.alpha_range || '')}" data-label2="${label}" data-price="${priceVal}"
     data-action="${esc(type)}" data-page-link="${btn.parent_id || ''}"
     style="${gridStyle};background:${bg};color:${color}${catColorStyle}">${imgHtml}${labelHtml}</div>`
 }
@@ -1416,7 +1425,14 @@ $('#posGrid').addEventListener('click', async e => {
     else if (type === 'open_price') {
       const rawLabel = btn.dataset.label2 || btn.textContent.trim()
       const name = rawLabel.split('\\n')[0].split('\n')[0].trim()
-      showOpenPriceModal(name, parseFloat(btn.dataset.price) || 0)
+      const price = parseFloat(btn.dataset.price) || 0
+      // KG items → weight modal with scale support; EA items → open price modal
+      if (/\bKG\b/i.test(rawLabel)) {
+        const prod = { id: 'KB_' + Date.now(), name: name.replace(/\s*KG$/i,'').trim(), price, active_price: price, unit: 'kg', tax_rate: 0.00, is_special: false }
+        pendingWeightProduct = prod; showWeightModal(prod)
+      } else {
+        showOpenPriceModal(name, price)
+      }
     }
     else if (type === 'product') {
       const plu = btn.dataset.cat
@@ -1925,6 +1941,21 @@ $('#weightConfirm').addEventListener('click', () => {
   qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); si.value = ''; refocus()
 })
 $('#weightCancel').addEventListener('click', () => { $('#weightModal').classList.remove('show'); pendingWeightProduct = null; refocus() })
+$('#weightReadScale').addEventListener('click', async () => {
+  try {
+    const r = await window.pos.readScale()
+    if (r && r.weight > 0) {
+      wBuf = r.weight.toFixed(2).replace(/\.?0+$/, '') || '0'
+      $('#weightDisplay').textContent = wBuf
+      if (pendingWeightProduct) updateWeightPreview(pendingWeightProduct)
+      showToast(`Scale: ${r.weight} ${r.unit || 'kg'}${r.stable ? '' : ' (unstable)'}`, r.stable ? 'success' : 'info')
+    } else if (r && r.error) {
+      showToast('Scale: ' + r.error, 'error')
+    } else {
+      showToast('Scale read: 0 or no response', 'info')
+    }
+  } catch (e) { showToast('Scale error: ' + e.message, 'error') }
+})
 
 // ═══ Cart Rendering ═══════════════════════════════════════════════
 cart.onChange = () => {
