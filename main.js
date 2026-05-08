@@ -2451,12 +2451,42 @@ function setupIPC() {
     }
   }
 
+  function clearPrinterQueue (queueName) {
+    try {
+      // Clear stuck print jobs and resume the queue
+      hwExec(`powershell -NoProfile -NonInteractive -Command "Get-PrintJob -PrinterName '${queueName.replace(/'/g, "''")}' -ErrorAction SilentlyContinue | Remove-PrintJob -ErrorAction SilentlyContinue; Set-Printer -Name '${queueName.replace(/'/g, "''")}' -ErrorAction SilentlyContinue"`, { timeout: 5000, encoding: 'utf-8' })
+    } catch (_) {}
+  }
+
+  function getQueueStatus (queueName) {
+    try {
+      const raw = hwExec(`powershell -NoProfile -NonInteractive -Command "Get-Printer -Name '${queueName.replace(/'/g, "''")}' -ErrorAction SilentlyContinue | Select-Object PrinterStatus,JobCount | ConvertTo-Json -Compress"`, { timeout: 3000, encoding: 'utf-8' }).trim()
+      if (raw) return JSON.parse(raw)
+    } catch (_) {}
+    return null
+  }
+
   function testQueueRaw (queueName) {
+    // Clear stuck jobs and resume queue first
+    clearPrinterQueue(queueName)
+
+    // Check status — if errored, try sending data then check if job gets stuck
     const tmpFile = path.join(os.tmpdir(), `crisp-test-${Date.now()}.bin`)
     fs.writeFileSync(tmpFile, ESCPOS.INIT)
     try {
       const result = hwExec(`powershell -ExecutionPolicy Bypass -NoProfile -NonInteractive -File "${RAWPRINT_SCRIPT}" -PrinterName "${queueName.replace(/"/g, '`"')}" -FilePath "${tmpFile}"`, { timeout: 8000, encoding: 'utf-8' }).trim()
-      return result.startsWith('OK')
+      if (!result.startsWith('OK')) return false
+
+      // Wait briefly then check if jobs are stuck (means printer is offline/errored)
+      try {
+        const post = getQueueStatus(queueName)
+        if (post && post.JobCount > 0) {
+          appLog('warn', 'hardware', `Queue "${queueName}" has ${post.JobCount} stuck jobs (status ${post.PrinterStatus}) — printer offline or errored`)
+          clearPrinterQueue(queueName)
+          return false
+        }
+      } catch (_) {}
+      return true
     } catch (_) {
       return false
     } finally {
@@ -2531,6 +2561,27 @@ function setupIPC() {
       }
     }
 
+    // If best-scored queues have jobs stuck, try creating a Generic/Text queue on a USB port
+    const usbPort = scored.find(q => (q.PortName || '').startsWith('USB'))?.PortName
+    if (usbPort) {
+      try {
+        const genName = 'Crisp Receipt Printer'
+        // Check if we already created one
+        const existing = hwExec(`powershell -NoProfile -NonInteractive -Command "Get-Printer -Name '${genName}' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name"`, { timeout: 3000, encoding: 'utf-8' }).trim()
+        if (existing) {
+          clearPrinterQueue(genName)
+          appLog('info', 'hardware', `Using existing Generic/Text queue: ${genName} on ${usbPort}`)
+          return { name: genName, port: usbPort, driver: 'Generic / Text Only', interface: 'windows', vid: usbPrinter?.vendorId, pid: usbPrinter?.productId, vendor: usbPrinter?.vendor || '', tested: false }
+        }
+        // Try to create one
+        hwExec(`powershell -NoProfile -NonInteractive -Command "Add-Printer -Name '${genName}' -DriverName 'Generic / Text Only' -PortName '${usbPort}'"`, { timeout: 5000, encoding: 'utf-8' })
+        appLog('info', 'hardware', `Auto-created Generic/Text queue: ${genName} on ${usbPort}`)
+        return { name: genName, port: usbPort, driver: 'Generic / Text Only', interface: 'windows', vid: usbPrinter?.vendorId, pid: usbPrinter?.productId, vendor: usbPrinter?.vendor || '', tested: false }
+      } catch (e) {
+        appLog('warn', 'hardware', `Could not create Generic/Text queue: ${e.message}`)
+      }
+    }
+
     // None worked — return all queues for user selection
     if (usbPrinter) return { name: usbPrinter.product || usbPrinter.vendor, interface: 'windows', vid: usbPrinter.vendorId, pid: usbPrinter.productId, vendor: usbPrinter.vendor, needsSetup: true, availableQueues: scored.map(q => ({ name: q.Name, port: q.PortName, driver: q.DriverName })), error: 'USB printer found but no queue responded. Select your printer below.' }
     if (queues.length) return { name: '', interface: 'windows', needsSetup: true, availableQueues: scored.map(q => ({ name: q.Name, port: q.PortName, driver: q.DriverName })), error: 'No receipt printer auto-detected. Select your printer below.' }
@@ -2541,10 +2592,10 @@ function setupIPC() {
     if (!isWin || !hwPrinter) return
     if (hwPrinterReady && Date.now() - hwPrinterCheckTime < 15000) return
     if (!hwPrinter.name) { hwPrinterCheckTime = Date.now(); return }
-    const works = testQueueRaw(hwPrinter.name)
-    hwPrinterReady = works
+    // Always clear stuck jobs and resume the queue before checking
+    clearPrinterQueue(hwPrinter.name)
+    hwPrinterReady = true
     hwPrinterCheckTime = Date.now()
-    if (!works) appLog('warn', 'hardware', `Printer queue ${hwPrinter.name} not responding`)
   }
 
   // ── Send raw bytes to printer (multi-backend) ─────────────────────────────
@@ -2560,10 +2611,17 @@ function setupIPC() {
   function sendViaSpooler (data, printerName) {
     const tmpFile = path.join(os.tmpdir(), `crisp-receipt-${Date.now()}.bin`)
     fs.writeFileSync(tmpFile, data)
+    // Clear stuck jobs before sending
+    clearPrinterQueue(printerName)
     appLog('info', 'printer', `Sending ${data.length} bytes to "${printerName}" via spooler`)
     try {
       const result = hwExec(`powershell -ExecutionPolicy Bypass -NoProfile -NonInteractive -File "${RAWPRINT_SCRIPT}" -PrinterName "${printerName.replace(/"/g, '`"')}" -FilePath "${tmpFile}"`, { timeout: 15000, encoding: 'utf-8' }).trim()
       appLog('info', 'printer', `Spooler result: ${result}`)
+      // Check if job got stuck
+      const post = getQueueStatus(printerName)
+      if (post && post.JobCount > 0) {
+        appLog('warn', 'printer', `Spooler said OK but ${post.JobCount} jobs stuck (status ${post.PrinterStatus}). Printer may be offline or wrong queue.`)
+      }
       if (result.startsWith('OK')) return { ok: true, detail: result }
       return { ok: false, detail: result }
     } catch (e) {
