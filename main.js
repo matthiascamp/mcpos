@@ -2466,84 +2466,23 @@ function setupIPC() {
     return null
   }
 
-  // ── Ensure a dedicated Generic/Text receipt printer queue exists ────────────
-  const CRISP_PRINTER_NAME = 'EPSON TM-T82II Receipt'
-
-  function ensureReceiptPrinter () {
-    if (!isWin) return null
+  // ── Resume a printer queue via WMI (clears Error state, no admin needed) ───
+  function resumePrinterQueue (queueName) {
     try {
-      // Check if our dedicated queue already exists and is ready
-      const check = hwExec(`powershell -NoProfile -NonInteractive -Command "Get-Printer -Name '${CRISP_PRINTER_NAME}' -ErrorAction SilentlyContinue | Select-Object Name,PrinterStatus,PortName | ConvertTo-Json -Compress"`, { timeout: 3000, encoding: 'utf-8' }).trim()
-      if (check) {
-        const info = JSON.parse(check)
-        if (info.Name && (info.PrinterStatus === 0 || info.PrinterStatus === 3)) {
-          appLog('info', 'printer', `Dedicated queue "${CRISP_PRINTER_NAME}" exists and ready on ${info.PortName}`)
-          return { name: info.Name, port: info.PortName, driver: 'Generic / Text Only', interface: 'windows' }
-        }
-        // Exists but errored — delete and recreate
-        appLog('warn', 'printer', `Dedicated queue "${CRISP_PRINTER_NAME}" is errored (status ${info.PrinterStatus}), recreating...`)
-        try { hwExec(`powershell -NoProfile -NonInteractive -Command "Remove-Printer -Name '${CRISP_PRINTER_NAME}' -ErrorAction SilentlyContinue"`, { timeout: 3000, encoding: 'utf-8' }) } catch (_) {}
-      }
-    } catch (_) {}
-
-    // Find the USB port from any existing printer queue
-    let usbPort = 'USB003'
-    try {
-      const portRaw = hwExec(`powershell -NoProfile -NonInteractive -Command "Get-Printer -ErrorAction SilentlyContinue | Where-Object { $_.PortName -like 'USB*' } | Select-Object -ExpandProperty PortName -First 1"`, { timeout: 3000, encoding: 'utf-8' }).trim()
-      if (portRaw && portRaw.startsWith('USB')) usbPort = portRaw
-    } catch (_) {}
-
-    // Create the queue
-    try {
-      hwExec(`powershell -NoProfile -NonInteractive -Command "Add-Printer -Name '${CRISP_PRINTER_NAME}' -DriverName 'Generic / Text Only' -PortName '${usbPort}'"`, { timeout: 5000, encoding: 'utf-8' })
-      appLog('info', 'printer', `Created dedicated queue "${CRISP_PRINTER_NAME}" on ${usbPort}`)
-      return { name: CRISP_PRINTER_NAME, port: usbPort, driver: 'Generic / Text Only', interface: 'windows' }
+      hwExec(`powershell -NoProfile -NonInteractive -Command "$p = Get-WmiObject Win32_Printer -Filter \\"Name='${queueName.replace(/'/g, "''").replace(/\\/g, '\\\\')}'\\" -ErrorAction SilentlyContinue; if ($p) { $p.CancelAllJobs() | Out-Null; $p.Resume() | Out-Null }"`, { timeout: 3000, encoding: 'utf-8' })
+      appLog('info', 'printer', `WMI Resume sent for "${queueName}"`)
     } catch (e) {
-      appLog('warn', 'printer', `Could not create dedicated queue: ${e.message}`)
-      return null
+      appLog('warn', 'printer', `WMI Resume failed for "${queueName}": ${e.message}`)
     }
   }
 
-  // ── Printer queue repair (no admin needed) ─────────────────────────────────
-  let _repairing = false
-  function repairPrinterQueue () {
-    if (_repairing) return null
-    _repairing = true
-    appLog('info', 'printer', 'Starting printer queue repair...')
+  // Clean up duplicate printer queues like "80mm Series Printer (1)", "(2)", "(3)"
+  function cleanupDuplicateQueues () {
     try {
-      // Step 1: Use WMI to cancel all jobs and resume errored queues (no admin rights needed)
-      const script = `$ErrorActionPreference='SilentlyContinue'
-$queues = Get-WmiObject Win32_Printer | Where-Object { $_.PortName -like 'USB*' }
-foreach ($q in $queues) { $q.CancelAllJobs() | Out-Null; $q.Resume() | Out-Null }
-Start-Sleep -Milliseconds 500
-$ready = Get-Printer | Where-Object { $_.PortName -like 'USB*' -and ($_.PrinterStatus -eq 0 -or $_.PrinterStatus -eq 3) } | Select-Object -First 1
-if ($ready) { Write-Output "OK:$($ready.Name)"; exit }
-$usbPort = ($queues | Select-Object -First 1).PortName
-if (-not $usbPort) { $usbPort = 'USB001' }
-$genName = 'Crisp Receipt Printer'
-Remove-Printer -Name $genName -ErrorAction SilentlyContinue
-Add-Printer -Name $genName -DriverName 'Generic / Text Only' -PortName $usbPort -ErrorAction SilentlyContinue
-Start-Sleep -Milliseconds 500
-$check = Get-Printer -Name $genName -ErrorAction SilentlyContinue
-if ($check) { Write-Output "CREATED:$genName" } else { Write-Output "FAIL" }`
-      const result = hwExec(`powershell -NoProfile -NonInteractive -Command "${script.replace(/"/g, '\\"')}"`, { timeout: 8000, encoding: 'utf-8' }).trim()
-      appLog('info', 'printer', `Queue repair result: ${result}`)
-      const lastLine = result.split('\n').pop().trim()
-      if (lastLine.startsWith('OK:')) {
-        hwPrinterReady = true; hwPrinterCheckTime = Date.now()
-        return lastLine.substring(3)
-      } else if (lastLine.startsWith('CREATED:')) {
-        hwPrinterReady = true; hwPrinterCheckTime = Date.now()
-        return lastLine.substring(8)
-      }
-      appLog('warn', 'printer', 'Queue repair could not restore any queue')
-      return null
-    } catch (e) {
-      appLog('error', 'printer', `Queue repair error: ${e.message}`)
-      return null
-    } finally {
-      _repairing = false
-    }
+      hwExec(`powershell -NoProfile -NonInteractive -Command "Get-Printer -ErrorAction SilentlyContinue | Where-Object { $_.Name -match '\\(\\d+\\)$' -and $_.PortName -like 'USB*' } | ForEach-Object { Remove-Printer -Name $_.Name -ErrorAction SilentlyContinue }"`, { timeout: 5000, encoding: 'utf-8' })
+      // Also remove any queues we previously created that don't work
+      hwExec(`powershell -NoProfile -NonInteractive -Command "Remove-Printer -Name 'Crisp Receipt Printer' -ErrorAction SilentlyContinue; Remove-Printer -Name 'EPSON TM-T82II Receipt' -ErrorAction SilentlyContinue"`, { timeout: 3000, encoding: 'utf-8' })
+    } catch (_) {}
   }
 
   function testQueueRaw (queueName) {
@@ -2575,33 +2514,10 @@ if ($check) { Write-Output "CREATED:$genName" } else { Write-Output "FAIL" }`
   }
 
   function detectPrinter (devices) {
+    // If we have saved config, trust it immediately — no PowerShell calls, no blocking
     if (hwPrinter?.configured) {
-      // Verify the saved queue actually works before trusting it
-      if (isWin && hwPrinter.interface === 'windows' && hwPrinter.name) {
-        const qs = getQueueStatus(hwPrinter.name)
-        if (qs && qs.PrinterStatus !== 0 && qs.PrinterStatus !== 3) {
-          appLog('warn', 'hardware', `Saved printer "${hwPrinter.name}" is errored (status ${qs.PrinterStatus}), trying repair...`)
-          const repaired = repairPrinterQueue()
-          if (repaired) {
-            hwPrinter.name = repaired
-            dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('hw_printer_name', ?1)", [repaired])
-            scheduleSave()
-            appLog('info', 'hardware', `Repaired → using queue "${repaired}"`)
-            return hwPrinter
-          }
-          // Repair failed — fall through to auto-detection
-          appLog('warn', 'hardware', 'Saved printer errored and repair failed, re-scanning...')
-          hwPrinter = null
-        } else {
-          // Queue looks OK, clear any stuck jobs just in case
-          if (qs && (qs.JobCount || 0) > 0) clearPrinterQueue(hwPrinter.name)
-          appLog('info', 'hardware', `Using saved printer config: ${hwPrinter.name} (${hwPrinter.interface})`)
-          return hwPrinter
-        }
-      } else {
-        appLog('info', 'hardware', `Using saved printer config: ${hwPrinter.name} (${hwPrinter.interface})`)
-        return hwPrinter
-      }
+      appLog('info', 'hardware', `Using saved printer config: ${hwPrinter.name} (${hwPrinter.interface})`)
+      return hwPrinter
     }
 
     let usbPrinter = null
@@ -2631,90 +2547,33 @@ if ($check) { Write-Output "CREATED:$genName" } else { Write-Output "FAIL" }`
       return usbPrinter ? { name: usbPrinter.product || usbPrinter.vendor, interface: 'unknown', vid: usbPrinter.vendorId, pid: usbPrinter.productId, vendor: usbPrinter.vendor, error: 'USB printer found but no CUPS queue' } : null
     }
 
-    // Strategy 1: Ensure our dedicated Generic/Text queue exists — this is the most reliable path
-    const dedicated = ensureReceiptPrinter()
-    if (dedicated) {
-      // Quick test: send INIT byte to verify the queue actually delivers data
-      const works = testQueueRaw(dedicated.name)
-      if (works) {
-        hwPrinterReady = true
-        hwPrinterCheckTime = Date.now()
-        appLog('info', 'hardware', `Using dedicated queue: ${dedicated.name} (${dedicated.port}) — tested OK`)
-        return { ...dedicated, vid: usbPrinter?.vendorId, pid: usbPrinter?.productId, vendor: usbPrinter?.vendor || '', tested: true }
-      }
-      appLog('warn', 'hardware', `Dedicated queue "${dedicated.name}" test failed, falling back to queue scan`)
-    }
-
-    // Strategy 2: Scan all Windows queues
+    // Scan Windows queues — score by keyword match, USB port, prefer base name over numbered copies
     const queues = getWindowsQueues()
-
-    // Score and sort queues: keyword match first, then USB-port queues, then others
     const scored = queues.map(q => {
       const name = (q.Name || '').toLowerCase()
       const driver = (q.DriverName || '').toLowerCase()
       const port = q.PortName || ''
-      const status = q.PrinterStatus || 0
       let score = 0
       if (RECEIPT_KEYWORDS.some(k => name.includes(k) || driver.includes(k))) score += 100
       if (port.startsWith('USB')) score += 50
-      if (driver.includes('generic')) score += 20
-      // Prefer ready printers (status 0 or 3=idle) over errored/paused ones
-      if (status === 0 || status === 3) score += 10
-      // Penalise virtual/system queues
       if (/xps|pdf|fax|onenote|send to/i.test(name)) score -= 200
-      // Prefer the base name over numbered copies like "Printer(2)", "Printer(3)"
-      if (/\(\d+\)/.test(q.Name)) score -= 5
+      if (/\(\d+\)/.test(q.Name)) score -= 50  // strongly penalise duplicates
       return { ...q, score }
     }).sort((a, b) => b.score - a.score)
 
-    // Try each candidate queue by actually sending data through rawprint.ps1
-    for (const q of scored) {
-      if (q.score > 0 || scored.length <= 3) {
-        const works = testQueueRaw(q.Name)
-        if (works) {
-          hwPrinterReady = true
-          hwPrinterCheckTime = Date.now()
-          appLog('info', 'hardware', `Auto-detected working printer: ${q.Name} (${q.PortName})`)
-          return { name: q.Name, port: q.PortName, driver: q.DriverName, interface: 'windows', vid: usbPrinter?.vendorId, pid: usbPrinter?.productId, vendor: usbPrinter?.vendor || '', tested: true }
-        }
-      }
+    // Pick the best-scoring receipt queue — NO test sends (they block startup and create stuck jobs)
+    const best = scored.find(q => q.score > 0)
+    if (best) {
+      // Resume the queue via WMI to clear any error state
+      resumePrinterQueue(best.Name)
+      appLog('info', 'hardware', `Auto-detected printer: ${best.Name} (${best.PortName}, score ${best.score})`)
+      return { name: best.Name, port: best.PortName, driver: best.DriverName, interface: 'windows', vid: usbPrinter?.vendorId, pid: usbPrinter?.productId, vendor: usbPrinter?.vendor || '' }
     }
 
-    // If best-scored queues have jobs stuck, try creating a Generic/Text queue on a USB port
-    const usbPort = scored.find(q => (q.PortName || '').startsWith('USB'))?.PortName
-    if (usbPort) {
-      try {
-        const genName = 'Crisp Receipt Printer'
-        // Check if we already created one
-        const existing = hwExec(`powershell -NoProfile -NonInteractive -Command "Get-Printer -Name '${genName}' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name"`, { timeout: 3000, encoding: 'utf-8' }).trim()
-        if (existing) {
-          clearPrinterQueue(genName)
-          appLog('info', 'hardware', `Using existing Generic/Text queue: ${genName} on ${usbPort}`)
-          return { name: genName, port: usbPort, driver: 'Generic / Text Only', interface: 'windows', vid: usbPrinter?.vendorId, pid: usbPrinter?.productId, vendor: usbPrinter?.vendor || '', tested: false }
-        }
-        // Try to create one
-        hwExec(`powershell -NoProfile -NonInteractive -Command "Add-Printer -Name '${genName}' -DriverName 'Generic / Text Only' -PortName '${usbPort}'"`, { timeout: 5000, encoding: 'utf-8' })
-        appLog('info', 'hardware', `Auto-created Generic/Text queue: ${genName} on ${usbPort}`)
-        return { name: genName, port: usbPort, driver: 'Generic / Text Only', interface: 'windows', vid: usbPrinter?.vendorId, pid: usbPrinter?.productId, vendor: usbPrinter?.vendor || '', tested: false }
-      } catch (e) {
-        appLog('warn', 'hardware', `Could not create Generic/Text queue: ${e.message}`)
-      }
-    }
-
-    // None worked — return all queues for user selection
-    if (usbPrinter) return { name: usbPrinter.product || usbPrinter.vendor, interface: 'windows', vid: usbPrinter.vendorId, pid: usbPrinter.productId, vendor: usbPrinter.vendor, needsSetup: true, availableQueues: scored.map(q => ({ name: q.Name, port: q.PortName, driver: q.DriverName })), error: 'USB printer found but no queue responded. Select your printer below.' }
+    // Return best available for user selection
+    if (usbPrinter) return { name: usbPrinter.product || usbPrinter.vendor, interface: 'windows', vid: usbPrinter.vendorId, pid: usbPrinter.productId, vendor: usbPrinter.vendor, needsSetup: true, availableQueues: scored.map(q => ({ name: q.Name, port: q.PortName, driver: q.DriverName })), error: 'USB printer found but no queue matched. Select your printer below.' }
     if (queues.length) return { name: '', interface: 'windows', needsSetup: true, availableQueues: scored.map(q => ({ name: q.Name, port: q.PortName, driver: q.DriverName })), error: 'No receipt printer auto-detected. Select your printer below.' }
     return null
-  }
-
-  function ensurePrinterQueue () {
-    if (!isWin || !hwPrinter) return
-    if (hwPrinterReady && Date.now() - hwPrinterCheckTime < 15000) return
-    if (!hwPrinter.name) { hwPrinterCheckTime = Date.now(); return }
-    // Always clear stuck jobs and resume the queue before checking
-    clearPrinterQueue(hwPrinter.name)
-    hwPrinterReady = true
-    hwPrinterCheckTime = Date.now()
   }
 
   // ── Send raw bytes to printer (multi-backend) ─────────────────────────────
@@ -2731,37 +2590,12 @@ if ($check) { Write-Output "CREATED:$genName" } else { Write-Output "FAIL" }`
     const tmpFile = path.join(os.tmpdir(), `crisp-receipt-${Date.now()}.bin`)
     fs.writeFileSync(tmpFile, data)
     // Resume queue via WMI (clears Error state without admin) + clear stuck jobs
-    try {
-      hwExec(`powershell -NoProfile -NonInteractive -Command "$p = Get-WmiObject Win32_Printer -Filter \\"Name='${printerName.replace(/'/g, "''").replace(/\\/g, '\\\\')}'\\" -ErrorAction SilentlyContinue; if ($p) { $p.CancelAllJobs() | Out-Null; $p.Resume() | Out-Null }"`, { timeout: 3000, encoding: 'utf-8' })
-    } catch (_) {}
+    resumePrinterQueue(printerName)
     appLog('info', 'printer', `Sending ${data.length} bytes to "${printerName}" via spooler`)
     try {
       const result = hwExec(`powershell -ExecutionPolicy Bypass -NoProfile -NonInteractive -File "${RAWPRINT_SCRIPT}" -PrinterName "${printerName.replace(/"/g, '`"')}" -FilePath "${tmpFile}"`, { timeout: 10000, encoding: 'utf-8' }).trim()
       appLog('info', 'printer', `Spooler result: ${result}`)
-      if (result.startsWith('OK')) {
-        // Check if job actually went through or got stuck
-        try {
-          const post = getQueueStatus(printerName)
-          if (post && post.JobCount > 0) {
-            appLog('warn', 'printer', `${post.JobCount} jobs stuck after send (status ${post.PrinterStatus}). Repairing and retrying...`)
-            const repaired = repairPrinterQueue()
-            if (repaired) {
-              hwPrinter.name = repaired
-              dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('hw_printer_name', ?1)", [repaired])
-              scheduleSave()
-              // Retry once on repaired queue
-              const tmpFile2 = path.join(os.tmpdir(), `crisp-retry-${Date.now()}.bin`)
-              fs.writeFileSync(tmpFile2, data)
-              try {
-                const retry = hwExec(`powershell -ExecutionPolicy Bypass -NoProfile -NonInteractive -File "${RAWPRINT_SCRIPT}" -PrinterName "${repaired.replace(/"/g, '`"')}" -FilePath "${tmpFile2}"`, { timeout: 10000, encoding: 'utf-8' }).trim()
-                if (retry.startsWith('OK')) return { ok: true, detail: `${retry} (after repair)` }
-              } catch (_) {} finally { try { fs.unlinkSync(tmpFile2) } catch (_) {} }
-            }
-            return { ok: false, detail: 'Jobs stuck in queue — printer may be offline' }
-          }
-        } catch (_) {}
-        return { ok: true, detail: result }
-      }
+      if (result.startsWith('OK')) return { ok: true, detail: result }
       return { ok: false, detail: result }
     } catch (e) {
       appLog('error', 'printer', `Spooler error: ${e.stderr || e.message}`)
@@ -3412,6 +3246,8 @@ if ($check) { Write-Output "CREATED:$genName" } else { Write-Output "FAIL" }`
     if (hwPrinter) appLog('info', 'hardware', `Printer: ${hwPrinter.name} (${hwPrinter.interface})`)
     if (hwScale) appLog('info', 'hardware', `Scale: ${hwScale.vendor || hwScale.product}`)
     startScalePolling()
+    // Clean up duplicate printer queues and any queues we previously created (background, non-critical)
+    try { cleanupDuplicateQueues() } catch (_) {}
   }).catch(e => appLog('error', 'hardware', 'Auto-probe failed', e.message))
 
   // Auto-reprobe every 30s — also checks printer queue health
@@ -3684,7 +3520,7 @@ if ($check) { Write-Output "CREATED:$genName" } else { Write-Output "FAIL" }`
   ipcMain.handle('hardware:printReceipt', async (_e, receiptData) => {
     try {
       if (!hwPrinter) await probeHardware()
-      ensurePrinterQueue()
+      if (hwPrinter?.name) resumePrinterQueue(hwPrinter.name)
       const buf = buildReceiptBuffer(receiptData)
       const result = await sendToPrinter(buf)
       if (!result.ok) return { error: result.detail }
@@ -3698,7 +3534,7 @@ if ($check) { Write-Output "CREATED:$genName" } else { Write-Output "FAIL" }`
   ipcMain.handle('hardware:openDrawer', async () => {
     try {
       if (!hwPrinter) await probeHardware()
-      ensurePrinterQueue()
+      if (hwPrinter?.name) resumePrinterQueue(hwPrinter.name)
       appLog('info', 'drawer', `Opening drawer via "${hwPrinter?.name}" (${hwPrinter?.interface})`)
       const buf = Buffer.concat([ESCPOS.INIT, ESCPOS.DRAWER_KICK])
       const result = await sendToPrinter(buf)
