@@ -2812,10 +2812,12 @@ function setupIPC() {
     //   S -                  (underload)
     //   S I                  (command not executable — e.g. scale in motion for too long)
     //   SI responses have same format but with SI prefix
-    const m = response.match(/^S[I]?\s+([SDLI+\-])\s+([\d.\-]+)\s*(mg|g|kg|ct|oz|lb|t)?/i)
+    const m = response.match(/^S[I]?\s+([SDLI+\-])\s+(-?[\d.]+)\s*(mg|g|kg|ct|oz|lb|t)?/i)
     if (!m) return null
     const statusChar = m[1].toUpperCase()
     const weight = parseFloat(m[2])
+    appLog('info', 'hardware', `SICS parsed: status=${statusChar} weight=${weight} unit=${m[3] || 'kg'} raw="${response.trim()}"`)
+
     const unit = (m[3] || 'kg').toLowerCase()
     const stable = statusChar === 'S'
     const inMotion = statusChar === 'D'
