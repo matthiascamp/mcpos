@@ -67,6 +67,13 @@ contextBridge.exposeInMainWorld('pos', {
   voidRefundCount:    (date)  => ipcRenderer.invoke('db:reports:voidRefundCount', date),
   zReport:            (date)  => ipcRenderer.invoke('db:reports:zReport', date),
 
+  // Insights
+  getSalesHeatmap:    (days)          => ipcRenderer.invoke('db:insights:salesHeatmap', { days }),
+  getDemandForecast:  ()              => ipcRenderer.invoke('db:insights:demandForecast'),
+  getBoughtTogether:  ()              => ipcRenderer.invoke('db:insights:boughtTogether'),
+  getXeroExport:      (dateFrom, dateTo) => ipcRenderer.invoke('db:insights:xeroExport', { dateFrom, dateTo }),
+  getSalesTrend:      (days)          => ipcRenderer.invoke('db:insights:salesTrend', { days }),
+
   // Keyboard Layout
   getKeyboardButtons: ()      => ipcRenderer.invoke('db:keyboard:getAll'),
   getButtonsByPage:   (page)  => ipcRenderer.invoke('db:keyboard:getByPage', page),
@@ -115,6 +122,9 @@ contextBridge.exposeInMainWorld('pos', {
   openDrawer:         ()      => ipcRenderer.invoke('hardware:openDrawer'),
   probeDevices:       ()      => ipcRenderer.invoke('hardware:probe'),
   readScale:          ()      => ipcRenderer.invoke('hardware:readScale'),
+  zeroScale:          ()      => ipcRenderer.invoke('hardware:zeroScale'),
+  testScale:          (port, baud, protocol) => ipcRenderer.invoke('hardware:testScale', port, baud, protocol),
+  getSerialPorts:     ()      => ipcRenderer.invoke('hardware:getSerialPorts'),
   testPrinter:        ()      => ipcRenderer.invoke('hardware:testPrinter'),
   testQueue:          (name)  => ipcRenderer.invoke('hardware:testQueue', name),
   getQueues:          ()      => ipcRenderer.invoke('hardware:getQueues'),

@@ -7,10 +7,28 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
 <style>
+:root{
+  --radius-sm:8px;--radius-md:12px;--radius-lg:16px;
+  --shadow-sm:0 2px 4px rgba(0,0,0,.08);--shadow-md:0 4px 12px rgba(0,0,0,.15);--shadow-lg:0 8px 24px rgba(0,0,0,.25);
+  --shadow-btn:0 4px 8px rgba(0,0,0,.3),0 1px 3px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.07);
+  --green:#10b981;--green-dark:#059669;--red:#ef4444;--amber:#f59e0b;--blue:#5b8def;
+  --ease-out:cubic-bezier(.2,0,0,1);--ease-bounce:cubic-bezier(.34,1.56,.64,1);
+}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;touch-action:manipulation}
 body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;display:flex;flex-direction:column;user-select:none;font-size:clamp(11px,1.2vw,14px);-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:rgba(0,0,0,.06)}
 ::-webkit-scrollbar{width:0px;display:none}*{scrollbar-width:none}
+
+/* ═══ Animations ════════════════════════════════════════════════════ */
+@keyframes slideInRight{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes countUp{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+@keyframes ripple{to{transform:scale(2.5);opacity:0}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.cart-item{animation:slideInRight .25s var(--ease-out) both}
+.total-amount{transition:all .3s var(--ease-out)}
+.modal-overlay.show .modal{animation:countUp .2s var(--ease-out) both}
 
 /* ═══ Status Bar ═══════════════════════════════════════════════════ */
 .status-bar{height:clamp(36px,5vh,48px);background:linear-gradient(180deg,#22252f 0%,#1a1d27 100%);display:flex;align-items:center;padding:0 clamp(6px,1vw,12px);gap:clamp(4px,0.8vw,10px);flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.04);box-shadow:0 2px 8px rgba(0,0,0,.2)}
@@ -149,6 +167,18 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .nav-green{background:linear-gradient(135deg,#10b981 0%,#059669 40%,#047857 100%);color:#fff;flex:2.5;border-color:rgba(16,185,129,.4);box-shadow:0 4px 14px rgba(5,150,105,.25),inset 0 1px 0 rgba(255,255,255,.2);text-shadow:0 1px 2px rgba(0,0,0,.2)}
 .nav-red{background:linear-gradient(135deg,#f87171 0%,#ef4444 40%,#dc2626 100%);color:#fff;font-size:14px;font-weight:800;flex:2;border-color:rgba(248,113,113,.4);box-shadow:0 4px 14px rgba(239,68,68,.3),inset 0 1px 0 rgba(255,255,255,.2);text-shadow:0 1px 2px rgba(0,0,0,.2)}
 .nav-spacer{width:10px;flex-shrink:0}
+
+/* ═══ Floating Pay Button ═══════════════════════════════════════ */
+.floating-pay{position:fixed;bottom:80px;right:24px;z-index:90;width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--green-dark));color:#fff;border:none;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 6px 20px rgba(5,150,105,.4),0 2px 8px rgba(0,0,0,.3);transition:all .3s var(--ease-bounce);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;opacity:0;pointer-events:none;transform:scale(.5)}
+.floating-pay.visible{opacity:1;pointer-events:auto;transform:scale(1);animation:pulse 2.5s ease-in-out infinite}
+.floating-pay:active{transform:scale(.9)!important;box-shadow:0 2px 8px rgba(5,150,105,.3)}
+.floating-pay .fp-icon{font-size:22px;line-height:1}
+.floating-pay .fp-amount{font-size:11px;font-weight:700;letter-spacing:-.3px}
+
+/* ═══ Cart Item Images + Category Colors ═══════════════════════ */
+.cart-item-img{width:36px;height:36px;border-radius:var(--radius-sm);object-fit:cover;flex-shrink:0;box-shadow:var(--shadow-sm)}
+.cart-item-img-placeholder{width:36px;height:36px;border-radius:var(--radius-sm);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;opacity:.7}
+.cart-item{border-left:3px solid transparent}
 
 /* ═══ Footer ═════════════════════════════════════════════════════ */
 .pos-footer{height:clamp(18px,2.5vh,24px);background:#0d0f14;color:#4a5068;display:flex;align-items:center;padding:0 clamp(6px,1vw,12px);gap:clamp(6px,1vw,14px);font-size:clamp(8px,0.9vw,10px);flex-shrink:0}
@@ -396,6 +426,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
   </div>
 </div>
 
+<button class="floating-pay" id="floatingPay" title="Pay Now"><span class="fp-icon">$</span><span class="fp-amount" id="fpAmount">$0.00</span></button>
 <div class="qty-badge" id="qtyBadge"></div>
 <div class="mode-banner return-mode" id="returnBanner">RETURN MODE — Items will be refunded</div>
 <div class="mode-banner supervisor-mode" id="supervisorBanner">SUPERVISOR MODE</div>
@@ -453,54 +484,70 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 </div>
 
 <!-- ═══ Payment Options Modal ══════════════════════════════════════ -->
-<div class="modal-overlay" id="paymentModal"><div class="modal" style="width:420px;padding:24px">
-  <h2 style="margin-bottom:6px;font-size:18px">Payment</h2>
-  <div style="text-align:center;margin-bottom:20px">
-    <div style="font-size:13px;color:#888">Total Due</div>
-    <div style="font-size:42px;font-weight:800;color:#059669;letter-spacing:-1px" id="paymentTotal">$0.00</div>
-  </div>
-  <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
-    <button id="payOptCash" style="padding:16px;border-radius:12px;border:2px solid #e2e4e8;background:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:12px;transition:all .1s">
-      <span style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff">$</span>
-      <span>Cash</span>
-    </button>
-    <button id="payOptCard" style="padding:16px;border-radius:12px;border:2px solid #e2e4e8;background:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:12px;transition:all .1s">
-      <span style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#3b82f6,#2563eb);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff">⬡</span>
-      <span>Card / EFTPOS</span>
-    </button>
-    <button id="payOptSplit" style="padding:16px;border-radius:12px;border:2px solid #e2e4e8;background:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:12px;transition:all .1s">
-      <span style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#8b5cf6,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff">½</span>
-      <span>Split Payment</span>
-    </button>
-    <button id="payOptAccount" style="padding:16px;border-radius:12px;border:2px solid #e2e4e8;background:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:12px;transition:all .1s">
-      <span style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#f59e0b,#d97706);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff">⊞</span>
-      <span>Account</span>
-    </button>
-  </div>
-  <div class="modal-actions"><button class="modal-cancel" id="paymentCancel">Cancel</button></div>
-</div></div>
+<div class="modal-overlay" id="paymentModal" style="display:none"></div>
 
-<!-- ═══ Cash Modal ═════════════════════════════════════════════════ -->
-<div class="modal-overlay" id="cashModal"><div class="modal" style="width:440px">
-  <h2 id="cashModalTitle">Cash Payment</h2>
-  <div class="modal-total" id="cashModalTotal">$0.00</div>
-  <div id="splitPayments" style="margin-bottom:10px"></div>
-  <div id="splitRemaining" style="text-align:center;font-size:13px;color:#888;margin-bottom:8px"></div>
-  <div class="tendered-row"><label>Tendered</label><input type="text" id="cashTendered" inputmode="none" readonly placeholder="Tap amount below"></div>
-  <div class="quick-cash" id="quickCash"><button data-amt="exact">Exact</button><button data-amt="5">$5</button><button data-amt="10">$10</button><button data-amt="20">$20</button><button data-amt="50">$50</button><button data-amt="100">$100</button></div>
-  <div class="cash-numpad" id="cashNumpad">
-    <button data-cv="7">7</button><button data-cv="8">8</button><button data-cv="9">9</button><button data-cv="C" class="cash-np-clear">C</button>
-    <button data-cv="4">4</button><button data-cv="5">5</button><button data-cv="6">6</button><button data-cv="00">00</button>
-    <button data-cv="1">1</button><button data-cv="2">2</button><button data-cv="3">3</button><button data-cv="0">0</button>
-    <button data-cv=".">.</button><button data-cv="back" style="font-size:14px">&larr;</button><button data-cv="OK" class="cash-np-enter" style="grid-column:span 2">ENTER</button>
+<!-- ═══ Unified Payment Modal ═════════════════════════════════════ -->
+<div class="modal-overlay" id="cashModal"><div class="modal" style="width:520px;padding:0;overflow:hidden">
+  <!-- Header with total -->
+  <div id="payHeader" style="background:linear-gradient(135deg,#059669,#047857);padding:20px 24px;text-align:center">
+    <div style="font-size:13px;color:rgba(255,255,255,.7);font-weight:600;text-transform:uppercase;letter-spacing:1px" id="cashModalTitle">Total Due</div>
+    <div style="font-size:48px;font-weight:800;color:#fff;letter-spacing:-1px;margin-top:2px" id="cashModalTotal">$0.00</div>
+    <div id="cashRoundingLine" style="display:none;font-size:11px;color:rgba(255,255,255,.6);margin-top:4px"></div>
   </div>
-  <div class="change-display" id="changeDisplay"></div>
-  <div id="changeBreakdown" style="display:none;text-align:center;margin-bottom:10px;font-size:11px;color:#666"></div>
-  <div class="modal-actions">
-    <button class="modal-cancel" id="cashCancel">Cancel</button>
-    <button class="modal-confirm" style="background:#3b82f6" id="splitCardBtn">Split: Card</button>
-    <button class="modal-confirm" id="cashConfirm" disabled>Complete Sale</button>
+
+  <div style="padding:20px 24px">
+    <!-- Split payments display -->
+    <div id="splitPayments" style="margin-bottom:10px"></div>
+    <div id="splitRemaining" style="text-align:center;font-size:13px;color:#888;margin-bottom:8px"></div>
+
+    <!-- Quick payment buttons — top row: Card & Exact -->
+    <div style="display:flex;gap:10px;margin-bottom:10px">
+      <button id="payOptCard" style="flex:1;padding:18px;border-radius:12px;border:none;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;font-size:18px;font-weight:800;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:10px">
+        <span style="font-size:22px">&#x2B21;</span> Card / EFTPOS
+      </button>
+      <button data-amt="exact" id="payExact" style="flex:1;padding:18px;border-radius:12px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-size:18px;font-weight:800;cursor:pointer;font-family:inherit;transition:all .15s">
+        Exact Cash
+      </button>
+    </div>
+
+    <!-- Quick cash denominations -->
+    <div class="quick-cash" id="quickCash" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px">
+      <button data-amt="5" style="padding:14px 0;border-radius:10px;border:2px solid #e2e4e8;background:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit">$5</button>
+      <button data-amt="10" style="padding:14px 0;border-radius:10px;border:2px solid #e2e4e8;background:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit">$10</button>
+      <button data-amt="20" style="padding:14px 0;border-radius:10px;border:2px solid #e2e4e8;background:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit">$20</button>
+      <button data-amt="50" style="padding:14px 0;border-radius:10px;border:2px solid #e2e4e8;background:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit">$50</button>
+      <button data-amt="100" style="padding:14px 0;border-radius:10px;border:2px solid #e2e4e8;background:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit">$100</button>
+    </div>
+
+    <!-- Custom amount (collapsed by default) -->
+    <details id="customAmountSection" style="margin-bottom:10px">
+      <summary style="cursor:pointer;font-size:13px;color:#888;text-align:center;padding:4px;user-select:none">Custom amount or split payment</summary>
+      <div style="margin-top:10px">
+        <div class="tendered-row"><label>Cash Tendered</label><input type="text" id="cashTendered" inputmode="none" readonly placeholder="Tap below"></div>
+        <div class="cash-numpad" id="cashNumpad">
+          <button data-cv="7">7</button><button data-cv="8">8</button><button data-cv="9">9</button><button data-cv="C" class="cash-np-clear">C</button>
+          <button data-cv="4">4</button><button data-cv="5">5</button><button data-cv="6">6</button><button data-cv="00">00</button>
+          <button data-cv="1">1</button><button data-cv="2">2</button><button data-cv="3">3</button><button data-cv="0">0</button>
+          <button data-cv=".">.</button><button data-cv="back" style="font-size:14px">&larr;</button><button data-cv="OK" class="cash-np-enter" style="grid-column:span 2">PAY CASH</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="modal-confirm" style="background:#3b82f6;flex:1;padding:10px" id="splitCardBtn">Split: Card Portion</button>
+          <button class="modal-confirm" style="background:#f59e0b;color:#000;flex:1;padding:10px" id="payOptAccount">Account</button>
+        </div>
+      </div>
+    </details>
+
+    <!-- Change display -->
+    <div class="change-display" id="changeDisplay"></div>
+    <div id="changeBreakdown" style="display:none;text-align:center;margin-bottom:10px;font-size:11px;color:#666"></div>
+
+    <!-- Cancel -->
+    <div style="text-align:center;margin-top:6px">
+      <button id="cashCancel" style="padding:10px 32px;border-radius:10px;border:1px solid #ddd;background:#fff;font-size:14px;cursor:pointer;font-family:inherit;color:#666">Cancel</button>
+    </div>
   </div>
+  <!-- Hidden confirm button for programmatic use -->
+  <button id="cashConfirm" style="display:none"></button>
 </div></div>
 
 <!-- ═══ Open Price Modal ═══════════════════════════════════════════ -->
@@ -1902,7 +1949,12 @@ function renderCart () {
   c.innerHTML = cart.items.map((item, i) => {
     const qStr = item.unit === 'each' ? Math.abs(item.qty) : Math.abs(item.qty).toFixed(2) + item.unit
     const isReturn = item.qty < 0
-    return `<div class="cart-item" style="${isReturn ? 'background:#fff0f0' : ''}">` +
+    const borderColor = item.category_color || 'transparent'
+    const imgHtml = item.image_url
+      ? `<img class="cart-item-img" src="${esc(item.image_url)}" alt="">`
+      : `<div class="cart-item-img-placeholder" style="background:${borderColor}"><span>${esc(item.name.charAt(0))}</span></div>`
+    return `<div class="cart-item" style="border-left-color:${borderColor};${isReturn ? 'background:#fff0f0' : ''}">` +
+      imgHtml +
       `<div class="cart-item-info"><div class="cart-item-name">${isReturn ? '<span style="color:#c44">[RET]</span> ' : ''}${esc(item.name)}</div>` +
       `<div class="cart-item-meta">${Math.abs(item.qty) !== 1 || item.unit !== 'each' ? `<span>${qStr} × ${money(item.unit_price)}</span>` : `<span>${money(item.unit_price)}</span>`}` +
       `${item.is_special ? '<span class="meta-special">SPECIAL</span>' : ''}` +
@@ -1946,6 +1998,10 @@ function updateTotals () {
   if ($('#btnCard')) $('#btnCard').disabled = cart.isEmpty
   $('#topTotal').textContent = money(cart.total)
   $('#sectionPrice').textContent = money(cart.total)
+  // Floating pay button
+  const fp = $('#floatingPay')
+  if (!cart.isEmpty) { fp.classList.add('visible'); $('#fpAmount').textContent = money(cart.total) }
+  else fp.classList.remove('visible')
 }
 
 $('#cartClear').addEventListener('click', () => {
@@ -2551,12 +2607,21 @@ $('#returnLookupConfirm').addEventListener('click', async () => {
 
 $('#returnLookupCancel').addEventListener('click', () => { $('#returnLookupModal').classList.remove('show'); refocus() })
 
+// ═══ Australian Cash Rounding (nearest 5c) ════════════════════════
+function cashRound (amount) {
+  return +(Math.round(amount * 20) / 20).toFixed(2)
+}
+
 // ═══ Cash Payment (with split payment support) ═══════════════════
 let pendingPayments = []
 
 function getRemaining () {
   const paid = pendingPayments.reduce((s, p) => s + p.amount, 0)
   return +(Math.abs(cart.total) - paid).toFixed(2)
+}
+
+function getRemainingCashRounded () {
+  return cashRound(getRemaining())
 }
 
 function renderSplitPayments () {
@@ -2585,14 +2650,10 @@ async function buildReceiptData (txn, r) {
 
 function showPaymentModal () {
   if (cart.isEmpty) return
-  $('#paymentTotal').textContent = money(cart.total)
-  $('#paymentModal').classList.add('show')
+  showCashModal()
 }
-$('#paymentCancel').addEventListener('click', () => { $('#paymentModal').classList.remove('show'); refocus() })
-$('#payOptCash').addEventListener('click', () => { $('#paymentModal').classList.remove('show'); showCashModal() })
-$('#payOptCard').addEventListener('click', () => { $('#paymentModal').classList.remove('show'); completeCardPayment() })
-$('#payOptSplit').addEventListener('click', () => { $('#paymentModal').classList.remove('show'); showCashModal() }) // split handled inside cash modal
-$('#payOptAccount').addEventListener('click', () => { $('#paymentModal').classList.remove('show'); completeAccountPayment() })
+$('#payOptCard').addEventListener('click', () => { $('#cashModal').classList.remove('show'); completeCardPayment() })
+$('#payOptAccount').addEventListener('click', () => { $('#cashModal').classList.remove('show'); completeAccountPayment() })
 
 async function completeCardPayment () {
   if (cart.isEmpty) return
@@ -2721,15 +2782,28 @@ function showCashModal () {
   pendingPayments = []
   const total = cart.total
   const isRefund = total < 0
-  $('#cashModalTitle').textContent = isRefund ? 'Refund' : 'Payment'
-  $('#cashModalTotal').textContent = isRefund ? `REFUND ${money(Math.abs(total))}` : money(Math.abs(total))
+  const rounded = cashRound(Math.abs(total))
+  const rounding = +(rounded - Math.abs(total)).toFixed(2)
+  $('#cashModalTitle').textContent = isRefund ? 'REFUND' : 'TOTAL DUE'
+  $('#cashModalTotal').textContent = isRefund ? `-${money(rounded)}` : money(rounded)
+  $('#payHeader').style.background = isRefund ? 'linear-gradient(135deg,#dc2626,#b91c1c)' : 'linear-gradient(135deg,#059669,#047857)'
+  // Show rounding line if applicable
+  const roundEl = $('#cashRoundingLine')
+  if (roundEl) {
+    if (rounding !== 0) { roundEl.style.display = ''; roundEl.textContent = `Cash rounding: ${rounding > 0 ? '+' : ''}${money(rounding)}` }
+    else roundEl.style.display = 'none'
+  }
   cashNumBuf = ''; $('#cashTendered').value = ''; $('#changeDisplay').textContent = ''; $('#changeBreakdown').style.display = 'none'; $('#cashConfirm').disabled = true
-  $('#splitCardBtn').style.display = isRefund ? 'none' : 'inline-block'
+  $('#splitCardBtn').style.display = isRefund ? 'none' : ''
+  $('#payOptAccount').style.display = isRefund ? 'none' : ''
+  // Collapse custom amount section
+  $('#customAmountSection').removeAttribute('open')
   renderSplitPayments()
-  $('#cashModal').classList.add('show'); setTimeout(() => $('#cashTendered').focus(), 100)
+  $('#cashModal').classList.add('show')
 }
 
 if ($('#btnPay')) $('#btnPay').addEventListener('click', showCashModal)
+$('#floatingPay').addEventListener('click', showCashModal)
 
 $('#splitPayments').addEventListener('click', e => {
   const rm = e.target.closest('[data-split-remove]')
@@ -2807,11 +2881,12 @@ function changeBreakdown (amount) {
 
 $('#cashTendered').addEventListener('input', () => {
   const t = parseFloat($('#cashTendered').value) || 0
-  const remaining = getRemaining()
+  const remaining = getRemainingCashRounded()
   const d = $('#changeDisplay')
   if (cart.total < 0) {
-    d.textContent = `Give back: ${money(Math.abs(cart.total))}`; d.className = 'change-display short'
-    changeBreakdown(Math.abs(cart.total))
+    const refundAmt = cashRound(Math.abs(cart.total))
+    d.textContent = `Give back: ${money(refundAmt)}`; d.className = 'change-display short'
+    changeBreakdown(refundAmt)
     $('#cashConfirm').disabled = false
   } else if (remaining <= 0) {
     d.textContent = 'Paid in full'; d.className = 'change-display positive'
@@ -2827,24 +2902,41 @@ $('#cashTendered').addEventListener('input', () => {
 })
 
 $('#quickCash').addEventListener('click', e => {
-  const b = e.target.closest('button'); if (!b) return
-  const remaining = getRemaining()
-  cashNumBuf = b.dataset.amt === 'exact' ? remaining.toFixed(2) : b.dataset.amt
+  const b = e.target.closest('button'); if (!b || !b.dataset.amt) return
+  const remaining = getRemainingCashRounded()
+  const amt = parseFloat(b.dataset.amt)
+  if (amt >= remaining) {
+    cashNumBuf = b.dataset.amt
+    $('#cashTendered').value = cashNumBuf
+    $('#cashTendered').dispatchEvent(new Event('input'))
+    $('#cashConfirm').click()
+  } else {
+    cashNumBuf = b.dataset.amt
+    $('#cashTendered').value = cashNumBuf
+    $('#cashTendered').dispatchEvent(new Event('input'))
+    $('#customAmountSection').setAttribute('open', '')
+  }
+})
+
+$('#payExact').addEventListener('click', () => {
+  const remaining = getRemainingCashRounded()
+  cashNumBuf = remaining.toFixed(2)
   $('#cashTendered').value = cashNumBuf
   $('#cashTendered').dispatchEvent(new Event('input'))
+  $('#cashConfirm').click()
 })
 
 $('#cashConfirm').addEventListener('click', async () => {
   if (payProcessing) return; payProcessing = true
   try {
     const remaining = getRemaining()
+    const roundedRemaining = getRemainingCashRounded()
     const tendered = parseFloat($('#cashTendered').value) || 0
-    const cashAmount = Math.min(tendered, remaining > 0 ? remaining : 0)
-    const ch = remaining > 0 ? Math.max(0, tendered - remaining) : 0
+    const ch = roundedRemaining > 0 ? Math.max(0, tendered - roundedRemaining) : 0
 
-    // Build final payments list
+    // Build final payments list — cash uses rounded amount
     const payments = [...pendingPayments]
-    if (cashAmount > 0 || !payments.length) {
+    if (remaining > 0 || !payments.length) {
       payments.push({ method: 'cash', amount: remaining > 0 ? remaining : Math.abs(cart.total) })
     }
 
@@ -2911,7 +3003,10 @@ $('#cashNumpad').addEventListener('click', e => {
   const input = $('#cashTendered')
   if (v === 'C') { cashNumBuf = ''; input.value = '' }
   else if (v === 'back') { cashNumBuf = cashNumBuf.slice(0, -1); input.value = cashNumBuf }
-  else if (v === 'OK') { /* just trigger recalc */ }
+  else if (v === 'OK') {
+    const tendered = parseFloat(cashNumBuf) || 0
+    if (tendered >= getRemainingCashRounded()) { input.dispatchEvent(new Event('input')); $('#cashConfirm').click(); return }
+  }
   else if (v === '.') { if (!cashNumBuf.includes('.')) { cashNumBuf += '.'; input.value = cashNumBuf } }
   else if (v === '00') {
     if (!cashNumBuf.includes('.')) { cashNumBuf += '.00'; input.value = cashNumBuf }

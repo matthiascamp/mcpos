@@ -604,6 +604,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M15 2v2M9 2v2M15 20v2M9 20v2M2 15h2M2 9h2M20 15h2M20 9h2"/></svg>
         Hardware
       </a>
+      <a href="#" data-tab="insights">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        Insights
+      </a>
       <a href="#" data-tab="audit">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         Audit Log
@@ -1579,9 +1583,44 @@
             <div id="dotScale" style="width:12px;height:12px;border-radius:50%;background:#555;flex-shrink:0"></div>
             <div class="stat-label" style="margin:0;font-size:15px;font-weight:600;color:var(--text)">Scale</div>
             <button class="btn btn-outline" id="readScaleBtn" style="margin-left:auto;font-size:10px;padding:3px 8px;display:none">Read Weight</button>
+            <button class="btn btn-outline" id="zeroScaleBtn" style="font-size:10px;padding:3px 8px;display:none">Zero/Tare</button>
           </div>
           <div style="font-size:13px;color:var(--text-dim)" id="scaleInfo">Not probed yet</div>
           <div id="scaleReading" style="font-size:20px;font-weight:700;color:var(--green);margin-top:6px;display:none"></div>
+        </div>
+      </div>
+
+      <!-- Scale Configuration (serial RS-232) -->
+      <div class="section" id="scaleConfigSection" style="margin-top:20px">
+        <h2 style="margin-bottom:12px">Scale Configuration (Serial / RS-232)</h2>
+        <p style="font-size:12px;color:var(--text-dim);margin-bottom:12px">For scales connected via serial port (DE-9 / DB-9 connector). Supports Mettler Toledo SICS protocol.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
+          <div class="form-field" style="flex:1;min-width:140px"><label>COM Port</label>
+            <select id="hwScalePort" style="width:100%;padding:8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text)">
+              <option value="">Select port...</option>
+            </select>
+          </div>
+          <div class="form-field" style="min-width:100px"><label>Baud Rate</label>
+            <select id="hwScaleBaud" style="width:100%;padding:8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text)">
+              <option value="2400">2400</option>
+              <option value="4800">4800</option>
+              <option value="9600" selected>9600</option>
+              <option value="19200">19200</option>
+              <option value="38400">38400</option>
+            </select>
+          </div>
+          <div class="form-field" style="min-width:120px"><label>Protocol</label>
+            <select id="hwScaleProtocol" style="width:100%;padding:8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text)">
+              <option value="sics">Mettler Toledo SICS</option>
+            </select>
+          </div>
+          <button class="btn btn-outline" id="hwScaleTestBtn" style="padding:8px 16px;white-space:nowrap">Test Connection</button>
+          <button class="btn btn-blue" id="hwScaleSaveBtn" style="padding:8px 16px;white-space:nowrap">Save Scale Config</button>
+        </div>
+        <div id="scaleTestResult" style="font-size:13px;min-height:20px;margin-top:8px"></div>
+        <div style="margin-top:8px">
+          <button class="btn btn-outline" id="hwScaleRefreshPorts" style="font-size:11px;padding:4px 10px">Refresh COM Ports</button>
+          <span id="serialPortCount" style="font-size:11px;color:var(--text-dim);margin-left:8px"></span>
         </div>
       </div>
 
@@ -1750,6 +1789,74 @@
       </div>
     </div>
 
+    <!-- ── Insights ─────────────────────────────────────────────── -->
+    <div class="tab-content" id="tab-insights">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+        <h1 style="margin:0">Insights</h1>
+        <span style="color:var(--text-dim);font-size:13px">Sales intelligence & analytics</span>
+      </div>
+
+      <!-- Sales Trend Sparkline -->
+      <div class="section" style="padding:16px;margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <h2 style="margin:0">Sales Trend (30 Days)</h2>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span id="insightTrendTotal" style="font-size:18px;font-weight:700;color:var(--green)"></span>
+            <span id="insightTrendAvg" style="font-size:12px;color:var(--text-dim)"></span>
+          </div>
+        </div>
+        <div id="insightTrendChart" style="height:120px;display:flex;align-items:flex-end;gap:2px"></div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-dim);margin-top:4px">
+          <span id="insightTrendStart"></span><span id="insightTrendEnd"></span>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <!-- Sales Heatmap -->
+        <div class="section" style="padding:16px">
+          <h2 style="margin-bottom:12px">Sales Heatmap</h2>
+          <p style="color:var(--text-dim);font-size:11px;margin-bottom:10px">Transaction volume by day & hour (last 30 days)</p>
+          <div id="insightHeatmap" style="overflow-x:auto"></div>
+        </div>
+
+        <!-- Demand Forecast -->
+        <div class="section" style="padding:16px">
+          <h2 style="margin-bottom:12px">Demand Forecast</h2>
+          <p style="color:var(--text-dim);font-size:11px;margin-bottom:10px">4-week moving average by day of week</p>
+          <div id="insightForecast"></div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <!-- Bought Together -->
+        <div class="section" style="padding:16px">
+          <h2 style="margin-bottom:12px">Frequently Bought Together</h2>
+          <p style="color:var(--text-dim);font-size:11px;margin-bottom:10px">Product pairs that appear in the same transaction</p>
+          <div id="insightPairs" style="max-height:320px;overflow-y:auto"></div>
+        </div>
+
+        <!-- Export -->
+        <div class="section" style="padding:16px">
+          <h2 style="margin-bottom:12px">Accounting Export</h2>
+          <p style="color:var(--text-dim);font-size:11px;margin-bottom:10px">Export daily sales data for Xero / MYOB</p>
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
+            <div class="form-field" style="margin:0"><label style="font-size:11px">From</label><input type="date" id="xeroFrom" style="padding:6px 10px;font-size:13px"></div>
+            <div class="form-field" style="margin:0"><label style="font-size:11px">To</label><input type="date" id="xeroTo" style="padding:6px 10px;font-size:13px"></div>
+            <button class="btn btn-blue" id="xeroExportBtn" style="margin-top:16px;white-space:nowrap">Download CSV</button>
+          </div>
+          <div id="xeroPreview" style="font-size:11px;font-family:monospace;color:var(--text-dim);max-height:200px;overflow-y:auto;white-space:pre;background:var(--surface2);border-radius:var(--radius);padding:8px;display:none"></div>
+
+          <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+            <h3 style="margin-bottom:8px;font-size:14px">Instagram Showcase</h3>
+            <p style="color:var(--text-dim);font-size:11px;margin-bottom:10px">Connect your Instagram account to showcase products on the customer display and website.</p>
+            <div class="form-field" style="margin-bottom:8px"><label style="font-size:11px">Instagram Handle</label><input type="text" id="igHandle" placeholder="@crisponcreek" style="padding:6px 10px;font-size:13px"></div>
+            <button class="btn btn-outline" id="igSaveBtn">Save Instagram Settings</button>
+            <span id="igStatus" style="font-size:11px;color:var(--text-dim);margin-left:8px"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="tab-content" id="tab-settings">
       <h1>Settings</h1>
 
@@ -1911,6 +2018,7 @@
         if (a.dataset.tab === 'audit') loadAuditLog()
         if (a.dataset.tab === 'logs') loadLogsTab()
         if (a.dataset.tab === 'labels') initLabelsTab()
+        if (a.dataset.tab === 'insights') loadInsights()
         if (a.dataset.tab === 'settings') { loadSettings(); loadBackups() }
       })
     })
@@ -4712,7 +4820,7 @@
 
     // -- Hardware Probing ---------------------------------------------------
 
-    const TYPE_BADGES = { printer: 'badge-green', scale: 'badge-blue', scanner: 'badge-amber', unknown: '' }
+    const TYPE_BADGES = { printer: 'badge-green', scale: 'badge-blue', scanner: 'badge-amber', serial: 'badge-blue', unknown: '' }
 
     async function loadHardware () {
       const cfg = await window.pos.getHardwareConfig()
@@ -4721,7 +4829,38 @@
       if (cfg.printerPort) $('#hwPrinterPort').value = cfg.printerPort
       if (cfg.printerIp) $('#hwPrinterIp').value = cfg.printerIp
       if (cfg.printerNetworkPort) $('#hwPrinterNetPort').value = cfg.printerNetworkPort
+      if (cfg.scalePort) $('#hwScalePort').value = cfg.scalePort
+      if (cfg.scaleBaud) $('#hwScaleBaud').value = cfg.scaleBaud
+      if (cfg.scaleProtocol) $('#hwScaleProtocol').value = cfg.scaleProtocol
       togglePrinterFields()
+      refreshSerialPorts()
+    }
+
+    async function refreshSerialPorts () {
+      try {
+        const ports = await window.pos.getSerialPorts()
+        const sel = $('#hwScalePort')
+        const current = sel.value
+        sel.innerHTML = '<option value="">Select port...</option>'
+        for (const p of ports) {
+          const opt = document.createElement('option')
+          opt.value = p.path
+          opt.textContent = p.path + (p.manufacturer ? ` (${p.manufacturer})` : '')
+          sel.appendChild(opt)
+        }
+        if (current) sel.value = current
+        // If saved config port isn't in list, add it manually
+        if (current && !sel.value) {
+          const opt = document.createElement('option')
+          opt.value = current
+          opt.textContent = current + ' (saved)'
+          sel.appendChild(opt)
+          sel.value = current
+        }
+        $('#serialPortCount').textContent = `${ports.length} port(s) found`
+      } catch (e) {
+        $('#serialPortCount').textContent = 'Failed to enumerate ports'
+      }
     }
 
     function togglePrinterFields () {
@@ -4750,8 +4889,28 @@
         $('#usbDeviceTable').innerHTML = '<tr><td colspan="6" style="color:var(--text-dim)">No USB devices found</td></tr>'
       }
 
-      // HID status
-      $('#hidStatus').textContent = result.hidAvailable ? 'node-hid: available (scale weight reading enabled)' : 'node-hid: not installed (scale weight reading disabled)'
+      // HID/Serial status
+      const caps = []
+      if (result.hidAvailable) caps.push('node-hid: available')
+      else caps.push('node-hid: not available')
+      if (result.scale?.hasSerial) caps.push('serialport: available')
+      else caps.push('serialport: not available')
+      $('#hidStatus').textContent = caps.join(' | ')
+
+      // Populate serial ports in scale config dropdown
+      if (result.serialPorts?.length) {
+        const sel = $('#hwScalePort')
+        const current = sel.value
+        sel.innerHTML = '<option value="">Select port...</option>'
+        for (const p of result.serialPorts) {
+          const opt = document.createElement('option')
+          opt.value = p.path
+          opt.textContent = p.path + (p.manufacturer ? ` (${p.manufacturer})` : '')
+          sel.appendChild(opt)
+        }
+        if (current) sel.value = current
+        $('#serialPortCount').textContent = `${result.serialPorts.length} port(s) found`
+      }
 
       // Printer
       if (result.printer.found) {
@@ -4819,24 +4978,44 @@
 
       // Scale
       if (result.scale.found) {
-        $('#dotScale').style.background = 'var(--green)'
-        let scaleText = `<span style="color:var(--green)">Detected</span> — ${esc(result.scale.vendor)} ${esc(result.scale.name)}`
-        if (result.scale.noHID) scaleText += ` <span style="color:var(--amber)">(install node-hid for weight reading)</span>`
-        $('#scaleInfo').innerHTML = scaleText
-        if (result.scale.reading) {
-          $('#scaleReading').style.display = ''
-          $('#scaleReading').textContent = `${result.scale.reading.weight} ${result.scale.reading.unit}`
-        } else if (result.scale.testResult) {
-          $('#scaleReading').style.display = ''
-          $('#scaleReading').textContent = result.scale.testResult
-          $('#scaleReading').style.color = 'var(--amber)'
+        const isSerial = result.scale.type === 'serial'
+        const hasReading = !!result.scale.reading
+        $('#dotScale').style.background = hasReading ? 'var(--green)' : 'var(--amber)'
+        let scaleText = ''
+        if (hasReading) {
+          scaleText = `<span style="color:var(--green)">Connected</span> — ${esc(result.scale.vendor)} ${esc(result.scale.name)}`
+          if (isSerial) scaleText += ` <span style="font-size:11px;color:var(--text-dim)">(${result.scale.port}, ${result.scale.protocol.toUpperCase()})</span>`
+        } else {
+          scaleText = `<span style="color:var(--amber)">Detected</span> — ${esc(result.scale.vendor)} ${esc(result.scale.name)}`
+          if (isSerial && !result.scale.detected) scaleText += ` <span style="color:var(--amber)">(configure COM port below)</span>`
+          if (result.scale.noHID) scaleText += ` <span style="color:var(--amber)">(node-hid needed for USB scale)</span>`
         }
-        if (result.scale.path) $('#readScaleBtn').style.display = ''
+        if (result.scale.testResult && !hasReading) scaleText += `<br><span style="font-size:11px;color:var(--amber)">${esc(result.scale.testResult)}</span>`
+        $('#scaleInfo').innerHTML = scaleText
+        if (hasReading) {
+          $('#scaleReading').style.display = ''
+          $('#scaleReading').style.color = result.scale.reading.stable ? 'var(--green)' : 'var(--amber)'
+          $('#scaleReading').textContent = `${result.scale.reading.weight} ${result.scale.reading.unit} (${result.scale.reading.status})`
+        } else {
+          $('#scaleReading').style.display = 'none'
+        }
+        // Show read/zero buttons for connected scales
+        const canRead = hasReading || result.scale.path || (isSerial && result.scale.port)
+        $('#readScaleBtn').style.display = canRead ? '' : 'none'
+        $('#zeroScaleBtn').style.display = (canRead && isSerial) ? '' : 'none'
+        // Auto-fill scale config
+        if (isSerial && result.scale.port && !$('#hwScalePort').value) {
+          $('#hwScalePort').value = result.scale.port
+        }
       } else {
-        $('#dotScale').style.background = 'var(--red)'
-        $('#scaleInfo').innerHTML = `<span style="color:var(--red)">Not found</span> — No compatible scale detected`
+        $('#dotScale').style.background = result.serialPorts?.length ? 'var(--amber)' : 'var(--red)'
+        const msg = result.serialPorts?.length
+          ? `<span style="color:var(--amber)">Not auto-detected</span> — ${result.serialPorts.length} serial port(s) available. Configure below.`
+          : `<span style="color:var(--red)">Not found</span> — No USB scale or serial ports detected`
+        $('#scaleInfo').innerHTML = msg
         $('#scaleReading').style.display = 'none'
         $('#readScaleBtn').style.display = 'none'
+        $('#zeroScaleBtn').style.display = 'none'
       }
     }
 
@@ -4846,9 +5025,10 @@
       try {
         const result = await window.pos.probeDevices()
         updateProbeUI(result)
-        const counts = { printer: 0, scale: 0, scanner: 0, unknown: 0 }
+        const counts = { printer: 0, scale: 0, scanner: 0, serial: 0, unknown: 0 }
         for (const d of (result.usbDevices || [])) counts[d.type] = (counts[d.type] || 0) + 1
-        $('#probeStatus').textContent = `Found ${result.usbDevices?.length || 0} device(s): ${counts.printer} printer, ${counts.scanner} scanner, ${counts.scale} scale`
+        const serialCount = result.serialPorts?.length || 0
+        $('#probeStatus').textContent = `Found ${result.usbDevices?.length || 0} USB device(s): ${counts.printer} printer, ${counts.scanner} scanner, ${counts.scale} scale` + (serialCount ? ` | ${serialCount} serial port(s)` : '')
       } catch (e) {
         $('#probeStatus').textContent = 'Probe failed: ' + e.message
       }
@@ -4908,6 +5088,58 @@
         $('#scaleReading').textContent = `${r.weight} ${r.unit} (${r.status})`
       } catch (e) { showToast('Scale error: ' + e.message, 'error') }
     })
+
+    $('#zeroScaleBtn').addEventListener('click', async () => {
+      try {
+        const r = await window.pos.zeroScale()
+        if (r.error) { showToast(r.error, 'error'); return }
+        showToast('Scale zeroed/tared', 'success')
+        // Re-read after zeroing
+        const reading = await window.pos.readScale()
+        if (!reading.error) {
+          $('#scaleReading').style.display = ''
+          $('#scaleReading').style.color = 'var(--green)'
+          $('#scaleReading').textContent = `${reading.weight} ${reading.unit} (${reading.status})`
+        }
+      } catch (e) { showToast('Zero failed: ' + e.message, 'error') }
+    })
+
+    $('#hwScaleTestBtn').addEventListener('click', async () => {
+      const port = $('#hwScalePort').value
+      if (!port) { showToast('Select a COM port first', 'error'); return }
+      const baud = parseInt($('#hwScaleBaud').value) || 9600
+      const protocol = $('#hwScaleProtocol').value || 'sics'
+      $('#scaleTestResult').innerHTML = '<span style="color:var(--text-dim)">Testing...</span>'
+      try {
+        const r = await window.pos.testScale(port, baud, protocol)
+        if (r.ok) {
+          $('#scaleTestResult').innerHTML = `<span style="color:var(--green)">Connected! Weight: ${r.reading.weight} ${r.reading.unit} (${r.reading.status})</span> <span style="font-size:11px;color:var(--text-dim)">Raw: ${esc(r.raw || '')}</span>`
+          $('#dotScale').style.background = 'var(--green)'
+          showToast('Scale connected!', 'success')
+        } else {
+          $('#scaleTestResult').innerHTML = `<span style="color:var(--red)">Failed: ${esc(r.error)}</span>`
+        }
+      } catch (e) {
+        $('#scaleTestResult').innerHTML = `<span style="color:var(--red)">Error: ${esc(e.message)}</span>`
+      }
+    })
+
+    $('#hwScaleSaveBtn').addEventListener('click', async () => {
+      const port = $('#hwScalePort').value
+      if (!port) { showToast('Select a COM port first', 'error'); return }
+      const config = {
+        scaleType: 'serial',
+        scalePort: port,
+        scaleBaud: $('#hwScaleBaud').value || '9600',
+        scaleProtocol: $('#hwScaleProtocol').value || 'sics',
+      }
+      try {
+        await window.pos.configureHardware(config)
+        showToast('Scale config saved', 'success')
+      } catch (e) { showToast('Save failed: ' + e.message, 'error') }
+    })
+
+    $('#hwScaleRefreshPorts').addEventListener('click', () => refreshSerialPorts())
 
     $('#hwSaveBtn').addEventListener('click', async () => {
       const config = {
@@ -5487,6 +5719,144 @@
         if (modePinBuf.length < 6) { modePinBuf += v; $('#modePinDots').textContent = '●'.repeat(modePinBuf.length); $('#modePinError').textContent = '' }
       })
     })
+
+    // -- Insights --------------------------------------------------------
+
+    async function loadInsights () {
+      try {
+        const [trend, heatmap, forecast, pairs] = await Promise.all([
+          window.pos.getSalesTrend(30),
+          window.pos.getSalesHeatmap(30),
+          window.pos.getDemandForecast(),
+          window.pos.getBoughtTogether(),
+        ])
+        renderSalesTrend(trend)
+        renderHeatmap(heatmap)
+        renderForecast(forecast)
+        renderBoughtTogether(pairs)
+      } catch (e) { showToast('Failed to load insights: ' + e.message, 'error') }
+
+      // Set default export dates
+      const today = new Date().toISOString().slice(0, 10)
+      const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10)
+      if ($('#xeroFrom')) $('#xeroFrom').value = weekAgo
+      if ($('#xeroTo')) $('#xeroTo').value = today
+    }
+
+    function renderSalesTrend (data) {
+      const el = $('#insightTrendChart')
+      if (!data || !data.length) { el.innerHTML = '<span style="color:var(--text-dim)">No data yet</span>'; return }
+      const maxVal = Math.max(...data.map(d => d.total), 1)
+      const totalSales = data.reduce((s, d) => s + d.total, 0)
+      const avgSales = totalSales / data.length
+      $('#insightTrendTotal').textContent = money(totalSales)
+      $('#insightTrendAvg').textContent = `avg ${money(avgSales)}/day`
+      $('#insightTrendStart').textContent = data[0]?.date || ''
+      $('#insightTrendEnd').textContent = data[data.length - 1]?.date || ''
+      el.innerHTML = data.map(d => {
+        const h = Math.max(2, (d.total / maxVal) * 100)
+        const isToday = d.date === new Date().toISOString().slice(0, 10)
+        return `<div title="${d.date}: ${money(d.total)} (${d.count} txns)" style="flex:1;height:${h}%;background:${isToday ? 'var(--green)' : 'rgba(16,185,129,.4)'};border-radius:2px 2px 0 0;min-width:4px;transition:height .3s"></div>`
+      }).join('')
+    }
+
+    function renderHeatmap (data) {
+      const el = $('#insightHeatmap')
+      if (!data || !data.length) { el.innerHTML = '<span style="color:var(--text-dim)">No data yet</span>'; return }
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+      const maxCount = Math.max(...data.map(d => d.count), 1)
+      // Build grid: 7 rows (days) x 24 cols (hours)
+      const grid = Array.from({ length: 7 }, () => Array(24).fill(0))
+      for (const d of data) grid[d.day][d.hour] = d.count
+      let html = '<table style="width:100%;border-collapse:collapse;font-size:10px"><thead><tr><th style="width:40px"></th>'
+      for (let h = 0; h < 24; h++) html += `<th style="color:var(--text-dim);font-weight:400;padding:1px">${h}</th>`
+      html += '</tr></thead><tbody>'
+      for (let d = 0; d < 7; d++) {
+        html += `<tr><td style="color:var(--text-dim);padding:2px 4px;text-align:right;font-weight:600">${days[d]}</td>`
+        for (let h = 0; h < 24; h++) {
+          const v = grid[d][h]
+          const intensity = v / maxCount
+          const bg = v === 0 ? 'var(--surface2)' : `rgba(16,185,129,${0.15 + intensity * 0.85})`
+          html += `<td style="padding:1px" title="${days[d]} ${h}:00 — ${v} txns"><div style="width:100%;height:18px;background:${bg};border-radius:2px"></div></td>`
+        }
+        html += '</tr>'
+      }
+      html += '</tbody></table>'
+      el.innerHTML = html
+    }
+
+    function renderForecast (data) {
+      const el = $('#insightForecast')
+      if (!data || !data.length) { el.innerHTML = '<span style="color:var(--text-dim)">No data yet</span>'; return }
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+      const maxSales = Math.max(...data.map(d => d.avgSales), 1)
+      el.innerHTML = data.map(d => {
+        const pct = (d.avgSales / maxSales) * 100
+        const tops = (d.topProducts || []).map(p => esc(p.name || p.product_name || '')).join(', ')
+        return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span style="width:32px;font-size:11px;font-weight:600;color:var(--text-dim);text-align:right">${days[d.day]}</span>
+          <div style="flex:1;height:22px;background:var(--surface2);border-radius:4px;overflow:hidden;position:relative">
+            <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,rgba(16,185,129,.6),rgba(16,185,129,.3));border-radius:4px;transition:width .5s"></div>
+            <span style="position:absolute;left:8px;top:3px;font-size:11px;font-weight:600;color:var(--text)">${money(d.avgSales)}</span>
+          </div>
+          <span style="font-size:10px;color:var(--text-dim);min-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${tops}">${d.avgTxns?.toFixed(0) || 0} txns</span>
+        </div>`
+      }).join('')
+    }
+
+    function renderBoughtTogether (data) {
+      const el = $('#insightPairs')
+      if (!data || !data.length) { el.innerHTML = '<span style="color:var(--text-dim)">No data yet — pairs appear after multiple transactions</span>'; return }
+      el.innerHTML = data.slice(0, 15).map((p, i) => {
+        const maxCount = data[0]?.count || 1
+        const pct = (p.count / maxCount) * 100
+        return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+          <span style="width:20px;font-size:11px;color:var(--text-dim);text-align:right">${i + 1}</span>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.product1_name)} + ${esc(p.product2_name)}</div>
+            <div style="height:4px;background:var(--surface2);border-radius:2px;margin-top:3px"><div style="height:100%;width:${pct}%;background:var(--blue);border-radius:2px"></div></div>
+          </div>
+          <span style="font-size:11px;font-weight:700;color:var(--text-dim);white-space:nowrap">${p.count}×</span>
+        </div>`
+      }).join('')
+    }
+
+    // Xero CSV export
+    if ($('#xeroExportBtn')) {
+      $('#xeroExportBtn').addEventListener('click', async () => {
+        const from = $('#xeroFrom').value
+        const to = $('#xeroTo').value
+        if (!from || !to) { showToast('Select date range', 'error'); return }
+        try {
+          const csv = await window.pos.getXeroExport(from, to)
+          if (!csv || csv.trim().split('\n').length < 2) { showToast('No transactions in range', 'info'); return }
+          // Show preview
+          $('#xeroPreview').textContent = csv.split('\n').slice(0, 10).join('\n') + (csv.split('\n').length > 10 ? '\n...' : '')
+          $('#xeroPreview').style.display = 'block'
+          // Download
+          const blob = new Blob([csv], { type: 'text/csv' })
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url; a.download = `sales-export-${from}-to-${to}.csv`
+          a.click(); URL.revokeObjectURL(url)
+          showToast('CSV downloaded', 'success')
+        } catch (e) { showToast('Export failed: ' + e.message, 'error') }
+      })
+    }
+
+    // Instagram settings save
+    if ($('#igSaveBtn')) {
+      $('#igSaveBtn').addEventListener('click', async () => {
+        const handle = $('#igHandle').value.trim()
+        if (handle) {
+          await window.pos.setSetting('instagram_handle', handle)
+          $('#igStatus').textContent = 'Saved!'
+          setTimeout(() => { $('#igStatus').textContent = '' }, 2000)
+        }
+      })
+      // Load saved handle
+      window.pos.getSetting('instagram_handle').then(v => { if (v) $('#igHandle').value = v }).catch(() => {})
+    }
 
     // -- Init -----------------------------------------------------------
 

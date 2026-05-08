@@ -147,6 +147,8 @@ async function initDatabase() {
     // Permanently remove Uber Eats button
     "UPDATE keyboard_buttons SET active = 0 WHERE id = 'fn-ubereats'",
     "INSERT OR IGNORE INTO deleted_records (table_name, record_id) VALUES ('keyboard_buttons', 'fn-ubereats')",
+    // Upgrade department button images to Pexels high-quality photography
+    "UPDATE keyboard_buttons SET image = NULL WHERE id IN ('btn-meat','btn-coffee','btn-fv','btn-cheese','btn-flowers','btn-deli','btn-nuts','btn-grocery','pg2-cherries')",
     "DELETE FROM keyboard_buttons WHERE id = 'fn-ubereats'",
   ]
   for (const m of migrations) {
@@ -459,18 +461,19 @@ const KB_IMAGE_BASE = 'https://raw.githubusercontent.com/matthiascamp/crisponcre
 const KB_IMAGE_BASE_DELI = 'https://raw.githubusercontent.com/matthiascamp/crisponcreek/main/crisp_on_creek_deli_images/'
 const KB_IMAGE_BASE_EXT = 'https://raw.githubusercontent.com/matthiascamp/crisponcreek/main/crisp_on_creek_external_images/'
 const KB_IMAGE_BASE_IMG = 'https://raw.githubusercontent.com/matthiascamp/crisponcreek/main/crisp_on_creek_images/'
+const PX = id => `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=400`
 const KB_IMAGE_MAP = {
-  // Main page department buttons
-  'btn-meat':    { base: 'ext', file: 'Barbell_Air_Dried_Steak.jpg' },
-  'btn-coffee':  { base: 'img', file: 'Fresh_Press_Cold_Drip_Coffee.jpg' },
-  'btn-fv':      { base: 'fv', file: 'Apple_Royal_Gala_Large.jpg' },
-  'btn-cheese':  { base: 'deli', file: 'Auricchio_Grana_Padano.jpg' },
-  'btn-flowers': { base: 'fv', file: 'Strawberries.jpg' },
+  // Main page department buttons (Pexels high-quality photography)
+  'btn-meat':    { base: 'direct', file: PX(65175) },
+  'btn-coffee':  { base: 'direct', file: PX(302899) },
+  'btn-fv':      { base: 'direct', file: PX(264537) },
+  'btn-cheese':  { base: 'direct', file: PX(4109938) },
+  'btn-flowers': { base: 'direct', file: PX(5996678) },
   'btn-bread':   { base: 'ext', file: 'F_R_CIABATTA_LOAF.jpg' },
   'btn-bags':    { base: 'img', file: 'Home_Force_Garbage_Bags_Handle_Tie.jpg' },
-  'btn-deli':    { base: 'deli', file: 'Casalingo_Prosciutto.jpg' },
-  'btn-nuts':    { base: 'img', file: 'Cashew_Macadamia_Mix.jpg' },
-  'btn-grocery': { base: 'img', file: 'Kettle.jpg' },
+  'btn-deli':    { base: 'direct', file: PX(8775044) },
+  'btn-nuts':    { base: 'direct', file: PX(529632) },
+  'btn-grocery': { base: 'direct', file: PX(1366594) },
   'btn-gas':     { base: 'img', file: 'Coca_Cola_1.25L.jpg' },
   // Page 2: Fruit A-M
   'pg2-apples': { base: 'fv', file: 'Apple_Royal_Gala_Large.jpg' },
@@ -478,7 +481,7 @@ const KB_IMAGE_MAP = {
   'pg2-avocados': { base: 'fv', file: 'Avocadoes_Small.jpg' },
   'pg2-bananas': { base: 'fv', file: 'Bananas_Cavendish.jpg' },
   'pg2-berries': { base: 'fv', file: 'Strawberries.jpg' },
-  'pg2-cherries': { base: 'fv', file: 'Cherry_Tomatoes.jpg' },
+  'pg2-cherries': { base: 'direct', file: PX(1178610) },
   'pg2-coconut': { base: 'img', file: 'MAE_MASSIMO_VUVOA_COCONUT.jpg' },
   'pg2-custard-apple': { base: 'fv', file: 'Custard_Apples.jpg' },
   'pg2-dragon-fruit': { base: 'img', file: 'Red_Dragon_Fruit.jpg' },
@@ -712,6 +715,8 @@ app.whenReady().then(async () => {
 app.on('window-all-closed', () => {
   if (dailyBackupTimer) clearInterval(dailyBackupTimer)
   appLog('info', 'app', 'App shutting down')
+  // Close serial scale port if open
+  try { if (typeof hwScalePort !== 'undefined' && hwScalePort?.isOpen) hwScalePort.close() } catch (_) {}
   saveDB()
   app.quit()
 })
@@ -976,7 +981,7 @@ function setupIPC() {
     const q = `%${query}%`
     const limit = query.length < 2 ? 200 : 50
     return dbAll(`
-      SELECT p.*, c.name as category_name,
+      SELECT p.*, c.name as category_name, c.colour as category_color,
         COALESCE(s.special_price, p.price) as active_price,
         CASE WHEN s.id IS NOT NULL THEN 1 ELSE 0 END as is_special
       FROM products p
@@ -994,7 +999,7 @@ function setupIPC() {
 
   ipcMain.handle('db:products:getByBarcode', (_e, barcode) => {
     return dbGet(`
-      SELECT p.*, c.name as category_name,
+      SELECT p.*, c.name as category_name, c.colour as category_color,
         COALESCE(s.special_price, p.price) as active_price,
         CASE WHEN s.id IS NOT NULL THEN 1 ELSE 0 END as is_special
       FROM products p
@@ -1010,7 +1015,7 @@ function setupIPC() {
 
   ipcMain.handle('db:products:getByCategory', (_e, categoryId) => {
     return dbAll(`
-      SELECT p.*, c.name as category_name,
+      SELECT p.*, c.name as category_name, c.colour as category_color,
         COALESCE(s.special_price, p.price) as active_price,
         CASE WHEN s.id IS NOT NULL THEN 1 ELSE 0 END as is_special
       FROM products p
@@ -1373,6 +1378,123 @@ function setupIPC() {
       GROUP BY d.id
     `)
   })
+
+  // ── Insights handlers ──────────────────────────────────────────────
+
+  ipcMain.handle('db:insights:salesHeatmap', (_e, opts = {}) => {
+    const days = opts.days || 30
+    return dbAll(`
+      SELECT CAST(strftime('%w', created_at) AS INTEGER) as day,
+             CAST(strftime('%H', created_at) AS INTEGER) as hour,
+             SUM(total) as total,
+             COUNT(*) as count
+      FROM transactions
+      WHERE status = 'completed'
+        AND created_at >= datetime('now', ?1)
+      GROUP BY day, hour
+      ORDER BY day, hour
+    `, [`-${days} days`])
+  })
+
+  ipcMain.handle('db:insights:demandForecast', () => {
+    const rows = dbAll(`
+      SELECT CAST(strftime('%w', created_at) AS INTEGER) as day,
+             DATE(created_at) as sale_date,
+             SUM(total) as day_total,
+             COUNT(*) as day_txns
+      FROM transactions
+      WHERE status = 'completed'
+        AND created_at >= datetime('now', '-28 days')
+      GROUP BY day, sale_date
+      ORDER BY day
+    `)
+    // Aggregate per day-of-week
+    const byDay = {}
+    for (const r of rows) {
+      if (!byDay[r.day]) byDay[r.day] = { totals: [], txns: [] }
+      byDay[r.day].totals.push(r.day_total)
+      byDay[r.day].txns.push(r.day_txns)
+    }
+    const result = []
+    for (let d = 0; d <= 6; d++) {
+      const entry = byDay[d]
+      if (!entry) {
+        result.push({ day: d, avgSales: 0, avgTxns: 0, topProducts: [] })
+        continue
+      }
+      const weeks = entry.totals.length || 1
+      const avgSales = entry.totals.reduce((a, b) => a + b, 0) / weeks
+      const avgTxns = entry.txns.reduce((a, b) => a + b, 0) / weeks
+      const topProducts = dbAll(`
+        SELECT ti.name, SUM(ti.qty) as total_qty
+        FROM transaction_items ti
+        JOIN transactions t ON t.id = ti.transaction_id
+        WHERE t.status = 'completed'
+          AND CAST(strftime('%w', t.created_at) AS INTEGER) = ?1
+          AND t.created_at >= datetime('now', '-28 days')
+        GROUP BY ti.product_id
+        ORDER BY total_qty DESC
+        LIMIT 3
+      `, [d])
+      result.push({ day: d, avgSales, avgTxns, topProducts })
+    }
+    return result
+  })
+
+  ipcMain.handle('db:insights:boughtTogether', () => {
+    return dbAll(`
+      SELECT a.product_id as product1, b.product_id as product2,
+             COUNT(*) as count,
+             a.name as product1_name, b.name as product2_name
+      FROM transaction_items a
+      JOIN transaction_items b ON a.transaction_id = b.transaction_id
+        AND a.product_id < b.product_id
+      JOIN transactions t ON t.id = a.transaction_id
+      WHERE t.status = 'completed'
+      GROUP BY a.product_id, b.product_id
+      ORDER BY count DESC
+      LIMIT 20
+    `)
+  })
+
+  ipcMain.handle('db:insights:xeroExport', (_e, opts = {}) => {
+    const { dateFrom, dateTo } = opts
+    const rows = dbAll(`
+      SELECT t.id, t.total, t.tax, t.created_at, t.register_id,
+             GROUP_CONCAT(ti.name, ', ') as items
+      FROM transactions t
+      LEFT JOIN transaction_items ti ON ti.transaction_id = t.id
+      WHERE t.status = 'completed'
+        AND DATE(t.created_at) >= ?1
+        AND DATE(t.created_at) <= ?2
+      GROUP BY t.id
+      ORDER BY t.created_at
+    `, [dateFrom, dateTo])
+    const lines = ['Date,Description,Reference,Account,Amount,Tax']
+    for (const r of rows) {
+      const date = r.created_at ? r.created_at.split('T')[0] : ''
+      const desc = (r.items || 'Sale').replace(/"/g, '""')
+      const ref = r.id.substring(0, 8)
+      lines.push(`${date},"${desc}",${ref},Sales,${(r.total || 0).toFixed(2)},${(r.tax || 0).toFixed(2)}`)
+    }
+    return lines.join('\n')
+  })
+
+  ipcMain.handle('db:insights:salesTrend', (_e, opts = {}) => {
+    const days = opts.days || 30
+    return dbAll(`
+      SELECT DATE(created_at) as date,
+             SUM(total) as total,
+             COUNT(*) as count
+      FROM transactions
+      WHERE status = 'completed'
+        AND created_at >= datetime('now', ?1)
+      GROUP BY DATE(created_at)
+      ORDER BY date
+    `, [`-${days} days`])
+  })
+
+  // ── End Insights handlers ─────────────────────────────────────────
 
   ipcMain.handle('db:cash_drawer:log', (_e, entry) => {
     const id = uuid()
@@ -1927,9 +2049,13 @@ function setupIPC() {
   const isMac = os.platform() === 'darwin'
   const RAWPRINT_SCRIPT = path.join(__dirname, 'rawprint.ps1')
 
-  // Optional native HID support (for scale weight reading)
+  // Optional native HID support (for USB scale weight reading)
   let HID = null
-  try { HID = require('node-hid') } catch (_) {}
+  try { HID = require('node-hid') } catch (e) { appLog('warn', 'hardware', 'node-hid not available', e.message) }
+
+  // Serial port support (for RS-232 scales)
+  let SerialPortLib = null
+  try { SerialPortLib = require('serialport') } catch (e) { appLog('warn', 'hardware', 'serialport not available', e.message) }
 
   // ── Vendor ID database (comprehensive, correctly labelled) ─────────────────
 
@@ -1955,6 +2081,12 @@ function setupIPC() {
   }
   const SCALE_USAGE_PAGE = 0x8D
   const RECEIPT_KEYWORDS = ['epson', 'tm-t', 'tm-u', 'tm-m', 'star ', 'tsp', 'bixolon', 'srp-', 'citizen', 'ct-s', 'ct-e', 'custom', 'sewoo', 'slk-', 'thermal', 'receipt', 'pos printer']
+  const EPSON_MODELS = {
+    0x0E03: 'TM-T20', 0x0E15: 'TM-T20II', 0x0E11: 'TM-T82',
+    0x0202: 'TM-T88IV/V', 0x0E28: 'TM-T88VI', 0x0E2A: 'TM-T88VII',
+    0x0E1E: 'TM-m30',
+  }
+  const SERIAL_ADAPTER_VIDS = { 0x0403: 'FTDI', 0x067B: 'Prolific', 0x1A86: 'CH340', 0x10C4: 'Silicon Labs CP210x' }
 
   // ── ESC/POS command bytes ──────────────────────────────────────────────────
 
@@ -1995,8 +2127,16 @@ function setupIPC() {
     } else if (name && iface) {
       hwPrinter = { name, port: port || '', interface: iface, configured: true }
     }
+    const scaleType = dbGet("SELECT value FROM settings WHERE key='hw_scale_type'")?.value
+    const scalePort = dbGet("SELECT value FROM settings WHERE key='hw_scale_port'")?.value
     const scalePath = dbGet("SELECT value FROM settings WHERE key='hw_scale_path'")?.value
-    if (scalePath) hwScale = { path: scalePath, configured: true }
+    const scaleBaud = parseInt(dbGet("SELECT value FROM settings WHERE key='hw_scale_baud'")?.value || '9600')
+    const scaleProtocol = dbGet("SELECT value FROM settings WHERE key='hw_scale_protocol'")?.value || 'sics'
+    if (scaleType === 'serial' && scalePort) {
+      hwScale = { type: 'serial', port: scalePort, baud: scaleBaud, protocol: scaleProtocol, configured: true, vendor: 'Serial Scale' }
+    } else if (scalePath) {
+      hwScale = { type: 'hid', path: scalePath, configured: true }
+    }
   }
 
   // ── USB device enumeration (multi-source, cross-platform) ──────────────────
@@ -2026,10 +2166,18 @@ function setupIPC() {
       } catch (e) { appLog('warn', 'hardware', 'HID enumeration failed', e.message) }
     }
 
-    // Source 2: Platform-specific (catches non-HID USB devices)
+    // Source 2: Serial ports (COM ports for RS-232 scales etc.)
+    if (SerialPortLib) {
+      try {
+        // SerialPort.list() is async but we need sync here — cache from last probe
+        // Actual serial enumeration happens in probeHardware() async path
+      } catch (e) { appLog('warn', 'hardware', 'Serial port enumeration failed', e.message) }
+    }
+
+    // Source 3: Platform-specific (catches non-HID USB devices)
     if (isWin) {
       try {
-        const raw = hwExec(`powershell -NoProfile -Command "Get-PnpDevice -Status OK -ErrorAction SilentlyContinue | Where-Object { $_.Class -in @('USB','Printer','HIDClass','Ports','PrintQueue','Image','Media') } | Select-Object FriendlyName,InstanceId,Class | ConvertTo-Json -Compress"`, { timeout: 15000, encoding: 'utf-8' }).trim()
+        const raw = hwExec(`powershell -NoProfile -Command "Get-PnpDevice -Status OK -ErrorAction SilentlyContinue | Where-Object { $_.Class -in @('USB','Printer','HIDClass','Ports','PrintQueue','Image','Media') } | Select-Object FriendlyName,InstanceId,Class | ConvertTo-Json -Compress"`, { timeout: 20000, encoding: 'utf-8' }).trim()
         if (raw) {
           const parsed = JSON.parse(raw)
           for (const d of (Array.isArray(parsed) ? parsed : [parsed])) {
@@ -2042,7 +2190,20 @@ function setupIPC() {
             })
           }
         }
-      } catch (e) { appLog('warn', 'hardware', 'PnP enumeration failed', e.message) }
+      } catch (e) {
+        appLog('warn', 'hardware', 'PnP enumeration failed, trying WMIC fallback', e.message)
+        try {
+          const raw = hwExec('wmic path Win32_PnPEntity where "PNPClass=\'USB\' or PNPClass=\'Printer\' or PNPClass=\'Ports\'" get Name,DeviceID /format:csv 2>nul', { timeout: 15000, encoding: 'utf-8' })
+          for (const line of raw.split('\n')) {
+            const parts = line.trim().split(',')
+            if (parts.length < 3) continue
+            const devId = parts[1] || '', name = parts[2] || ''
+            const vid = (devId.match(/VID_([0-9A-F]{4})/i) || [])[1]
+            const pid = (devId.match(/PID_([0-9A-F]{4})/i) || [])[1]
+            if (vid) addDevice({ vendorId: parseInt(vid, 16), productId: pid ? parseInt(pid, 16) : 0, manufacturer: '', product: name, path: devId, usagePage: 0, usage: 0, source: 'wmic' })
+          }
+        } catch (e2) { appLog('warn', 'hardware', 'WMIC fallback also failed', e2.message) }
+      }
     } else if (isMac) {
       try {
         const raw = hwExec('system_profiler SPUSBDataType -json 2>/dev/null', { timeout: 10000, encoding: 'utf-8' })
@@ -2057,7 +2218,7 @@ function setupIPC() {
           }
         }
         if (data.SPUSBDataType) walk(data.SPUSBDataType)
-      } catch (_) {}
+      } catch (e) { appLog('warn', 'hardware', 'macOS USB enumeration failed', e.message) }
     } else {
       try {
         const raw = hwExec('lsusb 2>/dev/null', { timeout: 5000, encoding: 'utf-8' })
@@ -2065,7 +2226,7 @@ function setupIPC() {
           const m = line.match(/ID\s+([0-9a-f]{4}):([0-9a-f]{4})\s+(.*)/i)
           if (m) addDevice({ vendorId: parseInt(m[1], 16), productId: parseInt(m[2], 16), manufacturer: '', product: m[3].trim(), path: '', usagePage: 0, usage: 0, source: 'lsusb' })
         }
-      } catch (_) {}
+      } catch (e) { appLog('warn', 'hardware', 'Linux USB enumeration failed', e.message) }
     }
 
     return devices
@@ -2074,10 +2235,14 @@ function setupIPC() {
   // ── Classify devices ───────────────────────────────────────────────────────
 
   function classifyDevice (d) {
-    if (d.vendorId && PRINTER_VENDORS[d.vendorId]) return { type: 'printer', vendor: PRINTER_VENDORS[d.vendorId] }
+    if (d.vendorId && PRINTER_VENDORS[d.vendorId]) {
+      const model = (d.vendorId === 0x04B8 && EPSON_MODELS[d.productId]) ? ` ${EPSON_MODELS[d.productId]}` : ''
+      return { type: 'printer', vendor: PRINTER_VENDORS[d.vendorId] + model }
+    }
     if (d.vendorId && SCALE_VENDORS[d.vendorId]) return { type: 'scale', vendor: SCALE_VENDORS[d.vendorId] }
     if (d.vendorId && SCANNER_VENDORS[d.vendorId]) return { type: 'scanner', vendor: SCANNER_VENDORS[d.vendorId] }
     if (d.usagePage === SCALE_USAGE_PAGE) return { type: 'scale', vendor: d.manufacturer || 'HID Scale' }
+    if (d.source === 'serial') return { type: 'serial', vendor: d.manufacturer || 'Serial Port' }
     const name = (d.product || '').toLowerCase()
     if (name.includes('scanner') || name.includes('barcode') || name.includes('reader')) return { type: 'scanner', vendor: d.manufacturer || '' }
     if (RECEIPT_KEYWORDS.some(k => name.includes(k))) return { type: 'printer', vendor: d.manufacturer || '' }
@@ -2114,13 +2279,20 @@ function setupIPC() {
   }
 
   function detectPrinter (devices) {
-    if (hwPrinter?.configured) return hwPrinter
+    if (hwPrinter?.configured) {
+      appLog('info', 'hardware', `Using saved printer config: ${hwPrinter.name} (${hwPrinter.interface})`)
+      return hwPrinter
+    }
 
     let usbPrinter = null
     for (const d of devices) {
       if (!d.vendorId) continue
       const cls = classifyDevice(d)
-      if (cls.type === 'printer') { usbPrinter = { ...d, vendor: cls.vendor }; break }
+      if (cls.type === 'printer') {
+        usbPrinter = { ...d, vendor: cls.vendor }
+        appLog('info', 'hardware', `USB printer detected: ${cls.vendor} (VID:${d.vendorId.toString(16)} PID:${d.productId.toString(16)})`)
+        break
+      }
     }
 
     if (!isWin) {
@@ -2229,31 +2401,65 @@ function setupIPC() {
     }
   }
 
-  // ── Scale detection & reading (USB HID POS protocol) ───────────────────────
+  // ── Scale detection & reading (USB HID + RS-232 serial) ────────────────────
 
-  function detectScale (devices) {
-    if (hwScale?.configured) return hwScale
+  let hwScalePort = null  // persistent SerialPort instance for serial scales
+  let cachedSerialPorts = []  // cached from last async enumeration
 
+  async function enumerateSerialPorts () {
+    if (!SerialPortLib) return []
+    try {
+      const ports = await SerialPortLib.SerialPort.list()
+      cachedSerialPorts = ports.map(p => ({
+        path: p.path,
+        manufacturer: p.manufacturer || '',
+        vendorId: p.vendorId ? parseInt(p.vendorId, 16) : 0,
+        productId: p.productId ? parseInt(p.productId, 16) : 0,
+        serialNumber: p.serialNumber || '',
+        pnpId: p.pnpId || '',
+      }))
+      appLog('info', 'hardware', `Serial ports found: ${cachedSerialPorts.map(p => p.path).join(', ') || 'none'}`)
+      return cachedSerialPorts
+    } catch (e) {
+      appLog('warn', 'hardware', 'Serial port enumeration failed', e.message)
+      return []
+    }
+  }
+
+  function detectScale (devices, serialPorts) {
+    if (hwScale?.configured) {
+      appLog('info', 'hardware', `Using saved scale config: ${hwScale.type} ${hwScale.port || hwScale.path || ''}`)
+      return hwScale
+    }
+
+    // Priority 1: USB HID scale (direct weight reading via HID protocol)
     if (HID) {
       const hidDevs = HID.devices()
-      // Priority 1: known scale vendor IDs
       for (const d of hidDevs) {
         if (d.vendorId && SCALE_VENDORS[d.vendorId] && d.vendorId !== 0x0403) {
-          return { path: d.path, vid: d.vendorId, pid: d.productId, vendor: SCALE_VENDORS[d.vendorId], product: d.product || '' }
+          appLog('info', 'hardware', `USB HID scale detected: ${SCALE_VENDORS[d.vendorId]}`)
+          return { type: 'hid', path: d.path, vid: d.vendorId, pid: d.productId, vendor: SCALE_VENDORS[d.vendorId], product: d.product || '' }
         }
       }
-      // Priority 2: HID usage page 0x8D (POS Scale standard — catches any brand)
       for (const d of hidDevs) {
         if (d.usagePage === SCALE_USAGE_PAGE) {
-          return { path: d.path, vid: d.vendorId, pid: d.productId, vendor: d.manufacturer || 'HID Scale', product: d.product || '' }
+          appLog('info', 'hardware', `USB HID scale detected via usage page: ${d.manufacturer || 'Unknown'}`)
+          return { type: 'hid', path: d.path, vid: d.vendorId, pid: d.productId, vendor: d.manufacturer || 'HID Scale', product: d.product || '' }
         }
       }
     }
 
-    // Fallback: USB enumeration VID match only (no weight reading without node-hid)
+    // Priority 2: Serial ports (RS-232 scales — Mettler Toledo, CAS, etc.)
+    if (serialPorts && serialPorts.length > 0) {
+      appLog('info', 'hardware', `Serial ports available for scale: ${serialPorts.map(p => p.path).join(', ')}`)
+      // Return first serial port as candidate — actual protocol test happens in probeHardware
+      return { type: 'serial', port: serialPorts[0].path, protocol: 'sics', baud: 9600, vendor: 'Serial Scale', product: serialPorts[0].manufacturer || serialPorts[0].path, detected: false }
+    }
+
+    // Priority 3: USB enumeration VID match only
     for (const d of devices) {
       if (d.vendorId && SCALE_VENDORS[d.vendorId] && d.vendorId !== 0x0403) {
-        return { vid: d.vendorId, pid: d.productId, vendor: SCALE_VENDORS[d.vendorId], product: d.product || '', noHID: true }
+        return { type: 'hid', vid: d.vendorId, pid: d.productId, vendor: SCALE_VENDORS[d.vendorId], product: d.product || '', noHID: !HID }
       }
     }
     return null
@@ -2262,9 +2468,118 @@ function setupIPC() {
   const SCALE_UNITS = { 0x01: 'mg', 0x02: 'g', 0x03: 'kg', 0x04: 'ct', 0x0B: 'oz', 0x0C: 'lb' }
   const SCALE_STATUSES = { 0x01: 'fault', 0x02: 'zero', 0x03: 'in_motion', 0x04: 'stable', 0x05: 'under_zero', 0x06: 'over_limit', 0x07: 'calibration', 0x08: 'needs_zero' }
 
-  function readScale () {
-    if (!HID) return { error: 'node-hid not installed — run: npm install node-hid' }
-    if (!hwScale?.path) return { error: 'No scale path. Run probe first.' }
+  // ── Serial scale communication (Mettler Toledo SICS protocol) ─────────────
+
+  function openScaleSerialPort (portPath, baud) {
+    if (hwScalePort) {
+      try { hwScalePort.close() } catch (_) {}
+      hwScalePort = null
+    }
+    if (!SerialPortLib) return Promise.reject(new Error('serialport package not available'))
+    return new Promise((resolve, reject) => {
+      const port = new SerialPortLib.SerialPort({
+        path: portPath,
+        baudRate: baud || 9600,
+        dataBits: 8,
+        stopBits: 1,
+        parity: 'none',
+        autoOpen: false,
+      })
+      port.open(err => {
+        if (err) {
+          appLog('error', 'hardware', `Failed to open scale port ${portPath}`, err.message)
+          return reject(err)
+        }
+        hwScalePort = port
+        appLog('info', 'hardware', `Scale serial port opened: ${portPath} @ ${baud} baud`)
+        resolve(port)
+      })
+      port.on('error', err => {
+        appLog('error', 'hardware', `Scale serial port error: ${err.message}`)
+      })
+      port.on('close', () => {
+        appLog('info', 'hardware', 'Scale serial port closed')
+        hwScalePort = null
+      })
+    })
+  }
+
+  function sendSerialCommand (port, command, timeoutMs) {
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        port.removeAllListeners('data')
+        reject(new Error(`Scale timeout (${timeoutMs}ms) — no response to "${command.trim()}"`))
+      }, timeoutMs || 3000)
+
+      let buf = ''
+      const onData = chunk => {
+        buf += chunk.toString('ascii')
+        // SICS responses end with \r\n
+        if (buf.includes('\r\n')) {
+          clearTimeout(timeout)
+          port.removeListener('data', onData)
+          resolve(buf.trim())
+        }
+      }
+      port.on('data', onData)
+      port.write(command, 'ascii')
+      port.drain()
+    })
+  }
+
+  function parseSICSResponse (response) {
+    // Mettler Toledo SICS responses:
+    //   S S      1.234 kg    (stable weight)
+    //   S D      1.230 kg    (dynamic/unstable weight)
+    //   S +      0.000 kg    (overload)
+    //   S -                  (underload)
+    //   S I                  (command not executable — e.g. scale in motion for too long)
+    //   SI responses have same format but with SI prefix
+    const m = response.match(/^S[I]?\s+([SDLI+\-])\s+([\d.\-]+)\s*(mg|g|kg|ct|oz|lb|t)?/i)
+    if (!m) return null
+    const statusChar = m[1].toUpperCase()
+    const weight = parseFloat(m[2])
+    const unit = (m[3] || 'kg').toLowerCase()
+    const stable = statusChar === 'S'
+    const inMotion = statusChar === 'D'
+    const status = stable ? 'stable' : inMotion ? 'in_motion' : statusChar === '+' ? 'over_limit' : statusChar === '-' ? 'under_zero' : statusChar === 'I' ? 'not_ready' : 'unknown'
+    return { weight, unit, status, stable, inMotion, zero: weight === 0 && stable }
+  }
+
+  async function readScaleSerial () {
+    if (!hwScalePort || !hwScalePort.isOpen) {
+      if (!hwScale?.port) return { error: 'No serial scale configured. Set COM port in Hardware tab.' }
+      try {
+        await openScaleSerialPort(hwScale.port, hwScale.baud || 9600)
+      } catch (e) {
+        return { error: `Cannot open ${hwScale.port}: ${e.message}` }
+      }
+    }
+
+    const protocol = hwScale?.protocol || 'sics'
+
+    if (protocol === 'sics') {
+      try {
+        // Try stable weight first
+        const resp = await sendSerialCommand(hwScalePort, 'S\r\n', 3000)
+        const parsed = parseSICSResponse(resp)
+        if (parsed) return parsed
+        // If S fails (e.g. in motion), try immediate weight
+        const respI = await sendSerialCommand(hwScalePort, 'SI\r\n', 2000)
+        const parsedI = parseSICSResponse(respI)
+        if (parsedI) return parsedI
+        return { error: `Unexpected scale response: ${resp}` }
+      } catch (e) {
+        return { error: e.message }
+      }
+    }
+
+    return { error: `Unknown scale protocol: ${protocol}` }
+  }
+
+  function readScaleHID () {
+    if (!HID) return { error: 'node-hid not available — USB HID scale reading disabled' }
+    if (!hwScale?.path) return { error: 'No HID scale path. Run probe first.' }
     try {
       const device = new HID.HID(hwScale.path)
       try {
@@ -2278,6 +2593,47 @@ function setupIPC() {
         return { weight, unit: SCALE_UNITS[unitCode] || '?', status: SCALE_STATUSES[status] || 'unknown', stable: status === 0x04, zero: status === 0x02, inMotion: status === 0x03, raw: Array.from(data) }
       } finally { device.close() }
     } catch (e) { return { error: `Scale read failed: ${e.message}` } }
+  }
+
+  async function readScale () {
+    if (!hwScale) return { error: 'No scale detected. Run probe or configure in Hardware tab.' }
+    if (hwScale.type === 'serial') return readScaleSerial()
+    return readScaleHID()
+  }
+
+  async function zeroScale () {
+    if (!hwScale) return { error: 'No scale configured' }
+    if (hwScale.type !== 'serial') return { error: 'Zero/tare only supported on serial scales' }
+    if (!hwScalePort || !hwScalePort.isOpen) {
+      try { await openScaleSerialPort(hwScale.port, hwScale.baud || 9600) } catch (e) { return { error: `Cannot open ${hwScale.port}: ${e.message}` } }
+    }
+    try {
+      const resp = await sendSerialCommand(hwScalePort, 'Z\r\n', 3000)
+      if (resp.startsWith('Z A')) return { ok: true, status: 'Scale zeroed' }
+      if (resp.startsWith('Z I')) return { error: 'Scale busy — cannot zero right now' }
+      if (resp.startsWith('Z +')) return { error: 'Scale overloaded — remove weight first' }
+      return { error: `Unexpected response: ${resp}` }
+    } catch (e) { return { error: e.message } }
+  }
+
+  async function testSerialScale (portPath, baud, protocol) {
+    let testPort = null
+    try {
+      testPort = new SerialPortLib.SerialPort({ path: portPath, baudRate: baud || 9600, dataBits: 8, stopBits: 1, parity: 'none', autoOpen: false })
+      await new Promise((resolve, reject) => testPort.open(err => err ? reject(err) : resolve()))
+      if (protocol === 'sics' || !protocol) {
+        const resp = await sendSerialCommand(testPort, 'S\r\n', 3000)
+        const parsed = parseSICSResponse(resp)
+        testPort.close()
+        if (parsed) return { ok: true, reading: parsed, protocol: 'sics', raw: resp }
+        return { ok: false, error: `Got response but couldn't parse: ${resp}`, raw: resp }
+      }
+      testPort.close()
+      return { ok: false, error: `Unknown protocol: ${protocol}` }
+    } catch (e) {
+      if (testPort?.isOpen) try { testPort.close() } catch (_) {}
+      return { ok: false, error: e.message }
+    }
   }
 
   // ── Scanner detection (HID keyboard — just identify, no communication) ─────
@@ -2355,9 +2711,19 @@ function setupIPC() {
 
   async function probeHardware () {
     const devices = enumerateDevices()
+    const serialPorts = await enumerateSerialPorts()
+
+    // Add serial ports to device list for UI display
+    for (const sp of serialPorts) {
+      devices.push({
+        vendorId: sp.vendorId || 0, productId: sp.productId || 0,
+        manufacturer: sp.manufacturer, product: sp.path + (sp.manufacturer ? ` (${sp.manufacturer})` : ''),
+        path: sp.path, usagePage: 0, usage: 0, source: 'serial',
+      })
+    }
 
     const printer = detectPrinter(devices)
-    const scale = detectScale(devices)
+    const scale = detectScale(devices, serialPorts)
     const scanner = detectScanner(devices)
 
     if (!printer?.needsSetup) hwPrinter = printer
@@ -2379,7 +2745,8 @@ function setupIPC() {
         tested: !!printer?.tested, status: printer?.tested ? 'OK (raw send confirmed)' : '',
         availableQueues: printer?.availableQueues || [],
       },
-      scale: { found: !!scale, name: scale?.product || '', vendor: scale?.vendor || '', path: scale?.path || '', hasHID: !!HID, noHID: !!scale?.noHID },
+      scale: { found: !!scale, name: scale?.product || '', vendor: scale?.vendor || '', path: scale?.path || '', port: scale?.port || '', type: scale?.type || '', protocol: scale?.protocol || '', baud: scale?.baud || 0, hasHID: !!HID, hasSerial: !!SerialPortLib, noHID: !!scale?.noHID },
+      serialPorts: serialPorts.map(p => ({ path: p.path, manufacturer: p.manufacturer, vendorId: p.vendorId, productId: p.productId })),
       scanner: { found: !!scanner, name: scanner?.product || '', vendor: scanner?.vendor || '' },
       drawer: { found: !!printer && !printer.needsSetup, via: printer ? 'printer DK port' : '' },
       hidAvailable: !!HID,
@@ -2392,8 +2759,18 @@ function setupIPC() {
       result.printer.found = tcp.ok
     }
 
-    if (scale && scale.path && HID) {
-      const reading = readScale()
+    if (scale && scale.type === 'serial' && scale.port && SerialPortLib) {
+      const test = await testSerialScale(scale.port, scale.baud || 9600, scale.protocol || 'sics')
+      result.scale.tested = true
+      if (test.ok) {
+        result.scale.testResult = `${test.reading.weight} ${test.reading.unit} (${test.reading.status})`
+        result.scale.reading = test.reading
+        result.scale.detected = true
+      } else {
+        result.scale.testResult = test.error
+      }
+    } else if (scale && scale.type === 'hid' && scale.path && HID) {
+      const reading = readScaleHID()
       result.scale.tested = true
       if (reading.error) { result.scale.testResult = reading.error }
       else { result.scale.testResult = `${reading.weight} ${reading.unit} (${reading.status})`; result.scale.reading = reading }
@@ -2443,6 +2820,9 @@ function setupIPC() {
   })
 
   ipcMain.handle('hardware:readScale', () => readScale())
+  ipcMain.handle('hardware:zeroScale', () => zeroScale())
+  ipcMain.handle('hardware:getSerialPorts', () => enumerateSerialPorts())
+  ipcMain.handle('hardware:testScale', (_e, portPath, baud, protocol) => testSerialScale(portPath, baud, protocol))
 
   ipcMain.handle('hardware:testPrinter', async () => {
     if (!hwPrinter) return { ok: false, error: 'No printer detected' }
@@ -2478,13 +2858,20 @@ function setupIPC() {
     return getWindowsQueues().map(q => ({ name: q.Name, port: q.PortName, driver: q.DriverName }))
   })
 
-  ipcMain.handle('hardware:configure', (_e, config) => {
-    const keys = { printerName: 'hw_printer_name', printerPort: 'hw_printer_port', printerInterface: 'hw_printer_interface', printerIp: 'hw_printer_ip', printerNetworkPort: 'hw_printer_network_port', scalePath: 'hw_scale_path' }
+  ipcMain.handle('hardware:configure', async (_e, config) => {
+    const keys = {
+      printerName: 'hw_printer_name', printerPort: 'hw_printer_port', printerInterface: 'hw_printer_interface',
+      printerIp: 'hw_printer_ip', printerNetworkPort: 'hw_printer_network_port',
+      scalePath: 'hw_scale_path', scaleType: 'hw_scale_type', scalePort: 'hw_scale_port',
+      scaleBaud: 'hw_scale_baud', scaleProtocol: 'hw_scale_protocol',
+    }
     for (const [k, dbKey] of Object.entries(keys)) {
       if (config[k] !== undefined) dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES (?1, ?2)", [dbKey, config[k]])
     }
     scheduleSave()
     hwPrinterReady = false
+    // Close existing scale port if reconfiguring
+    if (hwScalePort) { try { hwScalePort.close() } catch (_) {} hwScalePort = null }
     loadSavedHardwareConfig()
     return { ok: true }
   })
@@ -2497,6 +2884,10 @@ function setupIPC() {
       printerIp: dbGet("SELECT value FROM settings WHERE key='hw_printer_ip'")?.value || '',
       printerNetworkPort: dbGet("SELECT value FROM settings WHERE key='hw_printer_network_port'")?.value || '9100',
       scalePath: dbGet("SELECT value FROM settings WHERE key='hw_scale_path'")?.value || '',
+      scaleType: dbGet("SELECT value FROM settings WHERE key='hw_scale_type'")?.value || '',
+      scalePort: dbGet("SELECT value FROM settings WHERE key='hw_scale_port'")?.value || '',
+      scaleBaud: dbGet("SELECT value FROM settings WHERE key='hw_scale_baud'")?.value || '9600',
+      scaleProtocol: dbGet("SELECT value FROM settings WHERE key='hw_scale_protocol'")?.value || 'sics',
     }
   })
 

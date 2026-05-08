@@ -212,33 +212,38 @@ body{font-family:'Inter',system-ui,sans-serif;background:linear-gradient(160deg,
   function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
 
   // ═══ Deals Data & Helpers ═══════════════════════════════════════════════════
-  // TODO: Connect to real product/specials database via IPC
-  // Replace getFallbackDeals() with real data from window.pos.getSpecials()
+  let cachedDeals = []
 
-  function getFallbackDeals() {
-    return [
-      { id: 'f1', name: 'Strawberries', normalPrice: 6.99, specialPrice: 4.99, unit: '/ punnet', emoji: '🍓', badge: 'special', isSpecial: true, displayPriority: 1 },
-      { id: 'f2', name: 'Hass Avocados', specialText: '2 for $5', unit: '/ each', emoji: '🥑', badge: 'today', isSpecial: true, displayPriority: 2 },
-      { id: 'f3', name: 'Bananas', normalPrice: 3.99, specialPrice: 2.49, unit: '/ kg', emoji: '🍌', badge: 'popular', isSpecial: true, displayPriority: 3 },
-      { id: 'f4', name: 'Mangoes', specialText: 'Special today', normalPrice: 4.50, specialPrice: 3.50, unit: '/ each', emoji: '🥭', badge: 'fresh', isSpecial: true, displayPriority: 4 },
-      { id: 'f5', name: 'Blueberries', normalPrice: 7.99, specialPrice: 5.99, unit: '/ punnet', emoji: '🫐', badge: 'fresh', isSpecial: true, displayPriority: 5 },
-    ]
+  async function loadDealsFromDB () {
+    try {
+      const specials = await window.pos.getSpecials()
+      const activeSpecials = specials.filter(s => s.active)
+      cachedDeals = activeSpecials.map((s, i) => ({
+        id: s.id,
+        name: s.product_name,
+        normalPrice: s.product_price,
+        specialPrice: s.special_price,
+        unit: '',
+        emoji: '🏷️',
+        badge: 'special',
+        isSpecial: true,
+        displayPriority: i + 1,
+      }))
+      if (!cachedDeals.length) {
+        // Also check deals (multi-buy etc)
+        const deals = await window.pos.getActiveDeals()
+        for (const d of deals) {
+          const cfg = typeof d.config === 'string' ? JSON.parse(d.config) : d.config
+          let text = d.name
+          if (d.type === 'multi_buy' && cfg) text = `${cfg.qty} for $${cfg.price}`
+          cachedDeals.push({ id: d.id, name: d.name, specialText: text, emoji: '🎉', badge: 'today', isSpecial: true, displayPriority: cachedDeals.length + 1 })
+        }
+      }
+    } catch (e) { console.warn('Failed to load deals from DB:', e) }
   }
 
   function getActiveDeals() {
-    // TODO: Replace with real IPC call:
-    // const specials = await window.pos.getSpecials()
-    const deals = getFallbackDeals()
-    const now = new Date()
-    return deals
-      .filter(d => {
-        if (!d.isSpecial) return false
-        if (d.specialStart && new Date(d.specialStart) > now) return false
-        if (d.specialEnd && new Date(d.specialEnd) < now) return false
-        return true
-      })
-      .sort((a, b) => (a.displayPriority || 99) - (b.displayPriority || 99))
-      .slice(0, 5)
+    return cachedDeals.slice(0, 5)
   }
 
   function formatPrice(price) { return '$' + Number(price).toFixed(2) }
@@ -290,9 +295,10 @@ body{font-family:'Inter',system-ui,sans-serif;background:linear-gradient(160deg,
     `).join('')
   }
 
-  // Render on load
-  renderDeals()
-  renderSidebarDeals()
+  // Load real deals from DB, then render
+  loadDealsFromDB().then(() => { renderDeals(); renderSidebarDeals() })
+  // Refresh deals every 5 minutes
+  setInterval(() => { loadDealsFromDB().then(() => { renderDeals(); renderSidebarDeals() }) }, 300000)
 
   // ═══ IPC Listeners ══════════════════════════════════════════════════════════
 
