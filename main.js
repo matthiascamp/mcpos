@@ -3069,7 +3069,7 @@ function setupIPC() {
     }
 
     const printer = detectPrinter(devices)
-    const scale = detectScale(devices, serialPorts)
+    const scale = await detectScale(devices, serialPorts)
     const scanner = detectScanner(devices)
 
     if (!printer?.needsSetup) hwPrinter = printer
@@ -3251,6 +3251,40 @@ function setupIPC() {
         }
       }
     }
+
+    // Printer / drawer diagnosis
+    diag.printerScan = {}
+    if (isWin) {
+      const queues = getWindowsQueues()
+      diag.printerScan.queues = queues.map(q => ({ name: q.Name, port: q.PortName, driver: q.DriverName, status: q.PrinterStatus }))
+      diag.printerScan.queueTests = []
+      for (const q of queues) {
+        const works = testQueueRaw(q.Name)
+        diag.printerScan.queueTests.push({ name: q.Name, port: q.PortName, driver: q.DriverName, rawSendOk: works })
+      }
+    }
+    diag.printerScan.currentPrinter = hwPrinter ? { name: hwPrinter.name, interface: hwPrinter.interface, port: hwPrinter.port, tested: !!hwPrinter.tested, configured: !!hwPrinter.configured } : null
+    diag.printerScan.drawerAvailable = !!hwPrinter && !hwPrinter.needsSetup
+
+    // Scanner diagnosis
+    diag.scannerScan = {}
+    const scannerDevices = HID ? HID.devices().filter(d => d.vendorId && SCANNER_VENDORS[d.vendorId]) : []
+    diag.scannerScan.hidMatches = scannerDevices.map(d => ({
+      vid: '0x' + d.vendorId.toString(16).padStart(4, '0'),
+      pid: '0x' + d.productId.toString(16).padStart(4, '0'),
+      vendor: SCANNER_VENDORS[d.vendorId],
+      product: d.product || '',
+      manufacturer: d.manufacturer || '',
+    }))
+    diag.scannerScan.currentScanner = hwScanner
+    // Also list any HID keyboard-mode devices (scanners often present as keyboards)
+    diag.scannerScan.hidKeyboards = HID ? HID.devices().filter(d => d.usagePage === 1 && d.usage === 6 && d.vendorId).map(d => ({
+      vid: '0x' + d.vendorId.toString(16).padStart(4, '0'),
+      pid: '0x' + d.productId.toString(16).padStart(4, '0'),
+      product: d.product || '',
+      manufacturer: d.manufacturer || '',
+      note: 'HID keyboard (could be scanner in keyboard-emulation mode)',
+    })) : []
 
     // Saved config from DB
     diag.savedConfig = {}
