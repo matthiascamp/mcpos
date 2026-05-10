@@ -2950,64 +2950,95 @@ function setupIPC() {
   }
 
   function parse8217Response (data) {
-    // Log raw response BEFORE any parsing — diagnostic-first approach
-    if (data && data.length > 0) {
-      const hex = Array.from(data).map(b => b.toString(16).padStart(2, '0')).join(' ')
-      const ascii = data.toString('ascii').replace(/[^\x20-\x7e]/g, '?')
-      appLog('debug', 'scale', `Raw response: hex=[${hex}] ascii=[${ascii}] len=${data.length}`)
-    }
-
     if (!data || data.length < 1) return null
 
-    // Try standard MT 8217 framed format first: status byte + ASCII weight digits
-    // Then fall back to simple ASCII weight parsing for unframed responses
     const rawArr = Array.from(data)
-    const allDigits = data.toString('ascii').replace(/[^0-9.-]/g, '')
-    const decimals = hwScale?.decimals || parseInt(dbGet("SELECT value FROM settings WHERE key='hw_scale_decimals'")?.value || '3')
+    const hex = rawArr.map(b => b.toString(16).padStart(2, '0')).join(' ')
+    const ascii = data.toString('ascii').replace(/[^\x20-\x7e]/g, '?')
+    appLog('debug', 'scale', `8217 parse: hex=[${hex}] ascii=[${ascii}] len=${data.length}`)
 
-    // Method 1: Standard 8217 — first byte is status, rest are weight digits
-    if (data.length >= 2) {
-      const status = data[0]
-      const inMotion = !!(status & 0x01)
-      const atZero = !!(status & 0x02)
-      const netMode = !!(status & 0x04)
-      const negative = !!(status & 0x10)
-      const underZero = !!(status & 0x20)
-      const overCap = !!(status & 0x40)
-      const weightStr = data.slice(1).toString('ascii').replace(/[^0-9]/g, '')
+    // ── Method 1: Standard MT 8217 binary frame ──────────────────────────────
+    // Frame between STX and CR: STA + STB + W5 W4 W3 W2 W1 + BCC + ETX
+    //   STA (byte 0): bits 0-2 = decimal point position, bit 5 = always 1
+    //   STB (byte 1): bit 0 = net, bit 1 = negative, bit 2 = out-of-range,
+    //                 bit 3 = in motion, bit 4 = kg (vs lb), bit 5 = always 1,
+    //                 bit 6 = power-up
+    //   W5-W1 (bytes 2-6): 5 ASCII digit weight bytes
+    //   BCC (byte 7): checksum
+    //   ETX (byte 8): 0x03
+    if (data.length >= 7) {
+      const digitBytes = data.slice(2, 7)
+      const allAsciiDigits = Array.from(digitBytes).every(b => b >= 0x30 && b <= 0x39)
 
-      if (weightStr) {
-        let weight = parseInt(weightStr, 10) / Math.pow(10, decimals)
+      if (allAsciiDigits) {
+        const sta = data[0]
+        const stb = data[1]
+
+        // Decimal point position from STA bits 0-2
+        // 0=*100, 1=*10, 2=*1, 3=/10, 4=/100, 5=/1000, 6=/10000, 7=/100000
+        const decPos = sta & 0x07
+        const weightInt = parseInt(digitBytes.toString('ascii'), 10)
+        let weight = weightInt * Math.pow(10, 2 - decPos)
+
+        // Status flags from STB
+        const netMode    = !!(stb & 0x01)  // bit 0: Gross=0, Net=1
+        const negative   = !!(stb & 0x02)  // bit 1: Positive=0, Negative=1
+        const outOfRange = !!(stb & 0x04)  // bit 2: Over capacity or under zero
+        const inMotion   = !!(stb & 0x08)  // bit 3: Scale in motion / unstable
+        const isKg       = !!(stb & 0x10)  // bit 4: lb=0, kg=1
+        const inPowerUp  = !!(stb & 0x40)  // bit 6: Still powering up
+
         if (negative) weight = -weight
-        const scaleStatus = overCap ? 'over_limit' : underZero ? 'under_zero' : inMotion ? 'in_motion' : 'stable'
-        return { weight, unit: 'kg', status: scaleStatus, stable: !inMotion && !overCap && !underZero, inMotion, zero: atZero, net: netMode, raw: rawArr }
-      }
+        // Round to avoid floating point noise (e.g. 5.0000000001)
+        weight = Math.round(weight * 100000) / 100000
 
-      // Status-only response (all ?/0x3F) — scale not ready or in motion
-      if (status === 0x3F || overCap || underZero) {
-        // Check if ANY byte has digits (like the ????5 pattern from diagnostic)
-        if (allDigits) {
-          let weight = parseFloat(allDigits)
-          if (!isNaN(weight)) {
-            // Diagnostic showed ????5 = 5g on scale, apply decimal scaling
-            weight = weight / Math.pow(10, decimals)
-            return { weight, unit: 'kg', status: inMotion ? 'in_motion' : 'stable', stable: !inMotion, inMotion, zero: weight === 0, net: false, raw: rawArr }
-          }
+        const unit = isKg ? 'kg' : 'lb'
+        const status = inPowerUp ? 'power_up' : outOfRange ? 'over_limit' : inMotion ? 'in_motion' : 'stable'
+
+        return {
+          weight, unit, status,
+          stable: !inMotion && !outOfRange && !inPowerUp,
+          inMotion, zero: weight === 0 && !inMotion,
+          net: netMode, raw: rawArr
         }
-        return { weight: 0, unit: 'kg', status: overCap ? 'over_limit' : underZero ? 'under_zero' : 'not_ready', stable: false, inMotion: true, zero: false, raw: rawArr }
       }
     }
 
-    // Method 2: Simple ASCII weight (no status byte) — for unframed responses
-    if (allDigits) {
-      const match = data.toString('ascii').match(/(-?\d+(?:\.\d+)?)/)
-      if (match) {
-        let weight = parseFloat(match[1])
-        // If weight looks like raw digits without decimal, apply decimal scaling
-        if (Number.isInteger(weight) && weight > 100) {
-          weight = weight / Math.pow(10, decimals)
+    // ── Method 2: ECR format — ASCII weight with decimal point ───────────────
+    // Some 8217 configs return formatted strings like " 05.000LB" or "  0.500KG"
+    const asciiStr = data.toString('ascii')
+    const ecrMatch = asciiStr.match(/(-?\d+\.?\d*)\s*(kg|lb|g|oz)?/i)
+    if (ecrMatch) {
+      const weight = parseFloat(ecrMatch[1])
+      if (!isNaN(weight)) {
+        const unit = (ecrMatch[2] || 'kg').toLowerCase()
+        return {
+          weight, unit, status: 'stable',
+          stable: true, inMotion: false,
+          zero: weight === 0, net: false, raw: rawArr
         }
-        return { weight, unit: 'kg', status: 'stable', stable: true, inMotion: false, zero: weight === 0, net: false, raw: rawArr }
+      }
+    }
+
+    // ── Method 3: Status-only response ("?" + status char) — scale not ready ─
+    if (asciiStr.includes('?')) {
+      appLog('debug', 'scale', '8217 status-only response (scale not ready or in motion)')
+      return {
+        weight: 0, unit: 'kg', status: 'not_ready',
+        stable: false, inMotion: true, zero: false, net: false, raw: rawArr
+      }
+    }
+
+    // ── Method 4: Raw digit fallback ─────────────────────────────────────────
+    const digitMatch = asciiStr.match(/(-?\d+(?:\.\d+)?)/)
+    if (digitMatch) {
+      let weight = parseFloat(digitMatch[1])
+      // Raw digits without decimal from a kg scale — assume 3 decimal places
+      if (Number.isInteger(weight) && weight > 100) weight = weight / 1000
+      return {
+        weight, unit: 'kg', status: 'stable',
+        stable: true, inMotion: false,
+        zero: weight === 0, net: false, raw: rawArr
       }
     }
 
@@ -3016,7 +3047,7 @@ function setupIPC() {
 
   async function readScale8217 () {
     try {
-      const data = await send8217Command(hwScalePort, 'w', 3000)
+      const data = await send8217Command(hwScalePort, 'W', 3000)
       const parsed = parse8217Response(data)
       if (parsed) return parsed
       return { error: `Unexpected 8217 response: ${Array.from(data).map(b => b.toString(16)).join(' ')}` }
@@ -3149,7 +3180,7 @@ function setupIPC() {
         testPort.open(err => { clearTimeout(timer); err ? reject(err) : resolve() })
       })
       if (protocol === 'mt8217') {
-        const data = await send8217Command(testPort, 'w', cmdTimeout)
+        const data = await send8217Command(testPort, 'W', cmdTimeout)
         const parsed = parse8217Response(data)
         await closePort()
         if (parsed) return { ok: true, reading: parsed, protocol: 'mt8217', raw: Array.from(data).map(b => b.toString(16)).join(' ') }
@@ -3264,11 +3295,33 @@ function setupIPC() {
     const scale = await detectScale(devices, serialPorts)
     const scanner = detectScanner(devices)
 
-    if (!printer?.needsSetup) hwPrinter = printer
+    if (!printer?.needsSetup) {
+      hwPrinter = printer
+      // Auto-save detected printer config so it persists across restarts
+      if (printer && printer.name && !printer.configured) {
+        dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('hw_printer_name', ?1)", [printer.name])
+        dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('hw_printer_interface', ?1)", [printer.interface || 'windows'])
+        if (printer.port) dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('hw_printer_port', ?1)", [printer.port])
+        scheduleSave()
+        appLog('info', 'hardware', `Auto-saved printer config: ${printer.name} (${printer.interface})`)
+      }
+    }
     // Close cached HID scale if path changed
     const scaleOk = scale && scale.type !== 'none'
     if (scaleOk && scale.path !== hwScale?.path) closeHidScale()
-    if (scaleOk) hwScale = scale
+    if (scaleOk) {
+      hwScale = scale
+      // Auto-save detected serial scale config so it persists across restarts
+      // (avoids slow brute-force COM port scan on every startup)
+      if (scale.detected && scale.type === 'serial' && scale.port) {
+        dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('hw_scale_type', 'serial')", [])
+        dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('hw_scale_port', ?1)", [scale.port])
+        dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('hw_scale_baud', ?1)", [String(scale.baud || 9600)])
+        dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('hw_scale_protocol', ?1)", [scale.protocol || 'mt8217'])
+        scheduleSave()
+        appLog('info', 'hardware', `Auto-saved scale config: ${scale.port} ${scale.protocol}@${scale.baud}`)
+      }
+    }
     hwScanner = scanner
 
     const classified = devices.filter(d => d.vendorId > 0).map(d => {
@@ -3672,14 +3725,8 @@ function setupIPC() {
     if (!hwScale) return
 
     const protocol = hwScale?.protocol || 'sics'
-
-    // MT 8217 continuous streaming — scale pushes weight data automatically
-    if (protocol === 'mt8217' && hwScale.type === 'serial') {
-      await startScaleStream()
-      return
-    }
-
-    // SICS: request-response polling
+    // Both SICS and MT 8217 use request-response polling (send command, read response)
+    // The Viva/Ariva retail scales do NOT support continuous streaming mode
     appLog('info', 'hardware', `Starting scale polling (${protocol})`)
     scalePollingTimer = setInterval(pollScale, 500)
   }
@@ -3783,7 +3830,7 @@ function setupIPC() {
     resetWatchdog()
 
     // 'C' starts continuous output on MT 8217
-    hwScalePort.write('c', 'ascii', () => { hwScalePort.drain(() => {}) })
+    hwScalePort.write('C', 'ascii', () => { hwScalePort.drain(() => {}) })
   }
 
   function stopScaleStream () {
