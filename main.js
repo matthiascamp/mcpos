@@ -2779,7 +2779,7 @@ function setupIPC() {
   // Protocol-specific serial settings
   const PROTOCOL_SERIAL_OPTS = {
     sics:   { dataBits: 8, stopBits: 1, parity: 'none', rtscts: false },   // MT-SICS (lab balances)
-    mt8217: { dataBits: 8, stopBits: 1, parity: 'even', rtscts: false },   // MT 8217 (Viva, Ariva, bPlus retail scales) — confirmed 8-E-1 via diagnostic
+    mt8217: { dataBits: 7, stopBits: 1, parity: 'even', rtscts: false },   // MT 8217 (Viva, Ariva, bPlus retail scales) — 7-E-1 per protocol spec
   }
 
   async function openScaleSerialPort (portPath, baud, protocol) {

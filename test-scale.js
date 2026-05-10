@@ -6,15 +6,19 @@ const { SerialPort } = require('serialport')
 
 const comPort = process.argv[2] || 'COM2'
 const baud = parseInt(process.argv[3] || '9600')
+const bits = parseInt(process.argv[4] || '7')
 
-console.log(`Opening ${comPort} at ${baud} baud (8-E-1)...`)
-console.log('Settings: dataBits=8, parity=even, stopBits=1, command=w')
+console.log(`Opening ${comPort} at ${baud} baud (${bits}-E-1)...`)
+console.log(`Settings: dataBits=${bits}, parity=even, stopBits=1, command=w`)
+console.log('Usage: node test-scale.js [COM] [BAUD] [DATABITS]')
+console.log('  Try: node test-scale.js COM2 9600 7')
+console.log('  Try: node test-scale.js COM2 9600 8')
 console.log('')
 
 const port = new SerialPort({
   path: comPort,
   baudRate: baud,
-  dataBits: 8,
+  dataBits: bits,
   parity: 'even',
   stopBits: 1,
   autoOpen: false,
