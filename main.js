@@ -2476,12 +2476,11 @@ function setupIPC() {
     }
   }
 
-  // Clean up duplicate printer queues like "80mm Series Printer (1)", "(2)", "(3)"
+  // Clean up only printer queues that WE created (not system/driver-installed ones)
   function cleanupDuplicateQueues () {
     try {
-      hwExec(`powershell -NoProfile -NonInteractive -Command "Get-Printer -ErrorAction SilentlyContinue | Where-Object { $_.Name -match '\\(\\d+\\)$' -and $_.PortName -like 'USB*' } | ForEach-Object { Remove-Printer -Name $_.Name -ErrorAction SilentlyContinue }"`, { timeout: 5000, encoding: 'utf-8' })
-      // Also remove any queues we previously created that don't work
-      hwExec(`powershell -NoProfile -NonInteractive -Command "Remove-Printer -Name 'Crisp Receipt Printer' -ErrorAction SilentlyContinue; Remove-Printer -Name 'EPSON TM-T82II Receipt' -ErrorAction SilentlyContinue"`, { timeout: 3000, encoding: 'utf-8' })
+      // Only remove queues explicitly created by this app — never touch driver-installed queues
+      hwExec(`powershell -NoProfile -NonInteractive -Command "Remove-Printer -Name 'Crisp Receipt Printer' -ErrorAction SilentlyContinue"`, { timeout: 3000, encoding: 'utf-8' })
     } catch (_) {}
   }
 
