@@ -2660,6 +2660,17 @@ function setupIPC() {
     if (hwScale?.configured) {
       // Verify saved config actually works — don't blindly trust stale config
       if (hwScale.type === 'serial' && hwScale.port && SerialPortLib) {
+        // If port is already open (streaming/polling), verify through it
+        if (hwScalePort?.isOpen) {
+          try {
+            const reading = await readScaleSerial()
+            if (!reading.error) {
+              appLog('info', 'hardware', `Saved scale verified via open port: ${hwScale.port}`)
+              return hwScale
+            }
+          } catch (_) {}
+        }
+        // Port not open — try fresh test
         try {
           const verify = await testSerialScale(hwScale.port, hwScale.baud || 9600, hwScale.protocol || 'sics', 2000)
           if (verify.ok) {
@@ -2744,7 +2755,7 @@ function setupIPC() {
             }
           } catch (_) {}
         }
-        if (!found) portErrors.push({ port: sp.path, error: 'No protocol responded' })
+        if (!found) portErrors.push({ port: sp.path, error: 'Port opens but no scale responded — check: is the scale powered on? Is the RS-232 cable connected at both ends? Try a different baud rate in Hardware settings.' })
       }
       // No scale found — return error info so probe can display it
       if (portErrors.length > 0) {
@@ -2803,6 +2814,7 @@ function setupIPC() {
       port.on('close', () => {
         appLog('info', 'hardware', 'Scale serial port closed')
         hwScalePort = null
+        scaleStreamActive = false
       })
     })
   }
@@ -2941,6 +2953,7 @@ function setupIPC() {
   // ── Unified serial scale read ─────────────────────────────────────────────
 
   async function readScaleSerial () {
+    if (scaleStreamActive && lastStreamReading) return lastStreamReading
     if (!hwScalePort || !hwScalePort.isOpen) {
       if (!hwScale?.port) return { error: 'No serial scale configured. Set COM port in Hardware tab.' }
       try {
@@ -3213,14 +3226,27 @@ function setupIPC() {
     }
 
     if (scale && scale.type === 'serial' && scale.port && SerialPortLib) {
-      const test = await testSerialScale(scale.port, scale.baud || 9600, scale.protocol || 'sics')
-      result.scale.tested = true
-      if (test.ok) {
-        result.scale.testResult = `${test.reading.weight} ${test.reading.unit} (${test.reading.status})`
-        result.scale.reading = test.reading
-        result.scale.detected = true
+      if (hwScalePort?.isOpen) {
+        // Read through existing open port
+        const reading = await readScaleSerial()
+        result.scale.tested = true
+        if (!reading.error) {
+          result.scale.testResult = `${reading.weight} ${reading.unit} (${reading.status})`
+          result.scale.reading = reading
+          result.scale.detected = true
+        } else {
+          result.scale.testResult = reading.error
+        }
       } else {
-        result.scale.testResult = test.error
+        const test = await testSerialScale(scale.port, scale.baud || 9600, scale.protocol || 'sics')
+        result.scale.tested = true
+        if (test.ok) {
+          result.scale.testResult = `${test.reading.weight} ${test.reading.unit} (${test.reading.status})`
+          result.scale.reading = test.reading
+          result.scale.detected = true
+        } else {
+          result.scale.testResult = test.error
+        }
       }
     } else if (scale && scale.type === 'hid' && scale.path && HID) {
       const reading = readScaleHID()
@@ -3232,8 +3258,275 @@ function setupIPC() {
     return result
   }
 
+  // ── Environment diagnostics — detect conflicts, locked ports, missing drivers ──
+  async function diagnoseEnvironment () {
+    const issues = []
+    const info = []
+
+    if (!isWin) {
+      info.push({ type: 'info', area: 'platform', message: `Platform: ${process.platform} (some checks are Windows-only)` })
+    }
+
+    // ── 1. Scan ALL running processes for anything that commonly holds COM ports ──
+    if (isWin) {
+      const knownConflicts = {
+        'profittrack': 'Profit Track', 'pt_pos': 'Profit Track POS', 'ptserver': 'Profit Track Server',
+        'ptrack': 'Profit Track', 'ptwin': 'Profit Track', 'pt32': 'Profit Track',
+        'putty': 'PuTTY (serial terminal)', 'realterm': 'RealTerm (serial terminal)',
+        'teraterm': 'Tera Term', 'hterm': 'HTerm', 'com0com': 'com0com (virtual COM)',
+        'scalelink': 'ScaleLink', 'scalemanager': 'Scale Manager',
+        'hyperterminal': 'HyperTerminal', 'coolterm': 'CoolTerm', 'minicom': 'Minicom',
+        'mtterminal': 'MT Terminal (Mettler Toledo)', 'winhex': 'WinHex',
+        'device monitoring studio': 'Device Monitoring Studio',
+      }
+      // Generic COM port holders: any process with "serial", "com port", or "terminal" in name
+      try {
+        const tasklist = hwExec('tasklist /FO CSV /NH', { timeout: 5000, encoding: 'utf-8' })
+        const lines = tasklist.split('\n').filter(l => l.trim())
+        const foundConflicts = new Set()
+        for (const line of lines) {
+          const match = line.match(/^"([^"]+)"/)
+          if (!match) continue
+          const proc = match[1].replace(/\.exe$/i, '').toLowerCase()
+          // Check known conflicts
+          for (const [key, name] of Object.entries(knownConflicts)) {
+            if (proc.includes(key) && !foundConflicts.has(key)) {
+              foundConflicts.add(key)
+              issues.push({ type: 'conflict', area: 'software', severity: 'high',
+                message: `${name} is running (${match[1]}) — may be locking COM ports or printer queues`,
+                fix: `Close ${name} before using Crisp POS, or it will block access to the scale and printer` })
+            }
+          }
+        }
+      } catch (_) {}
+
+      // Also check which processes actually hold COM port handles
+      try {
+        const handleCheck = hwExec('powershell -NoProfile -NonInteractive -Command "Get-CimInstance Win32_SerialPort -ErrorAction SilentlyContinue | Select-Object DeviceID,Name,Status,Description | ConvertTo-Json -Compress"', { timeout: 5000, encoding: 'utf-8' }).trim()
+        if (handleCheck) {
+          const ports = JSON.parse(handleCheck)
+          const list = Array.isArray(ports) ? ports : [ports]
+          for (const p of list) {
+            if (p.Status && p.Status !== 'OK') {
+              issues.push({ type: 'port_status', area: 'port', severity: 'medium',
+                message: `${p.DeviceID}: hardware status is "${p.Status}" — ${p.Description || p.Name || ''}`,
+                fix: `Check Device Manager → Ports → ${p.DeviceID} for errors` })
+            }
+          }
+        }
+      } catch (_) {}
+    }
+
+    // ── 2. COM port access + scale response test ──
+    if (SerialPortLib) {
+      try {
+        const ports = await SerialPortLib.SerialPort.list()
+        for (const p of ports) {
+          // Skip if this port is already held open by our scale polling
+          if (hwScalePort?.isOpen && hwScalePort.path === p.path) {
+            info.push({ type: 'info', area: 'port', message: `${p.path}: in use by Crisp POS (scale connected)` })
+            continue
+          }
+          let portOpened = false
+          let testPort = null
+          try {
+            testPort = new SerialPortLib.SerialPort({ path: p.path, baudRate: 9600, autoOpen: false })
+            await new Promise((resolve, reject) => {
+              const t = setTimeout(() => reject(new Error('open_timeout')), 2000)
+              testPort.open(err => { clearTimeout(t); err ? reject(err) : resolve() })
+            })
+            portOpened = true
+
+            // Port opens — try to get a scale response to check if anything is connected
+            let gotResponse = false
+            try {
+              const resp = await new Promise((resolve, reject) => {
+                let buf = ''
+                const timer = setTimeout(() => reject(new Error('no_response')), 1500)
+                const onData = chunk => {
+                  buf += chunk.toString('ascii')
+                  if (buf.length > 0) { clearTimeout(timer); testPort.removeListener('data', onData); resolve(buf) }
+                }
+                testPort.on('data', onData)
+                testPort.write('S\r\n', 'ascii', () => { testPort.drain(() => {}) })
+              })
+              gotResponse = true
+              info.push({ type: 'info', area: 'port', message: `${p.path}: device responded${p.manufacturer ? ` (${p.manufacturer})` : ''}` })
+            } catch (_) {
+              // No response to SICS — try MT 8217
+              try {
+                const resp8217 = await new Promise((resolve, reject) => {
+                  const buf = []
+                  let inFrame = false
+                  const timer = setTimeout(() => reject(new Error('no_response')), 1500)
+                  const onData = chunk => {
+                    for (const byte of chunk) {
+                      if (byte === 0x02) { inFrame = true; buf.length = 0; continue }
+                      if (byte === 0x0D && inFrame) { clearTimeout(timer); testPort.removeListener('data', onData); resolve(Buffer.from(buf)); return }
+                      if (inFrame) buf.push(byte)
+                    }
+                  }
+                  testPort.on('data', onData)
+                  testPort.write('W', 'ascii', () => { testPort.drain(() => {}) })
+                })
+                gotResponse = true
+                info.push({ type: 'info', area: 'port', message: `${p.path}: MT 8217 scale responded${p.manufacturer ? ` (${p.manufacturer})` : ''}` })
+              } catch (_) {}
+            }
+
+            if (!gotResponse) {
+              // Port opens but nothing responds
+              issues.push({ type: 'no_response', area: 'scale', severity: 'medium',
+                message: `${p.path}: port opens but no device responded`,
+                fix: `Check: (1) Is the scale powered on? (2) Is the RS-232 cable connected to both the scale and this port? (3) Is the cable a straight-through or crossover — the Ariva-S needs a specific pinout` })
+            }
+
+            await new Promise(r => testPort.close(r))
+          } catch (e) {
+            if (/access denied|permission|busy/i.test(e.message)) {
+              // Try to find which process holds this port
+              let holder = ''
+              if (isWin) {
+                try {
+                  // Use handle.exe-style query via PowerShell to find the holder
+                  const result = hwExec(`powershell -NoProfile -NonInteractive -Command "$p = Get-CimInstance Win32_SerialPort -Filter \\"DeviceID='${p.path}'\\" -ErrorAction SilentlyContinue; if ($p) { $p.Name } else { 'unknown' }"`, { timeout: 3000, encoding: 'utf-8' }).trim()
+                  if (result && result !== 'unknown') holder = ` (device: ${result})`
+                } catch (_) {}
+              }
+              issues.push({ type: 'locked_port', area: 'port', severity: 'high',
+                message: `${p.path}: LOCKED — another application has exclusive access${holder}`,
+                fix: `Another program is using ${p.path}. Close Profit Track, serial terminals, Device Manager's port monitor, or any other software that connects to serial ports. Then re-scan.` })
+            } else if (e.message === 'open_timeout') {
+              issues.push({ type: 'port_timeout', area: 'port', severity: 'medium',
+                message: `${p.path}: timed out trying to open — port may be in a bad state`,
+                fix: `Try: (1) Unplug and replug the USB-to-Serial adapter (2) Restart the computer if the port is stuck` })
+            } else {
+              issues.push({ type: 'port_error', area: 'port', severity: 'medium',
+                message: `${p.path}: ${e.message}`,
+                fix: `Check Device Manager for errors on this port` })
+            }
+            if (testPort && portOpened) { try { await new Promise(r => testPort.close(r)) } catch (_) {} }
+          }
+        }
+        if (ports.length === 0) {
+          issues.push({ type: 'no_ports', area: 'port', severity: 'high',
+            message: 'No COM ports found — the RS-232 adapter is not detected',
+            fix: 'Check: (1) Is the USB-to-Serial adapter plugged in? (2) Does it show in Device Manager → Ports? (3) Install the correct driver — common adapters need FTDI, Prolific PL2303, CH340, or Silicon Labs CP210x drivers' })
+        }
+      } catch (e) {
+        issues.push({ type: 'serial_error', area: 'port', severity: 'high',
+          message: `Cannot list serial ports: ${e.message}` })
+      }
+    } else {
+      issues.push({ type: 'missing_dep', area: 'driver', severity: 'high',
+        message: 'serialport package not installed — RS-232 communication disabled',
+        fix: 'Run: npm install serialport' })
+    }
+
+    // ── 3. USB devices without drivers (yellow triangle in Device Manager) ──
+    if (isWin) {
+      try {
+        const problemDevices = hwExec('powershell -NoProfile -NonInteractive -Command "Get-PnpDevice -Status Error,Degraded,Unknown -ErrorAction SilentlyContinue | Where-Object { $_.Class -in \'Ports\',\'USB\',\'Printer\',\'HIDClass\',\'\' } | Select-Object FriendlyName,InstanceId,Status,Class | ConvertTo-Json -Compress"', { timeout: 5000, encoding: 'utf-8' }).trim()
+        if (problemDevices && problemDevices !== '') {
+          try {
+            const devs = JSON.parse(problemDevices)
+            const list = Array.isArray(devs) ? devs : [devs]
+            for (const d of list) {
+              const isUSBSerial = /serial|uart|com|rs.?232|ftdi|prolific|ch340|cp210/i.test(d.FriendlyName || d.InstanceId || '')
+              issues.push({ type: 'driver_missing', area: 'driver', severity: isUSBSerial ? 'high' : 'medium',
+                message: `Device "${d.FriendlyName || 'Unknown'}" has status: ${d.Status}${d.Class ? ` (class: ${d.Class})` : ''}`,
+                fix: isUSBSerial
+                  ? 'This looks like a USB-to-Serial adapter without a driver. Download and install the driver from the adapter manufacturer (FTDI, Prolific, CH340, or Silicon Labs)'
+                  : 'This device has a driver problem — check Device Manager for details' })
+            }
+          } catch (_) {} // JSON parse fail = no problem devices
+        }
+      } catch (_) {}
+
+      // ── 4. Port driver health ──
+      try {
+        const drivers = hwExec('powershell -NoProfile -NonInteractive -Command "Get-WmiObject Win32_PnPSignedDriver -Filter \\"DeviceClass=\'Ports\'\\" -ErrorAction SilentlyContinue | Select-Object DeviceName,DriverVersion,Manufacturer,Status | ConvertTo-Json -Compress"', { timeout: 5000, encoding: 'utf-8' }).trim()
+        if (drivers) {
+          const parsed = JSON.parse(drivers)
+          const list = Array.isArray(parsed) ? parsed : [parsed]
+          for (const d of list) {
+            if (d.Status && d.Status !== 'OK') {
+              issues.push({ type: 'driver_error', area: 'driver', severity: 'high',
+                message: `Port driver "${d.DeviceName || 'Unknown'}" has status: ${d.Status}`,
+                fix: 'Right-click the device in Device Manager → Update driver, or uninstall and reinstall' })
+            } else {
+              info.push({ type: 'info', area: 'driver', message: `Driver OK: ${d.DeviceName || 'Unknown'} v${d.DriverVersion || '?'} (${d.Manufacturer || '?'})` })
+            }
+          }
+        }
+      } catch (_) {}
+
+      // ── 5. Print Spooler service ──
+      try {
+        const spoolerStatus = hwExec('powershell -NoProfile -NonInteractive -Command "(Get-Service Spooler -ErrorAction SilentlyContinue).Status"', { timeout: 3000, encoding: 'utf-8' }).trim()
+        if (spoolerStatus !== 'Running') {
+          issues.push({ type: 'service', area: 'printer', severity: 'high',
+            message: `Print Spooler service is ${spoolerStatus || 'not found'} — receipt printing will not work`,
+            fix: 'Open services.msc → find "Print Spooler" → right-click → Start. Set startup type to Automatic.' })
+        } else {
+          info.push({ type: 'info', area: 'printer', message: 'Print Spooler service is running' })
+        }
+      } catch (_) {}
+
+      // ── 6. Stuck print jobs ──
+      try {
+        const jobs = hwExec('powershell -NoProfile -NonInteractive -Command "Get-Printer -ErrorAction SilentlyContinue | ForEach-Object { Get-PrintJob -PrinterName $_.Name -ErrorAction SilentlyContinue } | Measure-Object | Select-Object -ExpandProperty Count"', { timeout: 5000, encoding: 'utf-8' }).trim()
+        const jobCount = parseInt(jobs)
+        if (jobCount > 0) {
+          issues.push({ type: 'stuck_jobs', area: 'printer', severity: 'medium',
+            message: `${jobCount} print job(s) stuck in queue — may block new receipts`,
+            fix: 'Open Printers & Scanners → select the receipt printer → Open queue → Cancel All Documents' })
+        }
+      } catch (_) {}
+
+      // ── 7. Check for Bluetooth COM ports (can waste time during detection) ──
+      try {
+        const btPorts = hwExec('powershell -NoProfile -NonInteractive -Command "Get-PnpDevice -Class Bluetooth -Status OK -ErrorAction SilentlyContinue | Measure-Object | Select-Object -ExpandProperty Count"', { timeout: 3000, encoding: 'utf-8' }).trim()
+        const btCount = parseInt(btPorts)
+        if (btCount > 0) {
+          info.push({ type: 'info', area: 'port', message: `${btCount} Bluetooth device(s) found — Bluetooth COM ports may slow down hardware detection` })
+        }
+      } catch (_) {}
+    }
+
+    // ── 8. Scale connection status ──
+    if (hwScale) {
+      if (hwScalePort?.isOpen) {
+        info.push({ type: 'info', area: 'scale', message: `Scale connected: ${hwScale.port || hwScale.path} (${hwScale.protocol || 'hid'})${scaleStreamActive ? ' — streaming' : ''}` })
+      } else if (hwScale.configured) {
+        issues.push({ type: 'scale_disconnected', area: 'scale', severity: 'medium',
+          message: `Scale configured on ${hwScale.port || hwScale.path} but port is not open`,
+          fix: 'Check the RS-232 cable connection. The scale may have been unplugged or powered off.' })
+      }
+    } else {
+      issues.push({ type: 'no_scale', area: 'scale', severity: 'medium',
+        message: 'No scale detected — weight-based products will require manual weight entry',
+        fix: 'Connect the Mettler Toledo Ariva-S via the RS-232 cable, ensure it is powered on, and re-scan' })
+    }
+
+    // ── 9. Printer status ──
+    if (!hwPrinter) {
+      issues.push({ type: 'no_printer', area: 'printer', severity: 'medium',
+        message: 'No receipt printer detected — receipts will not print',
+        fix: 'Connect the receipt printer via USB, ensure it is powered on, and re-scan' })
+    }
+
+    // ── 10. Package availability ──
+    if (!HID) {
+      info.push({ type: 'info', area: 'driver', message: 'node-hid not available — USB HID scale reading disabled (RS-232 still works)' })
+    }
+
+    return { issues, info, timestamp: new Date().toISOString() }
+  }
+
   // ── Expose cleanup for shutdown handler (module-scope can't see setupIPC locals) ─
   hardwareCleanup = () => {
+    stopScalePolling()
     if (hwScalePort?.isOpen) try { hwScalePort.close() } catch (_) {}
     try { closeHidScale() } catch (_) {}
   }
@@ -3243,23 +3536,46 @@ function setupIPC() {
   loadSavedHardwareConfig()
   // Note: printer queue health is verified inside detectPrinter() during probeHardware()
 
-  probeHardware().then(r => {
+  probeHardware().then(async r => {
     if (hwPrinter) appLog('info', 'hardware', `Printer: ${hwPrinter.name} (${hwPrinter.interface})`)
     if (hwScale) appLog('info', 'hardware', `Scale: ${hwScale.vendor || hwScale.product}`)
     startScalePolling()
-    // Clean up duplicate printer queues and any queues we previously created (background, non-critical)
     try { cleanupDuplicateQueues() } catch (_) {}
+
+    // Run environment diagnostics and warn about issues
+    try {
+      const diag = await diagnoseEnvironment()
+      for (const issue of diag.issues) {
+        appLog('warn', 'hardware', `[DIAG] ${issue.message}${issue.fix ? ' — Fix: ' + issue.fix : ''}`)
+      }
+      // Send high-severity issues to renderer for toast notifications
+      const critical = diag.issues.filter(i => i.severity === 'high')
+      if (critical.length > 0 && mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('hardware:issues', critical)
+      }
+    } catch (e) { appLog('warn', 'hardware', 'Environment diagnostic failed', e.message) }
   }).catch(e => appLog('error', 'hardware', 'Auto-probe failed', e.message))
 
   // Auto-reprobe every 30s — also checks printer queue health
   setInterval(async () => {
     try {
-      const hadPrinter = !!hwPrinter, hadScale = !!hwScale
-      await probeHardware()
-      if (!hadPrinter && hwPrinter) appLog('info', 'hardware', `Printer connected: ${hwPrinter.name}`)
-      if (!hadScale && hwScale) {
-        appLog('info', 'hardware', `Scale connected: ${hwScale.vendor || hwScale.product}`)
-        startScalePolling()
+      const hadPrinter = !!hwPrinter
+      // If scale port is open and working, skip scale re-detection (avoids port conflict)
+      const scaleWorking = hwScalePort?.isOpen && scaleErrorCount < 10
+      if (scaleWorking) {
+        // Only reprobe printer — don't touch scale
+        const devices = enumerateDevices()
+        const printer = detectPrinter(devices)
+        if (!printer?.needsSetup) hwPrinter = printer
+        if (!hadPrinter && hwPrinter) appLog('info', 'hardware', `Printer connected: ${hwPrinter.name}`)
+      } else {
+        const hadScale = !!hwScale
+        await probeHardware()
+        if (!hadPrinter && hwPrinter) appLog('info', 'hardware', `Printer connected: ${hwPrinter.name}`)
+        if (!hadScale && hwScale) {
+          appLog('info', 'hardware', `Scale connected: ${hwScale.vendor || hwScale.product}`)
+          startScalePolling()
+        }
       }
       // Clear any stuck print jobs on each reprobe (detectPrinter handles full repair)
       if (isWin && hwPrinter?.name && hwPrinter.interface === 'windows') {
@@ -3269,62 +3585,153 @@ function setupIPC() {
     } catch (_) {}
   }, 30000)
 
-  // ── Continuous scale weight polling ──────────────────────────────────────
+  // ── Continuous scale weight reading ──────────────────────────────────────
   let scalePollingTimer = null
   let lastScaleWeight = null
   let scaleErrorCount = 0
+  let scaleStreamActive = false
+  let lastStreamReading = null
 
-  function startScalePolling () {
-    if (scalePollingTimer) return  // already running
+  async function startScalePolling () {
+    if (scalePollingTimer || scaleStreamActive) return
     if (!hwScale) return
-    appLog('info', 'hardware', 'Starting continuous scale polling')
-    scalePollingTimer = setInterval(pollScale, 200)  // ~5 reads per second
+
+    const protocol = hwScale?.protocol || 'sics'
+
+    // MT 8217 continuous streaming — scale pushes weight data automatically
+    if (protocol === 'mt8217' && hwScale.type === 'serial') {
+      await startScaleStream()
+      return
+    }
+
+    // SICS: request-response polling
+    appLog('info', 'hardware', `Starting scale polling (${protocol})`)
+    scalePollingTimer = setInterval(pollScale, 500)
   }
 
   function stopScalePolling () {
     if (scalePollingTimer) { clearInterval(scalePollingTimer); scalePollingTimer = null }
+    if (scaleStreamActive) stopScaleStream()
     lastScaleWeight = null
     scaleErrorCount = 0
   }
 
+  // ── MT 8217 continuous streaming ('C' command) ─────────────────────────
+  async function startScaleStream () {
+    if (scaleStreamActive) return
+    if (!hwScale?.port || !SerialPortLib) return
+
+    try {
+      if (!hwScalePort || !hwScalePort.isOpen) {
+        await openScaleSerialPort(hwScale.port, hwScale.baud || 9600, 'mt8217')
+      }
+    } catch (e) {
+      appLog('error', 'hardware', `Cannot open scale port for streaming: ${e.message}`)
+      scalePollingTimer = setInterval(pollScale, 1000)
+      return
+    }
+
+    scaleStreamActive = true
+    scaleErrorCount = 0
+    appLog('info', 'hardware', `Starting MT 8217 continuous stream on ${hwScale.port}`)
+
+    let frameBuf = []
+    let inFrame = false
+    let watchdog = null
+
+    const resetWatchdog = () => {
+      if (watchdog) clearTimeout(watchdog)
+      watchdog = setTimeout(() => {
+        if (!scaleStreamActive) return
+        appLog('warn', 'hardware', 'Scale stream timeout — no data for 5s, reconnecting...')
+        broadcastScaleWeight({ error: 'Scale connection lost', connected: false })
+        stopScaleStream()
+        setTimeout(() => { if (hwScale) startScalePolling() }, 2000)
+      }, 5000)
+    }
+
+    const onStreamData = (chunk) => {
+      resetWatchdog()
+      for (const byte of chunk) {
+        if (byte === 0x02) { inFrame = true; frameBuf = []; continue }
+        if (byte === 0x0D && inFrame) {
+          inFrame = false
+          const parsed = parse8217Response(Buffer.from(frameBuf))
+          if (parsed) {
+            scaleErrorCount = 0
+            lastStreamReading = parsed
+            const key = `${parsed.weight}|${parsed.status}`
+            if (key !== lastScaleWeight) {
+              lastScaleWeight = key
+              broadcastScaleWeight({ ...parsed, connected: true })
+            }
+          }
+          frameBuf = []
+          continue
+        }
+        if (inFrame) frameBuf.push(byte)
+      }
+    }
+
+    hwScalePort._streamListener = onStreamData
+    hwScalePort._streamWatchdog = watchdog
+    hwScalePort.on('data', onStreamData)
+    resetWatchdog()
+
+    // 'C' starts continuous output on MT 8217
+    hwScalePort.write('C', 'ascii', () => { hwScalePort.drain(() => {}) })
+  }
+
+  function stopScaleStream () {
+    scaleStreamActive = false
+    if (hwScalePort) {
+      if (hwScalePort._streamListener) {
+        hwScalePort.removeListener('data', hwScalePort._streamListener)
+        hwScalePort._streamListener = null
+      }
+      if (hwScalePort._streamWatchdog) {
+        clearTimeout(hwScalePort._streamWatchdog)
+        hwScalePort._streamWatchdog = null
+      }
+      if (hwScalePort.isOpen) {
+        try { hwScalePort.write('\r', 'ascii', () => {}) } catch (_) {}
+      }
+    }
+  }
+
+  // ── Request-response polling (SICS / fallback) ────────────────────────
   let scalePollingBusy = false
   async function pollScale () {
-    if (scalePollingBusy) return  // skip if previous read hasn't finished
+    if (scalePollingBusy) return
     if (!hwScale) { stopScalePolling(); return }
     scalePollingBusy = true
     try {
       const reading = await readScale()
       if (reading.error) {
         scaleErrorCount++
-        // After 10 consecutive errors, slow down and notify UI
-        if (scaleErrorCount === 10) {
-          appLog('warn', 'hardware', `Scale read errors: ${reading.error}`)
-        }
+        if (scaleErrorCount === 10) appLog('warn', 'hardware', `Scale read errors: ${reading.error}`)
         if (scaleErrorCount >= 10) {
           broadcastScaleWeight({ error: reading.error, connected: false })
-          // Don't spam — slow poll when erroring
-          if (scalePollingTimer) { clearInterval(scalePollingTimer); scalePollingTimer = setInterval(pollScale, 2000) }
+          if (scalePollingTimer) { clearInterval(scalePollingTimer); scalePollingTimer = setInterval(pollScale, 5000) }
         }
-        scalePollingBusy = false
         return
       }
-      // Scale read succeeded
       if (scaleErrorCount >= 10) {
-        // Was in slow mode, resume fast polling
-        if (scalePollingTimer) { clearInterval(scalePollingTimer); scalePollingTimer = setInterval(pollScale, 200) }
+        if (scalePollingTimer) { clearInterval(scalePollingTimer); scalePollingTimer = setInterval(pollScale, 500) }
         appLog('info', 'hardware', 'Scale reconnected')
       }
       scaleErrorCount = 0
-      // Only broadcast if weight changed (avoid flooding)
       const key = `${reading.weight}|${reading.status}|${reading.unit}`
       if (key !== lastScaleWeight) {
         lastScaleWeight = key
         broadcastScaleWeight({ ...reading, connected: true })
       }
-    } catch (_) {
+    } catch (e) {
       scaleErrorCount++
+      if (scaleErrorCount <= 3) appLog('warn', 'hardware', `Scale poll error: ${e.message}`)
+    } finally {
+      scalePollingBusy = false
     }
-    scalePollingBusy = false
   }
 
   function broadcastScaleWeight (data) {
@@ -3348,6 +3755,8 @@ function setupIPC() {
       }), 20000))
     ])
   })
+
+  ipcMain.handle('hardware:diagnose', () => diagnoseEnvironment())
 
   // Full hardware diagnostic — dumps everything raw for debugging
   ipcMain.handle('hardware:diagnostic', async () => {

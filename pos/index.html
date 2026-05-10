@@ -1915,8 +1915,15 @@ $('#priceChangeCancel').addEventListener('click', () => { $('#priceChangeModal')
 
 // ═══ Weight Modal ═════════════════════════════════════════════════
 let wBuf = '0'
+let liveScaleWeight = null
 function showWeightModal (p) {
-  wBuf = '0'; $('#weightDisplay').textContent = '0'
+  // Auto-fill from live scale if available
+  if (liveScaleWeight && liveScaleWeight.weight > 0 && liveScaleWeight.connected !== false) {
+    wBuf = liveScaleWeight.weight.toFixed(2).replace(/\.?0+$/, '') || '0'
+  } else {
+    wBuf = '0'
+  }
+  $('#weightDisplay').textContent = wBuf
   $('#weightUnit').textContent = p.unit === '100g' ? 'x 100g' : 'kg'
   $('#weightModalTitle').textContent = p.name
   updateWeightPreview(p)
@@ -3652,8 +3659,18 @@ window.pos.onDataChanged(async () => {
   await loadDeals()
 })
 
+// ── Hardware issue warnings from startup diagnostics ────────────────────
+window.pos.onHardwareIssues((issues) => {
+  for (const issue of issues) {
+    showToast(`⚠ ${issue.message}`, 'error')
+  }
+})
+
 // ── Continuous scale weight display ──────────────────────────────────────
+let prevScaleDisplay = '0'
 window.pos.onScaleWeight((data) => {
+  liveScaleWeight = data
+
   const el = document.getElementById('scaleDisplay')
   const wt = document.getElementById('scaleWeight')
   if (!el || !wt) return
@@ -3666,11 +3683,24 @@ window.pos.onScaleWeight((data) => {
   const u = data.unit || 'kg'
   wt.textContent = `${w} ${u}`
   if (data.stable) {
-    wt.style.color = '#4ade80'  // green = stable
+    wt.style.color = '#4ade80'
   } else if (data.inMotion) {
-    wt.style.color = '#fbbf24'  // amber = in motion
+    wt.style.color = '#fbbf24'
   } else {
-    wt.style.color = '#f87171'  // red = error/over/under
+    wt.style.color = '#f87171'
+  }
+
+  // Auto-update weight modal if open (only if user hasn't manually typed)
+  const weightModal = $('#weightModal')
+  if (weightModal?.classList.contains('show') && typeof data.weight === 'number' && data.weight > 0) {
+    const newVal = data.weight.toFixed(2).replace(/\.?0+$/, '') || '0'
+    const curVal = $('#weightDisplay')?.textContent || '0'
+    if (curVal === '0' || curVal === prevScaleDisplay) {
+      wBuf = newVal
+      $('#weightDisplay').textContent = newVal
+      if (pendingWeightProduct) updateWeightPreview(pendingWeightProduct)
+    }
+    prevScaleDisplay = newVal
   }
 })
 </script>

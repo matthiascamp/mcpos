@@ -1564,10 +1564,12 @@
       </p>
 
       <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
-        <button class="btn btn-green" id="probeBtn" style="padding:12px 28px;font-size:15px">Probe All Devices</button>
-        <span id="probeStatus" style="color:var(--text-dim);font-size:13px"></span>
+        <button class="btn btn-outline" id="probeBtn" style="padding:8px 16px;font-size:13px">Re-scan</button>
+        <span id="probeStatus" style="color:var(--text-dim);font-size:13px">Auto-detecting hardware...</span>
         <span id="hidStatus" style="font-size:11px;color:var(--text-dim);margin-left:auto"></span>
       </div>
+
+      <div id="hwDiagIssues" style="display:none;margin-bottom:16px"></div>
 
       <div class="stats-grid" style="grid-template-columns:repeat(auto-fit, minmax(280px, 1fr))">
         <!-- Printer Card -->
@@ -1577,7 +1579,7 @@
             <div class="stat-label" style="margin:0;font-size:15px;font-weight:600;color:var(--text)">Receipt Printer</div>
             <button class="btn btn-outline" id="testPrinterBtn" style="margin-left:auto;font-size:10px;padding:3px 8px;display:none">Test</button>
           </div>
-          <div style="font-size:13px;color:var(--text-dim)" id="printerInfo">Not probed yet</div>
+          <div style="font-size:13px;color:var(--text-dim)" id="printerInfo">Detecting...</div>
           <div id="printerDetails" style="font-size:11px;color:var(--text-dim);margin-top:6px;display:none"></div>
         </div>
         <!-- Drawer Card -->
@@ -1586,7 +1588,7 @@
             <div id="dotDrawerHw" style="width:12px;height:12px;border-radius:50%;background:#555;flex-shrink:0"></div>
             <div class="stat-label" style="margin:0;font-size:15px;font-weight:600;color:var(--text)">Cash Drawer</div>
           </div>
-          <div style="font-size:13px;color:var(--text-dim)" id="drawerInfo">Not probed yet</div>
+          <div style="font-size:13px;color:var(--text-dim)" id="drawerInfo">Detecting...</div>
           <div style="font-size:11px;color:var(--text-dim);margin-top:4px">Opens via printer DK port (ESC/POS pulse)</div>
         </div>
         <!-- Scanner Card -->
@@ -1595,7 +1597,7 @@
             <div id="dotScanner" style="width:12px;height:12px;border-radius:50%;background:#555;flex-shrink:0"></div>
             <div class="stat-label" style="margin:0;font-size:15px;font-weight:600;color:var(--text)">Barcode Scanner</div>
           </div>
-          <div style="font-size:13px;color:var(--text-dim)" id="scannerInfo">Not probed yet</div>
+          <div style="font-size:13px;color:var(--text-dim)" id="scannerInfo">Detecting...</div>
           <div style="font-size:11px;color:var(--text-dim);margin-top:4px">HID keyboard mode — scan below to test:</div>
           <input type="text" id="scannerTest" placeholder="Scan barcode here..." style="margin-top:6px;padding:8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:14px;width:100%">
           <div id="scannerResult" style="margin-top:4px;font-size:12px;min-height:18px"></div>
@@ -1608,7 +1610,7 @@
             <button class="btn btn-outline" id="readScaleBtn" style="margin-left:auto;font-size:10px;padding:3px 8px;display:none">Read Weight</button>
             <button class="btn btn-outline" id="zeroScaleBtn" style="font-size:10px;padding:3px 8px;display:none">Zero/Tare</button>
           </div>
-          <div style="font-size:13px;color:var(--text-dim)" id="scaleInfo">Not probed yet</div>
+          <div style="font-size:13px;color:var(--text-dim)" id="scaleInfo">Detecting...</div>
           <div id="scaleReading" style="font-size:20px;font-weight:700;color:var(--green);margin-top:6px;display:none"></div>
         </div>
       </div>
@@ -1690,7 +1692,7 @@
         <h2>All Detected Devices</h2>
         <table>
           <thead><tr><th>Type</th><th>Vendor</th><th>VID</th><th>PID</th><th>Product</th><th>Source</th></tr></thead>
-          <tbody id="usbDeviceTable"><tr><td colspan="6" style="color:var(--text-dim)">Click "Probe All Devices" to scan</td></tr></tbody>
+          <tbody id="usbDeviceTable"><tr><td colspan="6" style="color:var(--text-dim)">Scanning...</td></tr></tbody>
         </table>
       </div>
 
@@ -5007,6 +5009,45 @@
       if (cfg.scaleProtocol) $('#hwScaleProtocol').value = cfg.scaleProtocol
       togglePrinterFields()
       refreshSerialPorts()
+      // Auto-detect hardware when tab opens
+      autoProbe()
+    }
+
+    async function autoProbe () {
+      $('#probeStatus').textContent = 'Auto-detecting hardware...'
+      $('#probeBtn').disabled = true
+      try {
+        const result = await window.pos.probeDevices()
+        updateProbeUI(result)
+        const counts = { printer: 0, scale: 0, scanner: 0, serial: 0, unknown: 0 }
+        for (const d of (result.usbDevices || [])) counts[d.type] = (counts[d.type] || 0) + 1
+        const serialCount = result.serialPorts?.length || 0
+        const parts = []
+        if (counts.printer) parts.push(`${counts.printer} printer`)
+        if (counts.scanner) parts.push(`${counts.scanner} scanner`)
+        if (counts.scale) parts.push(`${counts.scale} scale`)
+        if (serialCount) parts.push(`${serialCount} serial port(s)`)
+        $('#probeStatus').textContent = parts.length ? `Detected: ${parts.join(', ')}` : 'No devices detected'
+        // Also run environment diagnostics
+        try {
+          const diag = await window.pos.diagnoseEnvironment()
+          if (diag.issues.length > 0) {
+            const issueDiv = document.getElementById('hwDiagIssues')
+            if (issueDiv) {
+              issueDiv.style.display = ''
+              issueDiv.innerHTML = diag.issues.map(i =>
+                `<div style="padding:8px 12px;background:${i.severity === 'high' ? 'rgba(239,68,68,.15)' : 'rgba(251,191,36,.15)'};border-radius:6px;margin-bottom:6px;font-size:13px">
+                  <div style="color:${i.severity === 'high' ? '#ef4444' : '#fbbf24'};font-weight:600">${esc(i.message)}</div>
+                  ${i.fix ? `<div style="color:var(--text-dim);font-size:12px;margin-top:2px">Fix: ${esc(i.fix)}</div>` : ''}
+                </div>`
+              ).join('')
+            }
+          }
+        } catch (_) {}
+      } catch (e) {
+        $('#probeStatus').textContent = 'Detection failed: ' + e.message
+      }
+      $('#probeBtn').disabled = false
     }
 
     async function refreshSerialPorts () {
@@ -5200,21 +5241,7 @@
       }
     }
 
-    $('#probeBtn').addEventListener('click', async () => {
-      $('#probeStatus').textContent = 'Probing...'
-      $('#probeBtn').disabled = true
-      try {
-        const result = await window.pos.probeDevices()
-        updateProbeUI(result)
-        const counts = { printer: 0, scale: 0, scanner: 0, serial: 0, unknown: 0 }
-        for (const d of (result.usbDevices || [])) counts[d.type] = (counts[d.type] || 0) + 1
-        const serialCount = result.serialPorts?.length || 0
-        $('#probeStatus').textContent = `Found ${result.usbDevices?.length || 0} USB device(s): ${counts.printer} printer, ${counts.scanner} scanner, ${counts.scale} scale` + (serialCount ? ` | ${serialCount} serial port(s)` : '')
-      } catch (e) {
-        $('#probeStatus').textContent = 'Probe failed: ' + e.message
-      }
-      $('#probeBtn').disabled = false
-    })
+    $('#probeBtn').addEventListener('click', () => autoProbe())
 
     $('#testPrinterBtn').addEventListener('click', async () => {
       $('#testPrinterBtn').textContent = 'Printing...'

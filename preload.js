@@ -131,6 +131,7 @@ contextBridge.exposeInMainWorld('pos', {
   configureHardware:  (cfg)   => ipcRenderer.invoke('hardware:configure', cfg),
   getHardwareConfig:  ()      => ipcRenderer.invoke('hardware:getConfig'),
   hardwareDiagnostic: ()      => ipcRenderer.invoke('hardware:diagnostic'),
+  diagnoseEnvironment: ()     => ipcRenderer.invoke('hardware:diagnose'),
 
   // Cash Drawer
   logCashDrawer:      (entry) => ipcRenderer.invoke('db:cash_drawer:log', entry),
@@ -176,6 +177,7 @@ contextBridge.exposeInMainWorld('pos', {
 
   // Scale weight (continuous polling from main process)
   onScaleWeight:      (cb)                  => { ipcRenderer.removeAllListeners('scale:weight'); ipcRenderer.on('scale:weight', (_e, data) => cb(data)) },
+  onHardwareIssues:   (cb)                  => { ipcRenderer.removeAllListeners('hardware:issues'); ipcRenderer.on('hardware:issues', (_e, data) => cb(data)) },
 
   // LAN data changed (server pushed new data)
   onDataChanged:      (cb)                  => { ipcRenderer.removeAllListeners('lan:data-changed'); ipcRenderer.on('lan:data-changed', () => cb()) },
