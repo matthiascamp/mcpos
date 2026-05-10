@@ -2779,8 +2779,8 @@ function setupIPC() {
 
   // Protocol-specific serial settings
   const PROTOCOL_SERIAL_OPTS = {
-    sics:   { dataBits: 8, stopBits: 1, parity: 'none' },   // MT-SICS (lab balances)
-    mt8217: { dataBits: 7, stopBits: 1, parity: 'even' },   // MT 8217 (Viva, Ariva, bPlus retail scales)
+    sics:   { dataBits: 8, stopBits: 1, parity: 'none', rtscts: false },   // MT-SICS (lab balances)
+    mt8217: { dataBits: 7, stopBits: 1, parity: 'even', rtscts: false },   // MT 8217 (Viva, Ariva, bPlus retail scales)
   }
 
   async function openScaleSerialPort (portPath, baud, protocol) {
@@ -2804,6 +2804,8 @@ function setupIPC() {
           appLog('error', 'hardware', `Failed to open scale port ${portPath}`, err.message)
           return reject(err)
         }
+        // Enable DTR (Data Terminal Ready) — matches Profit Track's DTR/DSR handshake setting
+        port.set({ dtr: true, rts: true }, () => {})
         hwScalePort = port
         appLog('info', 'hardware', `Scale serial port opened: ${portPath} @ ${baud} baud (${protocol || 'sics'}, ${serialOpts.dataBits}-${serialOpts.parity[0].toUpperCase()}-${serialOpts.stopBits})`)
         resolve(port)
