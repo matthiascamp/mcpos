@@ -1,16 +1,18 @@
-# diagnose-printer.ps1 — Full printer diagnostic for Crisp POS
+# diagnose-printer.ps1 - Full printer diagnostic for Crisp POS
 # Run: powershell -ExecutionPolicy Bypass -File diagnose-printer.ps1
 
 $ErrorActionPreference = 'SilentlyContinue'
-Write-Host "`n=== CRISP POS PRINTER DIAGNOSTIC ===" -ForegroundColor Cyan
-Write-Host "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')`n"
+Write-Host ""
+Write-Host "=== CRISP POS PRINTER DIAGNOSTIC ===" -ForegroundColor Cyan
+Write-Host "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+Write-Host ""
 
-# ── 1. All printer queues ─────────────────────────────────────────────────────
+# 1. All printer queues
 Write-Host "--- ALL PRINTER QUEUES ---" -ForegroundColor Yellow
 $printers = Get-Printer
 if ($printers) {
     foreach ($p in $printers) {
-        $color = if ($p.PrinterStatus -eq 'Normal') { 'Green' } else { 'Red' }
+        if ($p.PrinterStatus -eq 'Normal') { $color = 'Green' } else { $color = 'Red' }
         Write-Host "  $($p.Name)" -ForegroundColor $color -NoNewline
         Write-Host "  Port=$($p.PortName)  Driver=$($p.DriverName)  Status=$($p.PrinterStatus)  Shared=$($p.Shared)"
     }
@@ -18,8 +20,9 @@ if ($printers) {
     Write-Host "  NO PRINTERS FOUND" -ForegroundColor Red
 }
 
-# ── 2. Printer ports ──────────────────────────────────────────────────────────
-Write-Host "`n--- PRINTER PORTS ---" -ForegroundColor Yellow
+# 2. Printer ports
+Write-Host ""
+Write-Host "--- PRINTER PORTS ---" -ForegroundColor Yellow
 $ports = Get-PrinterPort
 if ($ports) {
     foreach ($port in $ports) {
@@ -29,12 +32,13 @@ if ($ports) {
     Write-Host "  No printer ports found" -ForegroundColor Red
 }
 
-# ── 3. USB devices (PnP) ─────────────────────────────────────────────────────
-Write-Host "`n--- USB DEVICES (printing-related) ---" -ForegroundColor Yellow
+# 3. USB devices (PnP)
+Write-Host ""
+Write-Host "--- USB DEVICES (printing-related) ---" -ForegroundColor Yellow
 $usbDevices = Get-PnpDevice -Class 'USB','Printer','Ports' -Status OK,Error,Degraded,Unknown 2>$null
 if ($usbDevices) {
     foreach ($d in $usbDevices) {
-        $color = if ($d.Status -eq 'OK') { 'Green' } else { 'Red' }
+        if ($d.Status -eq 'OK') { $color = 'Green' } else { $color = 'Red' }
         Write-Host "  [$($d.Status)] " -ForegroundColor $color -NoNewline
         Write-Host "$($d.FriendlyName)  Class=$($d.Class)  InstanceId=$($d.InstanceId)"
     }
@@ -42,8 +46,9 @@ if ($usbDevices) {
     Write-Host "  No USB/Printer/Ports PnP devices found"
 }
 
-# ── 4. Stuck print jobs ──────────────────────────────────────────────────────
-Write-Host "`n--- STUCK PRINT JOBS ---" -ForegroundColor Yellow
+# 4. Stuck print jobs
+Write-Host ""
+Write-Host "--- STUCK PRINT JOBS ---" -ForegroundColor Yellow
 $hasJobs = $false
 foreach ($p in $printers) {
     $jobs = Get-PrintJob -PrinterName $p.Name 2>$null
@@ -56,14 +61,16 @@ foreach ($p in $printers) {
 }
 if (-not $hasJobs) { Write-Host "  No stuck jobs (good)" -ForegroundColor Green }
 
-# ── 5. Print spooler service ─────────────────────────────────────────────────
-Write-Host "`n--- PRINT SPOOLER SERVICE ---" -ForegroundColor Yellow
+# 5. Print spooler service
+Write-Host ""
+Write-Host "--- PRINT SPOOLER SERVICE ---" -ForegroundColor Yellow
 $spooler = Get-Service -Name Spooler
-$color = if ($spooler.Status -eq 'Running') { 'Green' } else { 'Red' }
+if ($spooler.Status -eq 'Running') { $color = 'Green' } else { $color = 'Red' }
 Write-Host "  Status: $($spooler.Status)  StartType: $($spooler.StartType)" -ForegroundColor $color
 
-# ── 6. COM / serial ports ────────────────────────────────────────────────────
-Write-Host "`n--- SERIAL / COM PORTS ---" -ForegroundColor Yellow
+# 6. COM / serial ports
+Write-Host ""
+Write-Host "--- SERIAL / COM PORTS ---" -ForegroundColor Yellow
 $comPorts = Get-PnpDevice -Class Ports -Status OK 2>$null
 if ($comPorts) {
     foreach ($c in $comPorts) {
@@ -73,22 +80,24 @@ if ($comPorts) {
     Write-Host "  No COM ports found"
 }
 
-# ── 7. Try raw print test to each receipt-like queue ──────────────────────────
-Write-Host "`n--- RAW PRINT TEST ---" -ForegroundColor Yellow
+# 7. Try raw print test to each receipt-like queue
+Write-Host ""
+Write-Host "--- RAW PRINT TEST ---" -ForegroundColor Yellow
 $receiptKeywords = @('epson','tm-t','tm-u','tm-m','star','bixolon','srp-','citizen','ct-s','thermal','receipt','pos','80mm','58mm')
 $rawprintScript = Join-Path $PSScriptRoot 'rawprint.ps1'
 $hasRawprint = Test-Path $rawprintScript
 
 foreach ($p in $printers) {
-    $name = $p.Name.ToLower()
+    $pname = $p.Name.ToLower()
     $driver = ($p.DriverName + '').ToLower()
     $isReceipt = $false
     foreach ($kw in $receiptKeywords) {
-        if ($name.Contains($kw) -or $driver.Contains($kw)) { $isReceipt = $true; break }
+        if ($pname.Contains($kw) -or $driver.Contains($kw)) { $isReceipt = $true; break }
     }
     if (-not $isReceipt) { continue }
 
-    Write-Host "`n  Testing: $($p.Name) (Port=$($p.PortName), Status=$($p.PrinterStatus))" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "  Testing: $($p.Name) (Port=$($p.PortName), Status=$($p.PrinterStatus))" -ForegroundColor Cyan
 
     # Method 1: rawprint.ps1 (P/Invoke)
     if ($hasRawprint) {
@@ -100,30 +109,14 @@ foreach ($p in $printers) {
             if ($result -match '^OK') {
                 Write-Host "    P/Invoke raw send: OK" -ForegroundColor Green
             } else {
-                Write-Host "    P/Invoke raw send: FAILED — $result" -ForegroundColor Red
+                Write-Host "    P/Invoke raw send: FAILED - $result" -ForegroundColor Red
             }
         } catch {
-            Write-Host "    P/Invoke raw send: ERROR — $($_.Exception.Message)" -ForegroundColor Red
+            Write-Host "    P/Invoke raw send: ERROR - $($_.Exception.Message)" -ForegroundColor Red
         }
         Remove-Item $tmpFile -Force 2>$null
     } else {
-        Write-Host "    rawprint.ps1 not found — skipping P/Invoke test" -ForegroundColor DarkYellow
-    }
-
-    # Method 2: .NET direct to port (if USB port)
-    if ($p.PortName -match '^USB|^COM') {
-        Write-Host "    Port type: $($p.PortName) — checking if port is accessible..."
-        # Check if the queue accepts a document via spooler
-        try {
-            $bytes = [byte[]]@(0x1B, 0x40) # ESC @ init only
-            $tmpFile2 = [System.IO.Path]::GetTempFileName()
-            [System.IO.File]::WriteAllBytes($tmpFile2, $bytes)
-            Start-Process -FilePath "print" -ArgumentList "/D:`"$($p.Name)`" `"$tmpFile2`"" -NoNewWindow -Wait -ErrorAction Stop
-            Write-Host "    Spooler send: attempted (check printer for output)" -ForegroundColor DarkYellow
-            Remove-Item $tmpFile2 -Force 2>$null
-        } catch {
-            Write-Host "    Spooler send: FAILED — $($_.Exception.Message)" -ForegroundColor Red
-        }
+        Write-Host "    rawprint.ps1 not found - skipping P/Invoke test" -ForegroundColor DarkYellow
     }
 
     # Check for error state
@@ -131,7 +124,7 @@ foreach ($p in $printers) {
     if ($queueInfo) {
         $status = $queueInfo.PrinterStatus
         if ($status -ne 'Normal') {
-            Write-Host "    WARNING: Queue status is '$status' — may need resume/restart" -ForegroundColor Red
+            Write-Host "    WARNING: Queue status is '$status' - may need resume/restart" -ForegroundColor Red
             Write-Host "    Attempting resume..." -NoNewline
             try {
                 $wmiPrinter = Get-WmiObject -Class Win32_Printer -Filter "Name='$($p.Name.Replace("'","''"))'"
@@ -148,27 +141,20 @@ foreach ($p in $printers) {
     }
 }
 
-# ── 8. Check if any app is locking USB printer ────────────────────────────────
-Write-Host "`n--- PROCESSES USING PRINTER/SERIAL ---" -ForegroundColor Yellow
+# 8. Check if any app is locking USB printer
+Write-Host ""
+Write-Host "--- PROCESSES USING PRINTER/SERIAL ---" -ForegroundColor Yellow
 $suspects = @('ProfitTrack','PTPOS','PtVfd','OPOSScale','OPOSPOSPrinter','node','electron')
-foreach ($name in $suspects) {
-    $proc = Get-Process -Name $name 2>$null
+foreach ($procName in $suspects) {
+    $proc = Get-Process -Name $procName 2>$null
     if ($proc) {
-        Write-Host "  RUNNING: $name (PID $($proc.Id -join ', '))" -ForegroundColor Red
-    }
-}
-# Also check anything holding COM ports or USB printer handles
-$serialProcs = Get-Process | Where-Object {
-    $_.Modules 2>$null | Where-Object { $_.ModuleName -match 'serial|ftdi|ch341|cp210|usbprint' }
-}
-if ($serialProcs) {
-    foreach ($sp in $serialProcs) {
-        Write-Host "  HAS SERIAL/USB MODULE: $($sp.ProcessName) (PID $($sp.Id))" -ForegroundColor DarkYellow
+        Write-Host "  RUNNING: $procName (PID $($proc.Id -join ', '))" -ForegroundColor Red
     }
 }
 
-# ── 9. Driver info for receipt printers ───────────────────────────────────────
-Write-Host "`n--- PRINTER DRIVERS INSTALLED ---" -ForegroundColor Yellow
+# 9. Driver info for receipt printers
+Write-Host ""
+Write-Host "--- PRINTER DRIVERS INSTALLED ---" -ForegroundColor Yellow
 $drivers = Get-PrinterDriver
 foreach ($d in $drivers) {
     $lower = $d.Name.ToLower()
@@ -183,27 +169,42 @@ foreach ($d in $drivers) {
 $allDriverNames = ($drivers | ForEach-Object { $_.Name }) -join ', '
 Write-Host "  All drivers: $allDriverNames" -ForegroundColor DarkGray
 
-# ── 10. Windows event log (recent printer errors) ────────────────────────────
-Write-Host "`n--- RECENT PRINTER EVENTS (last 24h) ---" -ForegroundColor Yellow
+# 10. Windows event log (recent printer errors)
+Write-Host ""
+Write-Host "--- RECENT PRINTER EVENTS (last 24h) ---" -ForegroundColor Yellow
 $since = (Get-Date).AddHours(-24)
-$events = Get-WinEvent -FilterHashtable @{ LogName='System'; ProviderName='*print*','*spooler*'; StartTime=$since; Level=1,2,3 } -MaxEvents 10 2>$null
-if ($events) {
-    foreach ($e in $events) {
-        $color = if ($e.Level -le 2) { 'Red' } else { 'DarkYellow' }
-        Write-Host "  [$($e.TimeCreated.ToString('HH:mm:ss'))] $($e.Message.Substring(0, [Math]::Min(120, $e.Message.Length)))" -ForegroundColor $color
+try {
+    $events = Get-WinEvent -FilterHashtable @{ LogName='System'; StartTime=$since; Level=1,2,3 } -MaxEvents 50 2>$null
+    $printEvents = @()
+    if ($events) {
+        foreach ($e in $events) {
+            if ($e.ProviderName -match 'print|spooler') {
+                $printEvents += $e
+            }
+        }
     }
-} else {
-    Write-Host "  No printer errors in last 24h" -ForegroundColor Green
+    if ($printEvents.Count -gt 0) {
+        foreach ($e in $printEvents[0..9]) {
+            if ($e.Level -le 2) { $color = 'Red' } else { $color = 'DarkYellow' }
+            $msg = $e.Message
+            if ($msg.Length -gt 120) { $msg = $msg.Substring(0, 120) }
+            Write-Host "  [$($e.TimeCreated.ToString('HH:mm:ss'))] $msg" -ForegroundColor $color
+        }
+    } else {
+        Write-Host "  No printer errors in last 24h" -ForegroundColor Green
+    }
+} catch {
+    Write-Host "  Could not read event log: $($_.Exception.Message)" -ForegroundColor DarkYellow
 }
 
-# ── 11. Check if "EPSON TM-T82II Receipt" queue exists (was being deleted) ───
-Write-Host "`n--- QUEUE DELETION CHECK ---" -ForegroundColor Yellow
+# 11. Check if "EPSON TM-T82II Receipt" queue exists
+Write-Host ""
+Write-Host "--- QUEUE DELETION CHECK ---" -ForegroundColor Yellow
 $epsonQueue = Get-Printer -Name 'EPSON TM-T82II Receipt' 2>$null
 if ($epsonQueue) {
-    Write-Host "  'EPSON TM-T82II Receipt' EXISTS — Status=$($epsonQueue.PrinterStatus) Port=$($epsonQueue.PortName)" -ForegroundColor Green
+    Write-Host "  'EPSON TM-T82II Receipt' EXISTS - Status=$($epsonQueue.PrinterStatus) Port=$($epsonQueue.PortName)" -ForegroundColor Green
 } else {
-    Write-Host "  'EPSON TM-T82II Receipt' NOT FOUND — was it deleted by cleanup code?" -ForegroundColor Red
-    # Check if any Epson queue exists at all
+    Write-Host "  'EPSON TM-T82II Receipt' NOT FOUND - was it deleted by cleanup code?" -ForegroundColor Red
     $anyEpson = Get-Printer | Where-Object { $_.Name -match 'epson|80mm|tm-t' }
     if ($anyEpson) {
         Write-Host "  But found similar:" -ForegroundColor DarkYellow
@@ -215,32 +216,37 @@ if ($epsonQueue) {
     }
 }
 
-# ── Summary ───────────────────────────────────────────────────────────────────
-Write-Host "`n=== SUMMARY ===" -ForegroundColor Cyan
-$receiptPrinters = @($printers | Where-Object {
-    $n = $_.Name.ToLower(); $d = ($_.DriverName + '').ToLower()
+# Summary
+Write-Host ""
+Write-Host "=== SUMMARY ===" -ForegroundColor Cyan
+$receiptPrinters = @()
+foreach ($p in $printers) {
+    $pn = $p.Name.ToLower()
+    $pd = ($p.DriverName + '').ToLower()
     $found = $false
-    foreach ($kw in $receiptKeywords) { if ($n.Contains($kw) -or $d.Contains($kw)) { $found = $true; break } }
-    $found
-})
+    foreach ($kw in $receiptKeywords) {
+        if ($pn.Contains($kw) -or $pd.Contains($kw)) { $found = $true; break }
+    }
+    if ($found) { $receiptPrinters += $p }
+}
+
 if ($receiptPrinters.Count -eq 0) {
     Write-Host "  NO receipt printer queue found. The app WILL NOT be able to print." -ForegroundColor Red
     Write-Host "  Next steps:" -ForegroundColor White
     Write-Host "    1. Check USB cable is connected" -ForegroundColor White
-    Write-Host "    2. Open Settings > Printers & Scanners — is the printer listed?" -ForegroundColor White
+    Write-Host "    2. Open Settings > Printers & Scanners - is the printer listed?" -ForegroundColor White
     Write-Host "    3. If not: plug in printer, let Windows install driver" -ForegroundColor White
     Write-Host "    4. If listed but not here: driver name may not match keywords" -ForegroundColor White
 } elseif ($receiptPrinters.Count -eq 1) {
     $rp = $receiptPrinters[0]
     Write-Host "  Receipt printer: $($rp.Name) (Port=$($rp.PortName), Status=$($rp.PrinterStatus))" -ForegroundColor Green
     if ($rp.PrinterStatus -ne 'Normal') {
-        Write-Host "  WARNING: Status is '$($rp.PrinterStatus)' — try: Set-Printer -Name '$($rp.Name)' -PrinterStatus Normal" -ForegroundColor Red
+        Write-Host "  WARNING: Status is '$($rp.PrinterStatus)'" -ForegroundColor Red
     }
 } else {
     Write-Host "  Multiple receipt printers found ($($receiptPrinters.Count)):" -ForegroundColor DarkYellow
     foreach ($rp in $receiptPrinters) {
         Write-Host "    $($rp.Name)  Port=$($rp.PortName)  Status=$($rp.PrinterStatus)"
     }
-    Write-Host "  The app will pick the highest-scoring one. If wrong, save the correct one in Hardware settings." -ForegroundColor DarkYellow
 }
 Write-Host ""

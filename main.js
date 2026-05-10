@@ -2779,7 +2779,7 @@ function setupIPC() {
   // Protocol-specific serial settings
   const PROTOCOL_SERIAL_OPTS = {
     sics:   { dataBits: 8, stopBits: 1, parity: 'none', rtscts: false },   // MT-SICS (lab balances)
-    mt8217: { dataBits: 7, stopBits: 1, parity: 'even', rtscts: false },   // MT 8217 (Viva, Ariva, bPlus retail scales)
+    mt8217: { dataBits: 8, stopBits: 1, parity: 'even', rtscts: false },   // MT 8217 (Viva, Ariva, bPlus retail scales) — confirmed 8-E-1 via diagnostic
   }
 
   async function openScaleSerialPort (portPath, baud, protocol) {
@@ -2873,31 +2873,74 @@ function setupIPC() {
   // ── MT 8217 protocol (Viva, Ariva, bPlus retail scales) ─────────────────
 
   function send8217Command (port, command, timeoutMs) {
-    // 8217 protocol: send single ASCII char, response framed by STX (0x02) ... CR (0x0D)
+    // 8217 protocol: send single ASCII char, response may be:
+    //   (a) STX-framed: STX (0x02) + data + CR (0x0D)
+    //   (b) Unframed: raw bytes terminated by CR, LF, or ETX (0x03)
+    //   (c) Raw data with no framing (collect until silence)
+    // We try all approaches — accept whichever completes first
     return new Promise((resolve, reject) => {
       let settled = false
-      const buf = []
+      const framedBuf = []
+      const rawBuf = []
       let inFrame = false
+      let silenceTimer = null
+
+      const finish = (data) => {
+        if (settled) return
+        settled = true
+        clearTimeout(timer)
+        if (silenceTimer) clearTimeout(silenceTimer)
+        port.removeListener('data', onData)
+        resolve(Buffer.from(data))
+      }
+
       const onData = chunk => {
+        const hex = Array.from(chunk).map(b => b.toString(16).padStart(2, '0')).join(' ')
+        appLog('debug', 'scale', `Serial chunk: [${hex}] (${chunk.length} bytes)`)
+
         for (const byte of chunk) {
-          if (byte === 0x02) { inFrame = true; buf.length = 0; continue }  // STX — start of frame
-          if (byte === 0x0D && inFrame) {  // CR — end of frame
-            if (!settled) {
-              settled = true
-              clearTimeout(timer)
-              port.removeListener('data', onData)
-              resolve(Buffer.from(buf))
-            }
+          rawBuf.push(byte)
+
+          // Track STX-framed protocol
+          if (byte === 0x02) { inFrame = true; framedBuf.length = 0; continue }
+          if (inFrame) {
+            if (byte === 0x0D) { finish(framedBuf); return }  // CR ends framed response
+            framedBuf.push(byte)
+            continue
+          }
+
+          // Unframed: CR, LF, or ETX terminates
+          if (rawBuf.length >= 2 && (byte === 0x0D || byte === 0x0A || byte === 0x03)) {
+            // Return everything before the terminator
+            finish(rawBuf.slice(0, rawBuf.length - 1))
             return
           }
-          if (inFrame) buf.push(byte)
+        }
+
+        // No framing detected — use silence detection (50ms of no data = response complete)
+        if (rawBuf.length > 0) {
+          if (silenceTimer) clearTimeout(silenceTimer)
+          silenceTimer = setTimeout(() => {
+            if (!settled && rawBuf.length > 0) {
+              appLog('debug', 'scale', `Silence timeout — accepting ${rawBuf.length} unframed bytes`)
+              finish(rawBuf)
+            }
+          }, 50)
         }
       }
+
       const timer = setTimeout(() => {
         if (!settled) {
           settled = true
+          if (silenceTimer) clearTimeout(silenceTimer)
           port.removeListener('data', onData)
-          reject(new Error(`Scale timeout (${timeoutMs}ms) — no 8217 response to "${command}"`))
+          // If we got some data but no framing, return what we have
+          if (rawBuf.length > 0) {
+            appLog('debug', 'scale', `Timeout but got ${rawBuf.length} bytes — returning raw data`)
+            resolve(Buffer.from(rawBuf))
+          } else {
+            reject(new Error(`Scale timeout (${timeoutMs}ms) — no response to "${command}"`))
+          }
         }
       }, timeoutMs || 3000)
 
@@ -2907,42 +2950,73 @@ function setupIPC() {
   }
 
   function parse8217Response (data) {
-    // MT 8217 weight response (after STX, before CR):
-    //   Byte 0: Status byte
-    //     Bit 0 (0x01): Scale in motion
-    //     Bit 1 (0x02): Scale at zero
-    //     Bit 2 (0x04): Net weight mode (tare applied)
-    //     Bit 4 (0x10): Negative weight
-    //     Bit 5 (0x20): Under zero / out of range
-    //     Bit 6 (0x40): Over capacity
-    //   Bytes 1-5+: ASCII weight digits (high to low, no decimal)
-    //   Decimal position is set in scale config (typically 3 places for kg → divide by 1000)
-    if (!data || data.length < 2) return null
+    // Log raw response BEFORE any parsing — diagnostic-first approach
+    if (data && data.length > 0) {
+      const hex = Array.from(data).map(b => b.toString(16).padStart(2, '0')).join(' ')
+      const ascii = data.toString('ascii').replace(/[^\x20-\x7e]/g, '?')
+      appLog('debug', 'scale', `Raw response: hex=[${hex}] ascii=[${ascii}] len=${data.length}`)
+    }
 
-    const status = data[0]
-    const inMotion = !!(status & 0x01)
-    const atZero = !!(status & 0x02)
-    const netMode = !!(status & 0x04)
-    const negative = !!(status & 0x10)
-    const underZero = !!(status & 0x20)
-    const overCap = !!(status & 0x40)
+    if (!data || data.length < 1) return null
 
-    // Extract weight digits — strip non-digit chars, handle variable lengths
-    const weightStr = data.slice(1).toString('ascii').replace(/[^0-9]/g, '')
-    if (!weightStr) return { weight: 0, unit: 'kg', status: overCap ? 'over_limit' : underZero ? 'under_zero' : 'fault', stable: false, inMotion, zero: atZero }
-
-    // Decimal places configured in the scale's service menu (typically 3 for kg)
+    // Try standard MT 8217 framed format first: status byte + ASCII weight digits
+    // Then fall back to simple ASCII weight parsing for unframed responses
+    const rawArr = Array.from(data)
+    const allDigits = data.toString('ascii').replace(/[^0-9.-]/g, '')
     const decimals = hwScale?.decimals || parseInt(dbGet("SELECT value FROM settings WHERE key='hw_scale_decimals'")?.value || '3')
-    let weight = parseInt(weightStr, 10) / Math.pow(10, decimals)
-    if (negative) weight = -weight
 
-    const scaleStatus = overCap ? 'over_limit' : underZero ? 'under_zero' : inMotion ? 'in_motion' : 'stable'
-    return { weight, unit: 'kg', status: scaleStatus, stable: !inMotion && !overCap && !underZero, inMotion, zero: atZero, net: netMode, raw: Array.from(data) }
+    // Method 1: Standard 8217 — first byte is status, rest are weight digits
+    if (data.length >= 2) {
+      const status = data[0]
+      const inMotion = !!(status & 0x01)
+      const atZero = !!(status & 0x02)
+      const netMode = !!(status & 0x04)
+      const negative = !!(status & 0x10)
+      const underZero = !!(status & 0x20)
+      const overCap = !!(status & 0x40)
+      const weightStr = data.slice(1).toString('ascii').replace(/[^0-9]/g, '')
+
+      if (weightStr) {
+        let weight = parseInt(weightStr, 10) / Math.pow(10, decimals)
+        if (negative) weight = -weight
+        const scaleStatus = overCap ? 'over_limit' : underZero ? 'under_zero' : inMotion ? 'in_motion' : 'stable'
+        return { weight, unit: 'kg', status: scaleStatus, stable: !inMotion && !overCap && !underZero, inMotion, zero: atZero, net: netMode, raw: rawArr }
+      }
+
+      // Status-only response (all ?/0x3F) — scale not ready or in motion
+      if (status === 0x3F || overCap || underZero) {
+        // Check if ANY byte has digits (like the ????5 pattern from diagnostic)
+        if (allDigits) {
+          let weight = parseFloat(allDigits)
+          if (!isNaN(weight)) {
+            // Diagnostic showed ????5 = 5g on scale, apply decimal scaling
+            weight = weight / Math.pow(10, decimals)
+            return { weight, unit: 'kg', status: inMotion ? 'in_motion' : 'stable', stable: !inMotion, inMotion, zero: weight === 0, net: false, raw: rawArr }
+          }
+        }
+        return { weight: 0, unit: 'kg', status: overCap ? 'over_limit' : underZero ? 'under_zero' : 'not_ready', stable: false, inMotion: true, zero: false, raw: rawArr }
+      }
+    }
+
+    // Method 2: Simple ASCII weight (no status byte) — for unframed responses
+    if (allDigits) {
+      const match = data.toString('ascii').match(/(-?\d+(?:\.\d+)?)/)
+      if (match) {
+        let weight = parseFloat(match[1])
+        // If weight looks like raw digits without decimal, apply decimal scaling
+        if (Number.isInteger(weight) && weight > 100) {
+          weight = weight / Math.pow(10, decimals)
+        }
+        return { weight, unit: 'kg', status: 'stable', stable: true, inMotion: false, zero: weight === 0, net: false, raw: rawArr }
+      }
+    }
+
+    return null
   }
 
   async function readScale8217 () {
     try {
-      const data = await send8217Command(hwScalePort, 'W', 3000)
+      const data = await send8217Command(hwScalePort, 'w', 3000)
       const parsed = parse8217Response(data)
       if (parsed) return parsed
       return { error: `Unexpected 8217 response: ${Array.from(data).map(b => b.toString(16)).join(' ')}` }
@@ -3075,7 +3149,7 @@ function setupIPC() {
         testPort.open(err => { clearTimeout(timer); err ? reject(err) : resolve() })
       })
       if (protocol === 'mt8217') {
-        const data = await send8217Command(testPort, 'W', cmdTimeout)
+        const data = await send8217Command(testPort, 'w', cmdTimeout)
         const parsed = parse8217Response(data)
         await closePort()
         if (parsed) return { ok: true, reading: parsed, protocol: 'mt8217', raw: Array.from(data).map(b => b.toString(16)).join(' ') }
@@ -3651,26 +3725,55 @@ function setupIPC() {
       }, 5000)
     }
 
+    let silenceTimer = null
+
+    const processFrame = (data) => {
+      const parsed = parse8217Response(Buffer.from(data))
+      if (parsed) {
+        scaleErrorCount = 0
+        lastStreamReading = parsed
+        const key = `${parsed.weight}|${parsed.status}`
+        if (key !== lastScaleWeight) {
+          lastScaleWeight = key
+          broadcastScaleWeight({ ...parsed, connected: true })
+        }
+      }
+    }
+
     const onStreamData = (chunk) => {
       resetWatchdog()
       for (const byte of chunk) {
+        // Track STX-framed protocol
         if (byte === 0x02) { inFrame = true; frameBuf = []; continue }
-        if (byte === 0x0D && inFrame) {
-          inFrame = false
-          const parsed = parse8217Response(Buffer.from(frameBuf))
-          if (parsed) {
-            scaleErrorCount = 0
-            lastStreamReading = parsed
-            const key = `${parsed.weight}|${parsed.status}`
-            if (key !== lastScaleWeight) {
-              lastScaleWeight = key
-              broadcastScaleWeight({ ...parsed, connected: true })
-            }
+        if (inFrame) {
+          if (byte === 0x0D) {
+            inFrame = false
+            processFrame(frameBuf)
+            frameBuf = []
+          } else {
+            frameBuf.push(byte)
+          }
+          continue
+        }
+        // Unframed: collect until CR/LF/ETX
+        frameBuf.push(byte)
+        if (byte === 0x0D || byte === 0x0A || byte === 0x03) {
+          if (frameBuf.length > 1) {
+            processFrame(frameBuf.slice(0, -1))  // exclude terminator
           }
           frameBuf = []
           continue
         }
-        if (inFrame) frameBuf.push(byte)
+      }
+      // Silence detection for completely unframed data
+      if (frameBuf.length > 0 && !inFrame) {
+        if (silenceTimer) clearTimeout(silenceTimer)
+        silenceTimer = setTimeout(() => {
+          if (frameBuf.length > 0) {
+            processFrame(frameBuf)
+            frameBuf = []
+          }
+        }, 50)
       }
     }
 
@@ -3680,7 +3783,7 @@ function setupIPC() {
     resetWatchdog()
 
     // 'C' starts continuous output on MT 8217
-    hwScalePort.write('C', 'ascii', () => { hwScalePort.drain(() => {}) })
+    hwScalePort.write('c', 'ascii', () => { hwScalePort.drain(() => {}) })
   }
 
   function stopScaleStream () {
