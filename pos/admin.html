@@ -601,10 +601,6 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1"/></svg>
         Network
       </a>
-      <a href="#" data-tab="hardware">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M15 2v2M9 2v2M15 20v2M9 20v2M2 15h2M2 9h2M20 15h2M20 9h2"/></svg>
-        Hardware
-      </a>
       <a href="#" data-tab="insights">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
         Insights
@@ -1556,186 +1552,6 @@
       </div>
     </div>
 
-    <!-- ── Hardware ────────────────────────────────────────────────── -->
-    <div class="tab-content" id="tab-hardware">
-      <h1>Hardware Devices</h1>
-      <p style="color:var(--text-dim);font-size:14px;margin-bottom:20px">
-        Auto-detects receipt printer, cash drawer, barcode scanner, and scale across USB, HID, and network interfaces.
-      </p>
-
-      <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
-        <button class="btn btn-outline" id="probeBtn" style="padding:8px 16px;font-size:13px">Re-scan</button>
-        <span id="probeStatus" style="color:var(--text-dim);font-size:13px">Auto-detecting hardware...</span>
-        <span id="hidStatus" style="font-size:11px;color:var(--text-dim);margin-left:auto"></span>
-      </div>
-
-      <div id="hwDiagIssues" style="display:none;margin-bottom:16px"></div>
-
-      <div class="stats-grid" style="grid-template-columns:repeat(auto-fit, minmax(280px, 1fr))">
-        <!-- Printer Card -->
-        <div class="stat-card" id="hwPrinter">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-            <div id="dotPrinter" style="width:12px;height:12px;border-radius:50%;background:#555;flex-shrink:0"></div>
-            <div class="stat-label" style="margin:0;font-size:15px;font-weight:600;color:var(--text)">Receipt Printer</div>
-            <button class="btn btn-outline" id="testPrinterBtn" style="margin-left:auto;font-size:10px;padding:3px 8px;display:none">Test</button>
-          </div>
-          <div style="font-size:13px;color:var(--text-dim)" id="printerInfo">Detecting...</div>
-          <div id="printerDetails" style="font-size:11px;color:var(--text-dim);margin-top:6px;display:none"></div>
-        </div>
-        <!-- Drawer Card -->
-        <div class="stat-card" id="hwDrawer">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-            <div id="dotDrawerHw" style="width:12px;height:12px;border-radius:50%;background:#555;flex-shrink:0"></div>
-            <div class="stat-label" style="margin:0;font-size:15px;font-weight:600;color:var(--text)">Cash Drawer</div>
-          </div>
-          <div style="font-size:13px;color:var(--text-dim)" id="drawerInfo">Detecting...</div>
-          <div style="font-size:11px;color:var(--text-dim);margin-top:4px">Opens via printer DK port (ESC/POS pulse)</div>
-        </div>
-        <!-- Scanner Card -->
-        <div class="stat-card" id="hwScanner">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-            <div id="dotScanner" style="width:12px;height:12px;border-radius:50%;background:#555;flex-shrink:0"></div>
-            <div class="stat-label" style="margin:0;font-size:15px;font-weight:600;color:var(--text)">Barcode Scanner</div>
-          </div>
-          <div style="font-size:13px;color:var(--text-dim)" id="scannerInfo">Detecting...</div>
-          <div style="font-size:11px;color:var(--text-dim);margin-top:4px">HID keyboard mode — scan below to test:</div>
-          <input type="text" id="scannerTest" placeholder="Scan barcode here..." style="margin-top:6px;padding:8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:14px;width:100%">
-          <div id="scannerResult" style="margin-top:4px;font-size:12px;min-height:18px"></div>
-        </div>
-        <!-- Scale Card -->
-        <div class="stat-card" id="hwScale">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-            <div id="dotScale" style="width:12px;height:12px;border-radius:50%;background:#555;flex-shrink:0"></div>
-            <div class="stat-label" style="margin:0;font-size:15px;font-weight:600;color:var(--text)">Scale</div>
-            <button class="btn btn-outline" id="readScaleBtn" style="margin-left:auto;font-size:10px;padding:3px 8px;display:none">Read Weight</button>
-            <button class="btn btn-outline" id="zeroScaleBtn" style="font-size:10px;padding:3px 8px;display:none">Zero/Tare</button>
-          </div>
-          <div style="font-size:13px;color:var(--text-dim)" id="scaleInfo">Detecting...</div>
-          <div id="scaleReading" style="font-size:20px;font-weight:700;color:var(--green);margin-top:6px;display:none"></div>
-        </div>
-      </div>
-
-      <!-- Scale Configuration (serial RS-232) -->
-      <div class="section" id="scaleConfigSection" style="margin-top:20px">
-        <h2 style="margin-bottom:12px">Scale Configuration (Serial / RS-232)</h2>
-        <p style="font-size:12px;color:var(--text-dim);margin-bottom:12px">For scales connected via serial port (DE-9 / DB-9 connector). Supports Mettler Toledo Viva/Ariva (8217) and SICS protocols.</p>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
-          <div class="form-field" style="flex:1;min-width:140px"><label>COM Port</label>
-            <select id="hwScalePort" style="width:100%;padding:8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text)">
-              <option value="">Select port...</option>
-            </select>
-          </div>
-          <div class="form-field" style="min-width:100px"><label>Baud Rate</label>
-            <select id="hwScaleBaud" style="width:100%;padding:8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text)">
-              <option value="2400">2400</option>
-              <option value="4800">4800</option>
-              <option value="9600" selected>9600</option>
-              <option value="19200">19200</option>
-              <option value="38400">38400</option>
-            </select>
-          </div>
-          <div class="form-field" style="min-width:120px"><label>Protocol</label>
-            <select id="hwScaleProtocol" style="width:100%;padding:8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text)">
-              <option value="mt8217">MT 8217 (Viva / Ariva / bPlus)</option>
-              <option value="sics">MT-SICS (lab balances)</option>
-            </select>
-          </div>
-          <button class="btn btn-outline" id="hwScaleTestBtn" style="padding:8px 16px;white-space:nowrap">Test Connection</button>
-          <button class="btn btn-blue" id="hwScaleSaveBtn" style="padding:8px 16px;white-space:nowrap">Save Scale Config</button>
-        </div>
-        <div id="scaleTestResult" style="font-size:13px;min-height:20px;margin-top:8px"></div>
-        <div style="margin-top:8px">
-          <button class="btn btn-outline" id="hwScaleRefreshPorts" style="font-size:11px;padding:4px 10px">Refresh COM Ports</button>
-          <span id="serialPortCount" style="font-size:11px;color:var(--text-dim);margin-left:8px"></span>
-        </div>
-      </div>
-
-      <!-- Printer Queue Picker (shown when auto-detect fails) -->
-      <div class="section" id="queuePickerSection" style="margin-top:20px;display:none;border:2px solid var(--amber);border-radius:var(--radius)">
-        <h2 style="margin-bottom:8px;color:var(--amber)">Select Your Printer</h2>
-        <p style="font-size:12px;color:var(--text-dim);margin-bottom:12px">Auto-detection couldn't confirm a working printer. Select your receipt printer from the list below and click Test to verify.</p>
-        <div id="queueList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px"></div>
-        <div id="queueTestResult" style="font-size:13px;min-height:20px;margin-top:8px"></div>
-      </div>
-
-      <!-- Hardware Configuration -->
-      <div class="section" style="margin-top:20px">
-        <h2 style="margin-bottom:12px">Printer Configuration</h2>
-        <p style="font-size:12px;color:var(--text-dim);margin-bottom:12px">Auto-detected on probe. Override here if needed.</p>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
-          <div class="form-field" style="flex:1;min-width:140px"><label>Interface</label>
-            <select id="hwPrinterInterface" style="width:100%;padding:8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text)">
-              <option value="">Auto-detect</option>
-              <option value="windows">Windows Spooler</option>
-              <option value="network">Network (TCP/IP)</option>
-              <option value="cups">CUPS (macOS/Linux)</option>
-            </select>
-          </div>
-          <div class="form-field" style="flex:2;min-width:180px"><label>Printer Name / Queue</label>
-            <input type="text" id="hwPrinterName" placeholder="e.g. EPSON TM-T82II Receipt" style="width:100%;padding:8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text)">
-          </div>
-          <div class="form-field" id="hwPortField" style="flex:1;min-width:100px"><label>Port</label>
-            <input type="text" id="hwPrinterPort" placeholder="USB001" style="width:100%;padding:8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text)">
-          </div>
-          <div class="form-field" id="hwIpField" style="flex:1;min-width:120px;display:none"><label>IP Address</label>
-            <input type="text" id="hwPrinterIp" placeholder="192.168.1.100" style="width:100%;padding:8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text)">
-          </div>
-          <div class="form-field" id="hwNetPortField" style="min-width:70px;display:none"><label>TCP Port</label>
-            <input type="number" id="hwPrinterNetPort" value="9100" style="width:100%;padding:8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text)">
-          </div>
-          <button class="btn btn-blue" id="hwSaveBtn" style="padding:8px 16px;white-space:nowrap">Save Config</button>
-        </div>
-      </div>
-
-      <!-- USB Device Table -->
-      <div class="section" style="margin-top:20px">
-        <h2>All Detected Devices</h2>
-        <table>
-          <thead><tr><th>Type</th><th>Vendor</th><th>VID</th><th>PID</th><th>Product</th><th>Source</th></tr></thead>
-          <tbody id="usbDeviceTable"><tr><td colspan="6" style="color:var(--text-dim)">Scanning...</td></tr></tbody>
-        </table>
-      </div>
-
-      <div class="section" style="margin-top:24px">
-        <h2>Payment Terminal (Linkly)</h2>
-        <p style="color:var(--text-dim);font-size:13px;margin-bottom:14px">
-          Connect to your EFTPOS terminal via Linkly Cloud. Get credentials from your payment processor or Linkly (1300 286 464).
-        </p>
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-          <div id="dotLinkly" style="width:12px;height:12px;border-radius:50%;background:#555;flex-shrink:0"></div>
-          <span id="linklyStatusText" style="font-size:14px;color:var(--text-dim)">Not configured</span>
-        </div>
-        <div class="form-row" style="gap:10px;margin-bottom:10px">
-          <div class="form-field" style="flex:1"><label>Username</label><input type="text" id="linklyUser" placeholder="Linkly username"></div>
-          <div class="form-field" style="flex:1"><label>Password</label><input type="password" id="linklyPass" placeholder="Linkly password"></div>
-        </div>
-        <div class="form-row" style="gap:10px;margin-bottom:10px">
-          <div class="form-field" style="flex:1"><label>Pair Code (from terminal)</label><input type="text" id="linklyPairCode" placeholder="6-digit code shown on terminal" maxlength="8"></div>
-          <div class="form-field" style="flex:1"><label>Environment</label>
-            <select id="linklyEnv"><option value="sandbox">Sandbox (testing)</option><option value="production">Production (live)</option></select>
-          </div>
-        </div>
-        <div style="display:flex;gap:10px;margin-bottom:10px">
-          <button class="btn btn-green" id="linklyPairBtn">Pair Terminal</button>
-          <button class="btn btn-blue" id="linklySaveBtn">Save Credentials</button>
-          <button class="btn btn-outline" id="linklyTestBtn">Test Connection</button>
-          <button class="btn" id="linklySettleBtn" style="background:var(--amber);color:#000">Settlement</button>
-        </div>
-        <div id="linklyResult" style="font-size:13px;color:var(--text-dim);min-height:20px;margin-top:4px"></div>
-      </div>
-
-      <!-- Hardware Diagnostic -->
-      <div class="section" style="margin-top:20px;border:2px solid var(--border);border-radius:var(--radius)">
-        <h2 style="margin-bottom:8px">Hardware Diagnostic</h2>
-        <p style="font-size:12px;color:var(--text-dim);margin-bottom:12px">Scans ALL USB, HID, and serial devices. Brute-force tests every serial port with every scale protocol/baud rate. Copy the output and send it for debugging.</p>
-        <button class="btn btn-blue" id="hwDiagBtn" style="padding:8px 16px;margin-bottom:10px">Run Full Diagnostic</button>
-        <button class="btn btn-outline" id="hwDiagCopyBtn" style="padding:8px 16px;margin-bottom:10px;display:none">Copy to Clipboard</button>
-        <div id="hwDiagStatus" style="font-size:12px;color:var(--text-dim);margin-bottom:8px"></div>
-        <pre id="hwDiagOutput" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px;font-size:11px;max-height:400px;overflow:auto;white-space:pre-wrap;word-break:break-all;display:none"></pre>
-      </div>
-    </div>
-
-
     <!-- ── Settings ───────────────────────────────────────────────── -->
     <div class="tab-content" id="tab-audit">
       <h1>Audit Log</h1>
@@ -2050,7 +1866,6 @@
         if (a.dataset.tab === 'cashdrawer') loadCashDrawer()
         if (a.dataset.tab === 'zreport') initZReport()
         if (a.dataset.tab === 'keyboard') loadKeyboard()
-        if (a.dataset.tab === 'hardware') loadHardware()
         if (a.dataset.tab === 'audit') loadAuditLog()
         if (a.dataset.tab === 'logs') loadLogsTab()
         if (a.dataset.tab === 'labels') initLabelsTab()
