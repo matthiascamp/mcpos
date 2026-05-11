@@ -3153,7 +3153,7 @@ function setupIPC() {
 
   async function readScale8217 () {
     try {
-      const data = await send8217Command(hwScalePort, 'W', 3000)
+      const data = await send8217Command(hwScalePort, 'w', 3000)
       const parsed = parse8217Response(data)
       if (parsed) return parsed
       return { error: `Unexpected 8217 response: ${Array.from(data).map(b => b.toString(16)).join(' ')}` }
@@ -3258,7 +3258,7 @@ function setupIPC() {
     const protocol = hwScale?.protocol || 'sics'
     try {
       if (protocol === 'mt8217') {
-        const data = await send8217Command(hwScalePort, 'Z', 3000)
+        const data = await send8217Command(hwScalePort, 'z', 3000)
         // 8217 Z response: status byte indicating success
         return { ok: true, status: 'Scale zeroed' }
       }
@@ -3286,7 +3286,7 @@ function setupIPC() {
         testPort.open(err => { clearTimeout(timer); err ? reject(err) : resolve() })
       })
       if (protocol === 'mt8217') {
-        const data = await send8217Command(testPort, 'W', cmdTimeout)
+        const data = await send8217Command(testPort, 'w', cmdTimeout)
         const parsed = parse8217Response(data)
         await closePort()
         if (parsed) return { ok: true, reading: parsed, protocol: 'mt8217', raw: Array.from(data).map(b => b.toString(16)).join(' ') }
