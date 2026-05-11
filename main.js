@@ -3977,6 +3977,7 @@ function setupIPC() {
 
   // ── Request-response polling (SICS / fallback) ────────────────────────
   let scalePollingBusy = false
+  let lastGoodWeight = null  // last reading with weight > 0 (persists through in-motion/not-ready)
   async function pollScale () {
     if (scalePollingBusy) return
     if (!hwScale) { stopScalePolling(); return }
@@ -3997,11 +3998,26 @@ function setupIPC() {
         appLog('info', 'hardware', 'Scale reconnected')
       }
       scaleErrorCount = 0
-      lastStreamReading = reading  // cache for probe result
-      const key = `${reading.weight}|${reading.status}|${reading.unit}`
+
+      // When scale is in motion or not ready, show last good weight instead of 0
+      // This prevents the display from flickering between the real weight and 0
+      let displayReading = reading
+      if ((reading.status === 'not_ready' || reading.inMotion) && reading.weight === 0 && lastGoodWeight) {
+        displayReading = { ...lastGoodWeight, status: reading.status, stable: false, inMotion: true }
+      }
+      if (reading.weight > 0 || reading.stable) {
+        lastGoodWeight = reading
+      }
+      // Clear last good weight when scale settles back to zero (item removed)
+      if (reading.weight === 0 && reading.stable) {
+        lastGoodWeight = null
+      }
+
+      lastStreamReading = displayReading  // cache for probe result
+      const key = `${displayReading.weight}|${displayReading.status}|${displayReading.unit}`
       if (key !== lastScaleWeight) {
         lastScaleWeight = key
-        broadcastScaleWeight({ ...reading, connected: true })
+        broadcastScaleWeight({ ...displayReading, connected: true })
       }
     } catch (e) {
       scaleErrorCount++
