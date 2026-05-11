@@ -2231,6 +2231,74 @@ function setupIPC() {
   const isWin = os.platform() === 'win32'
   const isMac = os.platform() === 'darwin'
   const RAWPRINT_SCRIPT = path.join(__dirname, 'rawprint.ps1')
+  const OPOS_BRIDGE = path.join(__dirname, 'opos-bridge.ps1')
+
+  // ── OPOS COM bridge (via PowerShell) ────────────────────────────────────────
+
+  let oposAvailable = null  // null = not checked, object = check result
+  let oposPrinterName = ''  // logical device name from SetupPOS
+  let oposDrawerName = ''
+  let oposScaleName = ''
+
+  function oposCall (action, opts = {}) {
+    if (!isWin) return { ok: false, error: 'OPOS only available on Windows' }
+    const args = ['-ExecutionPolicy', 'Bypass', '-NoProfile', '-NonInteractive', '-File', OPOS_BRIDGE, '-Action', action]
+    if (opts.deviceName) { args.push('-DeviceName', opts.deviceName) }
+    if (opts.deviceType) { args.push('-DeviceType', opts.deviceType) }
+    if (opts.data) { args.push('-Data', opts.data) }
+    try {
+      const result = hwExec(`powershell ${args.map(a => `"${a}"`).join(' ')}`, { timeout: opts.timeout || 10000, encoding: 'utf-8' }).trim()
+      return JSON.parse(result)
+    } catch (e) {
+      const stderr = e.stderr || e.message || ''
+      return { ok: false, error: `OPOS bridge error: ${stderr.substring(0, 200)}` }
+    }
+  }
+
+  function checkOpos () {
+    if (oposAvailable !== null) return oposAvailable
+    appLog('info', 'hardware', 'Checking OPOS availability...')
+    const result = oposCall('check')
+    if (result.ok && result.data) {
+      oposAvailable = result.data
+      appLog('info', 'hardware', `OPOS: printer=${result.data.printer} drawer=${result.data.drawer} scale=${result.data.scale}`)
+      if (result.data.progIds) {
+        for (const p of result.data.progIds) appLog('info', 'hardware', `  OPOS ${p.type}: ${p.progId}`)
+      }
+    } else {
+      oposAvailable = { printer: false, drawer: false, scale: false }
+      appLog('info', 'hardware', `OPOS not available: ${result.error || 'check failed'}`)
+    }
+    // Load saved OPOS device names
+    oposPrinterName = dbGet("SELECT value FROM settings WHERE key='opos_printer_name'")?.value || ''
+    oposDrawerName = dbGet("SELECT value FROM settings WHERE key='opos_drawer_name'")?.value || ''
+    oposScaleName = dbGet("SELECT value FROM settings WHERE key='opos_scale_name'")?.value || ''
+    return oposAvailable
+  }
+
+  function listOposDevices () {
+    return oposCall('list-devices', { timeout: 5000 })
+  }
+
+  function oposPrint (text) {
+    return oposCall('print', { deviceName: oposPrinterName, data: text, timeout: 15000 })
+  }
+
+  function oposPrintRaw (base64Data) {
+    return oposCall('print-raw', { deviceName: oposPrinterName, data: base64Data, timeout: 15000 })
+  }
+
+  function oposCut () {
+    return oposCall('cut', { deviceName: oposPrinterName, timeout: 5000 })
+  }
+
+  function oposOpenDrawer () {
+    return oposCall('open-drawer', { deviceName: oposDrawerName, timeout: 5000 })
+  }
+
+  function oposReadScale () {
+    return oposCall('read-scale', { deviceName: oposScaleName, timeout: 8000 })
+  }
 
   // Optional native HID support (for USB scale weight reading)
   let HID = null
@@ -3354,6 +3422,10 @@ function setupIPC() {
       return { vendorId: d.vendorId, productId: d.productId, product: d.product || '', manufacturer: d.manufacturer || '', deviceClass: d.deviceClass || '', usagePage: d.usagePage || 0, type: cls.type, vendor: cls.vendor }
     })
 
+    // Check OPOS availability
+    const opos = checkOpos()
+    const oposDevices = opos.printer || opos.drawer || opos.scale ? listOposDevices() : { ok: false }
+
     const result = {
       usbDevices: classified,
       printer: {
@@ -3367,8 +3439,14 @@ function setupIPC() {
       scale: { found: !!scale && scale.type !== 'none', name: scale?.product || '', vendor: scale?.vendor || '', path: scale?.path || '', port: scale?.port || '', type: scale?.type || '', protocol: scale?.protocol || '', baud: scale?.baud || 0, hasHID: !!HID, hasSerial: !!SerialPortLib, noHID: !!scale?.noHID, error: scale?.error || '', portErrors: scale?.portErrors || [] },
       serialPorts: serialPorts.map(p => ({ path: p.path, manufacturer: p.manufacturer, vendorId: p.vendorId, productId: p.productId })),
       scanner: { found: !!scanner, name: scanner?.product || '', vendor: scanner?.vendor || '' },
-      drawer: { found: !!printer && !printer.needsSetup, via: printer ? 'printer DK port' : '' },
+      drawer: { found: !!(printer && !printer.needsSetup) || opos.drawer, via: opos.drawer ? 'OPOS CashDrawer' : (printer ? 'printer DK port' : '') },
       hidAvailable: !!HID,
+      opos: {
+        available: opos.printer || opos.drawer || opos.scale,
+        printer: opos.printer, drawer: opos.drawer, scale: opos.scale,
+        devices: oposDevices.ok ? oposDevices.data?.devices : [],
+        printerName: oposPrinterName, drawerName: oposDrawerName, scaleName: oposScaleName,
+      },
     }
 
     if (printer && printer.interface === 'network') {
@@ -4128,6 +4206,21 @@ function setupIPC() {
 
   ipcMain.handle('hardware:printReceipt', async (_e, receiptData) => {
     try {
+      // Try OPOS first (if available and configured)
+      const opos = checkOpos()
+      if (opos.printer) {
+        appLog('info', 'printer', `Printing receipt via OPOS (device: ${oposPrinterName || 'auto'})`)
+        const buf = buildReceiptBuffer(receiptData)
+        const b64 = buf.toString('base64')
+        const result = oposPrintRaw(b64)
+        if (result.ok) {
+          oposCut()
+          return true
+        }
+        appLog('warn', 'printer', `OPOS print failed: ${result.error} — falling back to raw spooler`)
+      }
+
+      // Fallback: raw spooler path
       if (!hwPrinter) {
         appLog('info', 'printer', 'No printer configured, probing...')
         await probeHardware()
@@ -4150,6 +4243,19 @@ function setupIPC() {
 
   ipcMain.handle('hardware:openDrawer', async () => {
     try {
+      // Try OPOS first (dedicated CashDrawer device — more reliable than printer DK port)
+      const opos = checkOpos()
+      if (opos.drawer) {
+        appLog('info', 'drawer', `Opening drawer via OPOS (device: ${oposDrawerName || 'auto'})`)
+        const result = oposOpenDrawer()
+        if (result.ok) {
+          appLog('info', 'drawer', 'OPOS drawer opened OK')
+          return true
+        }
+        appLog('warn', 'drawer', `OPOS drawer failed: ${result.error} — falling back to ESC/POS`)
+      }
+
+      // Fallback: ESC/POS drawer kick via printer
       if (!hwPrinter) {
         appLog('info', 'drawer', 'No printer configured, probing...')
         await probeHardware()
@@ -4222,6 +4328,47 @@ function setupIPC() {
 
   ipcMain.handle('hardware:getQueues', () => {
     return getWindowsQueues().map(q => ({ name: q.Name, port: q.PortName, driver: q.DriverName }))
+  })
+
+  // ── OPOS IPC handlers ────────────────────────────────────────────────────
+  ipcMain.handle('hardware:oposCheck', () => {
+    const result = checkOpos()
+    const devices = listOposDevices()
+    return { available: result, devices: devices.ok ? devices.data : null }
+  })
+
+  ipcMain.handle('hardware:oposListDevices', () => listOposDevices())
+
+  ipcMain.handle('hardware:oposConfigure', (_e, config) => {
+    if (config.printerName !== undefined) {
+      oposPrinterName = config.printerName
+      dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('opos_printer_name', ?1)", [config.printerName])
+    }
+    if (config.drawerName !== undefined) {
+      oposDrawerName = config.drawerName
+      dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('opos_drawer_name', ?1)", [config.drawerName])
+    }
+    if (config.scaleName !== undefined) {
+      oposScaleName = config.scaleName
+      dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('opos_scale_name', ?1)", [config.scaleName])
+    }
+    scheduleSave()
+    return { ok: true }
+  })
+
+  ipcMain.handle('hardware:oposTestPrinter', (_e, deviceName) => {
+    const name = deviceName || oposPrinterName
+    const result = oposCall('print', { deviceName: name, data: '=== OPOS TEST ===\nPrinter: ' + name + '\nDate: ' + new Date().toLocaleString('en-AU') + '\nOPOS is working!\n' })
+    if (result.ok) oposCall('cut', { deviceName: name })
+    return result
+  })
+
+  ipcMain.handle('hardware:oposTestDrawer', (_e, deviceName) => {
+    return oposCall('open-drawer', { deviceName: deviceName || oposDrawerName })
+  })
+
+  ipcMain.handle('hardware:oposTestScale', (_e, deviceName) => {
+    return oposCall('read-scale', { deviceName: deviceName || oposScaleName })
   })
 
   ipcMain.handle('hardware:configure', async (_e, config) => {

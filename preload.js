@@ -133,6 +133,14 @@ contextBridge.exposeInMainWorld('pos', {
   hardwareDiagnostic: ()      => ipcRenderer.invoke('hardware:diagnostic'),
   diagnoseEnvironment: ()     => ipcRenderer.invoke('hardware:diagnose'),
 
+  // OPOS
+  oposCheck:          ()      => ipcRenderer.invoke('hardware:oposCheck'),
+  oposListDevices:    ()      => ipcRenderer.invoke('hardware:oposListDevices'),
+  oposConfigure:      (cfg)   => ipcRenderer.invoke('hardware:oposConfigure', cfg),
+  oposTestPrinter:    (name)  => ipcRenderer.invoke('hardware:oposTestPrinter', name),
+  oposTestDrawer:     (name)  => ipcRenderer.invoke('hardware:oposTestDrawer', name),
+  oposTestScale:      (name)  => ipcRenderer.invoke('hardware:oposTestScale', name),
+
   // Cash Drawer
   logCashDrawer:      (entry) => ipcRenderer.invoke('db:cash_drawer:log', entry),
   getCashDrawerLog:   (date)  => ipcRenderer.invoke('db:cash_drawer:getLog', date),
