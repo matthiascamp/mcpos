@@ -3311,6 +3311,9 @@ function setupIPC() {
     if (scaleOk && scale.path !== hwScale?.path) closeHidScale()
     if (scaleOk) {
       hwScale = scale
+      // Mark as configured so subsequent probes use fast verify path
+      // (avoids re-scanning COM ports which would conflict with the open polling port)
+      hwScale.configured = true
       // Auto-save detected serial scale config so it persists across restarts
       // (avoids slow brute-force COM port scan on every startup)
       if (scale.detected && scale.type === 'serial' && scale.port) {
