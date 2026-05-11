@@ -10,7 +10,8 @@ $printerQueue = ''
 $scalePort = ''
 
 function Log($msg, $color) {
-    Write-Host $msg -ForegroundColor ($color ?? 'White')
+    if (-not $color) { $color = 'White' }
+    Write-Host $msg -ForegroundColor $color
     $script:report += $msg
 }
 function Pass($msg) { Log "  [PASS] $msg" 'Green' }
@@ -152,7 +153,7 @@ if ($queues.Count -eq 0) {
         $driver = $q.DriverName
         $status = $q.PrinterStatus
         $nameLower = $name.ToLower()
-        $driverLower = ($driver ?? '').ToLower()
+        $driverLower = $(if ($driver) { $driver.ToLower() } else { '' })
 
         $isReceipt = $receiptKeywords | Where-Object { $nameLower.Contains($_) -or $driverLower.Contains($_) }
         $isVirtual = $virtualKeywords | Where-Object { $nameLower.Contains($_) }
@@ -328,7 +329,7 @@ foreach ($q in $queues) {
 # Sort: receipt-keyword matches first
 $receiptKeywords = @('epson','tm-t','tm-u','tm-m','thermal','receipt','pos','80mm','58mm')
 $candidates = $candidates | Sort-Object {
-    $n = $_.Name.ToLower(); $d = ($_.DriverName ?? '').ToLower()
+    $n = $_.Name.ToLower(); $d = $(if ($_.DriverName) { $_.DriverName.ToLower() } else { '' })
     $isReceipt = $receiptKeywords | Where-Object { $n.Contains($_) -or $d.Contains($_) }
     if ($isReceipt) { 0 } else { 1 }
 }
