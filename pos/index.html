@@ -1533,14 +1533,15 @@ async function handleFuncButton (action) {
     case 'recall': showRecallModal(); break
     case 'nosale':
       try {
-        await window.pos.openDrawer()
+        const dr = await window.pos.openDrawer()
+        if (dr?.error) showToast('Drawer: ' + dr.error, 'error')
+        else showToast('Drawer opened', 'info')
         await window.pos.logCashDrawer({ staff_id: currentStaff?.id, action: 'open', note: 'No Sale' })
         window.pos.logAudit({ staff_id: currentStaff?.id, staff_name: currentStaff?.name, action: 'no_sale', detail: 'Drawer opened without sale' })
-      } catch (_) {}
-      showToast('Drawer opened', 'info')
+      } catch (e) { showToast('Drawer: ' + e.message, 'error') }
       break
     case 'movedrawer':
-      try { await window.pos.openDrawer() } catch (_) {}
+      try { const dr = await window.pos.openDrawer(); if (dr?.error) showToast('Drawer: ' + dr.error, 'error') } catch (_) {}
       await window.pos.logCashDrawer({ staff_id: currentStaff?.id, action: 'open', note: 'Log out — drawer opened' })
       window.pos.logAudit({ staff_id: currentStaff?.id, staff_name: currentStaff?.name, action: 'logout', detail: 'Logged out via drawer button' })
       if (returnMode) { returnMode = false; $('#returnBanner').classList.remove('active') }

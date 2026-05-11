@@ -2263,7 +2263,7 @@ function setupIPC() {
     0x04B4: 'Cypress (scanner HID)',
   }
   const SCALE_USAGE_PAGE = 0x8D
-  const RECEIPT_KEYWORDS = ['epson', 'tm-t', 'tm-u', 'tm-m', 'star ', 'tsp', 'bixolon', 'srp-', 'citizen', 'ct-s', 'ct-e', 'custom', 'sewoo', 'slk-', 'thermal', 'receipt', 'pos printer', '80mm', '58mm', '80normal', '58normal']
+  const RECEIPT_KEYWORDS = ['epson', 'tm-t', 'tm-u', 'tm-m', 'star ', 'tsp', 'bixolon', 'srp-', 'citizen', 'ct-s', 'ct-e', 'custom', 'sewoo', 'slk-', 'thermal', 'receipt', 'pos printer', '80mm', '58mm', '80normal', '58normal', 'generic / text only', 'generic/text']
   const EPSON_MODELS = {
     0x0E03: 'TM-T20', 0x0E15: 'TM-T20II', 0x0E20: 'TM-T20III', 0x0E22: 'TM-T20IIIL',
     0x0E11: 'TM-T82', 0x0E14: 'TM-T82II', 0x0E32: 'TM-T82III', 0x0E38: 'TM-T82IIIL',
@@ -2317,7 +2317,7 @@ function setupIPC() {
     const scalePort = dbGet("SELECT value FROM settings WHERE key='hw_scale_port'")?.value
     const scalePath = dbGet("SELECT value FROM settings WHERE key='hw_scale_path'")?.value
     const scaleBaud = parseInt(dbGet("SELECT value FROM settings WHERE key='hw_scale_baud'")?.value || '9600')
-    const scaleProtocol = dbGet("SELECT value FROM settings WHERE key='hw_scale_protocol'")?.value || 'sics'
+    const scaleProtocol = dbGet("SELECT value FROM settings WHERE key='hw_scale_protocol'")?.value || 'mt8217'
     if (scaleType === 'serial' && scalePort) {
       hwScale = { type: 'serial', port: scalePort, baud: scaleBaud, protocol: scaleProtocol, configured: true, vendor: 'Serial Scale' }
     } else if (scalePath) {
@@ -2513,12 +2513,6 @@ function setupIPC() {
   }
 
   function detectPrinter (devices) {
-    // If we have saved config, trust it immediately — no PowerShell calls, no blocking
-    if (hwPrinter?.configured) {
-      appLog('info', 'hardware', `Using saved printer config: ${hwPrinter.name} (${hwPrinter.interface})`)
-      return hwPrinter
-    }
-
     let usbPrinter = null
     for (const d of devices) {
       if (!d.vendorId) continue
@@ -2531,6 +2525,8 @@ function setupIPC() {
     }
 
     if (!isWin) {
+      // Saved config on non-Windows — trust it (no queue check needed for CUPS)
+      if (hwPrinter?.configured && hwPrinter.name) return hwPrinter
       try {
         const raw = hwExec('lpstat -p 2>/dev/null', { timeout: 5000, encoding: 'utf-8' })
         for (const line of raw.split('\n')) {
@@ -2546,8 +2542,36 @@ function setupIPC() {
       return usbPrinter ? { name: usbPrinter.product || usbPrinter.vendor, interface: 'unknown', vid: usbPrinter.vendorId, pid: usbPrinter.productId, vendor: usbPrinter.vendor, error: 'USB printer found but no CUPS queue' } : null
     }
 
-    // Scan Windows queues — score by keyword match, USB port, prefer base name over numbered copies
+    // Windows: get all queues once (used by both saved-config verify and fresh scan)
     const queues = getWindowsQueues()
+
+    // Verify saved config — check the queue still exists
+    if (hwPrinter?.configured && hwPrinter.name && hwPrinter.interface === 'windows') {
+      const match = queues.find(q => q.Name === hwPrinter.name)
+      if (match) {
+        appLog('info', 'hardware', `Saved printer verified: ${hwPrinter.name} (queue exists)`)
+        resumePrinterQueue(hwPrinter.name)
+        return hwPrinter
+      }
+      // Saved queue gone — check if it was renamed (e.g. "Printer (Copy 1)")
+      const baseName = hwPrinter.name.replace(/\s*\(Copy \d+\)$/i, '').toLowerCase()
+      const renamed = queues.find(q => q.Name.replace(/\s*\(Copy \d+\)$/i, '').toLowerCase() === baseName)
+      if (renamed) {
+        appLog('info', 'hardware', `Saved printer renamed: "${hwPrinter.name}" → "${renamed.Name}"`)
+        hwPrinter.name = renamed.Name
+        hwPrinter.port = renamed.PortName || hwPrinter.port
+        dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('hw_printer_name', ?1)", [renamed.Name])
+        scheduleSave()
+        resumePrinterQueue(renamed.Name)
+        return hwPrinter
+      }
+      appLog('warn', 'hardware', `Saved printer "${hwPrinter.name}" no longer exists — rescanning`)
+      hwPrinter = null  // clear stale config
+    } else if (hwPrinter?.configured && hwPrinter.interface === 'network') {
+      return hwPrinter
+    }
+
+    // Scan Windows queues — score by keyword match, USB port, prefer base name over numbered copies
     const scored = queues.map(q => {
       const name = (q.Name || '').toLowerCase()
       const driver = (q.DriverName || '').toLowerCase()
@@ -2559,6 +2583,9 @@ function setupIPC() {
       if (/\(\d+\)/.test(q.Name)) score -= 50  // strongly penalise duplicates
       return { ...q, score }
     }).sort((a, b) => b.score - a.score)
+
+    // Log all queues for debugging
+    appLog('info', 'hardware', `Windows queues: ${scored.map(q => `"${q.Name}" port=${q.PortName} driver=${q.DriverName} score=${q.score}`).join(' | ') || 'none found'}`)
 
     // Pick the best-scoring receipt queue — NO test sends (they block startup and create stuck jobs)
     const best = scored.find(q => q.score > 0)
@@ -3293,6 +3320,7 @@ function setupIPC() {
       hwPrinter = printer
       // Auto-save detected printer config so it persists across restarts
       if (printer && printer.name && !printer.configured) {
+        printer.configured = true
         dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('hw_printer_name', ?1)", [printer.name])
         dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('hw_printer_interface', ?1)", [printer.interface || 'windows'])
         if (printer.port) dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('hw_printer_port', ?1)", [printer.port])
@@ -3348,6 +3376,19 @@ function setupIPC() {
       result.printer.status = tcp.ok ? 'Responding' : tcp.detail
       result.printer.tested = tcp.ok
       result.printer.found = tcp.ok
+    } else if (printer && printer.interface === 'windows' && printer.name && isWin) {
+      // Verify Windows printer by checking queue status
+      try {
+        const qs = getQueueStatus(printer.name)
+        if (qs) {
+          result.printer.tested = true
+          result.printer.status = qs.PrinterStatus === 3 ? 'Idle' : qs.PrinterStatus === 4 ? 'Printing' : qs.PrinterStatus === 5 ? 'Warming Up' : `Status ${qs.PrinterStatus || 0}`
+          if ((qs.JobCount || 0) > 0) {
+            result.printer.status += ` (${qs.JobCount} stuck jobs — clearing)`
+            clearPrinterQueue(printer.name)
+          }
+        }
+      } catch (_) {}
     }
 
     if (scale && scale.type === 'serial' && scale.port && SerialPortLib) {
@@ -4087,11 +4128,19 @@ function setupIPC() {
 
   ipcMain.handle('hardware:printReceipt', async (_e, receiptData) => {
     try {
-      if (!hwPrinter) await probeHardware()
-      if (hwPrinter?.name) resumePrinterQueue(hwPrinter.name)
+      if (!hwPrinter) {
+        appLog('info', 'printer', 'No printer configured, probing...')
+        await probeHardware()
+      }
+      if (!hwPrinter) return { error: 'No printer detected. Go to Admin → Hardware and run Probe All Devices.' }
+      appLog('info', 'printer', `Printing receipt via "${hwPrinter.name}" (${hwPrinter.interface})`)
+      if (hwPrinter?.name && isWin) resumePrinterQueue(hwPrinter.name)
       const buf = buildReceiptBuffer(receiptData)
       const result = await sendToPrinter(buf)
-      if (!result.ok) return { error: result.detail }
+      if (!result.ok) {
+        appLog('error', 'printer', `Print send failed: ${result.detail}`)
+        return { error: result.detail }
+      }
       return true
     } catch (err) {
       appLog('error', 'printer', 'Print failed', err.message)
@@ -4101,9 +4150,13 @@ function setupIPC() {
 
   ipcMain.handle('hardware:openDrawer', async () => {
     try {
-      if (!hwPrinter) await probeHardware()
-      if (hwPrinter?.name) resumePrinterQueue(hwPrinter.name)
-      appLog('info', 'drawer', `Opening drawer via "${hwPrinter?.name}" (${hwPrinter?.interface})`)
+      if (!hwPrinter) {
+        appLog('info', 'drawer', 'No printer configured, probing...')
+        await probeHardware()
+      }
+      if (!hwPrinter) return { error: 'No printer detected — drawer opens via printer DK port. Go to Admin → Hardware.' }
+      if (hwPrinter?.name && isWin) resumePrinterQueue(hwPrinter.name)
+      appLog('info', 'drawer', `Opening drawer via "${hwPrinter.name}" (${hwPrinter.interface})`)
       const buf = Buffer.concat([ESCPOS.INIT, ESCPOS.DRAWER_KICK])
       const result = await sendToPrinter(buf)
       if (!result.ok) { appLog('error', 'drawer', `Drawer open failed: ${result.detail}`); return { error: result.detail } }
