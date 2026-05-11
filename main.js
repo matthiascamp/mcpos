@@ -2656,34 +2656,26 @@ function setupIPC() {
   }
 
   async function detectScale (devices, serialPorts) {
+    // Fast path: if scale port is already open and being polled, it's working — skip everything
+    if (hwScale && hwScalePort?.isOpen) {
+      appLog('info', 'hardware', `Scale already connected on ${hwScale.port} — skipping detection`)
+      return hwScale
+    }
+    // Fast path: saved config exists, just verify it works
     if (hwScale?.configured) {
-      // Verify saved config actually works — don't blindly trust stale config
       if (hwScale.type === 'serial' && hwScale.port && SerialPortLib) {
-        // If port is already open (streaming/polling), verify through it
-        if (hwScalePort?.isOpen) {
-          try {
-            const reading = await readScaleSerial()
-            if (!reading.error) {
-              appLog('info', 'hardware', `Saved scale verified via open port: ${hwScale.port}`)
-              return hwScale
-            }
-          } catch (_) {}
-        }
-        // Port not open — try fresh test
         try {
-          const verify = await testSerialScale(hwScale.port, hwScale.baud || 9600, hwScale.protocol || 'sics', 2000)
+          const verify = await testSerialScale(hwScale.port, hwScale.baud || 9600, hwScale.protocol || 'mt8217', 2000)
           if (verify.ok) {
-            appLog('info', 'hardware', `Saved scale config verified: ${hwScale.port} (${hwScale.protocol} @ ${hwScale.baud})`)
+            appLog('info', 'hardware', `Saved scale verified: ${hwScale.port} (${hwScale.protocol} @ ${hwScale.baud})`)
             return hwScale
           }
-          appLog('warn', 'hardware', `Saved scale config FAILED on ${hwScale.port}: ${verify.error} — scanning for scale...`)
+          appLog('warn', 'hardware', `Saved scale config FAILED on ${hwScale.port}: ${verify.error} — scanning...`)
         } catch (e) {
-          appLog('warn', 'hardware', `Saved scale config error on ${hwScale.port}: ${e.message} — scanning for scale...`)
+          appLog('warn', 'hardware', `Saved scale config error on ${hwScale.port}: ${e.message} — scanning...`)
         }
-        // Clear bad config so we don't keep retrying it
         hwScale = null
       } else if (hwScale.type === 'hid' && hwScale.path && HID) {
-        appLog('info', 'hardware', `Using saved HID scale config: ${hwScale.path}`)
         return hwScale
       }
     }
@@ -2710,7 +2702,9 @@ function setupIPC() {
       const scaleAdapterVids = new Set([0x0403, 0x10C4])
       // Skip ports that are known non-scale devices (payment terminals, etc.)
       const skipVids = new Set([0x11CA]) // VeriFone payment terminals
-      const candidates = serialPorts.filter(sp => !sp.vendorId || !skipVids.has(sp.vendorId))
+      // Skip ports already held open by us (e.g. scale polling)
+      const ourOpenPort = hwScalePort?.isOpen ? hwScalePort.path : null
+      const candidates = serialPorts.filter(sp => !sp.vendorId || !skipVids.has(sp.vendorId)).filter(sp => sp.path !== ourOpenPort)
       // Try known adapter VIDs first, then all other ports
       const sorted = [...candidates].sort((a, b) => {
         const aKnown = a.vendorId && scaleAdapterVids.has(a.vendorId) ? 0 : 1
@@ -3357,19 +3351,28 @@ function setupIPC() {
     }
 
     if (scale && scale.type === 'serial' && scale.port && SerialPortLib) {
-      if (hwScalePort?.isOpen) {
-        // Read through existing open port
-        const reading = await readScaleSerial()
+      if (hwScalePort?.isOpen && lastStreamReading) {
+        // Port is open and polling — use last cached reading (don't conflict with poller)
         result.scale.tested = true
-        if (!reading.error) {
-          result.scale.testResult = `${reading.weight} ${reading.unit} (${reading.status})`
-          result.scale.reading = reading
-          result.scale.detected = true
-        } else {
-          result.scale.testResult = reading.error
-        }
+        result.scale.testResult = `${lastStreamReading.weight} ${lastStreamReading.unit} (${lastStreamReading.status})`
+        result.scale.reading = lastStreamReading
+        result.scale.detected = true
+      } else if (hwScalePort?.isOpen) {
+        // Port open but no cached reading yet — do a single read
+        try {
+          const reading = await readScaleSerial()
+          result.scale.tested = true
+          if (!reading.error) {
+            result.scale.testResult = `${reading.weight} ${reading.unit} (${reading.status})`
+            result.scale.reading = reading
+            result.scale.detected = true
+          } else {
+            result.scale.testResult = reading.error
+          }
+        } catch (_) {}
       } else {
-        const test = await testSerialScale(scale.port, scale.baud || 9600, scale.protocol || 'sics')
+        // Port not open — test fresh
+        const test = await testSerialScale(scale.port, scale.baud || 9600, scale.protocol || 'mt8217')
         result.scale.tested = true
         if (test.ok) {
           result.scale.testResult = `${test.reading.weight} ${test.reading.unit} (${test.reading.status})`
@@ -3875,6 +3878,7 @@ function setupIPC() {
         appLog('info', 'hardware', 'Scale reconnected')
       }
       scaleErrorCount = 0
+      lastStreamReading = reading  // cache for probe result
       const key = `${reading.weight}|${reading.status}|${reading.unit}`
       if (key !== lastScaleWeight) {
         lastScaleWeight = key
