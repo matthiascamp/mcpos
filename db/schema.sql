@@ -328,7 +328,7 @@ INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, color, bg_color,
   ('btn-fv',      'FRUIT & VEG',       'open_price',  0,    '#000', '#409850', 22, 'grid', 1, 2, 7, 1, 1, NULL),
   ('btn-coffee',  'COFFEE',            'section',     0,    '#000', '#78b8d0', 23, 'grid', 1, 3, 3, 2, 1, 'Coffee'),
   ('btn-bread',   'BREAD &\nCROISSAN', 'section',     0,    '#000', '#98c030', 24, 'grid', 1, 3, 5, 2, 1, 'Bread & Croissants'),
-  ('btn-fvkg',    'FRUIT & VEG\n/KG',  'open_price',  0,    '#fff', '#2d6a4f', 25, 'grid', 1, 3, 7, 1, 1, NULL),
+  ('btn-fvkg',    'FRUIT & VEG\n/KG',  'weighed_open',0,    '#fff', '#2d6a4f', 25, 'grid', 1, 3, 7, 1, 1, NULL),
   ('btn-deli',    'DELI',              'section',     0,    '#000', '#c8a828', 26, 'grid', 1, 4, 3, 2, 1, 'Deli'),
   ('btn-cheese',  'CHEESE',            'section',     0,    '#000', '#c8c4bc', 27, 'grid', 1, 4, 5, 2, 1, 'Cheese'),
   ('btn-bags',    'BAG',               'fixed_price', 0.15, '#fff', '#222222', 28, 'grid', 1, 4, 7, 1, 1, NULL);

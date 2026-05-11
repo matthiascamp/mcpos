@@ -786,6 +786,15 @@ function createWindow() {
   }
 
 
+  // Forward renderer console messages we care about into the main-process log.
+  // Electron only mirrors console.error to stdout by default — this gives us
+  // info-level too, which is what the scale-event diagnostic uses.
+  mainWindow.webContents.on('console-message', (_e, level, message) => {
+    if (message.startsWith('[RENDERER_SCALE]') || message.startsWith('[RENDERER_DEBUG]')) {
+      try { appLog('info', 'renderer', message) } catch (_) {}
+    }
+  })
+
   mainWindow.webContents.on('before-input-event', (event, input) => {
     if (input.key === 'F11') {
       mainWindow.setKiosk(!mainWindow.isKiosk())
@@ -2516,23 +2525,45 @@ function setupIPC() {
 
   // ── Printer auto-detection ─────────────────────────────────────────────────
 
+  // Cache Windows printer queues for 30s. `Get-Printer` via PowerShell can take
+  // up to 10s on this box, which froze the Hardware tab whenever the renderer
+  // called any handler that ran this. Callers expect a sync return so we keep
+  // the same signature and serve from cache when fresh.
+  let _winQueuesCache = null
+  let _winQueuesCacheTime = 0
+  const WIN_QUEUES_CACHE_TTL = 30000
+
   function getWindowsQueues () {
     if (!isWin) return []
+    const now = Date.now()
+    if (_winQueuesCache && (now - _winQueuesCacheTime) < WIN_QUEUES_CACHE_TTL) {
+      return _winQueuesCache
+    }
     try {
       const raw = hwExec(`powershell -NoProfile -NonInteractive -Command "Get-Printer | Select-Object Name,PortName,DriverName,PrinterStatus | ConvertTo-Json -Compress"`, { timeout: 10000, encoding: 'utf-8' }).trim()
-      if (!raw) return []
+      if (!raw) { _winQueuesCache = []; _winQueuesCacheTime = now; return [] }
       const parsed = JSON.parse(raw)
-      return Array.isArray(parsed) ? parsed : [parsed]
+      _winQueuesCache = Array.isArray(parsed) ? parsed : [parsed]
+      _winQueuesCacheTime = now
+      return _winQueuesCache
     } catch (e) {
       appLog('warn', 'hardware', 'Printer queue scan failed', e.message)
-      return []
+      return _winQueuesCache || []  // serve stale cache on failure rather than nothing
     }
   }
 
   function clearPrinterQueue (queueName) {
+    // Fire-and-forget — spawning execSync blocks the entire main process when
+    // WMI/PowerShell is slow, which freezes the renderer over IPC. We don't need
+    // the return value, so spawn async and let it complete in the background.
     try {
-      // Clear stuck print jobs and resume the queue
-      hwExec(`powershell -NoProfile -NonInteractive -Command "Get-PrintJob -PrinterName '${queueName.replace(/'/g, "''")}' -ErrorAction SilentlyContinue | Remove-PrintJob -ErrorAction SilentlyContinue; Set-Printer -Name '${queueName.replace(/'/g, "''")}' -ErrorAction SilentlyContinue"`, { timeout: 5000, encoding: 'utf-8' })
+      const { spawn } = require('child_process')
+      const child = spawn('powershell', [
+        '-NoProfile', '-NonInteractive', '-Command',
+        `Get-PrintJob -PrinterName '${queueName.replace(/'/g, "''")}' -ErrorAction SilentlyContinue | Remove-PrintJob -ErrorAction SilentlyContinue; Set-Printer -Name '${queueName.replace(/'/g, "''")}' -ErrorAction SilentlyContinue`
+      ], { windowsHide: true, stdio: 'ignore' })
+      child.on('error', () => {})
+      setTimeout(() => { try { child.kill() } catch (_) {} }, 8000)
     } catch (_) {}
   }
 
@@ -2545,10 +2576,18 @@ function setupIPC() {
   }
 
   // ── Resume a printer queue via WMI (clears Error state, no admin needed) ───
+  // Fire-and-forget — execSync here blocks the main thread for the full WMI
+  // timeout (10s+ in practice), freezing the renderer over IPC. Result isn't used.
   function resumePrinterQueue (queueName) {
     try {
-      hwExec(`powershell -NoProfile -NonInteractive -Command "$p = Get-WmiObject Win32_Printer -Filter \\"Name='${queueName.replace(/'/g, "''").replace(/\\/g, '\\\\')}'\\" -ErrorAction SilentlyContinue; if ($p) { $p.CancelAllJobs() | Out-Null; $p.Resume() | Out-Null }"`, { timeout: 3000, encoding: 'utf-8' })
-      appLog('info', 'printer', `WMI Resume sent for "${queueName}"`)
+      const { spawn } = require('child_process')
+      const child = spawn('powershell', [
+        '-NoProfile', '-NonInteractive', '-Command',
+        `$p = Get-WmiObject Win32_Printer -Filter "Name='${queueName.replace(/'/g, "''").replace(/\\/g, '\\\\')}'" -ErrorAction SilentlyContinue; if ($p) { $p.CancelAllJobs() | Out-Null; $p.Resume() | Out-Null }`
+      ], { windowsHide: true, stdio: 'ignore' })
+      child.on('error', () => {})
+      setTimeout(() => { try { child.kill() } catch (_) {} }, 8000)
+      appLog('info', 'printer', `WMI Resume dispatched for "${queueName}"`)
     } catch (e) {
       appLog('warn', 'printer', `WMI Resume failed for "${queueName}": ${e.message}`)
     }
@@ -2685,29 +2724,50 @@ function setupIPC() {
   function sendToPrinter (data) {
     if (!hwPrinter) return Promise.resolve({ ok: false, detail: 'No printer detected. Run Probe All Devices in Hardware tab.' })
     if (hwPrinter.interface === 'network') return sendViaTCP(data, hwPrinter.ip, hwPrinter.networkPort || 9100)
-    if (hwPrinter.interface === 'windows') return Promise.resolve(sendViaSpooler(data, hwPrinter.name))
+    if (hwPrinter.interface === 'windows') return sendViaSpooler(data, hwPrinter.name)
     if (hwPrinter.interface === 'cups') return Promise.resolve(sendViaCUPS(data, hwPrinter.name))
     return Promise.resolve({ ok: false, detail: `No working print backend for interface: ${hwPrinter.interface}` })
   }
 
   function sendViaSpooler (data, printerName) {
+    // Async via spawn — execSync blocks the entire main process for the full
+    // 15s timeout if the spooler is slow, which freezes the renderer during a sale.
     const tmpFile = path.join(os.tmpdir(), `crisp-receipt-${Date.now()}.bin`)
     fs.writeFileSync(tmpFile, data)
-    // Resume queue via WMI (clears Error state without admin)
-    resumePrinterQueue(printerName)
+    resumePrinterQueue(printerName)  // already fire-and-forget
     appLog('info', 'printer', `Sending ${data.length} bytes to "${printerName}" via rawprint.ps1`)
-    try {
-      // Use external rawprint.ps1 to avoid quote-escaping issues with inline C# P/Invoke
-      const result = hwExec(`powershell -ExecutionPolicy Bypass -NoProfile -NonInteractive -File "${RAWPRINT_SCRIPT}" -PrinterName "${printerName.replace(/"/g, '`"')}" -FilePath "${tmpFile}"`, { timeout: 15000, encoding: 'utf-8' }).trim()
-      appLog('info', 'printer', `P/Invoke result: ${result}`)
-      if (result.includes('OK')) return { ok: true, detail: result }
-      return { ok: false, detail: result || 'P/Invoke returned no output' }
-    } catch (e) {
-      appLog('error', 'printer', `P/Invoke error: ${e.stderr || e.message}`)
-      return { ok: false, detail: e.stderr || e.message }
-    } finally {
-      try { fs.unlinkSync(tmpFile) } catch (_) {}
-    }
+    const { spawn } = require('child_process')
+    return new Promise(resolve => {
+      let out = ''
+      let err = ''
+      let settled = false
+      const finish = (r) => { if (settled) return; settled = true; try { fs.unlinkSync(tmpFile) } catch (_) {}; resolve(r) }
+      const child = spawn('powershell', [
+        '-ExecutionPolicy', 'Bypass', '-NoProfile', '-NonInteractive',
+        '-File', RAWPRINT_SCRIPT,
+        '-PrinterName', printerName,
+        '-FilePath', tmpFile,
+      ], { windowsHide: true })
+      const timer = setTimeout(() => {
+        try { child.kill() } catch (_) {}
+        appLog('warn', 'printer', `Print timed out (15s) for "${printerName}"`)
+        finish({ ok: false, detail: 'Print timeout (15s)' })
+      }, 15000)
+      child.stdout.on('data', d => { out += d.toString('utf-8') })
+      child.stderr.on('data', d => { err += d.toString('utf-8') })
+      child.on('error', e => {
+        clearTimeout(timer)
+        appLog('error', 'printer', `P/Invoke spawn error: ${e.message}`)
+        finish({ ok: false, detail: e.message })
+      })
+      child.on('exit', () => {
+        clearTimeout(timer)
+        const result = (out + err).trim()
+        appLog('info', 'printer', `P/Invoke result: ${result}`)
+        if (result.includes('OK')) finish({ ok: true, detail: result })
+        else finish({ ok: false, detail: result || 'P/Invoke returned no output' })
+      })
+    })
   }
 
   function sendViaTCP (data, ip, port) {
@@ -2764,6 +2824,13 @@ function setupIPC() {
     // Fast path: if scale port is already open and being polled, it's working — skip everything
     if (hwScale && hwScalePort?.isOpen) {
       appLog('info', 'hardware', `Scale already connected on ${hwScale.port} — skipping detection`)
+      return hwScale
+    }
+    // Fast path: Python bridge holds COM2 — never probe over the top of it,
+    // otherwise testSerialScale gets "Access denied" and we wrongly mark the
+    // scale as broken.
+    if (hwScale && pythonScaleProc) {
+      appLog('info', 'hardware', `Scale handled by Python bridge on ${hwScale.port} — skipping detection`)
       return hwScale
     }
     // Fast path: saved config exists, just verify it works
@@ -3597,6 +3664,13 @@ function setupIPC() {
             info.push({ type: 'info', area: 'port', message: `${p.path}: in use by Crisp POS (scale connected)` })
             continue
           }
+          // Skip if our Python scale bridge has it open — otherwise the open
+          // attempt below fails with "Access denied" and we wrongly flag our
+          // own usage as "another application has exclusive access".
+          if (pythonScaleProc && hwScale?.port === p.path) {
+            info.push({ type: 'info', area: 'port', message: `${p.path}: in use by Crisp POS scale bridge (Python)` })
+            continue
+          }
           let portOpened = false
           let testPort = null
           try {
@@ -3830,8 +3904,12 @@ function setupIPC() {
   setInterval(async () => {
     try {
       const hadPrinter = !!hwPrinter
-      // If scale port is open and working, skip scale re-detection (avoids port conflict)
-      const scaleWorking = hwScalePort?.isOpen && scaleErrorCount < 10
+      // Scale "working" = JS port open, Python bridge running, or stream active
+      const scaleWorking = (hwScalePort?.isOpen && scaleErrorCount < 10) || !!pythonScaleProc
+      const scaleHealthy = scaleWorking || !hwScale
+      // Skip the entire reprobe when both pieces are already working. The probe path
+      // hits WMI/Get-Printer/Resume which can take many seconds on slow Windows boxes.
+      if (hwPrinter && scaleHealthy) return
       if (scaleWorking) {
         // Only reprobe printer — don't touch scale
         const devices = enumerateDevices()
@@ -3862,13 +3940,155 @@ function setupIPC() {
   let scaleStreamActive = false
   let lastStreamReading = null
 
+  // ── Python scale bridge (scale_reader.py --json) ─────────────────────────
+  // The in-house JS 8217 parser doesn't recognise the Viva ECR weight frame
+  // format (STX + ASCII digits including a literal `.` + CR). The Python
+  // reference reader handles both, so for mt8217 scales we spawn it and pipe
+  // its JSON-line output into broadcastScaleWeight. Disable via the
+  // `hw_scale_use_python = 'false'` setting if you need to fall back to JS.
+  let pythonScaleProc = null
+  let lastPythonReading = null
+  let pythonScaleStopping = false  // set when we intentionally kill Python so the exit handler skips auto-restart
+
+  function startPythonScaleBridge () {
+    if (pythonScaleProc) return true
+    if (!hwScale?.port) return false
+    const scriptPath = path.join(__dirname, 'scale_reader.py')
+    if (!fs.existsSync(scriptPath)) {
+      appLog('warn', 'scale', 'scale_reader.py not found, falling back to JS poller')
+      return false
+    }
+    const { spawn } = require('child_process')
+    const args = [scriptPath, hwScale.port, '--json', '--baud', String(hwScale.baud || 9600), '--poll', '0.2']
+    appLog('info', 'scale', `Spawning Python scale bridge: python ${args.join(' ')}`)
+    let proc
+    // PYTHONUNBUFFERED=1 forces Python to flush stdout per print() — without
+    // this, Python's pipe buffering can hold JSON lines until the buffer fills
+    // (often 4KB), so the bridge appears silent when the scale is idle.
+    try { proc = spawn('python', args, { windowsHide: true, env: { ...process.env, PYTHONUNBUFFERED: '1' } }) }
+    catch (e) { appLog('warn', 'scale', `Python bridge spawn failed: ${e.message}`); return false }
+    pythonScaleProc = proc
+
+    let stdoutBuf = ''
+    // Diagnostic counters — logged every 20 events so we know events are flowing.
+    let evtCount = { weight: 0, status: 0, error: 0, other: 0, lastLogged: 0 }
+    const logEvtStats = () => {
+      const total = evtCount.weight + evtCount.status + evtCount.error + evtCount.other
+      if (total - evtCount.lastLogged < 20) return
+      evtCount.lastLogged = total
+      appLog('info', 'scale', `Bridge stats: ${total} evts (weight=${evtCount.weight} status=${evtCount.status} error=${evtCount.error} other=${evtCount.other})`)
+    }
+
+    proc.stdout.on('data', chunk => {
+      stdoutBuf += chunk.toString('utf-8')
+      let nl
+      while ((nl = stdoutBuf.indexOf('\n')) !== -1) {
+        const line = stdoutBuf.slice(0, nl).trim()
+        stdoutBuf = stdoutBuf.slice(nl + 1)
+        if (!line) continue
+        let evt
+        try { evt = JSON.parse(line) } catch (_) {
+          // First few non-JSON lines are useful (Probing... / Scale found!).
+          if (evtCount.other < 5) appLog('debug', 'scale', `bridge non-JSON stdout: ${line}`)
+          evtCount.other++
+          continue
+        }
+        // Log the first event of each type so we see exactly what's flowing.
+        if (evt.type === 'weight' && evtCount.weight === 0) appLog('info', 'scale', `First weight evt: ${JSON.stringify(evt)}`)
+        if (evt.type === 'status' && evtCount.status === 0) appLog('info', 'scale', `First status evt: ${JSON.stringify(evt)}`)
+        if (evt.type === 'error' && evtCount.error === 0) appLog('warn', 'scale', `First error evt: ${JSON.stringify(evt)}`)
+        evtCount[evt.type || 'other'] = (evtCount[evt.type || 'other'] || 0) + 1
+        logEvtStats()
+        if (evt.type === 'weight') {
+          const reading = {
+            weight: typeof evt.weight === 'number' ? evt.weight : 0,
+            unit: evt.unit || 'kg',
+            stable: true,
+            inMotion: false,
+            net: !!evt.net,
+            status: 'stable',
+            connected: true,
+          }
+          lastPythonReading = reading
+          broadcastScaleWeight(reading)
+        } else if (evt.type === 'status') {
+          // No weight available right now — always preserve last good weight so
+          // the status bar doesn't flicker to zero when the scale momentarily
+          // reports motion/net/idle status. Modal still won't lock in because
+          // we send stable: false.
+          const base = lastPythonReading
+            ? { weight: lastPythonReading.weight, unit: lastPythonReading.unit, net: lastPythonReading.net }
+            : { weight: 0, unit: evt.unit || 'kg', net: false }
+          broadcastScaleWeight({
+            ...base,
+            stable: false,
+            inMotion: !!evt.inMotion,
+            status: evt.powerup ? 'powerup' : (evt.inMotion ? 'in_motion' : 'not_ready'),
+            connected: true,
+          })
+        } else if (evt.type === 'error') {
+          appLog('warn', 'scale', `Python bridge: ${evt.message}`)
+        }
+      }
+    })
+
+    proc.stderr.on('data', chunk => {
+      const txt = chunk.toString('utf-8').trim()
+      if (txt) appLog('debug', 'scale', `[python] ${txt}`)
+    })
+
+    proc.on('exit', code => {
+      appLog('warn', 'scale', `Python scale bridge exited (code=${code})`)
+      pythonScaleProc = null
+      lastPythonReading = null
+      broadcastScaleWeight({ connected: false })
+      // Skip auto-restart if we killed it ourselves (app shutdown, manual stop).
+      // Otherwise we'd spawn a new Python child right as the app is exiting and
+      // leave an orphan holding COM2.
+      if (pythonScaleStopping) {
+        pythonScaleStopping = false
+        return
+      }
+      // Auto-restart on unexpected exit (e.g. transient serial drop / Python crash).
+      if (hwScale?.port) {
+        setTimeout(() => {
+          if (!pythonScaleProc && hwScale?.port) {
+            appLog('info', 'scale', 'Auto-restarting Python scale bridge')
+            startPythonScaleBridge()
+          }
+        }, 2000)
+      }
+    })
+
+    proc.on('error', err => {
+      appLog('error', 'scale', `Python scale bridge error: ${err.message}`)
+      pythonScaleProc = null
+    })
+
+    return true
+  }
+
+  function stopPythonScaleBridge () {
+    if (pythonScaleProc) {
+      pythonScaleStopping = true  // tell the exit handler this is intentional
+      try { pythonScaleProc.kill() } catch (_) {}
+      pythonScaleProc = null
+      lastPythonReading = null
+    }
+  }
+
   async function startScalePolling () {
-    if (scalePollingTimer || scaleStreamActive) return
+    if (scalePollingTimer || scaleStreamActive || pythonScaleProc) return
     if (!hwScale) return
 
+    // Prefer the Python bridge for mt8217 — handles Viva ECR-mode frames.
+    const usePyFlag = dbGet("SELECT value FROM settings WHERE key='hw_scale_use_python'")?.value
+    const usePy = usePyFlag !== 'false'  // default true
+    if (usePy && hwScale.protocol === 'mt8217' && hwScale.port) {
+      if (startPythonScaleBridge()) return
+    }
+
     const protocol = hwScale?.protocol || 'sics'
-    // Both SICS and MT 8217 use request-response polling (send command, read response)
-    // The Viva/Ariva retail scales do NOT support continuous streaming mode
     appLog('info', 'hardware', `Starting scale polling (${protocol})`)
     scalePollingTimer = setInterval(pollScale, 500)
   }
@@ -3876,6 +4096,7 @@ function setupIPC() {
   function stopScalePolling () {
     if (scalePollingTimer) { clearInterval(scalePollingTimer); scalePollingTimer = null }
     if (scaleStreamActive) stopScaleStream()
+    stopPythonScaleBridge()
     lastScaleWeight = null
     scaleErrorCount = 0
   }
