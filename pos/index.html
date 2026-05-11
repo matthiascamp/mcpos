@@ -1485,7 +1485,7 @@ $('#posGrid').addEventListener('click', async e => {
         const qty = returnMode ? -w : w
         cart.addProduct({
           id: 'WEIGHED_' + Date.now(),
-          name: `${name} (${w.toFixed(3)} kg @ $${labelPrice.toFixed(2)}/kg)`,
+          name,
           price: labelPrice,
           active_price: labelPrice,
           unit: 'kg',
@@ -2001,7 +2001,7 @@ $('#weighedOpenConfirm').addEventListener('click', () => {
   const qty = returnMode ? -w : w
   cart.addProduct({
     id: 'WEIGHED_' + Date.now(),
-    name: `${weighedOpenLabel} (${w.toFixed(3)} kg @ $${price.toFixed(2)}/kg)`,
+    name: weighedOpenLabel,
     price,
     active_price: price,
     unit: 'kg',
@@ -2177,23 +2177,35 @@ function renderCart () {
   const c = $('#cartItems')
   if (cart.isEmpty) { c.innerHTML = '<div class="cart-empty" style="flex-direction:column;gap:4px"><span style="font-size:20px;opacity:.4">&#128722;</span><span>Scan barcode or tap a product</span></div>'; return }
   c.innerHTML = cart.items.map((item, i) => {
-    const qStr = item.unit === 'each' ? Math.abs(item.qty) : Math.abs(item.qty).toFixed(2) + item.unit
+    const qStr = item.unit === 'each'
+      ? String(Math.abs(item.qty))
+      : item.unit === 'kg'
+        ? Math.abs(item.qty).toFixed(3) + ' kg'
+        : Math.abs(item.qty).toFixed(2) + ' ' + item.unit
     const isReturn = item.qty < 0
     const borderColor = item.category_color || 'transparent'
-    const imgHtml = item.image_url
-      ? `<img class="cart-item-img" src="${esc(item.image_url)}" alt="">`
-      : `<div class="cart-item-img-placeholder" style="background:${borderColor}"><span>${esc(item.name.charAt(0))}</span></div>`
-    return `<div class="cart-item" style="border-left-color:${borderColor};${isReturn ? 'background:#fff0f0' : ''}">` +
-      imgHtml +
-      `<div class="cart-item-info"><div class="cart-item-name">${isReturn ? '<span style="color:#c44">[RET]</span> ' : ''}${esc(item.name)}</div>` +
-      `<div class="cart-item-meta">${Math.abs(item.qty) !== 1 || item.unit !== 'each' ? `<span>${qStr} × ${money(item.unit_price)}</span>` : `<span>${money(item.unit_price)}</span>`}` +
-      `${item.is_special ? '<span class="meta-special">SPECIAL</span>' : ''}` +
-      `${item.deal_name ? `<span class="meta-deal">${esc(item.deal_name)}</span>` : ''}` +
-      `${item.discount > 0 ? `<span style="color:#c44;font-size:8px">-${money(item.discount)}</span>` : ''}` +
-      `</div></div>` +
-      `<div class="cart-item-qty"><button class="qty-btn remove" data-action="minus" data-index="${i}">−</button><span class="qty-val">${qStr}</span><button class="qty-btn" data-action="plus" data-index="${i}">+</button></div>` +
-      `<div class="cart-item-price">${money(item.line_total)}</div>` +
-      `<button class="cart-item-delete" data-delete="${i}" title="Remove">&times;</button></div>`
+    const metaParts = []
+    if (Math.abs(item.qty) !== 1 || item.unit !== 'each') metaParts.push(`${qStr} × ${money(item.unit_price)}`)
+    else metaParts.push(money(item.unit_price))
+    if (item.is_special) metaParts.push('<span class="meta-special">SPECIAL</span>')
+    if (item.deal_name) metaParts.push(`<span class="meta-deal">${esc(item.deal_name)}</span>`)
+    if (item.discount > 0) metaParts.push(`<span style="color:#c44;font-size:9px">-${money(item.discount)}</span>`)
+    const qtyControls = item.unit === 'each'
+      ? `<button class="qty-btn remove" data-action="minus" data-index="${i}" style="width:34px;height:34px;font-size:18px">−</button><span class="qty-val" style="min-width:20px">${qStr}</span><button class="qty-btn" data-action="plus" data-index="${i}" style="width:34px;height:34px;font-size:18px">+</button>`
+      : ''
+    return `<div class="cart-item" style="display:flex;flex-direction:column;gap:4px;padding:8px 10px;border-left:3px solid ${borderColor};${isReturn ? 'background:#fff0f0' : ''}">` +
+      // Row 1: name (full width) + delete button on the right
+      `<div style="display:flex;align-items:center;gap:6px;width:100%">` +
+        `<div class="cart-item-name" style="flex:1;min-width:0;font-weight:700;color:#1a1a2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px">${isReturn ? '<span style="color:#c44">[RET]</span> ' : ''}${esc(item.name)}</div>` +
+        `<button class="cart-item-delete" data-delete="${i}" title="Remove" style="width:30px;height:30px;font-size:18px;flex-shrink:0">&times;</button>` +
+      `</div>` +
+      // Row 2: meta on left, qty + price on right
+      `<div style="display:flex;align-items:center;gap:8px;width:100%">` +
+        `<div class="cart-item-meta" style="flex:1;min-width:0;font-size:10px;color:#8891a5;display:flex;gap:4px;align-items:center;flex-wrap:wrap">${metaParts.join('<span style="color:#d4d8e0">·</span>')}</div>` +
+        (qtyControls ? `<div class="cart-item-qty" style="display:flex;align-items:center;gap:3px;flex-shrink:0">${qtyControls}</div>` : '') +
+        `<div class="cart-item-price" style="font-weight:800;color:#1a1a2e;font-size:14px;text-align:right;flex-shrink:0">${money(item.line_total)}</div>` +
+      `</div>` +
+    `</div>`
   }).join(''); c.scrollTop = c.scrollHeight
 }
 let pendingDeleteIdx = null
