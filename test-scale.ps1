@@ -135,13 +135,39 @@ function Send-ScaleCommand {
 function Parse-8217Frame {
     param([byte[]]$Frame)
 
-    if ($Frame.Count -lt 7) {
-        Write-Host "    Frame too short ($($Frame.Count) bytes, need at least 7)" -ForegroundColor Yellow
-        # Check for status-only response (? char)
-        $ascii = -join ($Frame | ForEach-Object { [char]$_ })
-        if ($ascii -match "\?") {
-            Write-Host "    Status-only response -- scale not ready or in motion" -ForegroundColor Yellow
+    $ascii = -join ($Frame | ForEach-Object { [char]$_ })
+
+    # ECR format: ASCII weight with decimal point (e.g. "00.000", "05.250")
+    # This is what the Viva sends -- no binary status bytes, just the weight string
+    if ($ascii -match "^(-?\d+\.?\d*)$") {
+        $weight = [double]$Matches[1]
+        Write-Host ""
+        Write-Host "    Format:    ECR (ASCII weight with decimal point)" -ForegroundColor Cyan
+        Write-Host "    Raw:       '$ascii'" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "    WEIGHT: $weight kg (STABLE)" -ForegroundColor Green
+        return
+    }
+
+    # Status-only response: "?X" means scale not ready / in motion / error
+    if ($ascii -match "^\?(.?)") {
+        $code = $Matches[1]
+        $meaning = switch ($code) {
+            "M" { "scale in motion" }
+            "O" { "over capacity" }
+            "U" { "under zero" }
+            "P" { "power-up / initializing" }
+            "E" { "error" }
+            "Z" { "zero error" }
+            default { "status code: $code" }
         }
+        Write-Host ""
+        Write-Host "    STATUS: $meaning" -ForegroundColor Yellow
+        return
+    }
+
+    if ($Frame.Count -lt 7) {
+        Write-Host "    Unrecognized short frame ($($Frame.Count) bytes): '$ascii'" -ForegroundColor Yellow
         return
     }
 
@@ -249,29 +275,41 @@ for ($i = 1; $i -le 5; $i++) {
             }
         } else { Start-Sleep -Milliseconds 20 }
     }
-    if ($gotSTX -and $frameBytes.Count -ge 7) {
-        $sta = $frameBytes[0]
-        $stb = $frameBytes[1]
-        $decPos = $sta -band 0x07
-        $digitBytes = $frameBytes[2..6]
-        $allDigits = $true
-        foreach ($b in $digitBytes) { if ($b -lt 0x30 -or $b -gt 0x39) { $allDigits = $false; break } }
-        if ($allDigits) {
-            $weightStr = -join ($digitBytes | ForEach-Object { [char]$_ })
-            $weightInt = [int]$weightStr
-            $weight = $weightInt * [Math]::Pow(10, 2 - $decPos)
-            $negative = ($stb -band 0x02) -ne 0
-            if ($negative) { $weight = -$weight }
-            $weight = [Math]::Round($weight, 5)
-            $inMotion = ($stb -band 0x08) -ne 0
-            $isKg = ($stb -band 0x10) -ne 0
-            $unit = $(if ($isKg) { "kg" } else { "lb" })
-            $statusStr = $(if ($inMotion) { "IN MOTION" } else { "STABLE" })
-            $color = $(if ($inMotion) { "Yellow" } else { "Green" })
-            Write-Host " $weight $unit ($statusStr)" -ForegroundColor $color
-        } else {
-            $hexStr = ($frameBytes | ForEach-Object { $_.ToString("X2") }) -join " "
-            Write-Host " unexpected: $hexStr" -ForegroundColor Yellow
+    if ($gotSTX -and $frameBytes.Count -gt 0) {
+        $frameStr = -join ($frameBytes | ForEach-Object { [char]$_ })
+        # ECR format: ASCII weight with decimal point (e.g. "00.000", "05.250")
+        if ($frameStr -match "^(-?\d+\.?\d*)$") {
+            $weight = [double]$Matches[1]
+            Write-Host " $weight kg (STABLE)" -ForegroundColor Green
+        }
+        # Status-only: "?X" means scale not ready / in motion / error
+        elseif ($frameStr -match "^\?") {
+            Write-Host " not ready ($frameStr)" -ForegroundColor Yellow
+        }
+        # Binary frame (STA+STB+5digits+BCC+ETX) -- 7+ bytes
+        elseif ($frameBytes.Count -ge 7) {
+            $sta = $frameBytes[0]
+            $stb = $frameBytes[1]
+            $decPos = $sta -band 0x07
+            $digitBytes = $frameBytes[2..6]
+            $allDigits = $true
+            foreach ($b in $digitBytes) { if ($b -lt 0x30 -or $b -gt 0x39) { $allDigits = $false; break } }
+            if ($allDigits) {
+                $weightStr = -join ($digitBytes | ForEach-Object { [char]$_ })
+                $weightInt = [int]$weightStr
+                $weight = $weightInt * [Math]::Pow(10, 2 - $decPos)
+                $inMotion = ($stb -band 0x08) -ne 0
+                $isKg = ($stb -band 0x10) -ne 0
+                $unit = $(if ($isKg) { "kg" } else { "lb" })
+                $statusStr = $(if ($inMotion) { "IN MOTION" } else { "STABLE" })
+                $color = $(if ($inMotion) { "Yellow" } else { "Green" })
+                Write-Host " $weight $unit ($statusStr)" -ForegroundColor $color
+            } else {
+                Write-Host " unexpected: $frameStr" -ForegroundColor Yellow
+            }
+        }
+        else {
+            Write-Host " unknown: $frameStr" -ForegroundColor Yellow
         }
     } elseif ($rawBytes.Count -gt 0) {
         $hexStr = ($rawBytes | ForEach-Object { $_.ToString("X2") }) -join " "
