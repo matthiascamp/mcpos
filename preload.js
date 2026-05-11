@@ -140,6 +140,7 @@ contextBridge.exposeInMainWorld('pos', {
   oposTestPrinter:    (name)  => ipcRenderer.invoke('hardware:oposTestPrinter', name),
   oposTestDrawer:     (name)  => ipcRenderer.invoke('hardware:oposTestDrawer', name),
   oposTestScale:      (name)  => ipcRenderer.invoke('hardware:oposTestScale', name),
+  scaleDebug:         ()      => ipcRenderer.invoke('hardware:scaleDebug'),
 
   // Cash Drawer
   logCashDrawer:      (entry) => ipcRenderer.invoke('db:cash_drawer:log', entry),

@@ -65,9 +65,19 @@ function appLog (level, source, message, detail) {
 
 // Crash safety: catch unhandled errors
 process.on('uncaughtException', (err) => {
-  appLog('fatal', 'process', 'Uncaught exception', err.stack || err.message)
+  const msg = err.stack || err.message || String(err)
+  appLog('fatal', 'process', 'Uncaught exception', msg)
   // Try to save DB before crashing
   try { if (db) saveDB() } catch (_) {}
+  // If it's a serial port / hardware error, don't crash — just log and continue
+  const isHardwareError = msg.includes('serialport') || msg.includes('SerialPort') || msg.includes('COM') ||
+    msg.includes('Access is denied') || msg.includes('port is not open') || msg.includes('EACCES') ||
+    msg.includes('node-hid') || msg.includes('HID') || msg.includes('OPOS')
+  if (isHardwareError) {
+    appLog('warn', 'process', 'Hardware error caught — app continues running')
+    return  // swallow the error, don't crash
+  }
+  // For non-hardware errors, still crash (default Node.js behaviour)
 })
 
 process.on('unhandledRejection', (reason) => {
@@ -2356,7 +2366,7 @@ function setupIPC() {
     NORMAL_SIZE: Buffer.from([GS, 0x21, 0x00]),
     PARTIAL_CUT: Buffer.from([GS, 0x56, 0x01]),
     FEED_3: Buffer.from([ESC, 0x64, 0x03]),
-    DRAWER_KICK: Buffer.from([ESC, 0x70, 0x00, 0x37, 0x79]),
+    DRAWER_KICK: Buffer.from([ESC, 0x70, 0x00, 0x19, 0x78]),  // pin 2, 25ms on, 120ms off (matches working 52cbd7a)
     BARCODE_HEIGHT: Buffer.from([GS, 0x68, 0x3C]),
     BARCODE_WIDTH: Buffer.from([GS, 0x77, 0x02]),
     BARCODE_HRI_BELOW: Buffer.from([GS, 0x48, 0x02]),
@@ -2900,11 +2910,18 @@ function setupIPC() {
       })
       port.on('error', err => {
         appLog('error', 'hardware', `Scale serial port error: ${err.message}`)
+        // Don't crash — mark port as dead so polling can reconnect
+        hwScalePort = null
+        scaleStreamActive = false
       })
       port.on('close', () => {
         appLog('info', 'hardware', 'Scale serial port closed')
         hwScalePort = null
         scaleStreamActive = false
+        // Auto-reconnect after 2s if scale is configured
+        if (hwScale?.port) {
+          appLog('info', 'hardware', 'Scale port closed unexpectedly — will reconnect on next poll')
+        }
       })
     })
   }
@@ -4022,6 +4039,11 @@ function setupIPC() {
     } catch (e) {
       scaleErrorCount++
       if (scaleErrorCount <= 3) appLog('warn', 'hardware', `Scale poll error: ${e.message}`)
+      // If port died, null it out so readScale will try to reopen
+      if (hwScalePort && !hwScalePort.isOpen) {
+        appLog('warn', 'hardware', 'Scale port died — clearing for reconnect')
+        hwScalePort = null
+      }
     } finally {
       scalePollingBusy = false
     }
@@ -4292,6 +4314,19 @@ function setupIPC() {
 
   ipcMain.handle('hardware:readScale', () => readScale())
   ipcMain.handle('hardware:zeroScale', () => zeroScale())
+  ipcMain.handle('hardware:scaleDebug', () => {
+    return {
+      hwScale: hwScale ? { port: hwScale.port, baud: hwScale.baud, protocol: hwScale.protocol, type: hwScale.type, configured: hwScale.configured } : null,
+      portOpen: !!hwScalePort?.isOpen,
+      portPath: hwScalePort?.path || null,
+      polling: !!scalePollingTimer,
+      streaming: scaleStreamActive,
+      errorCount: scaleErrorCount,
+      lastReading: lastStreamReading,
+      lastGoodWeight,
+      lastDisplayKey: lastScaleWeight,
+    }
+  })
   ipcMain.handle('hardware:getSerialPorts', () => enumerateSerialPorts())
   ipcMain.handle('hardware:testScale', (_e, portPath, baud, protocol) => testSerialScale(portPath, baud, protocol))
 
