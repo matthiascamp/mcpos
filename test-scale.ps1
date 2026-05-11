@@ -1,4 +1,4 @@
-# test-scale.ps1 — Mettler Toledo Viva / 8217 protocol scale test
+# test-scale.ps1 -- Mettler Toledo Viva / 8217 protocol scale test
 # Usage: powershell -ExecutionPolicy Bypass -File test-scale.ps1 [-Port COM3] [-Baud 9600]
 param(
     [string]$Port = "",
@@ -23,7 +23,7 @@ if (-not $Port) {
     # Try to identify which port has the scale
     $Port = $ports[0]
     foreach ($p in $ports) {
-        # Try each port — pick the first one that responds
+        # Try each port -- pick the first one that responds
         try {
             $testPort = New-Object System.IO.Ports.SerialPort $p, $Baud, ([System.IO.Ports.Parity]::Even), 7, ([System.IO.Ports.StopBits]::One)
             $testPort.ReadTimeout = 2000
@@ -92,14 +92,14 @@ function Send-ScaleCommand {
             $rawBytes += $b
 
             if ($b -eq 0x02) {
-                # STX — start of frame
+                # STX -- start of frame
                 $gotSTX = $true
                 $frameBytes = @()
                 continue
             }
             if ($gotSTX) {
                 if ($b -eq 0x0D) {
-                    # CR — end of frame
+                    # CR -- end of frame
                     break
                 }
                 $frameBytes += $b
@@ -140,7 +140,7 @@ function Parse-8217Frame {
         # Check for status-only response (? char)
         $ascii = -join ($Frame | ForEach-Object { [char]$_ })
         if ($ascii -match "\?") {
-            Write-Host "    Status-only response — scale not ready or in motion" -ForegroundColor Yellow
+            Write-Host "    Status-only response -- scale not ready or in motion" -ForegroundColor Yellow
         }
         return
     }
@@ -156,10 +156,8 @@ function Parse-8217Frame {
     }
 
     if (-not $allDigits) {
-        Write-Host "    Weight bytes are not ASCII digits — unexpected format" -ForegroundColor Yellow
-        $ascii = -join ($Frame | ForEach-Object {
-            if ($_ -ge 0x20 -and $_ -le 0x7E) { [char]$_ } else { "?" }
-        })
+        Write-Host "    Weight bytes are not ASCII digits -- unexpected format" -ForegroundColor Yellow
+        $ascii = -join ($Frame | ForEach-Object { if ($_ -ge 0x20 -and $_ -le 0x7E) { [char]$_ } else { "?" } })
         Write-Host "    Trying ASCII parse: '$ascii'" -ForegroundColor Yellow
 
         if ($ascii -match "(\d+\.?\d*)") {
@@ -168,13 +166,13 @@ function Parse-8217Frame {
         return
     }
 
-    # Parse STA — decimal position (bits 0-2)
+    # Parse STA -- decimal position (bits 0-2)
     $decPos = $sta -band 0x07
     $decLabels = @("*100", "*10", "*1", "/10 (1dp)", "/100 (2dp)", "/1000 (3dp)", "/10000 (4dp)", "/100000 (5dp)")
     Write-Host ""
     Write-Host "    STA byte:  0x$($sta.ToString('X2')) (decimal position: $($decLabels[$decPos]))" -ForegroundColor Cyan
 
-    # Parse STB — status flags
+    # Parse STB -- status flags
     $netMode    = ($stb -band 0x01) -ne 0
     $negative   = ($stb -band 0x02) -ne 0
     $outOfRange = ($stb -band 0x04) -ne 0
@@ -195,7 +193,7 @@ function Parse-8217Frame {
     $weight = $weightInt * [Math]::Pow(10, 2 - $decPos)
     if ($negative) { $weight = -$weight }
     $weight = [Math]::Round($weight, 5)
-    $unit = if ($isKg) { "kg" } else { "lb" }
+    $unit = $(if ($isKg) { "kg" } else { "lb" })
 
     Write-Host "    Digits:    $weightStr" -ForegroundColor Cyan
     Write-Host ""
@@ -267,9 +265,9 @@ for ($i = 1; $i -le 5; $i++) {
             $weight = [Math]::Round($weight, 5)
             $inMotion = ($stb -band 0x08) -ne 0
             $isKg = ($stb -band 0x10) -ne 0
-            $unit = if ($isKg) { "kg" } else { "lb" }
-            $statusStr = if ($inMotion) { "IN MOTION" } else { "STABLE" }
-            $color = if ($inMotion) { "Yellow" } else { "Green" }
+            $unit = $(if ($isKg) { "kg" } else { "lb" })
+            $statusStr = $(if ($inMotion) { "IN MOTION" } else { "STABLE" })
+            $color = $(if ($inMotion) { "Yellow" } else { "Green" })
             Write-Host " $weight $unit ($statusStr)" -ForegroundColor $color
         } else {
             $hexStr = ($frameBytes | ForEach-Object { $_.ToString("X2") }) -join " "
