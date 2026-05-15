@@ -6,6 +6,7 @@ build/
 .env
 .DS_Store
 Thumbs.db
+.claude/
 
 # Profit Track legacy binaries (kept as reference docs only)
 *.dll
@@ -20,3 +21,6 @@ Thumbs.db
 *.CHM
 *.xls
 *.XLS
+
+# Ship the compiled OPOS scanner bridge (32-bit STA exe for Magellan 3200VSi)
+!scanner-bridge.exe

@@ -11,6 +11,7 @@ let db
 let saveTimer = null
 let dailyBackupTimer = null
 let hardwareCleanup = null  // set by setupIPC, called on shutdown
+let appShuttingDown = false
 
 const DB_PATH = path.join(app.getPath('userData'), 'crisp-pos.sqlite')
 const SCHEMA_PATH = path.join(__dirname, 'db', 'schema.sql')
@@ -915,6 +916,7 @@ app.whenReady().then(async () => {
 })
 
 app.on('window-all-closed', () => {
+  appShuttingDown = true
   if (dailyBackupTimer) clearInterval(dailyBackupTimer)
   appLog('info', 'app', 'App shutting down')
   // Close scale connections if open
@@ -2244,7 +2246,7 @@ function setupIPC() {
 
   // ── Hardware — Auto-detecting, cross-platform POS peripherals ───────────────
 
-  const { execSync: hwExec } = require('child_process')
+  const { execSync: hwExec, spawn: hwSpawn } = require('child_process')
   const net = require('net')
   const os = require('os')
   const isWin = os.platform() === 'win32'
@@ -2252,12 +2254,23 @@ function setupIPC() {
   const RAWPRINT_SCRIPT = path.join(__dirname, 'rawprint.ps1')
   const OPOS_BRIDGE = path.join(__dirname, 'opos-bridge.ps1')
 
+  // 32-bit PowerShell — required for Epson/Datalogic OPOS CCOs which are 32-bit COM
+  // On 64-bit Windows: %SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe
+  // On 32-bit Windows: plain "powershell" already is 32-bit
+  const POSH_X86 = (() => {
+    if (!isWin) return 'powershell'
+    const sysroot = process.env.SystemRoot || 'C:\\Windows'
+    const candidate = path.join(sysroot, 'SysWOW64', 'WindowsPowerShell', 'v1.0', 'powershell.exe')
+    return fs.existsSync(candidate) ? candidate : 'powershell'
+  })()
+
   // ── OPOS COM bridge (via PowerShell) ────────────────────────────────────────
 
   let oposAvailable = null  // null = not checked, object = check result
   let oposPrinterName = ''  // logical device name from SetupPOS
   let oposDrawerName = ''
   let oposScaleName = ''
+  let oposScannerName = ''
 
   function oposCall (action, opts = {}) {
     if (!isWin) return { ok: false, error: 'OPOS only available on Windows' }
@@ -2266,8 +2279,11 @@ function setupIPC() {
     if (opts.deviceType) { args.push('-DeviceType', opts.deviceType) }
     if (opts.data) { args.push('-Data', opts.data) }
     try {
-      const result = hwExec(`powershell ${args.map(a => `"${a}"`).join(' ')}`, { timeout: opts.timeout || 10000, encoding: 'utf-8' }).trim()
-      return JSON.parse(result)
+      const cmd = `"${POSH_X86}" ${args.map(a => `"${a}"`).join(' ')}`
+      const result = hwExec(cmd, { timeout: opts.timeout || 10000, encoding: 'utf-8' }).trim()
+      // Strip any non-JSON noise (e.g. leaked return values) — keep only the last JSON line
+      const lines = result.split(/\r?\n/).filter(l => l.trim().startsWith('{'))
+      return JSON.parse(lines[lines.length - 1] || result)
     } catch (e) {
       const stderr = e.stderr || e.message || ''
       return { ok: false, error: `OPOS bridge error: ${stderr.substring(0, 200)}` }
@@ -2280,19 +2296,132 @@ function setupIPC() {
     const result = oposCall('check')
     if (result.ok && result.data) {
       oposAvailable = result.data
-      appLog('info', 'hardware', `OPOS: printer=${result.data.printer} drawer=${result.data.drawer} scale=${result.data.scale}`)
+      appLog('info', 'hardware', `OPOS [${result.data.bitness}-bit]: printer=${result.data.printer} drawer=${result.data.drawer} scale=${result.data.scale} scanner=${result.data.scanner}`)
       if (result.data.progIds) {
         for (const p of result.data.progIds) appLog('info', 'hardware', `  OPOS ${p.type}: ${p.progId}`)
       }
     } else {
-      oposAvailable = { printer: false, drawer: false, scale: false }
+      oposAvailable = { printer: false, drawer: false, scale: false, scanner: false }
       appLog('info', 'hardware', `OPOS not available: ${result.error || 'check failed'}`)
     }
     // Load saved OPOS device names
     oposPrinterName = dbGet("SELECT value FROM settings WHERE key='opos_printer_name'")?.value || ''
     oposDrawerName = dbGet("SELECT value FROM settings WHERE key='opos_drawer_name'")?.value || ''
     oposScaleName = dbGet("SELECT value FROM settings WHERE key='opos_scale_name'")?.value || ''
+    oposScannerName = dbGet("SELECT value FROM settings WHERE key='opos_scanner_name'")?.value || ''
     return oposAvailable
+  }
+
+  // ── OPOS Scanner listener (long-running 32-bit PowerShell subprocess) ───────
+  // Reads barcodes via OPOS Scanner CCO and forwards each scan to the renderer
+  // as a 'scanner:data' IPC event. Auto-retries claim when another app (Profit
+  // Track) holds the device. Lifecycle is tied to the app — stopped on quit.
+
+  const SCANNER_BRIDGE_EXE = path.join(__dirname, 'scanner-bridge.exe')
+  let scannerProc = null
+  let scannerLastClaimFailLog = 0  // throttle "claim_failed" log spam
+
+  function startScannerListener () {
+    if (!isWin) return
+    if (scannerProc) return
+    if (!fs.existsSync(SCANNER_BRIDGE_EXE)) {
+      appLog('warn', 'scanner', `scanner-bridge.exe not found at ${SCANNER_BRIDGE_EXE} -- skipping listener`)
+      return
+    }
+    // Standalone 32-bit STA console exe -- polls the OPOS Scanner CCO via
+    // dynamic late-binding. STA + DoEvents + DataCount polling + ClearInput is
+    // the only path that reliably delivers scans on Magellan 3200VSi here.
+    // (PowerShell+Add-Type MTA host silently swallowed COM events; pure event
+    // sinks via ComEventsHelper failed with CONNECT_E_NOCONNECTION since the
+    // CCO's event interface IID wasn't the standard library+1 guess.)
+    const device = oposScannerName || 'TableScanner'
+    const retrySec = '3'
+    appLog('info', 'scanner', `Starting OPOS scanner bridge (device='${device}')`)
+    scannerProc = hwSpawn(SCANNER_BRIDGE_EXE, [device, retrySec], { windowsHide: true })
+
+    let buf = ''
+    scannerProc.stdout.on('data', chunk => {
+      buf += chunk.toString('utf8')
+      let nl
+      while ((nl = buf.indexOf('\n')) !== -1) {
+        const line = buf.slice(0, nl).trim()
+        buf = buf.slice(nl + 1)
+        if (!line) continue
+        let msg
+        try { msg = JSON.parse(line) } catch (_) {
+          appLog('warn', 'scanner', `non-JSON from listener: ${line.substring(0, 120)}`)
+          continue
+        }
+        handleScannerEvent(msg)
+      }
+    })
+    scannerProc.stderr.on('data', d => appLog('warn', 'scanner', `stderr: ${d.toString().trim().substring(0, 200)}`))
+    scannerProc.on('exit', code => {
+      scannerProc = null
+      if (appShuttingDown) return
+      appLog('warn', 'scanner', `Listener exited (code=${code}) -- restarting in 5s`)
+      setTimeout(() => { if (!appShuttingDown) startScannerListener() }, 5000)
+    })
+  }
+
+  function handleScannerEvent (msg) {
+    switch (msg.event) {
+      case 'starting':
+        appLog('info', 'scanner', `Listener starting (device='${msg.device}', bitness=${msg.bitness})`)
+        break
+      case 'opened':
+        appLog('info', 'scanner', `Scanner CLAIMED — ready to scan (device='${msg.device}') props=${JSON.stringify(msg.props || {})}`)
+        scannerLastClaimFailLog = 0
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.webContents.send('scanner:status', { connected: true, device: msg.device })
+        }
+        break
+      case 'heartbeat':
+        // New bridge emits keys at top level; old PS bridge nested under .props
+        appLog('info', 'scanner', `heartbeat ${JSON.stringify(msg.props || { dataCount: msg.dataCount, deviceEnabled: msg.deviceEnabled, dataEventEnabled: msg.dataEventEnabled })}`)
+        break
+      case 'scan_empty':
+        appLog('warn', 'scanner', `SCAN_EMPTY dataCount=${msg.dataCount} sdInfo=${msg.sdInfo} clearOk=${msg.clearOk} errs=${JSON.stringify(msg.errs || [])}`)
+        break
+      case 'scan':
+        appLog('info', 'scanner', `Scan: ${msg.label} (type=${msg.type})`)
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.webContents.send('scanner:data', { label: msg.label, raw: msg.raw, type: msg.type })
+        }
+        break
+      case 'claim_failed':
+        // Throttle: log once every 30s while PTPOS holds the device
+        if (Date.now() - scannerLastClaimFailLog > 30000) {
+          appLog('info', 'scanner', `Scanner busy (rc=${msg.rc}) — ${msg.hint || 'another app holds it'}; retrying every ${msg.retry_in}s`)
+          scannerLastClaimFailLog = Date.now()
+        }
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.webContents.send('scanner:status', { connected: false, reason: 'busy', rc: msg.rc })
+        }
+        break
+      case 'open_failed':
+        appLog('warn', 'scanner', `Scanner Open failed: rc=${msg.rc} (device='${msg.device}')`)
+        break
+      case 'reconnecting':
+        // silent
+        break
+      case 'fatal':
+        appLog('error', 'scanner', `Listener fatal: ${msg.message}`)
+        break
+      case 'error':
+      case 'poll_error':
+        appLog('warn', 'scanner', `Listener error: ${msg.message}`)
+        break
+      default:
+        appLog('info', 'scanner', `Event: ${JSON.stringify(msg)}`)
+    }
+  }
+
+  function stopScannerListener () {
+    if (scannerProc) {
+      try { scannerProc.kill() } catch (_) {}
+      scannerProc = null
+    }
   }
 
   function listOposDevices () {
@@ -3873,6 +4002,7 @@ function setupIPC() {
     stopScalePolling()
     if (hwScalePort?.isOpen) try { hwScalePort.close() } catch (_) {}
     try { closeHidScale() } catch (_) {}
+    try { stopScannerListener() } catch (_) {}
   }
 
   // ── Load saved config and auto-probe on startup ────────────────────────────
@@ -4790,6 +4920,13 @@ function setupIPC() {
       appLog('info', 'linkly', 'Linkly credentials loaded from settings')
     }
   } catch (_) {}
+
+  // Start the OPOS scanner listener — retries automatically if PTPOS holds the device
+  try { startScannerListener() } catch (e) { appLog('warn', 'scanner', `Failed to start listener: ${e.message}`) }
+
+  // Expose IPC controls for the scanner listener (used by Hardware tab / debug)
+  ipcMain.handle('hardware:scannerRestart', () => { stopScannerListener(); startScannerListener(); return { ok: true } })
+  ipcMain.handle('hardware:scannerTest', () => oposCall('scanner-test', { deviceName: oposScannerName, timeout: 5000 }))
 }
 
 // ─── Sync Queue Helper ───────────���────────────────────────────────────────────

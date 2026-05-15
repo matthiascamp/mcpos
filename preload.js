@@ -188,6 +188,12 @@ contextBridge.exposeInMainWorld('pos', {
   onScaleWeight:      (cb)                  => { ipcRenderer.removeAllListeners('scale:weight'); ipcRenderer.on('scale:weight', (_e, data) => cb(data)) },
   onHardwareIssues:   (cb)                  => { ipcRenderer.removeAllListeners('hardware:issues'); ipcRenderer.on('hardware:issues', (_e, data) => cb(data)) },
 
+  // Scanner (OPOS-fed barcode events from main process)
+  onScannerData:      (cb)                  => { ipcRenderer.removeAllListeners('scanner:data'); ipcRenderer.on('scanner:data', (_e, data) => cb(data)) },
+  onScannerStatus:    (cb)                  => { ipcRenderer.removeAllListeners('scanner:status'); ipcRenderer.on('scanner:status', (_e, data) => cb(data)) },
+  scannerRestart:     ()                    => ipcRenderer.invoke('hardware:scannerRestart'),
+  scannerTest:        ()                    => ipcRenderer.invoke('hardware:scannerTest'),
+
   // LAN data changed (server pushed new data)
   onDataChanged:      (cb)                  => { ipcRenderer.removeAllListeners('lan:data-changed'); ipcRenderer.on('lan:data-changed', () => cb()) },
 })

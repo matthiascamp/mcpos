@@ -31,6 +31,8 @@
       "main.js",
       "preload.js",
       "rawprint.ps1",
+      "opos-bridge.ps1",
+      "scanner-bridge.exe",
       "package.json",
       "pos/**",
       "db/**",
