@@ -66,6 +66,7 @@ contextBridge.exposeInMainWorld('pos', {
   salesByCategory:    (date)  => ipcRenderer.invoke('db:reports:salesByCategory', date),
   voidRefundCount:    (date)  => ipcRenderer.invoke('db:reports:voidRefundCount', date),
   zReport:            (date)  => ipcRenderer.invoke('db:reports:zReport', date),
+  weeklySummary:      (weekStart) => ipcRenderer.invoke('db:reports:weeklySummary', weekStart),
 
   // Insights
   getSalesHeatmap:    (days)          => ipcRenderer.invoke('db:insights:salesHeatmap', { days }),

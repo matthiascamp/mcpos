@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Crisp POS — Admin</title>
+  <title>MCpos — Admin</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
 
@@ -537,7 +537,7 @@
   <aside class="sidebar">
     <div class="sidebar-brand">
       <div class="brand-dot"></div>
-      <span>Crisp POS</span>
+      <span>MCpos</span>
       <small id="modeBadge">Admin</small>
     </div>
     <div style="padding:8px 12px;border-bottom:1px solid var(--border)">
@@ -559,7 +559,7 @@
       <div class="sidebar-group-label">Sales</div>
       <a href="#" data-tab="transactions">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        Transactions
+        Transaction Search
       </a>
       <a href="#" data-tab="cashdrawer">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20"/><circle cx="12" cy="14" r="2"/></svg>
@@ -567,7 +567,7 @@
       </a>
       <a href="#" data-tab="zreport">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Z Report
+        Reports
       </a>
     </div>
 
@@ -877,18 +877,26 @@
                 <div id="tagElProps" style="margin-top:10px;padding:10px;background:var(--surface2);border-radius:6px;border:1px solid var(--border);display:none">
                   <div style="font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;margin-bottom:6px" id="tagElPropsTitle">Element</div>
                   <div style="display:flex;gap:6px;flex-wrap:wrap">
-                    <div class="form-field" style="flex:1;min-width:60px;margin:0"><label style="font-size:9px">Size</label>
-                      <select id="tagElSize" style="width:100%;padding:3px;font-size:11px;border-radius:4px;border:1px solid var(--border);background:var(--surface);color:var(--text)">
-                        <option value="7">7pt</option><option value="8">8pt</option><option value="9">9pt</option><option value="10">10pt</option>
-                        <option value="11">11pt</option><option value="12">12pt</option><option value="14">14pt</option><option value="16">16pt</option><option value="18">18pt</option><option value="20">20pt</option>
+                    <div class="form-field" style="flex:2;min-width:100px;margin:0"><label style="font-size:9px">Font</label>
+                      <select id="tagElFont" style="width:100%;padding:3px;font-size:11px;border-radius:4px;border:1px solid var(--border);background:var(--surface);color:var(--text)">
+                        <option value="Arial">Arial</option><option value="Helvetica">Helvetica</option><option value="Verdana">Verdana</option>
+                        <option value="Georgia">Georgia</option><option value="Times New Roman">Times New Roman</option>
+                        <option value="Courier New">Courier New</option><option value="Impact">Impact</option><option value="Segoe UI">Segoe UI</option>
                       </select>
                     </div>
-                    <div class="form-field" style="flex:1;min-width:60px;margin:0"><label style="font-size:9px">Align</label>
+                    <div class="form-field" style="flex:1;min-width:55px;margin:0"><label style="font-size:9px">Size</label>
+                      <select id="tagElSize" style="width:100%;padding:3px;font-size:11px;border-radius:4px;border:1px solid var(--border);background:var(--surface);color:var(--text)">
+                        <option value="7">7pt</option><option value="8">8pt</option><option value="9">9pt</option><option value="10">10pt</option>
+                        <option value="11">11pt</option><option value="12">12pt</option><option value="14">14pt</option><option value="16">16pt</option>
+                        <option value="18">18pt</option><option value="20">20pt</option><option value="24">24pt</option><option value="28">28pt</option><option value="32">32pt</option>
+                      </select>
+                    </div>
+                    <div class="form-field" style="flex:1;min-width:55px;margin:0"><label style="font-size:9px">Align</label>
                       <select id="tagElAlign" style="width:100%;padding:3px;font-size:11px;border-radius:4px;border:1px solid var(--border);background:var(--surface);color:var(--text)">
                         <option value="center">Center</option><option value="left">Left</option><option value="right">Right</option>
                       </select>
                     </div>
-                    <div class="form-field" style="min-width:50px;margin:0"><label style="font-size:9px">Bold</label>
+                    <div class="form-field" style="min-width:44px;margin:0"><label style="font-size:9px">Bold</label>
                       <input type="checkbox" id="tagElBold" style="margin-top:4px">
                     </div>
                   </div>
@@ -1051,19 +1059,18 @@
 
     <!-- ── Transactions ──────────────────────────────────────────── -->
     <div class="tab-content" id="tab-transactions">
-      <h1>Transaction History</h1>
-      <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin-bottom:16px" id="txnSummaryStats">
-        <div class="stat-card"><div class="stat-label">Total Sales</div><div class="stat-value green" id="txnSumSales">$0.00</div></div>
-        <div class="stat-card"><div class="stat-label">Transactions</div><div class="stat-value" id="txnSumCount">0</div></div>
-        <div class="stat-card"><div class="stat-label">Avg Sale</div><div class="stat-value" id="txnSumAvg">$0.00</div></div>
-        <div class="stat-card"><div class="stat-label">Voided</div><div class="stat-value" id="txnSumVoids">0</div></div>
-        <div class="stat-card"><div class="stat-label">Refunded</div><div class="stat-value" id="txnSumRefunds">0</div></div>
-      </div>
-      <div class="section">
-        <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:end">
-          <div class="form-field" style="flex:0 0 140px"><label>From</label><input type="date" id="txnDateFrom"></div>
-          <div class="form-field" style="flex:0 0 140px"><label>To</label><input type="date" id="txnDateTo"></div>
-          <div class="form-field" style="flex:0 0 140px">
+      <h1 style="margin-bottom:16px">Transaction Search</h1>
+
+      <!-- Search Controls -->
+      <div class="section" style="margin-bottom:16px">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
+          <div class="form-field" style="flex:1;min-width:200px">
+            <label>Quick Search (ID, staff, or product)</label>
+            <input type="text" id="txnQuickSearch" placeholder="e.g. receipt #, staff name, product..." style="padding:10px 14px;font-size:14px">
+          </div>
+          <div class="form-field" style="flex:0 0 130px"><label>From</label><input type="date" id="txnDateFrom"></div>
+          <div class="form-field" style="flex:0 0 130px"><label>To</label><input type="date" id="txnDateTo"></div>
+          <div class="form-field" style="flex:0 0 130px">
             <label>Status</label>
             <select id="txnStatus">
               <option value="">All</option>
@@ -1073,25 +1080,55 @@
               <option value="parked">Parked</option>
             </select>
           </div>
-          <button class="btn btn-green" id="txnSearchBtn">Search</button>
-          <button class="btn btn-outline" id="txnExportBtn" style="padding:10px 16px">Export CSV</button>
+          <button class="btn btn-green" id="txnSearchBtn" style="height:42px;padding:0 20px;font-size:14px">Search</button>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+          <button class="btn btn-outline" style="padding:4px 10px;font-size:11px" data-txn-preset="today">Today</button>
+          <button class="btn btn-outline" style="padding:4px 10px;font-size:11px" data-txn-preset="yesterday">Yesterday</button>
+          <button class="btn btn-outline" style="padding:4px 10px;font-size:11px" data-txn-preset="week">This Week</button>
+          <button class="btn btn-outline" style="padding:4px 10px;font-size:11px" data-txn-preset="month">This Month</button>
+          <button class="btn btn-outline" style="padding:4px 10px;font-size:11px" data-txn-preset="all">All Time</button>
+          <div style="flex:1"></div>
+          <button class="btn btn-outline" id="txnExportBtn" style="padding:4px 10px;font-size:11px">Export CSV</button>
+        </div>
+      </div>
+
+      <!-- Summary Stats -->
+      <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));margin-bottom:16px" id="txnSummaryStats">
+        <div class="stat-card"><div class="stat-label">Total Sales</div><div class="stat-value green" id="txnSumSales">-</div></div>
+        <div class="stat-card"><div class="stat-label">Transactions</div><div class="stat-value" id="txnSumCount">-</div></div>
+        <div class="stat-card"><div class="stat-label">Avg Sale</div><div class="stat-value" id="txnSumAvg">-</div></div>
+        <div class="stat-card"><div class="stat-label">Cash</div><div class="stat-value" id="txnSumCash">-</div></div>
+        <div class="stat-card"><div class="stat-label">Card/EFTPOS</div><div class="stat-value" id="txnSumCard">-</div></div>
+        <div class="stat-card"><div class="stat-label">Voided</div><div class="stat-value" id="txnSumVoids">-</div></div>
+        <div class="stat-card"><div class="stat-label">Refunded</div><div class="stat-value" id="txnSumRefunds">-</div></div>
+      </div>
+
+      <!-- Results -->
+      <div class="section">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <span id="txnResultCount" style="font-size:13px;color:var(--text-dim)">Search to view transactions</span>
         </div>
         <table>
-          <thead><tr><th>Date/Time</th><th>ID</th><th>Staff</th><th>Items</th><th>Total</th><th>Status</th><th style="width:120px"></th></tr></thead>
-          <tbody id="txnTable"><tr><td colspan="7" style="color:var(--text-dim)">Select dates and click Search</td></tr></tbody>
+          <thead><tr><th>Date/Time</th><th>ID</th><th>Staff</th><th>Items</th><th>Payment</th><th>Total</th><th>Status</th><th style="width:130px"></th></tr></thead>
+          <tbody id="txnTable"><tr><td colspan="8" style="color:var(--text-dim);text-align:center;padding:30px">Use the search above to find transactions</td></tr></tbody>
         </table>
       </div>
+
+      <!-- Detail Modal -->
       <div class="modal-panel" id="txnDetailPanel">
         <div class="modal-header">
           <h2 id="txnDetailTitle">Transaction Detail</h2>
           <button class="modal-close" id="txnDetailClose">&times;</button>
         </div>
         <div class="modal-body">
-        <table>
-          <thead><tr><th>Product</th><th>Qty</th><th>Unit Price</th><th>Discount</th><th>Line Total</th></tr></thead>
-          <tbody id="txnItemsTable"></tbody>
-        </table>
-        <div style="margin-top:12px" id="txnPaymentsArea"></div>
+          <div id="txnDetailMeta" style="margin-bottom:12px;font-size:13px;color:var(--text-dim)"></div>
+          <table>
+            <thead><tr><th>Product</th><th>Qty</th><th>Unit Price</th><th>Discount</th><th>Line Total</th></tr></thead>
+            <tbody id="txnItemsTable"></tbody>
+          </table>
+          <div style="margin-top:12px" id="txnPaymentsArea"></div>
+          <div style="margin-top:12px;display:flex;gap:8px" id="txnDetailActions"></div>
         </div>
       </div>
     </div>
@@ -1130,46 +1167,109 @@
       </div>
     </div>
 
-    <!-- ── Z Report ─────────────────────────────────────────────── -->
+    <!-- ── Reports ──────────────────────────────────────────────── -->
     <div class="tab-content" id="tab-zreport">
-      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
-        <h1 style="margin:0">End-of-Day Z Report</h1>
-        <input type="date" id="zDate" style="padding:8px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:14px">
-        <button class="btn btn-green" id="zGenerate">Generate</button>
-        <button class="btn btn-outline" id="zPrint">Print Report</button>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+        <h1 style="margin:0">Reports</h1>
+        <div style="display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:3px" id="reportTypeTabs">
+          <button class="btn btn-green" style="padding:6px 14px;font-size:12px" data-report-type="daily">Daily Z Report</button>
+          <button class="btn btn-outline" style="padding:6px 14px;font-size:12px" data-report-type="weekly">Weekly Summary</button>
+        </div>
+        <div style="flex:1"></div>
+        <button class="btn btn-outline" id="rptPrint" style="padding:6px 14px;font-size:12px">Print / PDF</button>
       </div>
-      <div id="zReportContent" style="display:none">
-        <div id="zReportPrintable">
-          <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:16px">
-            <div class="stat-card"><div class="stat-label">Net Sales</div><div class="stat-value green" id="zSales">$0.00</div></div>
-            <div class="stat-card"><div class="stat-label">Transactions</div><div class="stat-value" id="zTxns">0</div></div>
-            <div class="stat-card"><div class="stat-label">Avg Transaction</div><div class="stat-value" id="zAvg">$0.00</div></div>
-            <div class="stat-card"><div class="stat-label">GST Collected</div><div class="stat-value" id="zTax">$0.00</div></div>
-            <div class="stat-card"><div class="stat-label">Discounts</div><div class="stat-value" id="zDisc">$0.00</div></div>
-            <div class="stat-card"><div class="stat-label">Voids</div><div class="stat-value" id="zVoids">0</div></div>
-            <div class="stat-card"><div class="stat-label">Refunds</div><div class="stat-value" id="zRefunds">0</div></div>
+
+      <!-- Daily Z Report -->
+      <div id="reportDaily">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <input type="date" id="zDate" style="padding:8px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:14px">
+          <button class="btn btn-green" id="zGenerate" style="padding:8px 16px">Generate</button>
+          <div style="display:flex;gap:4px;margin-left:8px">
+            <button class="btn btn-outline" style="padding:4px 10px;font-size:11px" data-z-preset="today">Today</button>
+            <button class="btn btn-outline" style="padding:4px 10px;font-size:11px" data-z-preset="yesterday">Yesterday</button>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-            <div class="section" style="padding:16px">
-              <h2 style="margin-bottom:10px">Payment Methods</h2>
-              <div id="zMethods"></div>
-              <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
-                <div style="display:flex;justify-content:space-between;font-weight:700;font-size:14px"><span>Total Tendered</span><span id="zMethodTotal"></span></div>
+        </div>
+        <div id="zReportContent" style="display:none">
+          <div id="zReportPrintable">
+            <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin-bottom:16px">
+              <div class="stat-card"><div class="stat-label">Net Sales</div><div class="stat-value green" id="zSales">$0.00</div></div>
+              <div class="stat-card"><div class="stat-label">Transactions</div><div class="stat-value" id="zTxns">0</div></div>
+              <div class="stat-card"><div class="stat-label">Avg Transaction</div><div class="stat-value" id="zAvg">$0.00</div></div>
+              <div class="stat-card"><div class="stat-label">GST Collected</div><div class="stat-value" id="zTax">$0.00</div></div>
+              <div class="stat-card"><div class="stat-label">Discounts</div><div class="stat-value" id="zDisc">$0.00</div></div>
+              <div class="stat-card"><div class="stat-label">Voids</div><div class="stat-value" id="zVoids">0</div></div>
+              <div class="stat-card"><div class="stat-label">Refunds</div><div class="stat-value" id="zRefunds">0</div></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+              <div class="section" style="padding:16px">
+                <h2 style="margin-bottom:10px">Payment Methods</h2>
+                <div id="zMethods"></div>
+                <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+                  <div style="display:flex;justify-content:space-between;font-weight:700;font-size:14px"><span>Total Tendered</span><span id="zMethodTotal"></span></div>
+                </div>
+              </div>
+              <div class="section" style="padding:16px">
+                <h2 style="margin-bottom:10px">Cash Drawer</h2>
+                <div id="zDrawer"></div>
               </div>
             </div>
-            <div class="section" style="padding:16px">
-              <h2 style="margin-bottom:10px">Cash Drawer</h2>
-              <div id="zDrawer"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+              <div class="section" style="padding:16px">
+                <h2 style="margin-bottom:10px">Sales by Category</h2>
+                <div id="zCategories"></div>
+              </div>
+              <div class="section" style="padding:16px">
+                <h2 style="margin-bottom:10px">Sales by Hour</h2>
+                <div id="zHourly"></div>
+              </div>
             </div>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-            <div class="section" style="padding:16px">
-              <h2 style="margin-bottom:10px">Sales by Category</h2>
-              <div id="zCategories"></div>
+        </div>
+      </div>
+
+      <!-- Weekly Summary -->
+      <div id="reportWeekly" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <label style="font-size:13px;color:var(--text-dim)">Week starting:</label>
+          <input type="date" id="wkDate" style="padding:8px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:14px">
+          <button class="btn btn-green" id="wkGenerate" style="padding:8px 16px">Generate</button>
+          <div style="display:flex;gap:4px;margin-left:8px">
+            <button class="btn btn-outline" style="padding:4px 10px;font-size:11px" data-wk-preset="this">This Week</button>
+            <button class="btn btn-outline" style="padding:4px 10px;font-size:11px" data-wk-preset="last">Last Week</button>
+          </div>
+        </div>
+        <div id="wkReportContent" style="display:none">
+          <div id="wkReportPrintable">
+            <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:16px">
+              <div class="stat-card"><div class="stat-label">Total Sales</div><div class="stat-value green" id="wkTotalSales">$0.00</div></div>
+              <div class="stat-card"><div class="stat-label">Transactions</div><div class="stat-value" id="wkTotalTxns">0</div></div>
+              <div class="stat-card"><div class="stat-label">Cash Total</div><div class="stat-value" id="wkTotalCash">$0.00</div></div>
+              <div class="stat-card"><div class="stat-label">Card/EFTPOS Total</div><div class="stat-value" id="wkTotalCard">$0.00</div></div>
+              <div class="stat-card"><div class="stat-label">GST Collected</div><div class="stat-value" id="wkTotalTax">$0.00</div></div>
+              <div class="stat-card"><div class="stat-label">Avg Daily Sales</div><div class="stat-value" id="wkAvgDaily">$0.00</div></div>
+            </div>
+            <div class="section" style="padding:16px;margin-bottom:16px">
+              <h2 style="margin-bottom:12px">Daily Breakdown</h2>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Day</th>
+                    <th>Date</th>
+                    <th style="text-align:right">Sales</th>
+                    <th style="text-align:right">Txns</th>
+                    <th style="text-align:right">Cash</th>
+                    <th style="text-align:right">Card</th>
+                    <th style="text-align:right">GST</th>
+                    <th style="text-align:right">Discounts</th>
+                  </tr>
+                </thead>
+                <tbody id="wkDaysTable"></tbody>
+                <tfoot id="wkDaysTotals" style="font-weight:700;border-top:2px solid var(--border)"></tfoot>
+              </table>
             </div>
             <div class="section" style="padding:16px">
-              <h2 style="margin-bottom:10px">Sales by Hour</h2>
-              <div id="zHourly"></div>
+              <h2 style="margin-bottom:12px">Daily Sales Chart</h2>
+              <div id="wkChart" style="display:flex;align-items:end;gap:8px;height:180px;padding:12px 0"></div>
             </div>
           </div>
         </div>
@@ -2510,6 +2610,8 @@
 
     // ── Transactions ────────────────────────────────────────────────
 
+    let txnCache = []
+
     function initTxnDates () {
       const today = new Date().toISOString().slice(0, 10)
       if (!$('#txnDateFrom').value) $('#txnDateFrom').value = today
@@ -2521,6 +2623,32 @@
       await searchTransactions()
     }
 
+    function applyTxnPreset (preset) {
+      const today = new Date()
+      const fmt = d => d.toISOString().slice(0, 10)
+      switch (preset) {
+        case 'today':
+          $('#txnDateFrom').value = $('#txnDateTo').value = fmt(today); break
+        case 'yesterday': {
+          const y = new Date(today); y.setDate(y.getDate() - 1)
+          $('#txnDateFrom').value = $('#txnDateTo').value = fmt(y); break
+        }
+        case 'week': {
+          const d = new Date(today); d.setDate(d.getDate() - d.getDay() + 1)
+          $('#txnDateFrom').value = fmt(d); $('#txnDateTo').value = fmt(today); break
+        }
+        case 'month': {
+          const m = new Date(today.getFullYear(), today.getMonth(), 1)
+          $('#txnDateFrom').value = fmt(m); $('#txnDateTo').value = fmt(today); break
+        }
+        case 'all':
+          $('#txnDateFrom').value = ''; $('#txnDateTo').value = ''; break
+      }
+      searchTransactions()
+    }
+
+    $$('[data-txn-preset]').forEach(btn => btn.addEventListener('click', () => applyTxnPreset(btn.dataset.txnPreset)))
+
     async function searchTransactions () {
       const opts = {
         dateFrom: $('#txnDateFrom').value || null,
@@ -2528,20 +2656,54 @@
         status: $('#txnStatus').value || null
       }
       const txns = await window.pos.searchTransactions(opts)
-      // Summary stats
-      const completed = txns.filter(t => t.status === 'completed')
+
+      const quickFilter = ($('#txnQuickSearch').value || '').trim().toLowerCase()
+      const filtered = quickFilter
+        ? txns.filter(t =>
+            (t.id || '').toLowerCase().includes(quickFilter) ||
+            (t.staff_name || '').toLowerCase().includes(quickFilter) ||
+            (t.item_names || '').toLowerCase().includes(quickFilter))
+        : txns
+
+      txnCache = filtered
+
+      const completed = filtered.filter(t => t.status === 'completed')
       const totalSales = completed.reduce((s, t) => s + (t.total || 0), 0)
-      const voided = txns.filter(t => t.status === 'voided').length
-      const refunded = txns.filter(t => t.status === 'refunded').length
+      const voided = filtered.filter(t => t.status === 'voided').length
+      const refunded = filtered.filter(t => t.status === 'refunded').length
       $('#txnSumSales').textContent = money(totalSales)
       $('#txnSumCount').textContent = completed.length
       $('#txnSumAvg').textContent = completed.length ? money(totalSales / completed.length) : '$0.00'
       $('#txnSumVoids').textContent = voided
       $('#txnSumRefunds').textContent = refunded
 
+      let cashTotal = 0, cardTotal = 0
+      for (const t of completed) {
+        if (t.payment_methods) {
+          const methods = t.payment_methods.split(',')
+          const amounts = (t.payment_amounts || '').split(',')
+          methods.forEach((m, i) => {
+            const amt = parseFloat(amounts[i]) || 0
+            if (m.trim() === 'cash') cashTotal += amt
+            else cardTotal += amt
+          })
+        } else {
+          cashTotal += t.total || 0
+        }
+      }
+      $('#txnSumCash').textContent = money(cashTotal)
+      $('#txnSumCard').textContent = money(cardTotal)
+
+      $('#txnResultCount').textContent = filtered.length
+        ? `${filtered.length} transaction${filtered.length !== 1 ? 's' : ''} found`
+        : 'No transactions found'
+
       const statusColors = { completed: 'badge-green', voided: 'badge-red', refunded: 'badge-amber', parked: 'badge-amber' }
-      $('#txnTable').innerHTML = txns.length ? txns.map(t => {
+      $('#txnTable').innerHTML = filtered.length ? filtered.map(t => {
         const dt = new Date(t.created_at + 'Z')
+        const payBadge = t.payment_methods
+          ? t.payment_methods.split(',').map(m => `<span class="badge" style="font-size:10px;padding:1px 5px;text-transform:capitalize">${esc(m.trim())}</span>`).join(' ')
+          : '<span style="color:var(--text-dim)">-</span>'
         const actions = [`<button class="btn btn-outline" style="padding:2px 8px;font-size:11px" data-txn-view="${esc(t.id)}">View</button>`]
         if (t.status === 'completed') {
           actions.push(`<button class="btn" style="padding:2px 8px;font-size:11px;background:var(--red);color:#fff" data-txn-void="${esc(t.id)}">Void</button>`)
@@ -2552,14 +2714,16 @@
           <td style="font-family:monospace;font-size:11px">${esc((t.id || '').substring(0, 8))}</td>
           <td>${esc(t.staff_name || '-')}</td>
           <td>${t.item_count || 0}</td>
+          <td>${payBadge}</td>
           <td>${money(t.total)}</td>
           <td><span class="badge ${statusColors[t.status] || ''}">${esc(t.status)}</span></td>
           <td style="display:flex;gap:4px">${actions.join('')}</td>
         </tr>`
-      }).join('') : '<tr><td colspan="7" style="color:var(--text-dim)">No transactions found</td></tr>'
+      }).join('') : '<tr><td colspan="8" style="color:var(--text-dim);text-align:center;padding:30px">No transactions found</td></tr>'
     }
 
     $('#txnSearchBtn').addEventListener('click', searchTransactions)
+    $('#txnQuickSearch').addEventListener('input', debounce(searchTransactions, 300))
 
     $('#txnTable').addEventListener('click', async e => {
       const viewBtn = e.target.closest('[data-txn-view]')
@@ -2567,11 +2731,21 @@
       const refundBtn = e.target.closest('[data-txn-refund]')
       if (viewBtn) {
         const txnId = viewBtn.dataset.txnView
+        const txn = txnCache.find(t => t.id === txnId)
         const [items, payments] = await Promise.all([
           window.pos.getTransactionItems(txnId),
           window.pos.getTransactionPayments(txnId)
         ])
         $('#txnDetailTitle').textContent = `Transaction ${txnId.substring(0, 8)}`
+        const dt = txn ? new Date(txn.created_at + 'Z') : null
+        $('#txnDetailMeta').innerHTML = txn ? `
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px">
+            <div><strong>Date:</strong> ${dt.toLocaleDateString('en-AU')} ${dt.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })}</div>
+            <div><strong>Staff:</strong> ${esc(txn.staff_name || '-')}</div>
+            <div><strong>Status:</strong> <span class="badge ${txn.status === 'completed' ? 'badge-green' : txn.status === 'voided' ? 'badge-red' : 'badge-amber'}">${esc(txn.status)}</span></div>
+            <div><strong>Total:</strong> ${money(txn.total)}</div>
+            <div><strong>Full ID:</strong> <span style="font-family:monospace;font-size:11px">${esc(txn.id)}</span></div>
+          </div>` : ''
         $('#txnItemsTable').innerHTML = items.map(i => `<tr>
           <td>${esc(i.name)}</td>
           <td>${i.qty}</td>
@@ -2585,18 +2759,23 @@
               <span style="text-transform:capitalize">${esc(p.method)}</span><span>${money(p.amount)}${p.reference ? ` (${esc(p.reference)})` : ''}</span>
             </div>`).join('')
           : ''
+        $('#txnDetailActions').innerHTML = txn && txn.status === 'completed' ? `
+          <button class="btn" style="background:var(--red);color:#fff;padding:6px 14px;font-size:12px" data-txn-void="${esc(txn.id)}">Void Transaction</button>
+          <button class="btn" style="background:#e07020;color:#fff;padding:6px 14px;font-size:12px" data-txn-refund="${esc(txn.id)}">Refund Transaction</button>` : ''
         openModal('txnDetailPanel')
       }
       if (voidBtn) {
         if (!confirm('Void this transaction? Stock will be restored.')) return
         await window.pos.voidTransaction(voidBtn.dataset.txnVoid)
         showToast('Transaction voided', 'success')
+        closeModal('txnDetailPanel')
         searchTransactions()
       }
       if (refundBtn) {
         if (!confirm('Mark this transaction as refunded?')) return
         await window.pos.refundTransaction(refundBtn.dataset.txnRefund)
         showToast('Transaction refunded', 'success')
+        closeModal('txnDetailPanel')
         searchTransactions()
       }
     })
@@ -2611,7 +2790,7 @@
       }
       const txns = await window.pos.searchTransactions(opts)
       if (!txns.length) { showToast('No transactions to export', 'info'); return }
-      const header = 'Date,Time,ID,Staff,Items,Subtotal,Tax,Discount,Total,Status'
+      const header = 'Date,Time,ID,Staff,Items,Payment,Subtotal,Tax,Discount,Total,Status'
       const rows = txns.map(t => {
         const dt = new Date(t.created_at + 'Z')
         return [
@@ -2620,6 +2799,7 @@
           t.id,
           (t.staff_name || '').replace(/,/g, ' '),
           t.item_count || 0,
+          (t.payment_methods || '').replace(/,/g, '+'),
           (t.subtotal || 0).toFixed(2),
           (t.tax || 0).toFixed(2),
           (t.discount || 0).toFixed(2),
@@ -3061,7 +3241,9 @@
       }
 
       updateLanRoleBanner(mode, status)
-      loadLanPeers()
+      $('#lanPeersSection').style.display = mode === 'off' ? 'none' : ''
+      if (mode !== 'off') loadLanPeers()
+      else $('#lanPeersList').innerHTML = ''
     }
 
     async function loadLanPeers () {
@@ -3440,11 +3622,44 @@
       btn.disabled = false
     })
 
-    // ── Z Report ────────────────────────────────────────────────────
+    // ── Reports ─────────────────────────────────────────────────────
+
+    let currentReportType = 'daily'
 
     function initZReport () {
       if (!$('#zDate').value) $('#zDate').value = new Date().toISOString().slice(0, 10)
+      const today = new Date()
+      const mon = new Date(today); mon.setDate(mon.getDate() - mon.getDay() + 1)
+      if (!$('#wkDate').value) $('#wkDate').value = mon.toISOString().slice(0, 10)
     }
+
+    function switchReportType (type) {
+      currentReportType = type
+      $$('#reportTypeTabs button').forEach(b => {
+        b.className = b.dataset.reportType === type ? 'btn btn-green' : 'btn btn-outline'
+      })
+      $('#reportDaily').style.display = type === 'daily' ? '' : 'none'
+      $('#reportWeekly').style.display = type === 'weekly' ? '' : 'none'
+    }
+
+    $$('#reportTypeTabs button').forEach(b => b.addEventListener('click', () => switchReportType(b.dataset.reportType)))
+
+    // Daily Z presets
+    $$('[data-z-preset]').forEach(btn => btn.addEventListener('click', () => {
+      const today = new Date()
+      if (btn.dataset.zPreset === 'yesterday') today.setDate(today.getDate() - 1)
+      $('#zDate').value = today.toISOString().slice(0, 10)
+      $('#zGenerate').click()
+    }))
+
+    // Weekly presets
+    $$('[data-wk-preset]').forEach(btn => btn.addEventListener('click', () => {
+      const today = new Date()
+      const mon = new Date(today); mon.setDate(mon.getDate() - mon.getDay() + 1)
+      if (btn.dataset.wkPreset === 'last') mon.setDate(mon.getDate() - 7)
+      $('#wkDate').value = mon.toISOString().slice(0, 10)
+      $('#wkGenerate').click()
+    }))
 
     $('#zGenerate').addEventListener('click', async () => {
       const date = $('#zDate').value
@@ -3460,7 +3675,6 @@
       $('#zVoids').textContent = r.voids || 0
       $('#zRefunds').textContent = r.refunds.count > 0 ? `${r.refunds.count} (${money(r.refunds.total)})` : '0'
 
-      // Payment methods
       const totalPay = r.methods.reduce((s, m) => s + m.total, 0)
       $('#zMethods').innerHTML = r.methods.length ? r.methods.map(m =>
         `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:14px">
@@ -3469,7 +3683,6 @@
       ).join('') : '<p style="color:var(--text-dim)">No payments</p>'
       $('#zMethodTotal').textContent = money(totalPay)
 
-      // Drawer
       const dw = r.drawer || {}
       $('#zDrawer').innerHTML = `
         <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:14px"><span>Opening Float</span><span>${money(dw.float_total || 0)}</span></div>
@@ -3479,14 +3692,12 @@
         <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:16px;font-weight:700"><span>Expected in Drawer</span><span style="color:var(--green)">${money(dw.expected || 0)}</span></div>
       `
 
-      // Categories
       $('#zCategories').innerHTML = r.categories.length ? r.categories.map(c =>
         `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:13px">
           <span>${esc(c.category)}</span><span style="color:var(--text-dim)">${money(c.total)} (${c.qty} items)</span>
         </div>`
       ).join('') : '<p style="color:var(--text-dim)">No sales</p>'
 
-      // Hourly
       $('#zHourly').innerHTML = r.hourly.length ? r.hourly.map(h =>
         `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:13px">
           <span>${(() => { const hr = parseInt(h.hour); if (hr === 0) return '12am'; if (hr === 12) return '12pm'; return hr > 12 ? (hr - 12) + 'pm' : hr + 'am' })()}</span>
@@ -3497,23 +3708,92 @@
       $('#zReportContent').style.display = 'block'
     })
 
-    $('#zPrint').addEventListener('click', () => {
-      const content = $('#zReportPrintable')
-      if (!content || !$('#zReportContent').style.display || $('#zReportContent').style.display === 'none') {
-        showToast('Generate a report first', 'info'); return
-      }
-      const win = window.open('', '_blank', 'width=800,height=600')
-      win.document.write(`<html><head><title>Z Report - ${$('#zDate').value}</title>
-        <style>body{font-family:sans-serif;padding:20px;color:#333}
+    // Weekly Summary
+    $('#wkGenerate').addEventListener('click', async () => {
+      const weekStart = $('#wkDate').value
+      if (!weekStart) { showToast('Select a week start date', 'error'); return }
+      const r = await window.pos.weeklySummary(weekStart)
+      const t = r.totals
+
+      $('#wkTotalSales').textContent = money(t.sales)
+      $('#wkTotalTxns').textContent = t.txns
+      $('#wkTotalCash').textContent = money(t.cash)
+      $('#wkTotalCard').textContent = money(t.card)
+      $('#wkTotalTax').textContent = money(t.tax)
+      const activeDays = r.days.filter(d => d.total_sales > 0).length
+      $('#wkAvgDaily').textContent = activeDays > 0 ? money(t.sales / activeDays) : '$0.00'
+
+      $('#wkDaysTable').innerHTML = r.days.map(d => {
+        const dt = new Date(d.date + 'T00:00:00')
+        const isToday = d.date === new Date().toISOString().slice(0, 10)
+        return `<tr style="${isToday ? 'background:rgba(16,185,129,0.08)' : ''}">
+          <td style="font-weight:600">${d.dayName}</td>
+          <td>${dt.toLocaleDateString('en-AU')}</td>
+          <td style="text-align:right;font-weight:600;color:${d.total_sales > 0 ? 'var(--green)' : 'var(--text-dim)'}">${money(d.total_sales)}</td>
+          <td style="text-align:right">${d.txn_count}</td>
+          <td style="text-align:right">${money(d.cash)}</td>
+          <td style="text-align:right">${money(d.card)}</td>
+          <td style="text-align:right">${money(d.total_tax)}</td>
+          <td style="text-align:right">${d.total_discounts > 0 ? money(d.total_discounts) : '-'}</td>
+        </tr>`
+      }).join('')
+
+      $('#wkDaysTotals').innerHTML = `<tr>
+        <td colspan="2" style="font-weight:700">TOTALS</td>
+        <td style="text-align:right;font-weight:700;color:var(--green)">${money(t.sales)}</td>
+        <td style="text-align:right;font-weight:700">${t.txns}</td>
+        <td style="text-align:right;font-weight:700">${money(t.cash)}</td>
+        <td style="text-align:right;font-weight:700">${money(t.card)}</td>
+        <td style="text-align:right;font-weight:700">${money(t.tax)}</td>
+        <td style="text-align:right;font-weight:700">${t.discounts > 0 ? money(t.discounts) : '-'}</td>
+      </tr>`
+
+      // Bar chart
+      const maxSales = Math.max(...r.days.map(d => d.total_sales), 1)
+      $('#wkChart').innerHTML = r.days.map(d => {
+        const cashPct = maxSales > 0 ? (d.cash / maxSales * 100) : 0
+        const cardPct = maxSales > 0 ? (d.card / maxSales * 100) : 0
+        return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+          <span style="font-size:11px;color:var(--text-dim)">${money(d.total_sales)}</span>
+          <div style="width:100%;display:flex;flex-direction:column;justify-content:end;height:140px">
+            <div style="background:#3b82f6;width:100%;height:${cardPct}%;border-radius:4px 4px 0 0;min-height:${d.card > 0 ? '2px' : '0'}" title="Card: ${money(d.card)}"></div>
+            <div style="background:var(--green);width:100%;height:${cashPct}%;border-radius:${d.card > 0 ? '0' : '4px 4px'} 0 0;min-height:${d.cash > 0 ? '2px' : '0'}" title="Cash: ${money(d.cash)}"></div>
+          </div>
+          <span style="font-size:11px;font-weight:600">${d.dayName}</span>
+        </div>`
+      }).join('')
+
+      $('#wkReportContent').style.display = 'block'
+    })
+
+    // Print
+    $('#rptPrint').addEventListener('click', () => {
+      const printStyles = `body{font-family:sans-serif;padding:20px;color:#333}
+        table{width:100%;border-collapse:collapse}th,td{padding:6px 8px;text-align:left;border-bottom:1px solid #ddd;font-size:13px}
+        th{font-weight:700;font-size:11px;text-transform:uppercase;color:#888}
         .stat-card{border:1px solid #ddd;padding:12px;border-radius:6px}
         .stat-label{font-size:11px;color:#888;margin-bottom:2px}
         .stat-value{font-size:22px;font-weight:700}
         .stat-value.green{color:#059669}
-        .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+        .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px}
         .section{border:1px solid #ddd;border-radius:6px;padding:14px;margin-bottom:12px}
         h1{font-size:20px;margin-bottom:4px}h2{font-size:14px;color:#666;margin-bottom:8px}
-        @media print{body{padding:0}.section{break-inside:avoid}}</style>
-      </head><body><h1>Z Report</h1><p style="color:#888;margin-bottom:16px">${$('#zDate').value}</p>${content.innerHTML}</body></html>`)
+        @media print{body{padding:0}.section{break-inside:avoid}}`
+
+      let content, title, subtitle
+      if (currentReportType === 'daily') {
+        content = $('#zReportPrintable')
+        if (!content || $('#zReportContent').style.display === 'none') { showToast('Generate a report first', 'info'); return }
+        title = 'Z Report'; subtitle = $('#zDate').value
+      } else {
+        content = $('#wkReportPrintable')
+        if (!content || $('#wkReportContent').style.display === 'none') { showToast('Generate a report first', 'info'); return }
+        title = 'Weekly Summary'; subtitle = 'Week of ' + $('#wkDate').value
+      }
+
+      const win = window.open('', '_blank', 'width=800,height=600')
+      win.document.write(`<html><head><title>${title} - ${subtitle}</title><style>${printStyles}</style>
+      </head><body><h1>${title}</h1><p style="color:#888;margin-bottom:16px">${subtitle}</p>${content.innerHTML}</body></html>`)
       win.document.close()
       setTimeout(() => { win.print() }, 300)
     })
@@ -5294,12 +5574,12 @@
     let labelQueue = [] // [{product, qty}]
     const TAG_SCALE = 4 // designer canvas scale factor
     const DEFAULT_TAG_LAYOUT = [
-      { type: 'name',         x: 5,  y: 3,  w: 90, h: 18, size: 9,  bold: true,  align: 'center', visible: true },
-      { type: 'price',        x: 5,  y: 22, w: 90, h: 22, size: 14, bold: true,  align: 'center', visible: true },
-      { type: 'barcode',      x: 10, y: 46, w: 80, h: 28, size: 25, bold: false, align: 'center', visible: true },
-      { type: 'barcode_text', x: 15, y: 76, w: 70, h: 12, size: 7,  bold: false, align: 'center', visible: true },
-      { type: 'unit',         x: 5,  y: 90, w: 90, h: 10, size: 7,  bold: false, align: 'center', visible: false },
-      { type: 'category',     x: 5,  y: 90, w: 90, h: 10, size: 7,  bold: false, align: 'center', visible: false },
+      { type: 'name',         x: 5,  y: 3,  w: 90, h: 18, size: 9,  bold: true,  align: 'center', font: 'Arial', visible: true },
+      { type: 'price',        x: 5,  y: 22, w: 90, h: 22, size: 14, bold: true,  align: 'center', font: 'Arial', visible: true },
+      { type: 'barcode',      x: 10, y: 46, w: 80, h: 28, size: 25, bold: false, align: 'center', font: 'Arial', visible: true },
+      { type: 'barcode_text', x: 15, y: 76, w: 70, h: 12, size: 7,  bold: false, align: 'center', font: 'Courier New', visible: true },
+      { type: 'unit',         x: 5,  y: 90, w: 90, h: 10, size: 7,  bold: false, align: 'center', font: 'Arial', visible: false },
+      { type: 'category',     x: 5,  y: 90, w: 90, h: 10, size: 7,  bold: false, align: 'center', font: 'Arial', visible: false },
     ]
     let tagLayout = JSON.parse(localStorage.getItem('crisp_tag_layout') || 'null') || JSON.parse(JSON.stringify(DEFAULT_TAG_LAYOUT))
     let selectedTagEl = null
@@ -5372,25 +5652,28 @@
         if (!el.visible) continue
         const left = el.x * cw / 100, top = el.y * ch / 100
         const w = el.w * cw / 100, h = el.h * ch / 100
-        const sel = selectedTagEl === el.type ? 'outline:2px solid #5b8def;z-index:10;' : ''
+        const isSel = selectedTagEl === el.type
+        const sel = isSel ? 'outline:2px solid #5b8def;z-index:10;' : ''
         const fw = el.bold ? 'font-weight:700;' : ''
         const ta = `text-align:${el.align || 'center'};`
-        const base = `position:absolute;left:${left}px;top:${top}px;width:${w}px;height:${h}px;display:flex;align-items:center;justify-content:${el.align === 'left' ? 'flex-start' : el.align === 'right' ? 'flex-end' : 'center'};overflow:hidden;cursor:move;border-radius:2px;${sel}${fw}${ta}`
+        const ff = `font-family:'${el.font || 'Arial'}',sans-serif;`
+        const base = `position:absolute;left:${left}px;top:${top}px;width:${w}px;height:${h}px;display:flex;align-items:center;justify-content:${el.align === 'left' ? 'flex-start' : el.align === 'right' ? 'flex-end' : 'center'};overflow:hidden;cursor:move;border-radius:2px;${sel}${fw}${ta}${ff}`
 
+        const resizeGrip = isSel ? `<div class="tag-resize" data-tag-resize="${el.type}" style="position:absolute;right:-1px;bottom:-1px;width:10px;height:10px;cursor:se-resize;background:#5b8def;border-radius:2px 0 2px 0;z-index:20"></div>` : ''
         const barcodeVal = p.plu || p.barcode || ''
         if (el.type === 'name') {
-          html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}font-size:${el.size * TAG_SCALE / 3}px;line-height:1.1;color:#000">${esc(p.name)}</div>`
+          html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}font-size:${el.size * TAG_SCALE / 3}px;line-height:1.1;color:#000">${esc(p.name)}${resizeGrip}</div>`
         } else if (el.type === 'price') {
-          html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}font-size:${el.size * TAG_SCALE / 3}px;color:#000">${money(p.price)}</div>`
+          html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}font-size:${el.size * TAG_SCALE / 3}px;color:#000">${money(p.price)}${resizeGrip}</div>`
         } else if (el.type === 'barcode') {
           const svg = generateBarcodeSVG(barcodeVal, h)
-          html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}">${svg ? `<img src="${svg}" style="width:100%;height:100%;object-fit:contain">` : '<span style="font-size:10px;color:#999">barcode</span>'}</div>`
+          html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}">${svg ? `<img src="${svg}" style="width:100%;height:100%;object-fit:contain">` : '<span style="font-size:10px;color:#999">barcode</span>'}${resizeGrip}</div>`
         } else if (el.type === 'barcode_text') {
-          html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}font-size:${el.size * TAG_SCALE / 3}px;font-family:monospace;color:#444">${esc(barcodeVal)}</div>`
+          html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}font-size:${el.size * TAG_SCALE / 3}px;color:#444">${esc(barcodeVal)}${resizeGrip}</div>`
         } else if (el.type === 'unit') {
-          html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}font-size:${el.size * TAG_SCALE / 3}px;color:#666">${p.unit === 'each' ? 'each' : 'per ' + p.unit}</div>`
+          html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}font-size:${el.size * TAG_SCALE / 3}px;color:#666">${p.unit === 'each' ? 'each' : 'per ' + p.unit}${resizeGrip}</div>`
         } else if (el.type === 'category') {
-          html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}font-size:${el.size * TAG_SCALE / 3}px;color:#888">${esc(p.category_name || '')}</div>`
+          html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}font-size:${el.size * TAG_SCALE / 3}px;color:#888">${esc(p.category_name || '')}${resizeGrip}</div>`
         }
       }
       canvas.innerHTML = html
@@ -5415,6 +5698,7 @@
       const panel = $('#tagElProps')
       panel.style.display = 'block'
       $('#tagElPropsTitle').textContent = ELEMENT_LABELS[type] || type
+      $('#tagElFont').value = el.font || 'Arial'
       $('#tagElSize').value = String(el.size)
       $('#tagElAlign').value = el.align || 'center'
       $('#tagElBold').checked = !!el.bold
@@ -5433,6 +5717,10 @@
       if (tog) showElProps(tog.dataset.tagToggle)
     })
 
+    $('#tagElFont').addEventListener('change', () => {
+      const el = tagLayout.find(e => e.type === selectedTagEl)
+      if (el) { el.font = $('#tagElFont').value; saveTagLayout(); renderTagCanvas(); renderLabelSheet() }
+    })
     $('#tagElSize').addEventListener('change', () => {
       const el = tagLayout.find(e => e.type === selectedTagEl)
       if (el) { el.size = parseInt($('#tagElSize').value); saveTagLayout(); renderTagCanvas(); renderLabelSheet() }
@@ -5449,10 +5737,21 @@
     // ── Drag elements on the canvas ──────────────────────────────────
 
     {
-      let dragging = null, startX = 0, startY = 0, origX = 0, origY = 0
+      let dragging = null, resizing = null, startX = 0, startY = 0, origX = 0, origY = 0, origW = 0, origH = 0
       const canvas = $('#tagCanvas')
 
       canvas.addEventListener('mousedown', e => {
+        const resizeHandle = e.target.closest('.tag-resize')
+        if (resizeHandle) {
+          e.preventDefault()
+          const type = resizeHandle.dataset.tagResize
+          const layout = tagLayout.find(x => x.type === type)
+          if (!layout) return
+          resizing = layout
+          startX = e.clientX; startY = e.clientY
+          origW = layout.w; origH = layout.h
+          return
+        }
         const el = e.target.closest('.tag-el')
         if (!el) return
         e.preventDefault()
@@ -5461,12 +5760,21 @@
         if (!layout) return
         dragging = layout
         showElProps(type)
-        const rect = canvas.getBoundingClientRect()
         startX = e.clientX; startY = e.clientY
         origX = layout.x; origY = layout.y
       })
 
       window.addEventListener('mousemove', e => {
+        if (resizing) {
+          const canvas = $('#tagCanvas')
+          const cw = canvas.offsetWidth, ch = canvas.offsetHeight
+          const dw = ((e.clientX - startX) / cw) * 100
+          const dh = ((e.clientY - startY) / ch) * 100
+          resizing.w = Math.max(10, Math.min(100 - resizing.x, Math.round(origW + dw)))
+          resizing.h = Math.max(5, Math.min(100 - resizing.y, Math.round(origH + dh)))
+          renderTagCanvas()
+          return
+        }
         if (!dragging) return
         const canvas = $('#tagCanvas')
         const cw = canvas.offsetWidth, ch = canvas.offsetHeight
@@ -5478,7 +5786,7 @@
       })
 
       window.addEventListener('mouseup', () => {
-        if (dragging) { saveTagLayout(); renderLabelSheet(); dragging = null }
+        if (dragging || resizing) { saveTagLayout(); renderLabelSheet(); dragging = null; resizing = null }
       })
     }
 
@@ -5518,7 +5826,8 @@
         const h = (el.h * tagH / 100) + 'mm'
         const fw = el.bold ? 'font-weight:700;' : ''
         const jc = el.align === 'left' ? 'flex-start' : el.align === 'right' ? 'flex-end' : 'center'
-        const base = `position:absolute;left:${left};top:${top};width:${w};height:${h};display:flex;align-items:center;justify-content:${jc};overflow:hidden;${fw}text-align:${el.align || 'center'};`
+        const ff = `font-family:'${el.font || 'Arial'}',sans-serif;`
+        const base = `position:absolute;left:${left};top:${top};width:${w};height:${h};display:flex;align-items:center;justify-content:${jc};overflow:hidden;${fw}${ff}text-align:${el.align || 'center'};`
         const barcodeVal = product.plu || product.barcode || ''
         if (el.type === 'name') html += `<div style="${base}font-size:${el.size}pt;line-height:1.1">${esc(product.name)}</div>`
         else if (el.type === 'price') html += `<div style="${base}font-size:${el.size}pt">${money(product.active_price ?? product.price)}</div>`
@@ -5526,7 +5835,7 @@
           const svg = generateBarcodeSVG(barcodeVal, Math.round(el.h * tagH / 100 * 3.78))
           if (svg) html += `<div style="${base}"><img src="${svg}" style="width:100%;height:100%;object-fit:contain"></div>`
         }
-        else if (el.type === 'barcode_text') html += `<div style="${base}font-size:${el.size}pt;font-family:monospace;color:#444">${esc(barcodeVal)}</div>`
+        else if (el.type === 'barcode_text') html += `<div style="${base}font-size:${el.size}pt;color:#444">${esc(barcodeVal)}</div>`
         else if (el.type === 'unit') html += `<div style="${base}font-size:${el.size}pt;color:#666">${product.unit === 'each' ? 'each' : 'per ' + product.unit}</div>`
         else if (el.type === 'category') html += `<div style="${base}font-size:${el.size}pt;color:#888">${esc(product.category_name || '')}</div>`
       }

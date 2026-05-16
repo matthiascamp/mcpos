@@ -6,6 +6,7 @@ const lanSync = require('./lan-sync')
 const linkly = require('./linkly')
 
 let mainWindow
+let splashWindow = null
 let customerWindow = null
 let db
 let saveTimer = null
@@ -215,6 +216,38 @@ async function initDatabase() {
   for (const m of migrations) {
     try { db.run(m) } catch (_) {}
   }
+
+  // ── GST compliance: set correct tax rates per Australian law ──
+  // Fresh staple foods are GST-free (0%). Prepared foods, beverages, confectionery,
+  // snacks, and non-food items attract 10% GST.
+  try {
+    const gstDone = dbAll("SELECT value FROM settings WHERE key = 'migration_gst_rates_v1'")
+    if (!gstDone.length) {
+      const gstFreeCategories = [
+        'Fruit', 'Vegetables', 'Meat', 'Dairy', 'Eggs', 'Bread', 'Bread & Bakery',
+        'Cheese', 'Deli', 'Flowers', 'Herbs', 'Salad', 'Asian Vegetables',
+        'Frozen Vegetables', 'Fresh Pasta', 'Honey'
+      ]
+      const gstCategories = [
+        'Coffee', 'Drinks', 'Beverages', 'Confectionery', 'Grocery',
+        'Nuts & Snacks', 'Dried Fruit & Nuts', 'Newsagent', 'Cards & Ice Cream',
+        'Ice Cream', 'Freezer', 'Bags', 'Gas', 'Household'
+      ]
+      // Set GST-free categories to 0%
+      for (const cat of gstFreeCategories) {
+        db.run(`UPDATE products SET tax_rate = 0.00 WHERE category_id IN (SELECT id FROM categories WHERE LOWER(name) = LOWER(?1))`, [cat])
+      }
+      // Set GST categories to 10%
+      for (const cat of gstCategories) {
+        db.run(`UPDATE products SET tax_rate = 0.10 WHERE category_id IN (SELECT id FROM categories WHERE LOWER(name) = LOWER(?1))`, [cat])
+      }
+      // Special cases: items sold by weight that are clearly fresh produce → GST-free
+      db.run("UPDATE products SET tax_rate = 0.00 WHERE unit IN ('kg', '100g') AND tax_rate = 0.10 AND category_id IN (SELECT id FROM categories WHERE LOWER(name) IN ('fruit', 'vegetables', 'meat', 'deli', 'cheese'))")
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('migration_gst_rates_v1', '1')")
+      appLog('info', 'migration', 'Applied Australian GST rates to all products')
+      scheduleSave()
+    }
+  } catch (e) { appLog('error', 'migration', 'GST rate migration failed', e.message) }
 
   // ── Repair: restore open_price button labels mangled by previous migration ──
   try {
@@ -769,6 +802,7 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
+    show: false,
     fullscreen: !process.argv.includes('--dev'),
     kiosk: !process.argv.includes('--dev'),
     autoHideMenuBar: true,
@@ -854,8 +888,9 @@ function createCustomerWindow () {
 
 // Single instance lock — focus existing window if already running
 const gotTheLock = app.requestSingleInstanceLock()
-if (!gotTheLock) { app.quit() }
-else {
+if (!gotTheLock) {
+  app.quit()
+} else {
   app.on('second-instance', () => {
     if (mainWindow) {
       if (mainWindow.isMinimized()) mainWindow.restore()
@@ -865,54 +900,120 @@ else {
 }
 
 app.whenReady().then(async () => {
-  await initDatabase()
-  createWindow()
-  setupIPC()
+  if (!gotTheLock) return
 
-  // Auto-open customer display if a second monitor is available
-  const { screen } = require('electron')
-  if (screen.getAllDisplays().length > 1) {
-    createCustomerWindow()
+  // Show splash screen during startup
+  splashWindow = new BrowserWindow({
+    width: 420, height: 360,
+    frame: false, resizable: false,
+    center: true, skipTaskbar: false,
+    backgroundColor: '#0f1117',
+    icon: path.join(__dirname, 'pos', 'logo.png'),
+    webPreferences: { nodeIntegration: true, contextIsolation: false }
+  })
+  splashWindow.loadFile(path.join(__dirname, 'pos', 'splash.html'))
+
+  const splashSend = (channel, ...args) => {
+    if (splashWindow && !splashWindow.isDestroyed()) splashWindow.webContents.send(channel, ...args)
   }
 
-  // LAN sync — always auto-start if a mode is configured
-  try {
-    const lanMode = dbGet("SELECT value FROM settings WHERE key = 'lan_mode'")?.value
-    const lanPort = parseInt(dbGet("SELECT value FROM settings WHERE key = 'lan_port'")?.value || '5555')
-    if (lanMode === 'server') {
-      lanSync.startServer(lanPort, { dbAll, dbGet, dbRun, saveDB, uuid })
-      appLog('info', 'lan-sync', 'Auto-started LAN server on port ' + lanPort)
-    } else if (lanMode === 'client') {
-      const serverIp = dbGet("SELECT value FROM settings WHERE key = 'lan_server_ip'")?.value
-      const secret = dbGet("SELECT value FROM settings WHERE key = 'lan_secret'")?.value
-      if (serverIp) {
-        lanSync.startClient(serverIp, lanPort, secret, { dbAll, dbGet, dbRun, saveDB, uuid })
-        appLog('info', 'lan-sync', `Auto-connected to server at ${serverIp}:${lanPort}`)
-      }
+  // Allow splash to be dragged via IPC
+  const splashMoveHandler = (_e, dx, dy) => {
+    if (splashWindow && !splashWindow.isDestroyed()) {
+      const [x, y] = splashWindow.getPosition()
+      splashWindow.setPosition(x + dx, y + dy)
     }
-  } catch (e) { appLog('error', 'lan-sync', 'LAN sync startup error', e.message) }
+  }
+  ipcMain.on('splash:move', splashMoveHandler)
 
-  lanSync.onDataChanged(() => {
-    const windows = [mainWindow, customerWindow]
-    for (const win of windows) {
-      if (win && !win.isDestroyed()) {
-        win.webContents.send('lan:data-changed')
-      }
-    }
+  await new Promise(resolve => {
+    splashWindow.webContents.on('did-finish-load', () => {
+      try { splashSend('splash:version', require('./package.json').version || '1.0.0') } catch (_) {}
+      resolve()
+    })
   })
 
-  // Supabase cloud pull — only on server or standalone (not client registers)
-  // Server pulls from Supabase, then LAN clients pull from server
+  const closeSplash = () => {
+    if (splashWindow && !splashWindow.isDestroyed()) splashWindow.close()
+    splashWindow = null
+    ipcMain.removeListener('splash:move', splashMoveHandler)
+  }
+  ipcMain.on('splash:close', () => { closeSplash(); app.quit() })
+
   try {
-    const currentLanMode = dbGet("SELECT value FROM settings WHERE key = 'lan_mode'")?.value
-    if (currentLanMode !== 'client') {
-      const supaUrl = dbGet("SELECT value FROM settings WHERE key = 'supabase_url'")?.value
-      const supaKey = dbGet("SELECT value FROM settings WHERE key = 'supabase_anon_key'")?.value
-      if (supaUrl && supaKey) {
-        appLog('info', 'supabase', `Cloud sync enabled (mode: ${currentLanMode || 'standalone'})`)
+    splashSend('splash:status', 'Initialising database...', 15)
+    await initDatabase()
+
+    splashSend('splash:status', 'Setting up handlers...', 40)
+    setupIPC()
+
+    splashSend('splash:status', 'Starting network...', 65)
+    try {
+      const lanMode = dbGet("SELECT value FROM settings WHERE key = 'lan_mode'")?.value
+      const lanPort = parseInt(dbGet("SELECT value FROM settings WHERE key = 'lan_port'")?.value || '5555')
+      if (lanMode === 'server') {
+        lanSync.startServer(lanPort, { dbAll, dbGet, dbRun, saveDB, uuid })
+        appLog('info', 'lan-sync', 'Auto-started LAN server on port ' + lanPort)
+      } else if (lanMode === 'client') {
+        const serverIp = dbGet("SELECT value FROM settings WHERE key = 'lan_server_ip'")?.value
+        const secret = dbGet("SELECT value FROM settings WHERE key = 'lan_secret'")?.value
+        if (serverIp) {
+          lanSync.startClient(serverIp, lanPort, secret, { dbAll, dbGet, dbRun, saveDB, uuid })
+          appLog('info', 'lan-sync', `Auto-connected to server at ${serverIp}:${lanPort}`)
+        }
       }
+    } catch (e) { appLog('error', 'lan-sync', 'LAN sync startup error', e.message) }
+
+    lanSync.onDataChanged(() => {
+      for (const win of [mainWindow, customerWindow]) {
+        if (win && !win.isDestroyed()) win.webContents.send('lan:data-changed')
+      }
+    })
+
+    try {
+      const currentLanMode = dbGet("SELECT value FROM settings WHERE key = 'lan_mode'")?.value
+      if (currentLanMode !== 'client') {
+        const supaUrl = dbGet("SELECT value FROM settings WHERE key = 'supabase_url'")?.value
+        const supaKey = dbGet("SELECT value FROM settings WHERE key = 'supabase_anon_key'")?.value
+        if (supaUrl && supaKey) appLog('info', 'supabase', `Cloud sync enabled (mode: ${currentLanMode || 'standalone'})`)
+      }
+    } catch (e) { appLog('error', 'supabase', 'Supabase config check failed', e.message) }
+
+    splashSend('splash:status', 'Loading register...', 90)
+    createWindow()
+
+    // Close splash once main window is ready
+    const showMain = () => {
+      setTimeout(() => {
+        closeSplash()
+        if (mainWindow && !mainWindow.isDestroyed()) mainWindow.show()
+      }, 300)
     }
-  } catch (e) { appLog('error', 'supabase', 'Supabase config check failed', e.message) }
+    if (mainWindow.webContents.isLoading()) {
+      mainWindow.webContents.on('did-finish-load', showMain)
+    } else {
+      showMain()
+    }
+
+    // Fallback: close splash after 8s even if main window is slow
+    setTimeout(() => {
+      if (splashWindow && !splashWindow.isDestroyed()) {
+        closeSplash()
+        if (mainWindow && !mainWindow.isDestroyed()) mainWindow.show()
+      }
+    }, 8000)
+
+    // Auto-open customer display if a second monitor is available
+    const { screen } = require('electron')
+    if (screen.getAllDisplays().length > 1) createCustomerWindow()
+
+  } catch (err) {
+    const msg = err.message || String(err)
+    appLog('fatal', 'startup', 'Startup failed', msg)
+    splashSend('splash:error', `Startup failed: ${msg}`)
+    // Keep splash open for 10s so user can read the error, then quit
+    setTimeout(() => { closeSplash(); app.quit() }, 10000)
+  }
 })
 
 app.on('window-all-closed', () => {
@@ -1560,10 +1661,14 @@ function setupIPC() {
     if (opts.status) { where.push(`t.status = ?${n}`); params.push(opts.status); n++ }
     if (opts.staffId) { where.push(`t.staff_id = ?${n}`); params.push(opts.staffId); n++ }
     return dbAll(`
-      SELECT t.*, s.name as staff_name, COUNT(ti.id) as item_count
+      SELECT t.*, s.name as staff_name, COUNT(DISTINCT ti.id) as item_count,
+        GROUP_CONCAT(DISTINCT p.method) as payment_methods,
+        GROUP_CONCAT(DISTINCT p.amount) as payment_amounts,
+        GROUP_CONCAT(DISTINCT ti.name) as item_names
       FROM transactions t
       LEFT JOIN staff s ON s.id = t.staff_id
       LEFT JOIN transaction_items ti ON ti.transaction_id = t.id
+      LEFT JOIN payments p ON p.transaction_id = t.id
       WHERE ${where.join(' AND ')}
       GROUP BY t.id
       ORDER BY t.created_at DESC
@@ -1962,6 +2067,42 @@ function setupIPC() {
     }
   })
 
+  ipcMain.handle('db:reports:weeklySummary', (_e, weekStartDate) => {
+    const ws = weekStartDate || (() => {
+      const d = new Date(); d.setDate(d.getDate() - d.getDay() + 1)
+      return d.toISOString().slice(0, 10)
+    })()
+    const days = []
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(ws + 'T00:00:00')
+      d.setDate(d.getDate() + i)
+      const ds = d.toISOString().slice(0, 10)
+      const dayName = d.toLocaleDateString('en-AU', { weekday: 'short' })
+      const summary = dbGet(`
+        SELECT COUNT(*) as txn_count, COALESCE(SUM(total),0) as total_sales,
+          COALESCE(SUM(tax),0) as total_tax, COALESCE(SUM(discount),0) as total_discounts
+        FROM transactions WHERE status='completed' AND date(created_at)=?1
+      `, [ds])
+      const methods = dbAll(`
+        SELECT p.method, COALESCE(SUM(p.amount),0) as total
+        FROM payments p JOIN transactions t ON t.id=p.transaction_id
+        WHERE t.status='completed' AND date(t.created_at)=?1 GROUP BY p.method
+      `, [ds])
+      const cash = methods.find(m => m.method === 'cash')?.total || 0
+      const card = methods.reduce((s, m) => m.method !== 'cash' ? s + m.total : s, 0)
+      days.push({ date: ds, dayName, ...summary, cash, card, methods })
+    }
+    const totals = {
+      sales: days.reduce((s, d) => s + d.total_sales, 0),
+      txns: days.reduce((s, d) => s + d.txn_count, 0),
+      tax: days.reduce((s, d) => s + d.total_tax, 0),
+      discounts: days.reduce((s, d) => s + d.total_discounts, 0),
+      cash: days.reduce((s, d) => s + d.cash, 0),
+      card: days.reduce((s, d) => s + d.card, 0),
+    }
+    return { weekStart: ws, days, totals }
+  })
+
   ipcMain.handle('db:reports:topProducts', (_e, date) => {
     return dbAll(`
       SELECT
@@ -2320,6 +2461,9 @@ function setupIPC() {
   const SCANNER_BRIDGE_EXE = path.join(__dirname, 'scanner-bridge.exe')
   let scannerProc = null
   let scannerLastClaimFailLog = 0  // throttle "claim_failed" log spam
+  let scannerFatalStop = false     // true when OPOS ProgID not registered — no point retrying
+  let scannerRetryCount = 0
+  const SCANNER_MAX_RETRIES = 3
 
   function startScannerListener () {
     if (!isWin) return
@@ -2359,8 +2503,18 @@ function setupIPC() {
     scannerProc.on('exit', code => {
       scannerProc = null
       if (appShuttingDown) return
-      appLog('warn', 'scanner', `Listener exited (code=${code}) -- restarting in 5s`)
-      setTimeout(() => { if (!appShuttingDown) startScannerListener() }, 5000)
+      if (scannerFatalStop) {
+        appLog('info', 'scanner', 'OPOS scanner not available on this system — stopped retrying')
+        return
+      }
+      scannerRetryCount++
+      if (scannerRetryCount > SCANNER_MAX_RETRIES) {
+        appLog('warn', 'scanner', `Listener failed ${scannerRetryCount} times — stopped retrying (use Hardware tab to restart)`)
+        return
+      }
+      const delay = Math.min(5000 * Math.pow(2, scannerRetryCount - 1), 60000)
+      appLog('warn', 'scanner', `Listener exited (code=${code}) -- retry ${scannerRetryCount}/${SCANNER_MAX_RETRIES} in ${delay / 1000}s`)
+      setTimeout(() => { if (!appShuttingDown) startScannerListener() }, delay)
     })
   }
 
@@ -2372,6 +2526,7 @@ function setupIPC() {
       case 'opened':
         appLog('info', 'scanner', `Scanner CLAIMED — ready to scan (device='${msg.device}') props=${JSON.stringify(msg.props || {})}`)
         scannerLastClaimFailLog = 0
+        scannerRetryCount = 0
         if (mainWindow && !mainWindow.isDestroyed()) {
           mainWindow.webContents.send('scanner:status', { connected: true, device: msg.device })
         }
@@ -2407,6 +2562,7 @@ function setupIPC() {
         break
       case 'fatal':
         appLog('error', 'scanner', `Listener fatal: ${msg.message}`)
+        if (msg.message && msg.message.includes('not registered')) scannerFatalStop = true
         break
       case 'error':
       case 'poll_error':
@@ -4010,7 +4166,9 @@ function setupIPC() {
   loadSavedHardwareConfig()
   // Note: printer queue health is verified inside detectPrinter() during probeHardware()
 
-  probeHardware().then(async r => {
+  // Delay hardware probe so the UI is fully interactive before heavy WMI/serial probing
+  setTimeout(() => probeHardware().then(async r => {
+    if (hwPrinter || hwScale) initialProbeFoundHardware = true
     if (hwPrinter) appLog('info', 'hardware', `Printer: ${hwPrinter.name} (${hwPrinter.interface})`)
     if (hwScale) appLog('info', 'hardware', `Scale: ${hwScale.vendor || hwScale.product}`)
     startScalePolling()
@@ -4028,20 +4186,19 @@ function setupIPC() {
         mainWindow.webContents.send('hardware:issues', critical)
       }
     } catch (e) { appLog('warn', 'hardware', 'Environment diagnostic failed', e.message) }
-  }).catch(e => appLog('error', 'hardware', 'Auto-probe failed', e.message))
+  }).catch(e => appLog('error', 'hardware', 'Auto-probe failed', e.message)), 8000)
 
-  // Auto-reprobe every 30s — also checks printer queue health
+  // Auto-reprobe every 120s — also checks printer queue health
+  // Skips entirely when no hardware was found on initial probe (no point hammering WMI)
+  let initialProbeFoundHardware = false
   setInterval(async () => {
     try {
+      if (!initialProbeFoundHardware && !hwPrinter && !hwScale) return
       const hadPrinter = !!hwPrinter
-      // Scale "working" = JS port open, Python bridge running, or stream active
       const scaleWorking = (hwScalePort?.isOpen && scaleErrorCount < 10) || !!pythonScaleProc
       const scaleHealthy = scaleWorking || !hwScale
-      // Skip the entire reprobe when both pieces are already working. The probe path
-      // hits WMI/Get-Printer/Resume which can take many seconds on slow Windows boxes.
       if (hwPrinter && scaleHealthy) return
       if (scaleWorking) {
-        // Only reprobe printer — don't touch scale
         const devices = enumerateDevices()
         const printer = detectPrinter(devices)
         if (!printer?.needsSetup) hwPrinter = printer
@@ -4055,13 +4212,12 @@ function setupIPC() {
           startScalePolling()
         }
       }
-      // Clear any stuck print jobs on each reprobe (detectPrinter handles full repair)
       if (isWin && hwPrinter?.name && hwPrinter.interface === 'windows') {
         const qs = getQueueStatus(hwPrinter.name)
         if (qs && (qs.JobCount || 0) > 0) clearPrinterQueue(hwPrinter.name)
       }
     } catch (_) {}
-  }, 30000)
+  }, 120000)
 
   // ── Continuous scale weight reading ──────────────────────────────────────
   let scalePollingTimer = null
@@ -4921,11 +5077,13 @@ function setupIPC() {
     }
   } catch (_) {}
 
-  // Start the OPOS scanner listener — retries automatically if PTPOS holds the device
-  try { startScannerListener() } catch (e) { appLog('warn', 'scanner', `Failed to start listener: ${e.message}`) }
+  // Start the OPOS scanner listener — deferred 10s so it doesn't compete with UI startup
+  setTimeout(() => {
+    try { startScannerListener() } catch (e) { appLog('warn', 'scanner', `Failed to start listener: ${e.message}`) }
+  }, 10000)
 
   // Expose IPC controls for the scanner listener (used by Hardware tab / debug)
-  ipcMain.handle('hardware:scannerRestart', () => { stopScannerListener(); startScannerListener(); return { ok: true } })
+  ipcMain.handle('hardware:scannerRestart', () => { stopScannerListener(); scannerFatalStop = false; scannerRetryCount = 0; startScannerListener(); return { ok: true } })
   ipcMain.handle('hardware:scannerTest', () => oposCall('scanner-test', { deviceName: oposScannerName, timeout: 5000 }))
 }
 
