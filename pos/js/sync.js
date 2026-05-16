@@ -303,7 +303,7 @@ export async function pushKeyboard() {
     price: b.price || 0,
     image: b.image || null,
     color: b.color || '#fff',
-    bg_color: b.bg_color || '#1B4332',
+    bg_color: b.bg_color || '#1a3d2a',
     parent_id: b.parent_id || null,
     category_filter: b.category_filter || null,
     alpha_range: b.alpha_range || null,

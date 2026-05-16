@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>MCpos — Admin</title>
+  <title>Tillaroo — Admin</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
 
     :root {
-      --green:      #10b981;
-      --green-dark: #059669;
-      --green-glow: rgba(16,185,129,.15);
+      --green:      #4fbd77;
+      --green-dark: #3a9c5e;
+      --green-glow: rgba(79,189,119,.15);
       --red:        #ef4444;
       --blue:       #3b82f6;
       --amber:      #f59e0b;
@@ -222,7 +222,7 @@
       font-weight: 600;
       display: inline-block;
     }
-    .badge-green { background: rgba(16,185,129,0.12); color: var(--green); }
+    .badge-green { background: rgba(79,189,119,0.12); color: var(--green); }
     .badge-amber { background: rgba(245,158,11,0.12); color: var(--amber); }
     .badge-red   { background: rgba(239,68,68,0.12); color: var(--red); }
     .badge-blue  { background: rgba(59,130,246,0.12); color: var(--blue); }
@@ -241,7 +241,7 @@
       gap: 6px;
     }
     .btn-green { background: var(--green); color: #000; }
-    .btn-green:hover { background: var(--green-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(16,185,129,.3); }
+    .btn-green:hover { background: var(--green-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,189,119,.3); }
     .btn-blue  { background: var(--blue); color: #fff; }
     .btn-blue:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,.3); }
     .btn-outline { background: var(--surface2); border: 1px solid var(--border); color: var(--text); }
@@ -297,8 +297,8 @@
       cursor: pointer;
       transition: all 0.2s;
     }
-    .import-zone:hover { border-color: var(--green); background: rgba(16,185,129,.03); }
-    .import-zone.dragover { border-color: var(--green); background: rgba(16,185,129,0.05); }
+    .import-zone:hover { border-color: var(--green); background: rgba(79,189,119,.03); }
+    .import-zone.dragover { border-color: var(--green); background: rgba(79,189,119,0.05); }
     .import-zone p { color: var(--text-dim); margin-top: 8px; font-size: 14px; }
 
     .hidden { display: none !important; }
@@ -537,7 +537,7 @@
   <aside class="sidebar">
     <div class="sidebar-brand">
       <div class="brand-dot"></div>
-      <span>MCpos</span>
+      <span>Tillaroo</span>
       <small id="modeBadge">Admin</small>
     </div>
     <div style="padding:8px 12px;border-bottom:1px solid var(--border)">
@@ -746,7 +746,7 @@
           <div id="catEditArea" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
             <div class="form-row">
               <div class="form-field"><label>Name</label><input type="text" id="catName"></div>
-              <div class="form-field" style="flex:0 0 100px"><label>Colour</label><input type="color" id="catColour" value="#10b981"></div>
+              <div class="form-field" style="flex:0 0 100px"><label>Colour</label><input type="color" id="catColour" value="#4fbd77"></div>
               <div class="form-field" style="flex:0 0 100px"><label>Sort Order</label><input type="number" id="catSort" value="0" min="0"></div>
               <button class="btn btn-green" id="saveCatBtn" style="height:42px">Save</button>
               <button class="btn btn-outline" id="cancelCatBtn" style="height:42px">Cancel</button>
@@ -1538,7 +1538,7 @@
 
         <!-- Initial setup: two big buttons -->
         <div id="lanSetupButtons" style="display:flex;gap:16px;margin-bottom:16px;">
-          <button class="btn" id="lanBecomeServer" style="flex:1;padding:24px 16px;background:rgba(16,185,129,0.1);border:2px solid var(--green);border-radius:12px;cursor:pointer;text-align:center;">
+          <button class="btn" id="lanBecomeServer" style="flex:1;padding:24px 16px;background:rgba(79,189,119,0.1);border:2px solid var(--green);border-radius:12px;cursor:pointer;text-align:center;">
             <div style="font-size:32px;margin-bottom:8px;">🖥️</div>
             <div style="font-size:15px;font-weight:700;color:var(--green);margin-bottom:4px;">This is the SERVER</div>
             <div style="font-size:12px;color:var(--text-dim);">The main PC with the master database. Products &amp; settings live here.</div>
@@ -1552,7 +1552,7 @@
 
         <!-- Server info (shown when mode=server) -->
         <div id="lanServerInfo" style="display:none;">
-          <div style="padding:12px 16px;border-radius:8px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);margin-bottom:12px;">
+          <div style="padding:12px 16px;border-radius:8px;background:rgba(79,189,119,0.08);border:1px solid rgba(79,189,119,0.2);margin-bottom:12px;">
             <div style="font-size:13px;color:var(--green);font-weight:600;margin-bottom:4px;">Server Running</div>
             <div style="font-size:12px;color:var(--text-dim);">Registers on this network will auto-discover and connect. No setup needed on registers.</div>
           </div>
@@ -2045,7 +2045,7 @@
         const payColors = { cash: 'var(--green)', card: 'var(--blue)', eftpos: 'var(--blue)', account: 'var(--amber)' }
         $('#paymentBreakdown').innerHTML = methods.map(m => {
           const pct = ((m.total / totalPay) * 100).toFixed(1)
-          const barColor = payColors[m.method] || '#10b981'
+          const barColor = payColors[m.method] || '#4fbd77'
           return `<div style="margin-bottom:10px">
             <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px">
               <span style="text-transform:capitalize">${esc(m.method)}</span>
@@ -2296,7 +2296,7 @@
 
       $('#catTable').innerHTML = cats.map(c => `<tr>
         <td>${esc(c.name)}</td>
-        <td><span style="display:inline-block;width:20px;height:20px;border-radius:4px;background:${esc(c.colour || '#10b981')};vertical-align:middle"></span> ${esc(c.colour || '#10b981')}</td>
+        <td><span style="display:inline-block;width:20px;height:20px;border-radius:4px;background:${esc(c.colour || '#4fbd77')};vertical-align:middle"></span> ${esc(c.colour || '#4fbd77')}</td>
         <td>${c.sort_order || 0}</td>
         <td>${countMap[c.id] || 0}</td>
         <td><button class="btn btn-outline" style="padding:3px 10px;font-size:11px" data-edit-cat="${esc(c.id)}">Edit</button></td>
@@ -2319,12 +2319,12 @@
       if (cat) {
         $('#catEditId').value = cat.id
         $('#catName').value = cat.name
-        $('#catColour').value = cat.colour || '#10b981'
+        $('#catColour').value = cat.colour || '#4fbd77'
         $('#catSort').value = cat.sort_order || 0
       } else {
         $('#catEditId').value = ''
         $('#catName').value = ''
-        $('#catColour').value = '#10b981'
+        $('#catColour').value = '#4fbd77'
         $('#catSort').value = productCategories.length
       }
       $('#catEditArea').style.display = 'block'
@@ -3226,14 +3226,14 @@
         $('#lanPort').value = s.lan_port || '5555'
         const clients = status.clients?.length || 0
         $('#lanServerStatus').innerHTML = status.connected
-          ? `<span style="color:#4a4;">${clients} register(s) connected</span>`
+          ? `<span style="color:#4fbd77;">${clients} register(s) connected</span>`
           : `<span style="color:${status.error ? '#a44' : 'var(--text-dim)'};">${status.error ? esc(status.error) : 'Waiting for registers...'}</span>`
       } else if (mode === 'client') {
         $('#lanServerIp').value = s.lan_server_ip || ''
         $('#lanClientPort').value = s.lan_port || '5555'
         if (status.connected) {
           $('#lanClientConnMsg').textContent = 'Connected & Syncing'
-          $('#lanClientStatus').innerHTML = `<span style="color:#4a4;">Last sync: ${status.lastPull ? new Date(status.lastPull).toLocaleTimeString('en-AU') : 'just now'}</span>`
+          $('#lanClientStatus').innerHTML = `<span style="color:#4fbd77;">Last sync: ${status.lastPull ? new Date(status.lastPull).toLocaleTimeString('en-AU') : 'just now'}</span>`
         } else {
           $('#lanClientConnMsg').textContent = 'Reconnecting...'
           $('#lanClientStatus').innerHTML = `<span style="color:#a44;">${status.error ? esc(status.error) : 'Trying to reach server...'}</span>`
@@ -3287,13 +3287,13 @@
       if (mode === 'server') {
         icon.textContent = '🖥'
         icon.style.borderColor = 'var(--green)'
-        icon.style.background = 'rgba(16,185,129,0.1)'
+        icon.style.background = 'rgba(79,189,119,0.1)'
         title.textContent = 'Main Server (Host)'
         title.style.color = 'var(--green)'
         desc.textContent = status?.connected
           ? `This PC hosts the database. ${status.clients?.length || 0} client register(s) connected.`
           : 'This PC is configured as the main server. Start the server to allow clients to connect.'
-        banner.style.borderColor = 'rgba(16,185,129,0.3)'
+        banner.style.borderColor = 'rgba(79,189,119,0.3)'
         diagramSection.style.display = ''
         renderLanDiagram('server', status)
       } else if (mode === 'client') {
@@ -3367,30 +3367,30 @@
           </div>
 
           <!-- Cloud ↔ Server link -->
-          <div class="net-line ${supaConnected ? 'active' : ''}" style="height:44px;background:${supaConnected ? 'linear-gradient(to bottom, #a855f7, #10b981)' : '#333'};">
+          <div class="net-line ${supaConnected ? 'active' : ''}" style="height:44px;background:${supaConnected ? 'linear-gradient(to bottom, #a855f7, #4fbd77)' : '#333'};">
             ${supaConnected ? `
               <div class="net-pulse down" style="background:#a855f7;box-shadow:0 0 6px #a855f7;animation-delay:0s;"></div>
               <div class="net-pulse down" style="background:#c084fc;box-shadow:0 0 6px #c084fc;animation-delay:0.7s;"></div>
-              <div class="net-pulse up" style="background:#10b981;box-shadow:0 0 6px #10b981;animation-delay:0.35s;"></div>
+              <div class="net-pulse up" style="background:#4fbd77;box-shadow:0 0 6px #4fbd77;animation-delay:0.35s;"></div>
             ` : `<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:16px;font-weight:900;color:#ef4444;text-shadow:0 0 6px #ef4444;">✕</div>`}
           </div>
           <div style="font-size:10px;color:${supaConnected ? '#a855f7' : '#ef4444'};background:var(--surface);padding:3px 12px;border-radius:10px;border:1px solid ${supaConnected ? 'rgba(168,85,247,0.3)' : 'rgba(239,68,68,0.3)'};margin:4px 0;font-weight:600;">${supaConnected ? '⚡ Push / Pull' : '✕ No Internet'}</div>
-          <div class="net-line ${supaConnected ? 'active' : ''}" style="height:20px;background:${supaConnected ? 'linear-gradient(to bottom, #10b981, #10b981)' : '#333'};">
-            ${supaConnected ? '<div class="net-pulse down" style="background:#34d399;box-shadow:0 0 4px #34d399;animation-delay:0.2s;"></div>' : ''}
+          <div class="net-line ${supaConnected ? 'active' : ''}" style="height:20px;background:${supaConnected ? 'linear-gradient(to bottom, #4fbd77, #4fbd77)' : '#333'};">
+            ${supaConnected ? '<div class="net-pulse down" style="background:#6ed99b;box-shadow:0 0 4px #6ed99b;animation-delay:0.2s;"></div>' : ''}
           </div>
 
           <!-- Main Server -->
           <div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin:4px 0;">
-            <div class="net-node active" style="width:68px;height:56px;background:rgba(16,185,129,0.12);border:2.5px solid var(--green);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--green);">🖥️</div>
+            <div class="net-node active" style="width:68px;height:56px;background:rgba(79,189,119,0.12);border:2.5px solid var(--green);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--green);">🖥️</div>
             <span style="font-size:13px;font-weight:700;color:var(--green);">${thisIsServer ? '⬤ THIS PC (Server)' : 'Main Server'}</span>
             <span style="font-size:10px;color:var(--text-dim);">${esc(serverIp)}:${status?.port || '5555'}</span>
-            <span style="font-size:10px;padding:3px 10px;border-radius:8px;background:rgba(16,185,129,0.15);color:var(--green);font-weight:700;">Master Database</span>
+            <span style="font-size:10px;padding:3px 10px;border-radius:8px;background:rgba(79,189,119,0.15);color:var(--green);font-weight:700;">Master Database</span>
           </div>
 
           <!-- Server ↔ Registers link -->
-          <div class="net-line ${lanActive ? 'active' : ''}" style="height:44px;background:${lanActive ? 'linear-gradient(to bottom, #10b981, #3b82f6)' : '#333'};">
+          <div class="net-line ${lanActive ? 'active' : ''}" style="height:44px;background:${lanActive ? 'linear-gradient(to bottom, #4fbd77, #3b82f6)' : '#333'};">
             ${lanActive ? `
-              <div class="net-pulse down" style="background:#10b981;box-shadow:0 0 6px #10b981;animation-delay:0.15s;"></div>
+              <div class="net-pulse down" style="background:#4fbd77;box-shadow:0 0 6px #4fbd77;animation-delay:0.15s;"></div>
               <div class="net-pulse down" style="background:#6ee7b7;box-shadow:0 0 6px #6ee7b7;animation-delay:0.85s;"></div>
               <div class="net-pulse up" style="background:#3b82f6;box-shadow:0 0 6px #3b82f6;animation-delay:0.5s;"></div>
             ` : `<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:16px;font-weight:900;color:#ef4444;text-shadow:0 0 6px #ef4444;">✕</div>`}
@@ -3514,7 +3514,7 @@
         if (r.recommendations && r.recommendations.length > 0) {
           const hasIssue = r.recommendations.some(r => !r.includes('passed') && !r.includes('Found') && !r.includes('Self-test passed'))
           recEl.innerHTML = `
-            <div style="padding:14px 16px;border-radius:var(--radius);border:1px solid ${hasIssue ? 'rgba(245,158,11,0.3)' : 'rgba(16,185,129,0.3)'};background:${hasIssue ? 'rgba(245,158,11,0.06)' : 'rgba(16,185,129,0.06)'};">
+            <div style="padding:14px 16px;border-radius:var(--radius);border:1px solid ${hasIssue ? 'rgba(245,158,11,0.3)' : 'rgba(79,189,119,0.3)'};background:${hasIssue ? 'rgba(245,158,11,0.06)' : 'rgba(79,189,119,0.06)'};">
               <div style="font-weight:700;font-size:14px;margin-bottom:8px;color:${hasIssue ? 'var(--amber)' : 'var(--green)'};">${hasIssue ? '⚠ Issues Found' : '✓ Network Healthy'}</div>
               ${r.recommendations.map(rec => {
                 const isGood = rec.includes('passed') || rec.includes('Self-test passed') || rec.includes('looks healthy')
@@ -3533,7 +3533,7 @@
         const allInterfaces = [...ipv4External, ...ipv4Internal]
         ifEl.innerHTML = allInterfaces.map(iface => {
           const isMain = !iface.internal && iface.family === 'IPv4'
-          const borderColor = isMain ? 'rgba(16,185,129,0.3)' : 'var(--border)'
+          const borderColor = isMain ? 'rgba(79,189,119,0.3)' : 'var(--border)'
           const label = iface.internal ? 'Loopback' : 'Active'
           return `<div class="stat-card" style="border-color:${borderColor}">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
@@ -3568,7 +3568,7 @@
         const discEl = $('#netDiagDiscovered')
         if (r.discoveredServers && r.discoveredServers.length > 0) {
           discEl.innerHTML = r.discoveredServers.map(s =>
-            `<div style="padding:8px 12px;background:var(--surface);border:1px solid rgba(16,185,129,0.2);border-radius:6px;margin-bottom:6px;display:flex;align-items:center;gap:10px">
+            `<div style="padding:8px 12px;background:var(--surface);border:1px solid rgba(79,189,119,0.2);border-radius:6px;margin-bottom:6px;display:flex;align-items:center;gap:10px">
               <span style="color:var(--green);font-size:16px">🖥️</span>
               <div>
                 <div style="font-weight:600;font-size:13px">${esc(s.ip)}:${s.port}</div>
@@ -3587,7 +3587,7 @@
         if (sub.reachable && sub.reachable.length > 0) {
           subHtml += sub.reachable.map(h => {
             const isPOS = h.isPosServer
-            return `<div style="padding:8px 12px;background:var(--surface);border:1px solid ${isPOS ? 'rgba(16,185,129,0.25)' : 'var(--border)'};border-radius:6px;margin-bottom:6px;display:flex;align-items:center;gap:10px">
+            return `<div style="padding:8px 12px;background:var(--surface);border:1px solid ${isPOS ? 'rgba(79,189,119,0.25)' : 'var(--border)'};border-radius:6px;margin-bottom:6px;display:flex;align-items:center;gap:10px">
               <div style="width:10px;height:10px;border-radius:50%;background:${isPOS ? 'var(--green)' : 'var(--amber)'};flex-shrink:0"></div>
               <div style="flex:1">
                 <span style="font-weight:600;font-size:13px">${esc(h.ip)}:${h.port}</span>
@@ -3726,7 +3726,7 @@
       $('#wkDaysTable').innerHTML = r.days.map(d => {
         const dt = new Date(d.date + 'T00:00:00')
         const isToday = d.date === new Date().toISOString().slice(0, 10)
-        return `<tr style="${isToday ? 'background:rgba(16,185,129,0.08)' : ''}">
+        return `<tr style="${isToday ? 'background:rgba(79,189,119,0.08)' : ''}">
           <td style="font-weight:600">${d.dayName}</td>
           <td>${dt.toLocaleDateString('en-AU')}</td>
           <td style="text-align:right;font-weight:600;color:${d.total_sales > 0 ? 'var(--green)' : 'var(--text-dim)'}">${money(d.total_sales)}</td>
@@ -3774,7 +3774,7 @@
         .stat-card{border:1px solid #ddd;padding:12px;border-radius:6px}
         .stat-label{font-size:11px;color:#888;margin-bottom:2px}
         .stat-value{font-size:22px;font-weight:700}
-        .stat-value.green{color:#059669}
+        .stat-value.green{color:#3a9c5e}
         .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px}
         .section{border:1px solid #ddd;border-radius:6px;padding:14px;margin-bottom:12px}
         h1{font-size:20px;margin-bottom:4px}h2{font-size:14px;color:#666;margin-bottom:8px}
@@ -4551,8 +4551,8 @@
         if (!valid) break
       }
 
-      const borderColor = valid ? 'rgba(16,185,129,.8)' : 'rgba(239,68,68,.8)'
-      const bgColor = valid ? 'rgba(16,185,129,.15)' : 'rgba(239,68,68,.1)'
+      const borderColor = valid ? 'rgba(79,189,119,.8)' : 'rgba(239,68,68,.8)'
+      const bgColor = valid ? 'rgba(79,189,119,.15)' : 'rgba(239,68,68,.1)'
 
       for (const btn of selected) {
         const nr = (btn.grid_row || 0) + dr, nc = (btn.grid_col || 0) + dc
@@ -4674,8 +4674,8 @@
         const gapPx = 3
         const cellW = (rect.width - (gridCols - 1) * gapPx) / gridCols
         const cellH = (rect.height - (gridRows - 1) * gapPx) / gridRows
-        const borderColor = valid ? 'rgba(16,185,129,.8)' : 'rgba(239,68,68,.8)'
-        const bgColor = valid ? 'rgba(16,185,129,.15)' : 'rgba(239,68,68,.1)'
+        const borderColor = valid ? 'rgba(79,189,119,.8)' : 'rgba(239,68,68,.8)'
+        const bgColor = valid ? 'rgba(79,189,119,.15)' : 'rgba(239,68,68,.1)'
         const ghost = document.createElement('div')
         ghost.style.cssText = `position:absolute;pointer-events:none;z-index:10;border:2px dashed ${borderColor};background:${bgColor};border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${borderColor};opacity:.9`
         ghost.style.left = (nc * (cellW + gapPx)) + 'px'
@@ -5581,10 +5581,10 @@
       { type: 'unit',         x: 5,  y: 90, w: 90, h: 10, size: 7,  bold: false, align: 'center', font: 'Arial', visible: false },
       { type: 'category',     x: 5,  y: 90, w: 90, h: 10, size: 7,  bold: false, align: 'center', font: 'Arial', visible: false },
     ]
-    let tagLayout = JSON.parse(localStorage.getItem('crisp_tag_layout') || 'null') || JSON.parse(JSON.stringify(DEFAULT_TAG_LAYOUT))
+    let tagLayout = JSON.parse(localStorage.getItem('tillaroo_tag_layout') || 'null') || JSON.parse(JSON.stringify(DEFAULT_TAG_LAYOUT))
     let selectedTagEl = null
 
-    function saveTagLayout () { localStorage.setItem('crisp_tag_layout', JSON.stringify(tagLayout)) }
+    function saveTagLayout () { localStorage.setItem('tillaroo_tag_layout', JSON.stringify(tagLayout)) }
 
     const ELEMENT_LABELS = { name: 'Product Name', price: 'Price', barcode: 'Barcode', barcode_text: 'Barcode #', unit: 'Unit', category: 'Category' }
     const SAMPLE_PRODUCT = { name: 'Strawberries', price: 4.99, barcode: '9310015241234', plu: '', unit: 'punnet', category_name: 'Fruit' }
@@ -6004,7 +6004,7 @@
 
     // -- Mode Switching (Register vs Admin) --------------------------------
 
-    let currentMode = localStorage.getItem('crisp_admin_mode') || 'admin'
+    let currentMode = localStorage.getItem('tillaroo_admin_mode') || 'admin'
 
     // Also load from DB (survives localStorage clears)
     window.pos.getSetting('app_mode').then(v => {
@@ -6013,7 +6013,7 @@
 
     function applyMode (mode) {
       currentMode = mode
-      localStorage.setItem('crisp_admin_mode', mode)
+      localStorage.setItem('tillaroo_admin_mode', mode)
       window.pos.setSetting('app_mode', mode)
       if (mode === 'register') {
         document.body.classList.add('register-mode')
@@ -6115,7 +6115,7 @@
       el.innerHTML = data.map(d => {
         const h = Math.max(2, (d.total / maxVal) * 100)
         const isToday = d.date === new Date().toISOString().slice(0, 10)
-        return `<div title="${d.date}: ${money(d.total)} (${d.count} txns)" style="flex:1;height:${h}%;background:${isToday ? 'var(--green)' : 'rgba(16,185,129,.4)'};border-radius:2px 2px 0 0;min-width:4px;transition:height .3s"></div>`
+        return `<div title="${d.date}: ${money(d.total)} (${d.count} txns)" style="flex:1;height:${h}%;background:${isToday ? 'var(--green)' : 'rgba(79,189,119,.4)'};border-radius:2px 2px 0 0;min-width:4px;transition:height .3s"></div>`
       }).join('')
     }
 
@@ -6135,7 +6135,7 @@
         for (let h = 0; h < 24; h++) {
           const v = grid[d][h]
           const intensity = v / maxCount
-          const bg = v === 0 ? 'var(--surface2)' : `rgba(16,185,129,${0.15 + intensity * 0.85})`
+          const bg = v === 0 ? 'var(--surface2)' : `rgba(79,189,119,${0.15 + intensity * 0.85})`
           html += `<td style="padding:1px" title="${days[d]} ${h}:00 — ${v} txns"><div style="width:100%;height:18px;background:${bg};border-radius:2px"></div></td>`
         }
         html += '</tr>'
@@ -6155,7 +6155,7 @@
         return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
           <span style="width:32px;font-size:11px;font-weight:600;color:var(--text-dim);text-align:right">${days[d.day]}</span>
           <div style="flex:1;height:22px;background:var(--surface2);border-radius:4px;overflow:hidden;position:relative">
-            <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,rgba(16,185,129,.6),rgba(16,185,129,.3));border-radius:4px;transition:width .5s"></div>
+            <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,rgba(79,189,119,.6),rgba(79,189,119,.3));border-radius:4px;transition:width .5s"></div>
             <span style="position:absolute;left:8px;top:3px;font-size:11px;font-weight:600;color:var(--text)">${money(d.avgSales)}</span>
           </div>
           <span style="font-size:10px;color:var(--text-dim);min-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${tops}">${d.avgTxns?.toFixed(0) || 0} txns</span>

@@ -1,4 +1,4 @@
--- Crisp POS — Supabase (Postgres) Schema
+-- Tillaroo POS — Supabase (Postgres) Schema
 -- This is the cloud database. Registers sync their local SQLite data here.
 -- Run this in the Supabase SQL Editor after creating your project.
 
@@ -8,7 +8,7 @@ CREATE TABLE categories (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name        TEXT NOT NULL,
   sort_order  INT DEFAULT 0,
-  colour      TEXT DEFAULT '#10b981',
+  colour      TEXT DEFAULT '#4fbd77',
   active      BOOLEAN DEFAULT true,
   updated_at  TIMESTAMPTZ DEFAULT now()
 );
@@ -197,7 +197,7 @@ CREATE TABLE keyboard_buttons (
   price           NUMERIC(10,2) DEFAULT 0,
   image           TEXT,
   color           TEXT DEFAULT '#fff',
-  bg_color        TEXT DEFAULT '#1B4332',
+  bg_color        TEXT DEFAULT '#1a3d2a',
   parent_id       TEXT,
   category_filter TEXT,
   alpha_range     TEXT,

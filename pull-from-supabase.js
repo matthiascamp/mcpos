@@ -61,7 +61,7 @@ async function main() {
   for (const c of categories) {
     db.run(`INSERT OR REPLACE INTO categories (id, name, sort_order, colour, active, updated_at)
             VALUES (?1, ?2, ?3, ?4, ?5, ?6)`,
-      [c.id, c.name, c.sort_order || 0, c.colour || '#10b981', c.active ? 1 : 0,
+      [c.id, c.name, c.sort_order || 0, c.colour || '#4fbd77', c.active ? 1 : 0,
        c.updated_at || new Date().toISOString()])
   }
   console.log(`  ✓ ${categories.length} categories`)

@@ -11,8 +11,8 @@
 html,body{width:100%;height:100%;overflow:hidden}
 body{font-family:'Inter',system-ui,sans-serif;background:linear-gradient(160deg,#0f1a14 0%,#1a1d27 40%,#1a2218 100%);color:#f5f0e8;display:flex;flex-direction:column;user-select:none;-webkit-font-smoothing:antialiased}
 
-.header{padding:1.5vh 2.5vw;display:flex;align-items:center;gap:1.2vw;border-bottom:1px solid rgba(16,185,129,.15);background:rgba(0,0,0,.25);flex-shrink:0}
-.brand-circle-img{width:5.5vh;height:5.5vh;border-radius:50%;object-fit:cover;box-shadow:0 2px 12px rgba(16,185,129,.2)}
+.header{padding:1.5vh 2.5vw;display:flex;align-items:center;gap:1.2vw;border-bottom:1px solid rgba(79,189,119,.15);background:rgba(0,0,0,.25);flex-shrink:0}
+.brand-circle-img{width:5.5vh;height:5.5vh;border-radius:50%;object-fit:cover;box-shadow:0 2px 12px rgba(79,189,119,.2)}
 .store-name{font-family:'Playfair Display',serif;font-weight:700;font-size:2.8vmin;color:#f5f0e8}
 .store-sub{font-size:1.6vmin;color:rgba(245,240,232,.5);margin-top:.3vh;letter-spacing:.5px;text-transform:uppercase}
 
@@ -26,8 +26,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:linear-gradient(160deg,
 
 .deals-grid{flex:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(30vw,320px),1fr));gap:1.8vmin;align-content:center;overflow-y:auto;padding-bottom:1vh}
 
-.deal-card{background:linear-gradient(145deg,rgba(27,67,50,.45),rgba(27,67,50,.12));border:1px solid rgba(16,185,129,.2);border-radius:1.5vmin;padding:2vmin 2.5vmin;display:flex;flex-direction:column;gap:1.2vmin;position:relative;overflow:hidden}
-.deal-card::before{content:'';position:absolute;top:0;left:0;right:0;height:.5vmin;background:linear-gradient(90deg,#10b981,#f59e0b);border-radius:1.5vmin 1.5vmin 0 0;opacity:.6}
+.deal-card{background:linear-gradient(145deg,rgba(27,67,50,.45),rgba(27,67,50,.12));border:1px solid rgba(79,189,119,.2);border-radius:1.5vmin;padding:2vmin 2.5vmin;display:flex;flex-direction:column;gap:1.2vmin;position:relative;overflow:hidden}
+.deal-card::before{content:'';position:absolute;top:0;left:0;right:0;height:.5vmin;background:linear-gradient(90deg,#4fbd77,#f59e0b);border-radius:1.5vmin 1.5vmin 0 0;opacity:.6}
 .deal-card-top{display:flex;align-items:center;gap:1.5vmin}
 .deal-emoji{font-size:5.5vmin;line-height:1;flex-shrink:0}
 .deal-info{flex:1;min-width:0}
@@ -35,15 +35,15 @@ body{font-family:'Inter',system-ui,sans-serif;background:linear-gradient(160deg,
 .deal-badge{display:inline-block;padding:.4vmin 1vmin;border-radius:.6vmin;font-size:1.4vmin;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
 .badge-special{background:rgba(239,68,68,.2);color:#fca5a5;border:1px solid rgba(239,68,68,.3)}
 .badge-today{background:rgba(245,158,11,.15);color:#fcd34d;border:1px solid rgba(245,158,11,.3)}
-.badge-fresh{background:rgba(16,185,129,.15);color:#6ee7b7;border:1px solid rgba(16,185,129,.3)}
+.badge-fresh{background:rgba(79,189,119,.15);color:#6ee7b7;border:1px solid rgba(79,189,119,.3)}
 .badge-popular{background:rgba(139,92,246,.15);color:#c4b5fd;border:1px solid rgba(139,92,246,.3)}
 .deal-pricing{display:flex;align-items:baseline;gap:1.2vmin;margin-top:.5vmin}
-.deal-special-price{font-size:4vmin;font-weight:800;color:#10b981}
+.deal-special-price{font-size:4vmin;font-weight:800;color:#4fbd77}
 .deal-special-text{font-size:3vmin;font-weight:700;color:#f59e0b}
 .deal-normal-price{font-size:2.2vmin;color:rgba(245,240,232,.4);text-decoration:line-through}
 .deal-unit{font-size:1.8vmin;color:rgba(245,240,232,.5);font-weight:500}
 
-.idle-footer{display:flex;align-items:center;justify-content:space-between;padding-top:1.5vh;border-top:1px solid rgba(16,185,129,.1);margin-top:auto;flex-shrink:0}
+.idle-footer{display:flex;align-items:center;justify-content:space-between;padding-top:1.5vh;border-top:1px solid rgba(79,189,119,.1);margin-top:auto;flex-shrink:0}
 .idle-footer-left{display:flex;align-items:center;gap:1vw}
 .idle-footer-logo{width:4.5vh;height:4.5vh;border-radius:50%;object-fit:cover}
 .idle-footer-text{font-size:1.8vmin;color:rgba(245,240,232,.5)}
@@ -57,49 +57,49 @@ body{font-family:'Inter',system-ui,sans-serif;background:linear-gradient(160deg,
 .sale-view{flex:1;display:none;flex-direction:row;overflow:hidden;animation:fadeIn .3s ease;min-height:0}
 
 .sale-left{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
-.items-header{padding:1.5vh 2.5vw;font-size:2.2vmin;color:rgba(245,240,232,.5);text-transform:uppercase;letter-spacing:.5px;font-weight:700;border-bottom:1px solid rgba(16,185,129,.08);flex-shrink:0}
+.items-header{padding:1.5vh 2.5vw;font-size:2.2vmin;color:rgba(245,240,232,.5);text-transform:uppercase;letter-spacing:.5px;font-weight:700;border-bottom:1px solid rgba(79,189,119,.08);flex-shrink:0}
 .items-list{flex:1;overflow-y:auto;padding:1.5vh 2vw;min-height:0}
-.item-row{display:flex;align-items:center;padding:2vh 2.5vw;margin-bottom:1vh;border-radius:1.2vmin;background:rgba(27,67,50,.12);border:1px solid rgba(16,185,129,.06);gap:1.5vw;transition:all .2s}
+.item-row{display:flex;align-items:center;padding:2vh 2.5vw;margin-bottom:1vh;border-radius:1.2vmin;background:rgba(27,67,50,.12);border:1px solid rgba(79,189,119,.06);gap:1.5vw;transition:all .2s}
 .item-row:last-child{margin-bottom:0}
 .item-row.item-new{animation:slideIn .3s ease}
-.item-qty{background:rgba(16,185,129,.15);color:#6ee7b7;font-size:3vmin;font-weight:700;padding:1vmin 1.5vmin;border-radius:.8vmin;min-width:5vmin;text-align:center}
+.item-qty{background:rgba(79,189,119,.15);color:#6ee7b7;font-size:3vmin;font-weight:700;padding:1vmin 1.5vmin;border-radius:.8vmin;min-width:5vmin;text-align:center}
 .item-details{flex:1;min-width:0}
 .item-name{font-weight:600;font-size:3.2vmin;color:#f5f0e8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .item-unit-price{font-size:2vmin;color:rgba(245,240,232,.4);margin-top:.3vh}
-.item-price{font-weight:800;font-size:3.5vmin;color:#10b981;min-width:12vw;text-align:right}
+.item-price{font-weight:800;font-size:3.5vmin;color:#4fbd77;min-width:12vw;text-align:right}
 
-.totals-bar{padding:2.5vh 2.5vw;background:rgba(0,0,0,.4);border-top:3px solid rgba(16,185,129,.4);flex-shrink:0}
+.totals-bar{padding:2.5vh 2.5vw;background:rgba(0,0,0,.4);border-top:3px solid rgba(79,189,119,.4);flex-shrink:0}
 .total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:1vh;font-size:2.5vmin;color:rgba(245,240,232,.5)}
 .total-row:last-child{margin-bottom:0}
-.total-row.grand{font-size:4.5vmin;font-weight:800;color:#f5f0e8;margin-top:1.5vh;padding-top:1.5vh;border-top:2px solid rgba(16,185,129,.25)}
-.total-row.grand .total-amount{color:#10b981;font-family:'Playfair Display',serif;font-size:7vmin}
+.total-row.grand{font-size:4.5vmin;font-weight:800;color:#f5f0e8;margin-top:1.5vh;padding-top:1.5vh;border-top:2px solid rgba(79,189,119,.25)}
+.total-row.grand .total-amount{color:#4fbd77;font-family:'Playfair Display',serif;font-size:7vmin}
 
 /* Right sidebar — mini deals */
-.sale-right{width:22vw;max-width:360px;flex-shrink:0;display:flex;flex-direction:column;background:rgba(0,0,0,.15);border-left:1px solid rgba(16,185,129,.1);overflow:hidden}
-.sidebar-header{padding:1.8vh 1.5vw;text-align:center;border-bottom:1px solid rgba(16,185,129,.08);flex-shrink:0}
+.sale-right{width:22vw;max-width:360px;flex-shrink:0;display:flex;flex-direction:column;background:rgba(0,0,0,.15);border-left:1px solid rgba(79,189,119,.1);overflow:hidden}
+.sidebar-header{padding:1.8vh 1.5vw;text-align:center;border-bottom:1px solid rgba(79,189,119,.08);flex-shrink:0}
 .sidebar-title{font-family:'Playfair Display',serif;font-size:2.5vmin;font-weight:700;color:#f5f0e8}
 .sidebar-sub{font-size:1.4vmin;color:rgba(245,240,232,.4);margin-top:.3vh;text-transform:uppercase;letter-spacing:.3px}
 .sidebar-deals{flex:1;overflow-y:auto;padding:1.2vh 1.2vw;display:flex;flex-direction:column;gap:1vmin;min-height:0}
 
-.mini-deal{background:rgba(27,67,50,.25);border:1px solid rgba(16,185,129,.12);border-radius:1vmin;padding:1.5vmin 1.8vmin;display:flex;align-items:center;gap:1.2vmin}
+.mini-deal{background:rgba(27,67,50,.25);border:1px solid rgba(79,189,119,.12);border-radius:1vmin;padding:1.5vmin 1.8vmin;display:flex;align-items:center;gap:1.2vmin}
 .mini-deal-emoji{font-size:3.5vmin;flex-shrink:0}
 .mini-deal-info{flex:1;min-width:0}
 .mini-deal-name{font-weight:600;font-size:1.8vmin;color:#f5f0e8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mini-deal-price{font-size:2.2vmin;font-weight:700;color:#10b981;margin-top:.2vmin}
+.mini-deal-price{font-size:2.2vmin;font-weight:700;color:#4fbd77;margin-top:.2vmin}
 .mini-deal-unit{font-size:1.4vmin;color:rgba(245,240,232,.4);font-weight:400}
 .mini-deal-badge{font-size:1.2vmin;font-weight:700;text-transform:uppercase;color:#fcd34d;letter-spacing:.3px;margin-top:.3vmin}
 
-.sidebar-footer{padding:1.5vh 1.5vw;border-top:1px solid rgba(16,185,129,.08);text-align:center;flex-shrink:0}
+.sidebar-footer{padding:1.5vh 1.5vw;border-top:1px solid rgba(79,189,119,.08);text-align:center;flex-shrink:0}
 .sidebar-footer-text{font-size:1.4vmin;color:rgba(245,240,232,.3);line-height:1.5}
 
 /* ═══ Sale Complete ════════════════════════════════════════════════════════ */
 .sale-complete{flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;gap:3vmin;padding:4vh 4vw}
 .sale-complete.active{display:flex}
-.check-circle{width:14vmin;height:14vmin;border-radius:50%;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;animation:popIn .4s ease;box-shadow:0 4px 30px rgba(16,185,129,.3)}
+.check-circle{width:14vmin;height:14vmin;border-radius:50%;background:linear-gradient(135deg,#4fbd77,#3a9c5e);display:flex;align-items:center;justify-content:center;animation:popIn .4s ease;box-shadow:0 4px 30px rgba(79,189,119,.3)}
 .check-circle svg{width:7vmin;height:7vmin;stroke:#fff;stroke-width:3;fill:none}
 .thank-you{font-family:'Playfair Display',serif;font-size:6vmin;font-weight:700;color:#f5f0e8;animation:fadeIn .6s ease}
 .thank-store{font-size:2.5vmin;color:rgba(245,240,232,.5);margin-top:-.5vmin}
-.change-display{font-size:5vmin;color:#10b981;font-weight:700;margin-top:1vmin}
+.change-display{font-size:5vmin;color:#4fbd77;font-weight:700;margin-top:1vmin}
 .total-paid{font-size:3vmin;color:rgba(245,240,232,.5)}
 .goodbye{font-size:2vmin;color:rgba(245,240,232,.35);margin-top:1.5vmin}
 

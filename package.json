@@ -1,7 +1,7 @@
 {
-  "name": "crisp-pos",
+  "name": "tillaroo",
   "version": "1.0.0",
-  "description": "Crisp on Creek POS — Electron + SQLite + Supabase",
+  "description": "Tillaroo POS — Electron + SQLite + Supabase",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -22,8 +22,8 @@
     "electron-builder": "^25.1.8"
   },
   "build": {
-    "appId": "com.crisponcreek.pos",
-    "productName": "Crisp POS",
+    "appId": "com.tillaroo.pos",
+    "productName": "Tillaroo",
     "directories": {
       "output": "dist"
     },
@@ -50,11 +50,11 @@
       "icon": "build/icon.png"
     },
     "portable": {
-      "artifactName": "CrispPOS-${version}.exe"
+      "artifactName": "Tillaroo-${version}.exe"
     },
     "nsis": {
       "oneClick": true,
-      "artifactName": "CrispPOS-Setup-${version}.exe"
+      "artifactName": "Tillaroo-Setup-${version}.exe"
     },
     "extraResources": [
       {

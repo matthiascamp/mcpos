@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Crisp on Creek POS</title>
+<title>Tillaroo POS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
 <style>
@@ -11,7 +11,7 @@
   --radius-sm:8px;--radius-md:12px;--radius-lg:16px;
   --shadow-sm:0 2px 4px rgba(0,0,0,.08);--shadow-md:0 4px 12px rgba(0,0,0,.15);--shadow-lg:0 8px 24px rgba(0,0,0,.25);
   --shadow-btn:0 4px 8px rgba(0,0,0,.3),0 1px 3px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.07);
-  --green:#10b981;--green-dark:#059669;--red:#ef4444;--amber:#f59e0b;--blue:#5b8def;
+  --green:#4fbd77;--green-dark:#3a9c5e;--red:#ef4444;--amber:#f59e0b;--blue:#5b8def;
   --ease-out:cubic-bezier(.2,0,0,1);--ease-bounce:cubic-bezier(.34,1.56,.64,1);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -42,13 +42,13 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .admin-link{color:#6b7080;text-decoration:none;font-size:11px;padding:6px 12px;border:1px solid #3a3d48;border-radius:8px;min-height:32px;display:inline-flex;align-items:center;transition:all .15s}
 .admin-link:hover,.admin-link:active{color:#e0e2e8;border-color:#5b8def;background:rgba(91,141,239,.08)}
 .sync-info{display:flex;align-items:center;gap:4px;color:#6b7080;font-size:10px}
-.sync-dot{width:6px;height:6px;border-radius:50%;background:#34d399}.sync-dot.offline{background:#f87171}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:#6ed99b}.sync-dot.offline{background:#f87171}
 .status-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
 .health-dots{display:flex;gap:8px;font-size:10px;color:#6b7080}
 .health-dots span{display:flex;align-items:center;gap:3px}
-.health-dot{width:7px;height:7px;border-radius:50%;background:#34d399}
+.health-dot{width:7px;height:7px;border-radius:50%;background:#6ed99b}
 .subtotal-label{background:rgba(91,141,239,.15);color:#5b8def;font-weight:700;font-size:11px;padding:5px 12px;border-radius:6px;white-space:nowrap;text-transform:uppercase;letter-spacing:.5px}
-.subtotal-amount{font-family:'Inter',sans-serif;font-weight:800;font-size:clamp(18px,2.5vw,28px);color:#34d399;min-width:clamp(80px,10vw,130px);text-align:right;letter-spacing:-1px;text-shadow:0 0 18px rgba(52,211,153,.25)}
+.subtotal-amount{font-family:'Inter',sans-serif;font-weight:800;font-size:clamp(18px,2.5vw,28px);color:#6ed99b;min-width:clamp(80px,10vw,130px);text-align:right;letter-spacing:-1px;text-shadow:0 0 18px rgba(110,217,155,.25)}
 
 /* ═══ Main Layout ══════════════════════════════════════════════════ */
 .main-row{display:flex;flex:1;overflow:hidden}
@@ -80,13 +80,13 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .total-row{display:flex;justify-content:space-between;padding:2px 0;font-size:11px;color:#8891a5}
 .total-row.grand{padding:8px 0 2px;border-top:2px solid #e2e4e8;margin-top:4px}
 .total-row.grand span:first-child{font-weight:700;font-size:14px;color:#1a1a2e}
-.total-amount{font-family:'Inter',sans-serif;font-size:clamp(16px,2.2vw,24px);font-weight:800;color:#059669;letter-spacing:-0.5px}
+.total-amount{font-family:'Inter',sans-serif;font-size:clamp(16px,2.2vw,24px);font-weight:800;color:#3a9c5e;letter-spacing:-0.5px}
 .cart-actions{padding:clamp(5px,1vh,10px) clamp(6px,0.8vw,12px);display:flex;flex-direction:column;gap:clamp(3px,0.5vh,6px);flex-shrink:0;background:#fff;border-top:1px solid #eef0f4}
 .action-row{display:flex;gap:6px}
 .action-btn{padding:clamp(6px,1.2vh,12px);border-radius:10px;border:none;font-size:clamp(11px,1.3vw,14px);font-weight:700;cursor:pointer;font-family:inherit;flex:1;min-height:clamp(36px,5vh,48px);transition:all .12s;letter-spacing:-.2px}
 .action-btn:active:not(:disabled){transform:scale(.97)}
-.btn-pay{background:linear-gradient(135deg,#10b981 0%,#059669 60%,#047857 100%);color:#fff;box-shadow:0 4px 14px rgba(5,150,105,.3),inset 0 1px 0 rgba(255,255,255,.15)}
-.btn-pay:active:not(:disabled){background:linear-gradient(135deg,#059669 0%,#047857 100%);box-shadow:0 1px 4px rgba(5,150,105,.2)}.btn-pay:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
+.btn-pay{background:linear-gradient(135deg,#4fbd77 0%,#3a9c5e 60%,#2d7a4a 100%);color:#fff;box-shadow:0 4px 14px rgba(58,156,94,.3),inset 0 1px 0 rgba(255,255,255,.15)}
+.btn-pay:active:not(:disabled){background:linear-gradient(135deg,#3a9c5e 0%,#2d7a4a 100%);box-shadow:0 1px 4px rgba(58,156,94,.2)}.btn-pay:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
 .btn-card{background:#f0f1f3;color:#4a5068;border:1px solid #e2e4e8}
 .btn-card:active:not(:disabled){background:#e2e4e8}.btn-card:disabled{opacity:.35;cursor:not-allowed}
 .btn-park{background:#fff;color:#8891a5;border:1px solid #e2e4e8}.btn-park:active{background:#f4f5f7}
@@ -110,8 +110,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .pos-grid-btn.func-key:active{filter:brightness(.75);box-shadow:0 1px 2px rgba(0,0,0,.3),inset 0 2px 4px rgba(0,0,0,.25)}
 
 /* ─── Back / home navigation buttons ────────────────────────────── */
-.pos-grid-btn.back-key{font-size:clamp(11px,1.3vw,15px);font-weight:700;letter-spacing:-.2px;background:linear-gradient(135deg,#10b981 0%,#059669 50%,#047857 100%);color:#fff;border:none;border-radius:10px;box-shadow:0 4px 12px rgba(5,150,105,.3),inset 0 1px 0 rgba(255,255,255,.2);transition:all .1s}
-.pos-grid-btn.back-key:active{transform:scale(.96);filter:brightness(.8);box-shadow:0 1px 4px rgba(5,150,105,.2)}
+.pos-grid-btn.back-key{font-size:clamp(11px,1.3vw,15px);font-weight:700;letter-spacing:-.2px;background:linear-gradient(135deg,#4fbd77 0%,#3a9c5e 50%,#2d7a4a 100%);color:#fff;border:none;border-radius:10px;box-shadow:0 4px 12px rgba(58,156,94,.3),inset 0 1px 0 rgba(255,255,255,.2);transition:all .1s}
+.pos-grid-btn.back-key:active{transform:scale(.96);filter:brightness(.8);box-shadow:0 1px 4px rgba(58,156,94,.2)}
 
 /* ─── Department / product buttons ───────────────────────────────── */
 .pos-grid-btn.dept-key{font-size:clamp(10px,1.2vw,14px);font-weight:700;letter-spacing:-.2px;border:1px solid rgba(255,255,255,.12);box-shadow:0 4px 14px rgba(0,0,0,.45),0 2px 4px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.14),inset 0 -1px 0 rgba(0,0,0,.15)}
@@ -130,7 +130,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .pos-grid-btn.digit-btn.num-action:active{background:linear-gradient(180deg,#d0d4dc 0%,#c2c7d0 100%);box-shadow:0 1px 2px rgba(0,0,0,.08),inset 0 2px 3px rgba(0,0,0,.06);transform:scale(.96) translateY(2px)}
 .pos-grid-btn.digit-btn.num-orange{background:linear-gradient(135deg,#ff9500 0%,#f97316 50%,#e8650e 100%);color:#fff;font-size:clamp(10px,1vw,12px);font-weight:800;letter-spacing:.3px;text-transform:uppercase;border:1px solid rgba(255,160,0,.4);box-shadow:0 4px 12px rgba(249,115,22,.35),0 2px 4px rgba(249,115,22,.2),inset 0 1px 0 rgba(255,255,255,.25),inset 0 -2px 0 rgba(0,0,0,.1)}
 .pos-grid-btn.digit-btn.num-orange:active{filter:brightness(.85);box-shadow:0 1px 4px rgba(249,115,22,.3),inset 0 2px 4px rgba(0,0,0,.15);transform:scale(.96) translateY(2px)}
-.pos-grid-btn.num-display-cell{background:linear-gradient(180deg,#080b10 0%,#0f1318 100%);color:#34d399;font-family:'JetBrains Mono','Courier New',monospace;font-size:clamp(16px,2.2vw,24px);font-weight:700;text-align:right;justify-content:flex-end;padding:clamp(3px,0.6vh,6px) clamp(8px,1.2vw,16px);border-radius:clamp(8px,1vw,14px);cursor:default;border:2px solid #1e2a35;box-shadow:inset 0 3px 12px rgba(0,0,0,.6),inset 0 0 30px rgba(52,211,153,.04),0 1px 0 rgba(255,255,255,.03)}
+.pos-grid-btn.num-display-cell{background:linear-gradient(180deg,#080b10 0%,#0f1318 100%);color:#6ed99b;font-family:'JetBrains Mono','Courier New',monospace;font-size:clamp(16px,2.2vw,24px);font-weight:700;text-align:right;justify-content:flex-end;padding:clamp(3px,0.6vh,6px) clamp(8px,1.2vw,16px);border-radius:clamp(8px,1vw,14px);cursor:default;border:2px solid #1e2a35;box-shadow:inset 0 3px 12px rgba(0,0,0,.6),inset 0 0 30px rgba(110,217,155,.04),0 1px 0 rgba(255,255,255,.03)}
 .pos-grid-btn.num-display-cell.qty-mode{color:#f97316;border-color:#3a2510;box-shadow:inset 0 3px 12px rgba(0,0,0,.6),inset 0 0 30px rgba(249,115,22,.06),0 1px 0 rgba(255,255,255,.03)}
 .pos-grid-btn.empty-cell{background:transparent;border:none;cursor:default;box-shadow:none}
 
@@ -148,8 +148,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 
 /* ═══ Section View ════════════════════════════════════════════════ */
 .section-view{flex:1;display:flex;flex-direction:column;background:radial-gradient(ellipse at 50% 0%,#1f2333 0%,#13151d 100%)}
-.section-back-btn{background:linear-gradient(135deg,#10b981 0%,#059669 50%,#047857 100%);color:#fff;border:none;border-radius:clamp(8px,1vw,14px);font-weight:700;font-size:clamp(12px,1.3vw,16px);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;min-height:clamp(60px,10vh,100px);box-shadow:0 4px 12px rgba(5,150,105,.3),inset 0 1px 0 rgba(255,255,255,.2);transition:all .1s}
-.section-back-btn:active{transform:scale(.96);filter:brightness(.8);box-shadow:0 1px 4px rgba(5,150,105,.2)}
+.section-back-btn{background:linear-gradient(135deg,#4fbd77 0%,#3a9c5e 50%,#2d7a4a 100%);color:#fff;border:none;border-radius:clamp(8px,1vw,14px);font-weight:700;font-size:clamp(12px,1.3vw,16px);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;min-height:clamp(60px,10vh,100px);box-shadow:0 4px 12px rgba(58,156,94,.3),inset 0 1px 0 rgba(255,255,255,.2);transition:all .1s}
+.section-back-btn:active{transform:scale(.96);filter:brightness(.8);box-shadow:0 1px 4px rgba(58,156,94,.2)}
 
 .product-grid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(4px,0.6vw,8px);padding:clamp(6px,1vw,12px);align-content:start;background:transparent}
 .product-btn{background:linear-gradient(180deg,#2e3242 0%,#252838 100%);border:1px solid rgba(255,255,255,.06);border-radius:clamp(8px,1vw,14px);display:flex;flex-direction:column;align-items:center;padding:clamp(6px,1vh,12px) clamp(4px,0.6vw,8px);cursor:pointer;min-height:clamp(60px,10vh,100px);justify-content:center;font-family:inherit;transition:transform .1s cubic-bezier(.4,0,.2,1),box-shadow .1s;box-shadow:0 4px 12px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.05)}
@@ -169,7 +169,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .nav-dark{background:linear-gradient(180deg,#424a5c 0%,#323a4a 100%);color:#e8eaef;flex:2}
 .nav-small{background:linear-gradient(180deg,#2e3242 0%,#252838 100%);color:#c8cdd8;flex:1;border-color:#3d4255}
 .nav-gold{background:linear-gradient(135deg,#fbbf24 0%,#f59e0b 40%,#d97706 100%);color:#fff;flex:2.5;border-color:rgba(251,191,36,.4);box-shadow:0 4px 14px rgba(245,158,11,.25),inset 0 1px 0 rgba(255,255,255,.2);text-shadow:0 1px 2px rgba(0,0,0,.2)}
-.nav-green{background:linear-gradient(135deg,#10b981 0%,#059669 40%,#047857 100%);color:#fff;flex:2.5;border-color:rgba(16,185,129,.4);box-shadow:0 4px 14px rgba(5,150,105,.25),inset 0 1px 0 rgba(255,255,255,.2);text-shadow:0 1px 2px rgba(0,0,0,.2)}
+.nav-green{background:linear-gradient(135deg,#4fbd77 0%,#3a9c5e 40%,#2d7a4a 100%);color:#fff;flex:2.5;border-color:rgba(79,189,119,.4);box-shadow:0 4px 14px rgba(58,156,94,.25),inset 0 1px 0 rgba(255,255,255,.2);text-shadow:0 1px 2px rgba(0,0,0,.2)}
 .nav-red{background:linear-gradient(135deg,#f87171 0%,#ef4444 40%,#dc2626 100%);color:#fff;font-size:clamp(12px,1.4vw,16px);font-weight:800;flex:2;border-color:rgba(248,113,113,.4);box-shadow:0 4px 14px rgba(239,68,68,.3),inset 0 1px 0 rgba(255,255,255,.2);text-shadow:0 1px 2px rgba(0,0,0,.2)}
 .nav-spacer{width:clamp(6px,0.8vw,12px);flex-shrink:0}
 
@@ -222,13 +222,13 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .search-modal-inner{flex:1;display:flex;flex-direction:column;max-width:900px;width:100%;margin:0 auto;padding:16px;gap:10px}
 .search-modal-bar{display:flex;gap:10px;align-items:center}
 .search-modal-input{flex:1;font-size:22px;font-weight:600;padding:12px 18px;border-radius:12px;border:2px solid #e2e4e8;background:#fff;outline:none;font-family:inherit}
-.search-modal-input:focus{border-color:#10b981}
+.search-modal-input:focus{border-color:#4fbd77}
 .search-modal-close{width:48px;height:48px;border-radius:12px;border:none;background:#ef4444;color:#fff;font-size:22px;font-weight:700;cursor:pointer}
 .search-modal-results{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;align-content:start;padding:4px 0}
 .search-modal-item{padding:14px 10px;border-radius:12px;background:#fff;border:1px solid #e2e4e8;cursor:pointer;text-align:center;transition:all .1s}
 .search-modal-item:active{transform:scale(.95);background:#f0fdf4}
 .search-modal-item .sr-name{font-size:13px;font-weight:600;color:#1a1a2e;margin-bottom:4px;line-height:1.2}
-.search-modal-item .sr-price{font-size:15px;font-weight:700;color:#059669}
+.search-modal-item .sr-price{font-size:15px;font-weight:700;color:#3a9c5e}
 .search-modal-item .sr-unit{font-size:11px;color:#888}
 .search-kb{background:#e8eaef;border-radius:14px;padding:10px;flex-shrink:0}
 .search-kb-row{display:flex;gap:4px;justify-content:center;margin-bottom:4px}
@@ -236,7 +236,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .search-kb-key:active{transform:scale(.92);background:#ddd}
 .search-kb-key.wide{min-width:65px;font-size:13px}
 .search-kb-key.space{flex:1;max-width:260px}
-.search-kb-key.action{background:#1B4332;color:#fff;min-width:65px}
+.search-kb-key.action{background:#1a3d2a;color:#fff;min-width:65px}
 .search-kb-key.del{background:#fee2e2;color:#991b1b}
 
 .modal{background:#fff;border:none;border-radius:16px;padding:clamp(16px,2.5vw,28px);width:clamp(320px,35vw,420px);box-shadow:0 20px 60px rgba(0,0,0,.2),0 0 0 1px rgba(0,0,0,.05);animation:modalIn .25s ease-out}
@@ -251,12 +251,12 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .quick-cash button{padding:12px;border-radius:10px;border:1px solid #e2e4e8;background:#fafbfc;color:#1a1a2e;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;min-height:48px;transition:all .1s}
 .quick-cash button:active{background:#e2e4e8;transform:scale(.97)}
 .change-display{text-align:center;font-size:18px;margin-bottom:14px;min-height:24px;font-weight:800;font-family:'Inter',sans-serif;letter-spacing:-.3px}
-.change-display.positive{color:#059669}.change-display.short{color:#ef4444}
+.change-display.positive{color:#3a9c5e}.change-display.short{color:#ef4444}
 .modal-actions{display:flex;gap:8px}
 .modal-actions button{flex:1;padding:14px;border-radius:10px;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;min-height:48px;transition:all .1s}
 .modal-actions button:active{transform:scale(.97)}
 .modal-cancel{background:#f0f1f3;color:#4a5068;border:1px solid #e2e4e8 !important}.modal-cancel:active{background:#e2e4e8}
-.modal-confirm{background:#059669;color:#fff;box-shadow:0 2px 8px rgba(5,150,105,.2)}.modal-confirm:active:not(:disabled){background:#047857}.modal-confirm:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
+.modal-confirm{background:#3a9c5e;color:#fff;box-shadow:0 2px 8px rgba(58,156,94,.2)}.modal-confirm:active:not(:disabled){background:#2d7a4a}.modal-confirm:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
 
 .numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px}
 .numpad button{padding:14px;border-radius:10px;border:1px solid #e2e4e8;background:#fafbfc;color:#1a1a2e;font-size:1.2rem;font-weight:600;cursor:pointer;font-family:inherit;min-height:52px;transition:all .1s}
@@ -276,8 +276,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .pin-pad{display:grid;grid-template-columns:repeat(3,clamp(60px,7vw,80px));gap:clamp(4px,0.8vw,8px)}
 .pin-btn{width:clamp(60px,7vw,80px);height:clamp(48px,6vh,64px);border-radius:12px;border:1px solid #e2e4e8;background:#fff;color:#1a1a2e;font-size:clamp(1rem,1.5vw,1.3rem);font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 2px 6px rgba(0,0,0,.04);transition:all .1s}
 .pin-btn:active{background:#f0f1f3;transform:scale(.96)}
-.pin-btn.enter{background:#059669;color:#fff;border-color:#059669;box-shadow:0 2px 8px rgba(5,150,105,.25)}
-.pin-btn.enter:active{background:#047857}
+.pin-btn.enter{background:#3a9c5e;color:#fff;border-color:#3a9c5e;box-shadow:0 2px 8px rgba(58,156,94,.25)}
+.pin-btn.enter:active{background:#2d7a4a}
 .pin-btn.clear{color:#8891a5;font-size:12px;font-weight:600;background:#f0f1f3;border-color:#e2e4e8}
 .login-error{margin-top:16px;color:#ef4444;font-size:13px;min-height:20px;font-weight:500}
 
@@ -291,12 +291,12 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 @keyframes popIn{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
 .toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%) translateY(14px);padding:10px 20px;border-radius:10px;font-size:12px;font-weight:600;opacity:0;transition:all .3s ease;z-index:300;box-shadow:0 8px 24px rgba(0,0,0,.15)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.toast-info{background:#374151;color:#fff}.toast-success{background:#059669;color:#fff}.toast-error{background:#ef4444;color:#fff}
+.toast-info{background:#374151;color:#fff}.toast-success{background:#3a9c5e;color:#fff}.toast-error{background:#ef4444;color:#fff}
 .mode-banner{display:none;padding:6px 12px;text-align:center;font-weight:800;font-size:13px;letter-spacing:1px;flex-shrink:0}
 .mode-banner.active{display:block}
 .mode-banner.return-mode{background:#ef4444;color:#fff}
 .mode-banner.supervisor-mode{background:#fbbf24;color:#1a1a2e}
-.meta-deal{color:#059669;font-weight:700;font-size:9px;background:rgba(5,150,105,.08);padding:1px 4px;border-radius:3px}
+.meta-deal{color:#3a9c5e;font-weight:700;font-size:9px;background:rgba(58,156,94,.08);padding:1px 4px;border-radius:3px}
 
 /* QTY multiplier floating badge */
 .qty-badge{position:fixed;top:56px;right:20px;background:#f97316;color:#fff;font-weight:800;font-size:18px;padding:8px 18px;border-radius:10px;z-index:90;box-shadow:0 4px 16px rgba(249,115,22,.3);animation:popIn .2s ease-out;display:none}
@@ -307,7 +307,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .sale-summary-items{font-size:12px;color:#8891a5;margin-bottom:8px}
 .sale-summary-row{display:flex;justify-content:space-between;padding:3px 0;font-size:13px;color:#4a5068}
 .sale-summary-row.total{border-top:2px solid #e2e4e8;margin-top:6px;padding-top:8px;font-weight:800;font-size:16px;color:#1a1a2e}
-.sale-summary-method{display:inline-block;background:rgba(5,150,105,.08);color:#059669;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:600;margin-top:6px}
+.sale-summary-method{display:inline-block;background:rgba(58,156,94,.08);color:#3a9c5e;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:600;margin-top:6px}
 .sale-summary-method.card{background:rgba(91,141,239,.08);color:#5b8def}
 
 /* Cart delete button */
@@ -326,7 +326,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .cash-numpad button{padding:12px;border-radius:10px;border:1px solid #e2e4e8;background:#fafbfc;color:#1a1a2e;font-size:1.1rem;font-weight:600;cursor:pointer;font-family:inherit;min-height:48px;transition:all .1s}
 .cash-numpad button:active{background:#e2e4e8;transform:scale(.97)}
 .cash-numpad button.cash-np-clear{background:#fef2f2;color:#ef4444;border-color:#fecaca}
-.cash-numpad button.cash-np-enter{background:#059669;color:#fff;border-color:#059669;box-shadow:0 2px 6px rgba(5,150,105,.2)}
+.cash-numpad button.cash-np-enter{background:#3a9c5e;color:#fff;border-color:#3a9c5e;box-shadow:0 2px 6px rgba(58,156,94,.2)}
 .total-row.discount-row span{color:#ef4444;font-weight:600}
 .recall-list{overflow-y:auto}
 .recall-item{padding:12px 16px;border-bottom:1px solid #f4f5f7;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background .1s;gap:12px}
@@ -341,11 +341,11 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .recall-status.refunded{background:#dbeafe;color:#1e40af}
 .pricecheck-result{text-align:center;padding:16px;font-size:14px}
 .pricecheck-result .pc-name{font-weight:700;font-size:18px;margin-bottom:6px;color:#1a1a2e}
-.pricecheck-result .pc-price{font-family:'Inter',sans-serif;font-weight:800;font-size:2rem;color:#059669}
+.pricecheck-result .pc-price{font-family:'Inter',sans-serif;font-weight:800;font-size:2rem;color:#3a9c5e}
 .pricecheck-result .pc-special{color:#ef4444;font-size:14px;margin-top:4px}
 .pricecheck-result .pc-stock{color:#8891a5;font-size:12px;margin-top:4px}
 .split-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:8px;font-size:12px;font-weight:600;margin:2px}
-.split-badge.cash{background:rgba(5,150,105,.08);color:#059669}
+.split-badge.cash{background:rgba(58,156,94,.08);color:#3a9c5e}
 .split-badge.card{background:rgba(91,141,239,.08);color:#5b8def}
 .split-badge .split-remove{cursor:pointer;opacity:.6;font-size:14px;padding:4px}.split-badge .split-remove:active{opacity:1}
 
@@ -365,8 +365,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 
 <!-- ═══ PIN Login ═══════════════════════════════════════════════════ -->
 <div class="login-overlay" id="loginOverlay">
-  <img src="logo.png" class="login-logo" alt="Crisp on Creek">
-  <div class="login-store">Crisp on Creek</div>
+  <img src="logo.png" class="login-logo" alt="Tillaroo">
+  <div class="login-store">Tillaroo</div>
   <div class="login-subtitle">Enter your PIN to start</div>
   <div class="pin-display" id="pinDisplay"></div>
   <div class="pin-pad" id="pinPad">
@@ -384,7 +384,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
     <div style="font-size:28px;margin-bottom:8px">💰</div>
     <div style="font-size:18px;font-weight:700;color:#1a1a2e;margin-bottom:4px">Enter Drawer Float</div>
     <div style="font-size:13px;color:#8891a5;margin-bottom:20px">Count the cash in the drawer and enter the total amount.</div>
-    <div id="floatDisplay" style="font-size:32px;font-weight:700;color:#1B4332;background:#f0fdf4;border:2px solid #10b981;border-radius:10px;padding:12px;margin-bottom:16px;min-height:48px;letter-spacing:1px">$0.00</div>
+    <div id="floatDisplay" style="font-size:32px;font-weight:700;color:#1a3d2a;background:#f0fdf4;border:2px solid #4fbd77;border-radius:10px;padding:12px;margin-bottom:16px;min-height:48px;letter-spacing:1px">$0.00</div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;" id="floatPad">
       <button class="pin-btn" data-val="1">1</button><button class="pin-btn" data-val="2">2</button><button class="pin-btn" data-val="3">3</button>
       <button class="pin-btn" data-val="4">4</button><button class="pin-btn" data-val="5">5</button><button class="pin-btn" data-val="6">6</button>
@@ -393,7 +393,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
     </div>
     <div style="display:flex;gap:8px;">
       <button id="floatSkipBtn" style="flex:1;padding:12px;border-radius:8px;border:1px solid #ddd;background:#f8f9fa;font-size:14px;cursor:pointer;color:#666">Skip</button>
-      <button id="floatConfirmBtn" style="flex:2;padding:12px;border-radius:8px;border:none;background:#1B4332;color:#fff;font-size:14px;font-weight:600;cursor:pointer">Confirm Float</button>
+      <button id="floatConfirmBtn" style="flex:2;padding:12px;border-radius:8px;border:none;background:#1a3d2a;color:#fff;font-size:14px;font-weight:600;cursor:pointer">Confirm Float</button>
     </div>
   </div>
 </div>
@@ -402,7 +402,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 <div class="status-bar">
   <div class="status-left">
     <img src="logo.png" alt="" style="width:28px;height:28px;object-fit:contain;flex-shrink:0">
-    <span class="store-name">Crisp on Creek</span>
+    <span class="store-name">Tillaroo</span>
     <div style="position:relative">
       <input type="text" id="searchInput" class="scan-input" placeholder="" autofocus style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden">
     </div>
@@ -422,7 +422,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
       <span><span class="health-dot" id="dotServer"></span>Server</span>
       <span><span class="health-dot" id="dotDrawer"></span>Drawer</span>
     </div>
-    <button id="receiptToggle" style="background:none;border:1px solid rgba(255,255,255,.3);color:#10b981;padding:3px 8px;border-radius:4px;font-size:11px;cursor:pointer;min-height:26px;white-space:nowrap" title="Toggle auto-receipt printing">REC: ON</button>
+    <button id="receiptToggle" style="background:none;border:1px solid rgba(255,255,255,.3);color:#4fbd77;padding:3px 8px;border-radius:4px;font-size:11px;cursor:pointer;min-height:26px;white-space:nowrap" title="Toggle auto-receipt printing">REC: ON</button>
     <span id="numBufDisplay" style="display:none;background:#111;color:#0c0;font-family:'Courier New',monospace;font-size:16px;font-weight:700;padding:2px 10px;border-radius:3px;margin-right:8px;min-width:50px;text-align:right"></span>
     <span class="subtotal-label">Sub Total</span>
     <span class="subtotal-amount" id="topTotal">$0.00</span>
@@ -485,7 +485,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 <!-- ═══ Unified Payment Modal ═════════════════════════════════════ -->
 <div class="modal-overlay" id="cashModal"><div class="modal" style="width:520px;padding:0;overflow:hidden">
   <!-- Header with total -->
-  <div id="payHeader" style="background:linear-gradient(135deg,#059669,#047857);padding:20px 24px;text-align:center">
+  <div id="payHeader" style="background:linear-gradient(135deg,#3a9c5e,#2d7a4a);padding:20px 24px;text-align:center">
     <div style="font-size:13px;color:rgba(255,255,255,.7);font-weight:600;text-transform:uppercase;letter-spacing:1px" id="cashModalTitle">Total Due</div>
     <div style="font-size:48px;font-weight:800;color:#fff;letter-spacing:-1px;margin-top:2px" id="cashModalTotal">$0.00</div>
     <div id="cashRoundingLine" style="display:none;font-size:11px;color:rgba(255,255,255,.6);margin-top:4px"></div>
@@ -501,7 +501,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
       <button id="payOptCard" style="flex:1;padding:18px;border-radius:12px;border:none;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;font-size:18px;font-weight:800;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:10px">
         <span style="font-size:22px">&#x2B21;</span> Card / EFTPOS
       </button>
-      <button data-amt="exact" id="payExact" style="flex:1;padding:18px;border-radius:12px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-size:18px;font-weight:800;cursor:pointer;font-family:inherit;transition:all .15s">
+      <button data-amt="exact" id="payExact" style="flex:1;padding:18px;border-radius:12px;border:none;background:linear-gradient(135deg,#4fbd77,#3a9c5e);color:#fff;font-size:18px;font-weight:800;cursor:pointer;font-family:inherit;transition:all .15s">
         Exact Cash
       </button>
     </div>
@@ -580,7 +580,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
   <div id="weightReadStatus" style="display:none;margin:0 4px 12px 4px">
     <div id="weightReadStatusText" style="text-align:center;font-size:12px;font-weight:700;color:#5b8def;margin-bottom:6px;letter-spacing:.3px;text-transform:uppercase">Getting reading…</div>
     <div style="height:5px;background:#e2e4e8;border-radius:99px;overflow:hidden;position:relative">
-      <div style="position:absolute;top:0;left:-40%;height:100%;width:40%;background:linear-gradient(90deg,#5b8def,#34d399);border-radius:99px;animation:weightBarSlide 1.1s ease-in-out infinite"></div>
+      <div style="position:absolute;top:0;left:-40%;height:100%;width:40%;background:linear-gradient(90deg,#5b8def,#6ed99b);border-radius:99px;animation:weightBarSlide 1.1s ease-in-out infinite"></div>
     </div>
   </div>
   <div class="weight-input" id="weightDisplay">0</div>
@@ -654,7 +654,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
   <div id="discountMenuTarget" style="margin-bottom:16px">
     <div style="font-size:12px;font-weight:600;color:#888;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Apply to</div>
     <div style="display:flex;gap:8px">
-      <button class="disc-target-btn active" data-target="sale" style="flex:1;padding:12px;border-radius:10px;border:2px solid #059669;background:#f0fdf4;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;transition:all .1s">Whole Order</button>
+      <button class="disc-target-btn active" data-target="sale" style="flex:1;padding:12px;border-radius:10px;border:2px solid #3a9c5e;background:#f0fdf4;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;transition:all .1s">Whole Order</button>
       <button class="disc-target-btn" data-target="item" style="flex:1;padding:12px;border-radius:10px;border:2px solid #e2e4e8;background:#fff;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;transition:all .1s">Last Item</button>
       <button class="disc-target-btn" data-target="pick" style="flex:1;padding:12px;border-radius:10px;border:2px solid #e2e4e8;background:#fff;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;transition:all .1s">Choose Items</button>
     </div>
@@ -687,7 +687,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
       <button class="disc-num" data-val="9" style="padding:8px;border:1px solid #e2e4e8;border-radius:6px;background:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit">9</button>
       <button class="disc-num" data-val="C" style="padding:8px;border:1px solid #fecaca;border-radius:6px;background:#fff5f5;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:#dc2626">C</button>
       <button class="disc-num" data-val="0" style="padding:8px;border:1px solid #e2e4e8;border-radius:6px;background:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit">0</button>
-      <button class="disc-num" data-val="OK" style="padding:8px;border:1px solid #bbf7d0;border-radius:6px;background:#f0fdf4;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:#059669">OK</button>
+      <button class="disc-num" data-val="OK" style="padding:8px;border:1px solid #bbf7d0;border-radius:6px;background:#f0fdf4;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:#3a9c5e">OK</button>
     </div>
   </div>
   <div id="discountPreview" style="text-align:center;padding:10px;border-radius:8px;background:#f8f9fa;margin-bottom:14px;font-weight:700;font-size:14px;color:#555;display:none"></div>
@@ -1018,16 +1018,16 @@ let returnMode = false, supervisorMode = false, supervisorTimer = null
 let lastCompletedTxns = [], pcFoundProduct = null
 let payProcessing = false
 let cashNumBuf = ''
-let autoReceipt = localStorage.getItem('crisp_auto_receipt') !== '0'
+let autoReceipt = localStorage.getItem('tillaroo_auto_receipt') !== '0'
 function updateReceiptToggle () {
   const btn = $('#receiptToggle')
   btn.textContent = autoReceipt ? 'REC: ON' : 'REC: OFF'
-  btn.style.color = autoReceipt ? '#10b981' : '#ef4444'
-  btn.style.borderColor = autoReceipt ? 'rgba(16,185,129,.4)' : 'rgba(239,68,68,.4)'
+  btn.style.color = autoReceipt ? '#4fbd77' : '#ef4444'
+  btn.style.borderColor = autoReceipt ? 'rgba(79,189,119,.4)' : 'rgba(239,68,68,.4)'
 }
 $('#receiptToggle').addEventListener('click', () => {
   autoReceipt = !autoReceipt
-  localStorage.setItem('crisp_auto_receipt', autoReceipt ? '1' : '0')
+  localStorage.setItem('tillaroo_auto_receipt', autoReceipt ? '1' : '0')
   updateReceiptToggle()
   showToast(autoReceipt ? 'Auto-receipt ON' : 'Auto-receipt OFF', 'info')
 })
@@ -1108,18 +1108,18 @@ if (window.pos && typeof window.pos.onScannerStatus === 'function') {
 
 // -- Cart persistence to localStorage
 function saveCartLocal () {
-  try { localStorage.setItem('crisp_cart', JSON.stringify(cart.items)) } catch (_) {}
+  try { localStorage.setItem('tillaroo_cart', JSON.stringify(cart.items)) } catch (_) {}
 }
 function restoreCartLocal () {
   try {
-    const data = JSON.parse(localStorage.getItem('crisp_cart') || '[]')
+    const data = JSON.parse(localStorage.getItem('tillaroo_cart') || '[]')
     if (data.length) {
       cart.loadItems(data)
       showToast(`Restored ${data.length} item(s) from previous session`, 'info')
     }
   } catch (_) {}
 }
-function clearCartLocal () { localStorage.removeItem('crisp_cart') }
+function clearCartLocal () { localStorage.removeItem('tillaroo_cart') }
 
 // ═══ Clock & Sync ══════════════════════════════════════════════════
 function updateClock () {
@@ -1145,7 +1145,7 @@ function showLogin () {
     }).catch(() => {})
   }
   currentStaff = null
-  try { localStorage.removeItem('crisp_staff') } catch (_) {}
+  try { localStorage.removeItem('tillaroo_staff') } catch (_) {}
   pinBuf = ''
   $('#pinDisplay').textContent = ''
   $('#loginError').textContent = ''
@@ -1155,7 +1155,7 @@ function showLogin () {
 
 function completeLogin (s) {
   currentStaff = s
-  try { localStorage.setItem('crisp_staff', JSON.stringify(s)) } catch (_) {}
+  try { localStorage.setItem('tillaroo_staff', JSON.stringify(s)) } catch (_) {}
   $('#loginOverlay').classList.add('hidden')
   $('#staffBadge').textContent = `${s.name} (${s.role})`
   $('#clerkInfo').textContent = `Clerk: ${s.name.toUpperCase()}`
@@ -1188,7 +1188,7 @@ async function attemptPinLogin () {
 // Restore session from localStorage (skip login if already logged in)
 function tryRestoreSession () {
   try {
-    const saved = localStorage.getItem('crisp_staff')
+    const saved = localStorage.getItem('tillaroo_staff')
     if (saved) {
       const s = JSON.parse(saved)
       if (s && s.id && s.name) {
@@ -1603,7 +1603,7 @@ async function handleFuncButton (action) {
         try {
           const settings = await window.pos.getAllSettings()
           await window.pos.printReceipt({
-            storeName: settings.store_name || 'Crisp on Creek',
+            storeName: settings.store_name || 'Tillaroo',
             storeAddress: '', storePhone: '', storeAbn: '',
             header: '*** HELD SALE ***',
             date: new Date().toLocaleString('en-AU'),
@@ -1742,7 +1742,7 @@ async function runLookupSearch () {
   grid.innerHTML = results.slice(0, 100).map(p => `
     <button class="lookup-item" data-id="${esc(p.id)}" style="background:#fafbfc;border:1px solid #e8eaef;border-radius:10px;padding:12px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:inherit;transition:all .1s;min-height:80px;justify-content:center">
       <div style="font-size:12px;font-weight:600;text-align:center;line-height:1.2;color:#1a1a2e">${esc(p.name)}</div>
-      <div style="font-size:13px;font-weight:700;color:#059669">${money(p.active_price ?? p.price)}</div>
+      <div style="font-size:13px;font-weight:700;color:#3a9c5e">${money(p.active_price ?? p.price)}</div>
       ${p.unit !== 'each' ? `<div style="font-size:10px;color:#888">per ${p.unit}</div>` : ''}
       ${p.track_stock && p.stock_qty <= 0 ? '<div style="font-size:9px;color:#c44;font-weight:700">OUT OF STOCK</div>' : ''}
     </button>`).join('')
@@ -2465,7 +2465,7 @@ async function loadRecallSales () {
       </div>
       <div style="display:flex;align-items:center;gap:10px">
         <div class="recall-total">${money(Math.abs(t.total))}</div>
-        ${canRecall ? '<button class="recall-action-btn" data-recall="true" style="padding:6px 12px;border-radius:6px;border:1px solid #059669;background:#f0fdf4;color:#059669;font-weight:700;font-size:11px;cursor:pointer;white-space:nowrap">RECALL</button>' : ''}
+        ${canRecall ? '<button class="recall-action-btn" data-recall="true" style="padding:6px 12px;border-radius:6px;border:1px solid #3a9c5e;background:#f0fdf4;color:#3a9c5e;font-weight:700;font-size:11px;cursor:pointer;white-space:nowrap">RECALL</button>' : ''}
       </div>
     </div>`
   }).join('')
@@ -2551,7 +2551,7 @@ function showDiscountMenuModal () {
     b.style.border = '2px solid #e2e4e8'; b.style.background = '#fff'; b.style.color = '#1a1a2e'
   })
   const saleBtn = $('.disc-target-btn[data-target="sale"]')
-  saleBtn.style.border = '2px solid #059669'; saleBtn.style.background = '#f0fdf4'
+  saleBtn.style.border = '2px solid #3a9c5e'; saleBtn.style.background = '#f0fdf4'
 
   // Reset preset highlights
   $$('.disc-preset').forEach(b => {
@@ -2573,7 +2573,7 @@ $$('.disc-target-btn').forEach(btn => {
     $$('.disc-target-btn').forEach(b => {
       b.style.border = '2px solid #e2e4e8'; b.style.background = '#fff'; b.style.color = '#1a1a2e'
     })
-    btn.style.border = '2px solid #059669'; btn.style.background = '#f0fdf4'
+    btn.style.border = '2px solid #3a9c5e'; btn.style.background = '#f0fdf4'
 
     // Show item picker if "Choose Items"
     if (discMenuTarget === 'pick') {
@@ -2582,7 +2582,7 @@ $$('.disc-target-btn').forEach(btn => {
       container.style.display = 'block'
       container.innerHTML = cart.items.map((item, i) => `
         <label style="display:flex;align-items:center;gap:8px;padding:6px 8px;cursor:pointer;border-radius:6px;transition:background .1s" data-idx="${i}">
-          <input type="checkbox" data-idx="${i}" style="width:18px;height:18px;accent-color:#059669">
+          <input type="checkbox" data-idx="${i}" style="width:18px;height:18px;accent-color:#3a9c5e">
           <span style="flex:1;font-weight:600;font-size:13px">${esc(item.name)}</span>
           <span style="color:#888;font-size:12px">${money(item.line_total)}</span>
         </label>
@@ -2650,7 +2650,7 @@ function updateDiscountPreview () {
     }
   }
   preview.style.display = 'block'
-  preview.innerHTML = `<span style="color:#059669">${discMenuPct}% off</span> — saves <strong>${money(savings)}</strong>`
+  preview.innerHTML = `<span style="color:#3a9c5e">${discMenuPct}% off</span> — saves <strong>${money(savings)}</strong>`
 }
 
 $('#discountMenuApply').addEventListener('click', () => {
@@ -2913,7 +2913,7 @@ function renderSplitPayments () {
 async function buildReceiptData (txn, r) {
   const s = await window.pos.getAllSettings()
   return {
-    storeName: s.store_name || 'Crisp on Creek', storeAddress: s.store_address || '',
+    storeName: s.store_name || 'Tillaroo', storeAddress: s.store_address || '',
     storePhone: s.store_phone || '', storeAbn: s.store_abn || '',
     header: s.receipt_header || '', date: new Date().toLocaleString('en-AU'),
     txnId: r.id, staffName: currentStaff?.name || '', registerId: s.register_id || 'LANE01',
@@ -3061,7 +3061,7 @@ function showCashModal () {
   const rounding = +(rounded - Math.abs(total)).toFixed(2)
   $('#cashModalTitle').textContent = isRefund ? 'REFUND' : 'TOTAL DUE'
   $('#cashModalTotal').textContent = isRefund ? `-${money(rounded)}` : money(rounded)
-  $('#payHeader').style.background = isRefund ? 'linear-gradient(135deg,#dc2626,#b91c1c)' : 'linear-gradient(135deg,#059669,#047857)'
+  $('#payHeader').style.background = isRefund ? 'linear-gradient(135deg,#dc2626,#b91c1c)' : 'linear-gradient(135deg,#3a9c5e,#2d7a4a)'
   // Show rounding line if applicable
   const roundEl = $('#cashRoundingLine')
   if (roundEl) {
@@ -3220,7 +3220,7 @@ $('#cashConfirm').addEventListener('click', async () => {
     const r = await window.pos.saveTransaction(txn)
     const s = await window.pos.getAllSettings()
     const receiptData = {
-      storeName: s.store_name || 'Crisp on Creek', storeAddress: s.store_address || '',
+      storeName: s.store_name || 'Tillaroo', storeAddress: s.store_address || '',
       storePhone: s.store_phone || '', storeAbn: s.store_abn || '',
       header: s.receipt_header || '', date: new Date().toLocaleString('en-AU'),
       txnId: r.id, staffName: currentStaff?.name || '', registerId: s.register_id || 'LANE01',
@@ -3601,7 +3601,7 @@ $('#eodSubmit').addEventListener('click', async () => {
     const settings = await window.pos.getAllSettings()
     const zReport = await window.pos.zReport()
     const receiptData = {
-      storeName: settings.store_name || 'Crisp on Creek',
+      storeName: settings.store_name || 'Tillaroo',
       storeAddress: settings.store_address || '',
       storePhone: settings.store_phone || '',
       storeAbn: settings.store_abn || '',
@@ -3868,7 +3868,7 @@ async function init () {
       const dot = document.getElementById('dotServer')
       if (!dot) return
       if (!status || status.mode === 'off') dot.style.background = '#888'
-      else if (status.connected) dot.style.background = '#4a4'
+      else if (status.connected) dot.style.background = '#4fbd77'
       else dot.style.background = '#a44'
     } catch (_) {}
   }, 10000)

@@ -143,7 +143,7 @@ async function initDatabase() {
     // Set product page grid sizes (8 cols x 5 rows for fruit/veg pages)
     "INSERT OR REPLACE INTO settings (key, value) VALUES ('keyboard_page_sizes', '{\"2\":{\"cols\":8,\"rows\":5},\"3\":{\"cols\":8,\"rows\":5},\"4\":{\"cols\":8,\"rows\":5},\"5\":{\"cols\":8,\"rows\":5},\"6\":{\"cols\":8,\"rows\":5}}')",
     // Give product pages dark green backgrounds for buttons (better with images)
-    "UPDATE keyboard_buttons SET bg_color = '#1B4332', color = '#fff' WHERE page IN (2,3,4,5) AND type = 'open_price' AND bg_color = '#ffffff'",
+    "UPDATE keyboard_buttons SET bg_color = '#1a3d2a', color = '#fff' WHERE page IN (2,3,4,5) AND type = 'open_price' AND bg_color = '#ffffff'",
     // Fix button types (may have been created with empty type due to INSERT OR IGNORE)
     "UPDATE keyboard_buttons SET type = 'discount' WHERE id = 'fn-discount'",
     "UPDATE keyboard_buttons SET type = 'endofday' WHERE id = 'fn-endofday'",
@@ -166,10 +166,10 @@ async function initDatabase() {
     // ── Upgrade all fruit/veg button images to Pexels photography ──
     "UPDATE keyboard_buttons SET image = NULL WHERE id LIKE 'pg2-%' OR id LIKE 'pg3-%' OR id LIKE 'pg4-%' OR id LIKE 'pg5-%'",
     // ── Intentional colour scheme for fruit/veg pages ──
-    // Fruit pages: warm earthy tones (dark olive) instead of flat #1B4332
-    "UPDATE keyboard_buttons SET bg_color = '#2d3a2e' WHERE (id LIKE 'pg2-%' OR id LIKE 'pg3-%') AND bg_color = '#1B4332'",
+    // Fruit pages: warm earthy tones (dark olive) instead of flat #1a3d2a
+    "UPDATE keyboard_buttons SET bg_color = '#2d3a2e' WHERE (id LIKE 'pg2-%' OR id LIKE 'pg3-%') AND bg_color = '#1a3d2a'",
     // Veg pages: cool forest green
-    "UPDATE keyboard_buttons SET bg_color = '#1e3328' WHERE (id LIKE 'pg4-%' OR id LIKE 'pg5-%') AND bg_color = '#1B4332'",
+    "UPDATE keyboard_buttons SET bg_color = '#1e3328' WHERE (id LIKE 'pg4-%' OR id LIKE 'pg5-%') AND bg_color = '#1a3d2a'",
     // Nav buttons on fruit/veg pages: fresh green tones
     "UPDATE keyboard_buttons SET bg_color = '#16a34a', color = '#fff' WHERE id IN ('pg2-back','pg3-back','pg4-back','pg5-back')",
     "UPDATE keyboard_buttons SET bg_color = '#22c55e', color = '#000' WHERE id IN ('pg2-veg-menu','pg3-prev-fruit','pg4-fruit-menu','pg5-fruit-menu')",
@@ -196,7 +196,7 @@ async function initDatabase() {
     // Function buttons — clearer purpose colors
     "UPDATE keyboard_buttons SET bg_color = '#8b5cf6', color = '#fff' WHERE id = 'fn-endofday'", // vivid purple
     "UPDATE keyboard_buttons SET bg_color = '#3b82f6', color = '#fff' WHERE id = 'fn-hold'",     // blue
-    "UPDATE keyboard_buttons SET bg_color = '#059669', color = '#fff' WHERE id = 'fn-itemsearch'", // green
+    "UPDATE keyboard_buttons SET bg_color = '#3a9c5e', color = '#fff' WHERE id = 'fn-itemsearch'", // green
     "UPDATE keyboard_buttons SET bg_color = '#f97316', color = '#fff' WHERE id = 'fn-nosale'",   // orange
     "UPDATE keyboard_buttons SET bg_color = '#d97706', color = '#fff' WHERE id = 'fn-discount'", // amber
     "UPDATE keyboard_buttons SET bg_color = '#dc2626', color = '#fff' WHERE id = 'fn-movedrawer'", // red
@@ -1076,7 +1076,7 @@ function setupIPC() {
 
       await new Promise((resolve, reject) => {
         const follow = (url) => {
-          https.get(url, { headers: { 'User-Agent': 'CrispPOS' } }, res => {
+          https.get(url, { headers: { 'User-Agent': 'Tillaroo' } }, res => {
             if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
               return follow(res.headers.location)
             }
@@ -1367,7 +1367,7 @@ function setupIPC() {
     dbRun(`
       INSERT OR REPLACE INTO categories (id, name, sort_order, colour, active, updated_at)
       VALUES (?1, ?2, ?3, ?4, ?5, datetime('now'))
-    `, [id, cat.name, cat.sort_order || 0, cat.colour || '#10b981', cat.active !== false ? 1 : 0])
+    `, [id, cat.name, cat.sort_order || 0, cat.colour || '#4fbd77', cat.active !== false ? 1 : 0])
 
     queueSync('categories', id, cat.id ? 'update' : 'insert')
     return { id }
@@ -1404,7 +1404,7 @@ function setupIPC() {
       if (!c.id || !c.name) continue
       dbRun(`INSERT OR REPLACE INTO categories (id, name, sort_order, colour, active, updated_at)
         VALUES (?1, ?2, ?3, ?4, ?5, datetime('now'))`,
-        [c.id, c.name, c.sort_order || 0, c.colour || '#10b981', c.active !== false ? 1 : 0])
+        [c.id, c.name, c.sort_order || 0, c.colour || '#4fbd77', c.active !== false ? 1 : 0])
       count++
     }
     scheduleSave()
@@ -2168,7 +2168,7 @@ function setupIPC() {
       INSERT OR REPLACE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, product_id, active, updated_at)
       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, datetime('now'))
     `, [id, btn.label, btn.type, btn.price || 0, btn.image || null, btn.color || '#fff',
-        btn.bg_color || '#1B4332', btn.parent_id || null, btn.category_filter || null,
+        btn.bg_color || '#1a3d2a', btn.parent_id || null, btn.category_filter || null,
         btn.alpha_range || null, btn.sort_order || 0, btn.position || 'grid',
         btn.page || 1, btn.grid_row || 0, btn.grid_col || 0,
         btn.col_span || 1, btn.row_span || 1, btn.product_id || null,
@@ -2216,7 +2216,7 @@ function setupIPC() {
           row_span=excluded.row_span, product_id=excluded.product_id, active=excluded.active,
           updated_at=excluded.updated_at`,
         [b.id, b.label, b.type, b.price || 0, b.image || null, b.color || '#fff',
-         b.bg_color || '#1B4332', b.parent_id || null, b.category_filter || null,
+         b.bg_color || '#1a3d2a', b.parent_id || null, b.category_filter || null,
          b.alpha_range || null, b.sort_order || 0, b.position || 'grid',
          b.page || 1, b.grid_row || 0, b.grid_col || 0, b.col_span || 1, b.row_span || 1,
          b.product_id || null, b.active !== false ? 1 : 0])
@@ -2293,7 +2293,7 @@ function setupIPC() {
       dbRun(`INSERT OR REPLACE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, active, updated_at)
         VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,datetime('now'))`,
         [id, btn.label, btn.type, btn.price || 0, btn.image || null, btn.color || '#fff',
-         btn.bg_color || '#1B4332', btn.parent_id || null, btn.category_filter || null,
+         btn.bg_color || '#1a3d2a', btn.parent_id || null, btn.category_filter || null,
          btn.alpha_range || null, btn.sort_order || 0, btn.position || 'grid',
          btn.page || 1, row, col, cs, rs, btn.active !== undefined ? btn.active : 1])
       count++
@@ -2882,7 +2882,7 @@ function setupIPC() {
   function cleanupDuplicateQueues () {
     try {
       // Only remove queues explicitly created by this app — never touch driver-installed queues
-      hwExec(`powershell -NoProfile -NonInteractive -Command "Remove-Printer -Name 'Crisp Receipt Printer' -ErrorAction SilentlyContinue"`, { timeout: 3000, encoding: 'utf-8' })
+      hwExec(`powershell -NoProfile -NonInteractive -Command "Remove-Printer -Name 'Tillaroo Receipt Printer' -ErrorAction SilentlyContinue"`, { timeout: 3000, encoding: 'utf-8' })
     } catch (_) {}
   }
 
@@ -3683,7 +3683,7 @@ function setupIPC() {
     cmd(ESCPOS.ALIGN_CENTER)
 
     cmd(ESCPOS.BOLD_ON); cmd(ESCPOS.DOUBLE_SIZE)
-    text(receiptData.storeName || 'Crisp on Creek')
+    text(receiptData.storeName || 'Tillaroo')
     cmd(ESCPOS.NORMAL_SIZE); cmd(ESCPOS.BOLD_OFF)
 
     if (receiptData.storeAddress) text(receiptData.storeAddress)
@@ -3916,7 +3916,7 @@ function setupIPC() {
               foundConflicts.add(key)
               issues.push({ type: 'conflict', area: 'software', severity: 'high',
                 message: `${name} is running (${match[1]}) — may be locking COM ports or printer queues`,
-                fix: `Close ${name} before using Crisp POS, or it will block access to the scale and printer` })
+                fix: `Close ${name} before using Tillaroo, or it will block access to the scale and printer` })
             }
           }
         }
@@ -3946,14 +3946,14 @@ function setupIPC() {
         for (const p of ports) {
           // Skip if this port is already held open by our scale polling
           if (hwScalePort?.isOpen && hwScalePort.path === p.path) {
-            info.push({ type: 'info', area: 'port', message: `${p.path}: in use by Crisp POS (scale connected)` })
+            info.push({ type: 'info', area: 'port', message: `${p.path}: in use by Tillaroo (scale connected)` })
             continue
           }
           // Skip if our Python scale bridge has it open — otherwise the open
           // attempt below fails with "Access denied" and we wrongly flag our
           // own usage as "another application has exclusive access".
           if (pythonScaleProc && hwScale?.port === p.path) {
-            info.push({ type: 'info', area: 'port', message: `${p.path}: in use by Crisp POS scale bridge (Python)` })
+            info.push({ type: 'info', area: 'port', message: `${p.path}: in use by Tillaroo scale bridge (Python)` })
             continue
           }
           let portOpened = false

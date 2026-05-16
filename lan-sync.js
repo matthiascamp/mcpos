@@ -520,7 +520,7 @@ async function doFullSync () {
     for (const c of data.categories) {
       db.dbRun(`INSERT OR REPLACE INTO categories (id, name, sort_order, colour, active, updated_at)
                 VALUES (?1, ?2, ?3, ?4, ?5, ?6)`,
-               [c.id, c.name, c.sort_order || 0, c.colour || '#10b981', c.active ?? 1, c.updated_at || null])
+               [c.id, c.name, c.sort_order || 0, c.colour || '#4fbd77', c.active ?? 1, c.updated_at || null])
     }
   }
 
@@ -585,7 +585,7 @@ async function doFullSync () {
       db.dbRun(`INSERT OR REPLACE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, product_id, active, updated_at)
                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20)`,
                [b.id, b.label, b.type, b.price || null, b.image || null, b.color || '#fff',
-                b.bg_color || '#1B4332', b.parent_id || null, b.category_filter || null,
+                b.bg_color || '#1a3d2a', b.parent_id || null, b.category_filter || null,
                 b.alpha_range || null, b.sort_order || 0, b.position || 'grid',
                 b.page || 1, b.grid_row || 0, b.grid_col || 0, b.col_span || 1, b.row_span || 1,
                 b.product_id || null, b.active ?? 1, b.updated_at || null])
@@ -715,7 +715,7 @@ async function doSyncCycle () {
     for (const c of categories) {
       db.dbRun(`INSERT OR REPLACE INTO categories (id, name, sort_order, colour, active, updated_at)
                 VALUES (?1, ?2, ?3, ?4, ?5, ?6)`,
-               [c.id, c.name, c.sort_order || 0, c.colour || '#10b981', c.active ?? 1, c.updated_at || null])
+               [c.id, c.name, c.sort_order || 0, c.colour || '#4fbd77', c.active ?? 1, c.updated_at || null])
     }
 
     for (const p of products) {
@@ -753,7 +753,7 @@ async function doSyncCycle () {
         db.dbRun(`INSERT OR REPLACE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, product_id, active, updated_at)
                   VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20)`,
                  [b.id, b.label, b.type, b.price || null, b.image || null, b.color || '#fff',
-                  b.bg_color || '#1B4332', b.parent_id || null, b.category_filter || null,
+                  b.bg_color || '#1a3d2a', b.parent_id || null, b.category_filter || null,
                   b.alpha_range || null, b.sort_order || 0, b.position || 'grid',
                   b.page || 1, b.grid_row || 0, b.grid_col || 0, b.col_span || 1, b.row_span || 1,
                   b.product_id || null, b.active ?? 1, b.updated_at || null])
@@ -1186,8 +1186,8 @@ async function networkDiagnostic () {
     results.firewallHints.push(
       'Windows Firewall may block incoming connections on port ' + port + '.',
       'To allow: Settings > Windows Security > Firewall > Allow an app through firewall > Add Electron.',
-      'Or run in admin PowerShell: netsh advfirewall firewall add rule name="CrispPOS" dir=in action=allow protocol=TCP localport=' + port,
-      'Also add UDP rule: netsh advfirewall firewall add rule name="CrispPOS-UDP" dir=in action=allow protocol=UDP localport=5556'
+      'Or run in admin PowerShell: netsh advfirewall firewall add rule name="Tillaroo" dir=in action=allow protocol=TCP localport=' + port,
+      'Also add UDP rule: netsh advfirewall firewall add rule name="Tillaroo-UDP" dir=in action=allow protocol=UDP localport=5556'
     )
     // Try to check firewall status
     try {
@@ -1217,7 +1217,7 @@ async function networkDiagnostic () {
     }
   } else if (os.platform() === 'darwin') {
     results.firewallHints.push(
-      'macOS Application Firewall: System Settings > Network > Firewall. If enabled, allow Electron/Crisp POS.',
+      'macOS Application Firewall: System Settings > Network > Firewall. If enabled, allow Electron/Tillaroo.',
       'macOS usually prompts "Allow incoming connections?" on first server start — click Allow.'
     )
   }
