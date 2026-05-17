@@ -54,23 +54,25 @@ function appLog (level, source, message, detail) {
   if (level === 'error' || level === 'fatal') {
     appHealth.lastError = ts
   }
+}
 
-  // Prune old log files — keep last 14 days
-  try {
+// Prune old log files at startup — keep last 14 days
+try {
+  if (fs.existsSync(LOG_DIR)) {
     const files = fs.readdirSync(LOG_DIR).filter(f => f.startsWith('app-') && f.endsWith('.log')).sort()
     while (files.length > 14) {
       const old = files.shift()
       try { fs.unlinkSync(path.join(LOG_DIR, old)) } catch (_) {}
     }
-  } catch (_) {}
-}
+  }
+} catch (_) {}
 
 // Crash safety: catch unhandled errors
 process.on('uncaughtException', (err) => {
   const msg = err.stack || err.message || String(err)
   appLog('fatal', 'process', 'Uncaught exception', msg)
   // Try to save DB before crashing
-  try { if (db) saveDB() } catch (_) {}
+  try { if (db) saveDBSync() } catch (_) {}
   // If it's a serial port / hardware error, don't crash — just log and continue
   const isHardwareError = msg.includes('serialport') || msg.includes('SerialPort') || msg.includes('COM') ||
     msg.includes('Access is denied') || msg.includes('port is not open') || msg.includes('EACCES') ||
@@ -206,6 +208,8 @@ async function initDatabase() {
     // Reprint & Price Check — subtle but distinct
     "UPDATE keyboard_buttons SET bg_color = '#64748b', color = '#fff' WHERE id = 'fn-reprint'",    // slate
     "UPDATE keyboard_buttons SET bg_color = '#0ea5e9', color = '#fff' WHERE id = 'fn-pricecheck'", // sky blue
+    // Add family grouping for categories
+    "ALTER TABLE categories ADD COLUMN family TEXT DEFAULT ''",
     // Performance indexes for transaction lookups and reports
     "CREATE INDEX IF NOT EXISTS idx_transaction_items_txn ON transaction_items(transaction_id)",
     "CREATE INDEX IF NOT EXISTS idx_payments_txn ON payments(transaction_id)",
@@ -566,6 +570,33 @@ async function initDatabase() {
   // Link keyboard buttons to products by matching names (best image match)
   relinkKeyboardProducts()
 
+  // Rebrand: update store details to Tillaroo / Cavendish Rd
+  try {
+    const rebrandDone = dbAll("SELECT value FROM settings WHERE key = 'rebrand_tillaroo_v2'")
+    if (!rebrandDone.length) {
+      db.run("UPDATE settings SET value = 'Tillaroo' WHERE key = 'store_name'")
+      db.run("UPDATE settings SET value = '1164 Cavendish Rd, Mt Gravatt East QLD 4122' WHERE key = 'store_address'")
+      db.run("UPDATE settings SET value = 'Tillaroo\n1164 Cavendish Rd, Mt Gravatt East\nFresh Fruit & Veg' WHERE key = 'receipt_header'")
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('rebrand_tillaroo_v2', '1')")
+      appLog('info', 'migration', 'Rebranded store to Tillaroo / 1164 Cavendish Rd')
+    }
+  } catch (e) { console.error('Rebrand migration error:', e.message) }
+
+  // Set default company logo if not already set
+  try {
+    const logoFixed = dbGet("SELECT value FROM settings WHERE key = 'company_logo_v2'")
+    if (!logoFixed || !logoFixed.value) {
+      const logoPath = path.join(__dirname, 'pos', 'logo-circle.png')
+      if (fs.existsSync(logoPath)) {
+        const logoData = fs.readFileSync(logoPath)
+        const dataUrl = 'data:image/png;base64,' + logoData.toString('base64')
+        db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('company_logo', ?1)", [dataUrl])
+        db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('company_logo_v2', '1')")
+        appLog('info', 'migration', 'Set default company logo')
+      }
+    }
+  } catch (e) { console.error('Company logo migration error:', e.message) }
+
   // Enforce deleted_records — remove anything that was intentionally deleted but got re-inserted
   try {
     const deleted = db.exec("SELECT table_name, record_id FROM deleted_records")
@@ -577,7 +608,7 @@ async function initDatabase() {
     }
   } catch (_) {}
 
-  saveDB()
+  saveDBSync()
   appLog('info', 'database', 'Database initialized', `Path: ${DB_PATH}`)
 
   // Auto-backup on startup
@@ -589,12 +620,28 @@ async function initDatabase() {
   }, 24 * 60 * 60 * 1000)
 }
 
+let saveInProgress = false
 function saveDB() {
-  if (!db) return
+  if (!db || saveInProgress) return
+  saveInProgress = true
   try {
     const data = db.export()
     const buf = Buffer.from(data)
-    fs.writeFileSync(DB_PATH, buf)
+    fs.writeFile(DB_PATH, buf, (err) => {
+      saveInProgress = false
+      if (err) appLog('error', 'database', 'Failed to save database to disk', err.message)
+      else appHealth.lastDbSave = new Date().toISOString()
+    })
+  } catch (e) {
+    saveInProgress = false
+    appLog('error', 'database', 'Failed to export database', e.message)
+  }
+}
+function saveDBSync() {
+  if (!db) return
+  try {
+    const data = db.export()
+    fs.writeFileSync(DB_PATH, Buffer.from(data))
     appHealth.lastDbSave = new Date().toISOString()
   } catch (e) {
     appLog('error', 'database', 'Failed to save database to disk', e.message)
@@ -628,7 +675,7 @@ function createBackup(prefix = 'auto') {
 
 function scheduleSave() {
   if (saveTimer) clearTimeout(saveTimer)
-  saveTimer = setTimeout(saveDB, 1000)
+  saveTimer = setTimeout(saveDB, 3000)
 }
 
 // sql.js helpers — wraps the slightly different API to match what we need
@@ -798,15 +845,15 @@ function relinkKeyboardProducts() {
   } catch (e) { console.error('relinkKeyboardProducts error:', e.message) }
 }
 
+const isDevMode = process.argv.includes('--dev')
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
     show: false,
-    fullscreen: !process.argv.includes('--dev'),
-    kiosk: !process.argv.includes('--dev'),
     autoHideMenuBar: true,
-    icon: path.join(__dirname, 'pos', 'logo.png'),
+    icon: path.join(__dirname, 'pos', 'logo-circle.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -814,12 +861,20 @@ function createWindow() {
     }
   })
 
-  mainWindow.loadFile(path.join(__dirname, 'pos', 'index.html'))
+  mainWindow.loadFile(path.join(__dirname, 'pos', 'admin.html'))
 
-  if (process.argv.includes('--dev')) {
+  if (isDevMode) {
     mainWindow.webContents.openDevTools({ mode: 'detach' })
   }
 
+
+  // Allow window.open for print dialogs
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (url === '' || url === 'about:blank') {
+      return { action: 'allow', overrideBrowserWindowOptions: { width: 900, height: 700, autoHideMenuBar: true } }
+    }
+    return { action: 'deny' }
+  })
 
   // Forward renderer console messages we care about into the main-process log.
   // Electron only mirrors console.error to stdout by default — this gives us
@@ -904,7 +959,8 @@ app.whenReady().then(async () => {
 
   // Show splash screen during startup
   splashWindow = new BrowserWindow({
-    width: 420, height: 360,
+    width: 420, height: 480,
+    show: true,
     frame: false, resizable: false,
     center: true, skipTaskbar: false,
     backgroundColor: '#0f1117',
@@ -912,6 +968,7 @@ app.whenReady().then(async () => {
     webPreferences: { nodeIntegration: true, contextIsolation: false }
   })
   splashWindow.loadFile(path.join(__dirname, 'pos', 'splash.html'))
+  splashWindow.once('ready-to-show', () => splashWindow.show())
 
   const splashSend = (channel, ...args) => {
     if (splashWindow && !splashWindow.isDestroyed()) splashWindow.webContents.send(channel, ...args)
@@ -940,14 +997,16 @@ app.whenReady().then(async () => {
   }
   ipcMain.on('splash:close', () => { closeSplash(); app.quit() })
 
+  const wait = ms => new Promise(r => setTimeout(r, ms))
+
   try {
-    splashSend('splash:status', 'Initialising database...', 15)
+    splashSend('splash:status', 'Initialising database...', 10)
     await initDatabase()
 
-    splashSend('splash:status', 'Setting up handlers...', 40)
+    splashSend('splash:status', 'Setting up handlers...', 30)
     setupIPC()
 
-    splashSend('splash:status', 'Starting network...', 65)
+    splashSend('splash:status', 'Configuring network...', 50)
     try {
       const lanMode = dbGet("SELECT value FROM settings WHERE key = 'lan_mode'")?.value
       const lanPort = parseInt(dbGet("SELECT value FROM settings WHERE key = 'lan_port'")?.value || '5555')
@@ -979,31 +1038,24 @@ app.whenReady().then(async () => {
       }
     } catch (e) { appLog('error', 'supabase', 'Supabase config check failed', e.message) }
 
-    splashSend('splash:status', 'Loading register...', 90)
+    splashSend('splash:status', 'Preparing interface...', 70)
     createWindow()
 
-    // Close splash once main window is ready
-    const showMain = () => {
-      setTimeout(() => {
-        closeSplash()
-        if (mainWindow && !mainWindow.isDestroyed()) mainWindow.show()
-      }, 300)
-    }
+    // Wait for the page to finish loading
     if (mainWindow.webContents.isLoading()) {
-      mainWindow.webContents.on('did-finish-load', showMain)
-    } else {
-      showMain()
+      await new Promise(resolve => mainWindow.webContents.on('did-finish-load', resolve))
     }
 
-    // Fallback: close splash after 8s even if main window is slow
-    setTimeout(() => {
-      if (splashWindow && !splashWindow.isDestroyed()) {
-        closeSplash()
-        if (mainWindow && !mainWindow.isDestroyed()) mainWindow.show()
-      }
-    }, 8000)
+    splashSend('splash:status', 'Ready!', 100)
+    await wait(300)
 
-    // Auto-open customer display if a second monitor is available
+    closeSplash()
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.show()
+      if (!isDevMode) { mainWindow.setFullScreen(true); mainWindow.setKiosk(true) }
+    }
+
+    // Open customer display AFTER splash is gone
     const { screen } = require('electron')
     if (screen.getAllDisplays().length > 1) createCustomerWindow()
 
@@ -1022,7 +1074,7 @@ app.on('window-all-closed', () => {
   appLog('info', 'app', 'App shutting down')
   // Close scale connections if open
   try { if (hardwareCleanup) hardwareCleanup() } catch (_) {}
-  saveDB()
+  saveDBSync()
   app.quit()
 })
 
@@ -1039,6 +1091,31 @@ function setupIPC() {
 
   ipcMain.handle('window:quit', () => {
     app.quit()
+  })
+
+  ipcMain.handle('window:printHTML', async (_e, html, title) => {
+    const { BrowserWindow, shell } = require('electron')
+    const printWin = new BrowserWindow({ show: false, width: 800, height: 600, webPreferences: { offscreen: true } })
+    const tmpHtml = path.join(app.getPath('temp'), `_print_${Date.now()}.html`)
+    fs.writeFileSync(tmpHtml, html, 'utf-8')
+    await printWin.loadFile(tmpHtml)
+    await new Promise(r => setTimeout(r, 600))
+    const pdfData = await printWin.webContents.printToPDF({ pageSize: 'A4', printBackground: true })
+    printWin.close()
+    try { fs.unlinkSync(tmpHtml) } catch (_) {}
+    const safeName = (title || 'report').replace(/[^a-zA-Z0-9_-]/g, '_')
+    const tmpPath = path.join(app.getPath('temp'), `${safeName}.pdf`)
+    fs.writeFileSync(tmpPath, pdfData)
+    shell.openPath(tmpPath)
+    return tmpPath
+  })
+
+  ipcMain.handle('window:navigate', (_e, page) => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      const [filePart, queryPart] = page.split('?')
+      const opts = queryPart ? { query: Object.fromEntries(new URLSearchParams(queryPart)) } : {}
+      mainWindow.loadFile(path.join(__dirname, 'pos', filePart), opts)
+    }
   })
 
   // ── App Update (git pull from GitHub) ──────────────────────────────────
@@ -1217,7 +1294,18 @@ function setupIPC() {
   })
 
   ipcMain.handle('app:health', () => {
-    return { ...appHealth }
+    let counts = {}
+    try {
+      counts = {
+        products: dbGet("SELECT COUNT(*) as c FROM products WHERE active=1")?.c || 0,
+        categories: dbGet("SELECT COUNT(*) as c FROM categories WHERE active=1")?.c || 0,
+        transactions: dbGet("SELECT COUNT(*) as c FROM transactions")?.c || 0,
+        staff: dbGet("SELECT COUNT(*) as c FROM staff WHERE active=1")?.c || 0,
+        keyboard_buttons: dbGet("SELECT COUNT(*) as c FROM keyboard_buttons WHERE active=1")?.c || 0,
+        sync_pending: dbGet("SELECT COUNT(*) as c FROM sync_queue WHERE synced=0")?.c || 0,
+      }
+    } catch (_) {}
+    return { ...appHealth, database: !!db, counts }
   })
 
   ipcMain.handle('app:version', () => {
@@ -1365,9 +1453,9 @@ function setupIPC() {
   ipcMain.handle('db:categories:upsert', (_e, cat) => {
     const id = cat.id || uuid()
     dbRun(`
-      INSERT OR REPLACE INTO categories (id, name, sort_order, colour, active, updated_at)
-      VALUES (?1, ?2, ?3, ?4, ?5, datetime('now'))
-    `, [id, cat.name, cat.sort_order || 0, cat.colour || '#4fbd77', cat.active !== false ? 1 : 0])
+      INSERT OR REPLACE INTO categories (id, name, sort_order, colour, family, active, updated_at)
+      VALUES (?1, ?2, ?3, ?4, ?5, ?6, datetime('now'))
+    `, [id, cat.name, cat.sort_order || 0, cat.colour || '#4fbd77', cat.family || '', cat.active !== false ? 1 : 0])
 
     queueSync('categories', id, cat.id ? 'update' : 'insert')
     return { id }
@@ -1611,6 +1699,7 @@ function setupIPC() {
     }
     dbRun("UPDATE transactions SET status = 'voided' WHERE id = ?1", [txnId])
     queueSync('transactions', txnId, 'update')
+    scheduleSave()
     return true
   })
 
@@ -1623,6 +1712,7 @@ function setupIPC() {
     }
     dbRun("UPDATE transactions SET status = 'refunded' WHERE id = ?1", [txnId])
     queueSync('transactions', txnId, 'update')
+    scheduleSave()
     return true
   })
 
@@ -1649,6 +1739,7 @@ function setupIPC() {
     dbRun("DELETE FROM payments WHERE transaction_id = ?1", [txnId])
     dbRun("DELETE FROM transaction_items WHERE transaction_id = ?1", [txnId])
     dbRun("DELETE FROM transactions WHERE id = ?1", [txnId])
+    scheduleSave()
     return true
   })
 
@@ -1660,6 +1751,12 @@ function setupIPC() {
     if (opts.dateTo) { where.push(`date(t.created_at) <= ?${n}`); params.push(opts.dateTo); n++ }
     if (opts.status) { where.push(`t.status = ?${n}`); params.push(opts.status); n++ }
     if (opts.staffId) { where.push(`t.staff_id = ?${n}`); params.push(opts.staffId); n++ }
+    let having = ''
+    if (opts.query) {
+      const q = `%${opts.query}%`
+      having = `HAVING item_names LIKE ?${n} OR t.id LIKE ?${n} OR s.name LIKE ?${n}`
+      params.push(q); n++
+    }
     return dbAll(`
       SELECT t.*, s.name as staff_name, COUNT(DISTINCT ti.id) as item_count,
         GROUP_CONCAT(DISTINCT p.method) as payment_methods,
@@ -1671,6 +1768,7 @@ function setupIPC() {
       LEFT JOIN payments p ON p.transaction_id = t.id
       WHERE ${where.join(' AND ')}
       GROUP BY t.id
+      ${having}
       ORDER BY t.created_at DESC
       LIMIT 200
     `, params)
@@ -1808,10 +1906,11 @@ function setupIPC() {
   ipcMain.handle('db:cash_drawer:log', (_e, entry) => {
     const id = uuid()
     const regRow = dbGet("SELECT value FROM settings WHERE key = 'register_id'")
+    const registerId = entry.register_id || regRow?.value || 'LANE01'
     dbRun(`
       INSERT INTO cash_drawer (id, register_id, staff_id, action, amount, note, created_at)
       VALUES (?1, ?2, ?3, ?4, ?5, ?6, datetime('now'))
-    `, [id, regRow?.value || 'LANE01', entry.staff_id || null, entry.action, entry.amount || null, entry.note || null])
+    `, [id, registerId, entry.staff_id || null, entry.action, entry.amount || null, entry.note || null])
     queueSync('cash_drawer', id, 'insert')
     return { id }
   })

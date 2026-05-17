@@ -141,9 +141,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:linear-gradient(160deg,
 <body>
 
 <div class="header">
-  <img src="logo.png" alt="C" class="brand-circle-img">
+  <img src="logo-circle.png" alt="C" class="brand-circle-img company-logo">
   <div>
-    <div class="store-name" id="storeName">Crisp on Creek</div>
+    <div class="store-name" id="storeName">Tillaroo</div>
     <div class="store-sub" id="storeSub">Fresh Fruit & Veg</div>
   </div>
 </div>
@@ -158,8 +158,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:linear-gradient(160deg,
     <div class="deals-grid" id="dealsGrid"></div>
     <div class="idle-footer">
       <div class="idle-footer-left">
-        <img src="logo.png" alt="C" class="idle-footer-logo">
-        <div class="idle-footer-text" id="storeAddress">1832 Logan Rd, Mt Gravatt QLD 4122</div>
+        <img src="logo-circle.png" alt="C" class="idle-footer-logo company-logo">
+        <div class="idle-footer-text" id="storeAddress">1164 Cavendish Rd, Mt Gravatt East QLD 4122</div>
       </div>
       <div class="qr-area">
         <div>
@@ -294,6 +294,11 @@ body{font-family:'Inter',system-ui,sans-serif;background:linear-gradient(160deg,
       </div>
     `).join('')
   }
+
+  // Load company logo
+  ipcRenderer.invoke('db:settings:get', 'company_logo').then(logo => {
+    if (logo) document.querySelectorAll('.company-logo').forEach(img => { img.src = logo })
+  }).catch(() => {})
 
   // Load real deals from DB, then render
   loadDealsFromDB().then(() => { renderDeals(); renderSidebarDeals() })

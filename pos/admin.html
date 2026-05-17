@@ -517,8 +517,9 @@
     .mode-pin-btn:active { background:var(--surface3);transform:scale(.95) }
 
     /* Register mode — hide sensitive tabs */
+    .osk-key{border:none;border-radius:10px;background:#fff;font-size:18px;font-weight:700;min-width:50px;height:50px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.1);transition:all .08s}
+    .osk-key:active{transform:scale(.92);background:#ddd}
     body.register-mode [data-tab="dashboard"],
-    body.register-mode [data-tab="transactions"],
     body.register-mode [data-tab="cashdrawer"],
     body.register-mode [data-tab="zreport"],
     body.register-mode [data-tab="audit"],
@@ -526,7 +527,10 @@
     body.register-mode [data-tab="settings"],
     body.register-mode [data-tab="staff"],
     body.register-mode [data-tab="keyboard"],
-    body.register-mode [data-tab="labels"] { display: none !important; }
+    body.register-mode [data-tab="labels"],
+    body.register-mode [data-tab="stock"],
+    body.register-mode [data-tab="insights"],
+    body.register-mode [data-tab="diagnostics"] { display: none !important; }
     body.register-mode .sidebar-group-label { display: none; }
     body.register-mode .sidebar-group { padding-top: 6px; }
 
@@ -585,6 +589,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
         Deals
       </a>
+      <a href="#" data-tab="stock">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        Stock
+      </a>
     </div>
 
     <div class="sidebar-group">
@@ -613,6 +621,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
         Logs
       </a>
+      <a href="#" data-tab="diagnostics">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        Diagnostics
+      </a>
       <a href="#" data-tab="settings">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         Settings
@@ -620,7 +632,7 @@
     </div>
 
     <div class="sidebar-footer">
-      <a href="index.html">
+      <a href="#" id="backToRegisterBtn" onclick="event.preventDefault(); window._promptRegisterSwitch()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
         Back to Register
       </a>
@@ -655,6 +667,29 @@
       <button class="mode-pin-btn" data-val="C" style="color:var(--red)">C</button>
       <button class="mode-pin-btn" data-val="0">0</button>
       <button class="mode-pin-btn" data-val="OK" style="background:var(--green);color:#fff">OK</button>
+    </div>
+  </div>
+
+  <!-- On-screen keyboard for register mode -->
+  <div id="oskOverlay" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#e8eaef;padding:10px 14px;box-shadow:0 -4px 20px rgba(0,0,0,.3);border-radius:14px 14px 0 0">
+    <div style="display:flex;flex-direction:column;gap:5px;max-width:700px;margin:0 auto">
+      <div style="display:flex;gap:5px;justify-content:center">
+        <button class="osk-key" data-osk="1">1</button><button class="osk-key" data-osk="2">2</button><button class="osk-key" data-osk="3">3</button><button class="osk-key" data-osk="4">4</button><button class="osk-key" data-osk="5">5</button><button class="osk-key" data-osk="6">6</button><button class="osk-key" data-osk="7">7</button><button class="osk-key" data-osk="8">8</button><button class="osk-key" data-osk="9">9</button><button class="osk-key" data-osk="0">0</button>
+      </div>
+      <div style="display:flex;gap:5px;justify-content:center">
+        <button class="osk-key" data-osk="Q">Q</button><button class="osk-key" data-osk="W">W</button><button class="osk-key" data-osk="E">E</button><button class="osk-key" data-osk="R">R</button><button class="osk-key" data-osk="T">T</button><button class="osk-key" data-osk="Y">Y</button><button class="osk-key" data-osk="U">U</button><button class="osk-key" data-osk="I">I</button><button class="osk-key" data-osk="O">O</button><button class="osk-key" data-osk="P">P</button>
+      </div>
+      <div style="display:flex;gap:5px;justify-content:center">
+        <button class="osk-key" data-osk="A">A</button><button class="osk-key" data-osk="S">S</button><button class="osk-key" data-osk="D">D</button><button class="osk-key" data-osk="F">F</button><button class="osk-key" data-osk="G">G</button><button class="osk-key" data-osk="H">H</button><button class="osk-key" data-osk="J">J</button><button class="osk-key" data-osk="K">K</button><button class="osk-key" data-osk="L">L</button>
+      </div>
+      <div style="display:flex;gap:5px;justify-content:center">
+        <button class="osk-key" data-osk="Z">Z</button><button class="osk-key" data-osk="X">X</button><button class="osk-key" data-osk="C">C</button><button class="osk-key" data-osk="V">V</button><button class="osk-key" data-osk="B">B</button><button class="osk-key" data-osk="N">N</button><button class="osk-key" data-osk="M">M</button><button class="osk-key osk-del" data-osk="BKSP" style="background:#fee2e2;color:#991b1b">⌫</button>
+      </div>
+      <div style="display:flex;gap:5px;justify-content:center">
+        <button class="osk-key" data-osk=" " style="flex:1;max-width:300px">SPACE</button>
+        <button class="osk-key" data-osk="." style="min-width:44px">.</button>
+        <button class="osk-key" data-osk="DONE" style="background:#1a3d2a;color:#fff;min-width:80px;font-size:14px">DONE</button>
+      </div>
     </div>
   </div>
 
@@ -740,14 +775,16 @@
         </div>
         <div id="catSection" style="display:none">
           <table>
-            <thead><tr><th>Name</th><th>Colour</th><th>Sort Order</th><th>Products</th><th style="width:120px"></th></tr></thead>
+            <thead><tr><th>Name</th><th>Family</th><th>Colour</th><th>Sort</th><th>Products</th><th style="width:120px"></th></tr></thead>
             <tbody id="catTable"></tbody>
           </table>
           <div id="catEditArea" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
             <div class="form-row">
               <div class="form-field"><label>Name</label><input type="text" id="catName"></div>
+              <div class="form-field"><label>Family</label><input type="text" id="catFamily" list="familyList" placeholder="e.g. Fresh Produce, Deli, Pantry..."></div>
+              <datalist id="familyList"></datalist>
               <div class="form-field" style="flex:0 0 100px"><label>Colour</label><input type="color" id="catColour" value="#4fbd77"></div>
-              <div class="form-field" style="flex:0 0 100px"><label>Sort Order</label><input type="number" id="catSort" value="0" min="0"></div>
+              <div class="form-field" style="flex:0 0 80px"><label>Sort</label><input type="number" id="catSort" value="0" min="0"></div>
               <button class="btn btn-green" id="saveCatBtn" style="height:42px">Save</button>
               <button class="btn btn-outline" id="cancelCatBtn" style="height:42px">Cancel</button>
             </div>
@@ -756,16 +793,6 @@
         </div>
       </div>
 
-      <div class="section" id="lowStockPanel" style="display:none;border-color:var(--amber);margin-bottom:16px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-          <span style="color:var(--amber);font-size:18px;font-weight:700">&#9888;</span>
-          <h2 style="margin:0;color:var(--amber)">Low Stock Alerts</h2>
-        </div>
-        <table>
-          <thead><tr><th>Product</th><th>Category</th><th>Stock</th><th style="width:200px">Quick Adjust</th></tr></thead>
-          <tbody id="lowStockTable"></tbody>
-        </table>
-      </div>
 
       <div class="section">
         <div class="form-row" style="gap:8px;align-items:flex-end;flex-wrap:wrap">
@@ -798,6 +825,7 @@
             </select>
           </div>
           <button class="btn btn-green" id="addProductBtn">+ Add Product</button>
+          <button class="btn btn-outline" id="manageCatsBtn" style="font-size:12px">Categories</button>
         </div>
         <div id="productFilterInfo" style="font-size:12px;color:var(--text-dim);margin:8px 0 4px"></div>
         <table>
@@ -849,6 +877,25 @@
         </div>
       </div>
     </div>
+
+      <!-- Category Manager Modal -->
+      <div class="modal-panel" id="catManagerPanel" style="width:560px;max-height:80vh;overflow:auto">
+        <div class="modal-header">
+          <h2>Manage Categories</h2>
+          <button class="modal-close" id="catManagerClose">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div style="display:flex;gap:8px;margin-bottom:14px">
+            <input type="text" id="catNewName" placeholder="New category name..." style="flex:1;padding:8px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:14px">
+            <input type="color" id="catNewColour" value="#10b981" title="Category colour" style="width:40px;height:38px;border:none;border-radius:var(--radius);cursor:pointer">
+            <button class="btn btn-green" id="catAddBtn">+ Add</button>
+          </div>
+          <table>
+            <thead><tr><th>Colour</th><th>Name</th><th>Products</th><th style="width:120px"></th></tr></thead>
+            <tbody id="catManagerTable"></tbody>
+          </table>
+        </div>
+      </div>
 
     <!-- ── Price Tags / Labels ──────────────────────────────────────── -->
     <div class="tab-content" id="tab-labels">
@@ -962,6 +1009,33 @@
       </div>
     </div>
 
+    <!-- ── Stock ──────────────────────────────────────────────────── -->
+    <div class="tab-content" id="tab-stock">
+      <h1>Stock Management</h1>
+      <div class="section" style="margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <span style="color:var(--amber);font-size:18px;font-weight:700">&#9888;</span>
+          <h2 style="margin:0;color:var(--amber)">Low Stock Alerts</h2>
+          <span id="stockAlertCount" class="badge badge-amber" style="margin-left:8px">0</span>
+        </div>
+        <table>
+          <thead><tr><th>Product</th><th>Category</th><th>Current Stock</th><th style="width:200px">Quick Adjust</th></tr></thead>
+          <tbody id="lowStockTable"></tbody>
+        </table>
+        <p id="stockNoAlerts" style="color:var(--text-dim);text-align:center;padding:20px;display:none">All stock levels are healthy</p>
+      </div>
+      <div class="section">
+        <h2>All Tracked Products</h2>
+        <div style="margin-bottom:12px">
+          <input type="text" id="stockSearchInput" placeholder="Search tracked products..." style="padding:10px 14px;width:100%;max-width:360px;font-size:14px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text)">
+        </div>
+        <table>
+          <thead><tr><th>Product</th><th>Category</th><th>Unit</th><th>Stock Qty</th><th style="width:220px">Adjust</th></tr></thead>
+          <tbody id="stockAllTable"><tr><td colspan="5" style="color:var(--text-dim);text-align:center;padding:20px">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- ── Staff ──────────────────────────────────────────────────── -->
     <div class="tab-content" id="tab-staff">
       <h1>Staff</h1>
@@ -1064,9 +1138,10 @@
       <!-- Search Controls -->
       <div class="section" style="margin-bottom:16px">
         <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
-          <div class="form-field" style="flex:1;min-width:200px">
+          <div class="form-field" style="flex:1;min-width:200px;position:relative">
             <label>Quick Search (ID, staff, or product)</label>
-            <input type="text" id="txnQuickSearch" placeholder="e.g. receipt #, staff name, product..." style="padding:10px 14px;font-size:14px">
+            <input type="text" id="txnQuickSearch" placeholder="e.g. receipt #, staff name, product..." style="padding:10px 14px;font-size:14px" autocomplete="off">
+            <div id="txnSuggestBox" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:100;background:var(--surface2);border:1px solid var(--border);border-radius:0 0 var(--radius) var(--radius);max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.4)"></div>
           </div>
           <div class="form-field" style="flex:0 0 130px"><label>From</label><input type="date" id="txnDateFrom"></div>
           <div class="form-field" style="flex:0 0 130px"><label>To</label><input type="date" id="txnDateTo"></div>
@@ -1077,7 +1152,7 @@
               <option value="completed">Completed</option>
               <option value="voided">Voided</option>
               <option value="refunded">Refunded</option>
-              <option value="parked">Parked</option>
+              <option value="parked">On Hold</option>
             </select>
           </div>
           <button class="btn btn-green" id="txnSearchBtn" style="height:42px;padding:0 20px;font-size:14px">Search</button>
@@ -1135,7 +1210,15 @@
 
     <!-- ── Cash Drawer ────────────────────────────────────────────── -->
     <div class="tab-content" id="tab-cashdrawer">
-      <h1>Cash Drawer Management</h1>
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+        <h1 style="margin:0">Cash Drawer Management</h1>
+        <div class="form-field" style="margin:0">
+          <select id="cdTillSelect" style="padding:8px 12px;font-size:13px;min-width:160px">
+            <option value="">All Tills</option>
+          </select>
+        </div>
+        <button class="btn btn-outline" id="cdAddTill" style="padding:6px 12px;font-size:12px">+ Add Till</button>
+      </div>
       <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-bottom:20px">
         <div class="stat-card"><div class="stat-label">Current Float</div><div class="stat-value green" id="cdFloat">$0.00</div></div>
         <div class="stat-card"><div class="stat-label">Cash Sales Today</div><div class="stat-value" id="cdCashSales">$0.00</div></div>
@@ -1161,8 +1244,8 @@
       <div class="section" style="margin-top:20px">
         <h2>Drawer Log (Today)</h2>
         <table>
-          <thead><tr><th>Time</th><th>Action</th><th>Amount</th><th>Staff</th><th>Note</th></tr></thead>
-          <tbody id="cdLogTable"><tr><td colspan="5" style="color:var(--text-dim)">No entries today</td></tr></tbody>
+          <thead><tr><th>Time</th><th>Till</th><th>Action</th><th>Amount</th><th>Staff</th><th>Note</th></tr></thead>
+          <tbody id="cdLogTable"><tr><td colspan="6" style="color:var(--text-dim)">No entries today</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -1365,7 +1448,7 @@
                     <option value="subtotal">Sub Total</option>
                     <option value="pay_cash">Pay Cash</option>
                     <option value="pay_card">Pay Card</option>
-                    <option value="park">Park Sale</option>
+                    <option value="park">Hold Sale</option>
                   </optgroup>
                   <optgroup label="Layout">
                     <option value="cart_display">Cart / Receipt Area</option>
@@ -1809,6 +1892,56 @@
       </div>
     </div>
 
+    <!-- ── Diagnostics ──────────────────────────────────────────── -->
+    <div class="tab-content" id="tab-diagnostics">
+      <h1>System Diagnostics</h1>
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <button class="btn btn-green" id="diagRunBtn">Run Full Diagnostic</button>
+        <button class="btn btn-outline" id="diagRefreshBtn">Refresh</button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <!-- System Info -->
+        <div class="section">
+          <h2>System Information</h2>
+          <div id="diagSystemInfo" style="font-size:12px;line-height:2">Loading...</div>
+        </div>
+
+        <!-- Database -->
+        <div class="section">
+          <h2>Database Status</h2>
+          <div id="diagDbInfo" style="font-size:12px;line-height:2">Loading...</div>
+        </div>
+
+        <!-- Hardware -->
+        <div class="section">
+          <h2>Hardware</h2>
+          <div id="diagHardwareInfo" style="font-size:12px;line-height:2">Loading...</div>
+        </div>
+
+        <!-- Network -->
+        <div class="section">
+          <h2>Network &amp; Sync</h2>
+          <div id="diagNetworkInfo" style="font-size:12px;line-height:2">Loading...</div>
+        </div>
+      </div>
+
+      <!-- Health Check Results -->
+      <div class="section" style="margin-top:16px">
+        <h2>Health Check Results</h2>
+        <div id="diagHealthResults" style="font-size:12px;font-family:monospace;white-space:pre-wrap;background:var(--surface2);padding:12px;border-radius:var(--radius);max-height:300px;overflow-y:auto;border:1px solid var(--border)">Click "Run Full Diagnostic" to begin...</div>
+      </div>
+
+      <!-- Console Errors -->
+      <div class="section" style="margin-top:16px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <h2 style="margin:0">Runtime Errors</h2>
+          <button class="btn btn-outline" id="diagClearErrors" style="font-size:10px;padding:4px 8px">Clear</button>
+        </div>
+        <div id="diagErrorLog" style="font-size:11px;font-family:monospace;white-space:pre-wrap;background:#1a0a0a;padding:12px;border-radius:var(--radius);max-height:250px;overflow-y:auto;border:1px solid #3a1515;color:#f88">No errors captured</div>
+      </div>
+    </div>
+
     <div class="tab-content" id="tab-settings">
       <h1>Settings</h1>
 
@@ -1822,6 +1955,19 @@
             <div class="form-field" style="margin-bottom:10px"><label>Address</label><input type="text" id="setStoreAddr"></div>
             <div class="form-field" style="margin-bottom:10px"><label>Phone</label><input type="text" id="setStorePhone"></div>
             <div class="form-field" style="margin-bottom:10px"><label>Register ID</label><input type="text" id="setRegisterId" placeholder="e.g. LANE01"></div>
+            <div class="form-field" style="margin-bottom:10px">
+              <label>Company Logo</label>
+              <div style="display:flex;align-items:center;gap:12px">
+                <div id="companyLogoPreview" style="width:48px;height:48px;border-radius:50%;background:#1a1d27;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">
+                  <img id="companyLogoImg" style="width:100%;height:100%;object-fit:cover" src="">
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                  <label class="btn btn-outline" style="cursor:pointer;font-size:12px;padding:6px 12px">Upload Logo<input type="file" id="companyLogoFile" accept="image/*" style="display:none"></label>
+                  <button class="btn btn-outline" id="removeLogoBtn" style="font-size:12px;padding:6px 12px;color:#ef4444;border-color:#ef4444">Remove</button>
+                </div>
+              </div>
+              <p style="color:var(--text-dim);font-size:11px;margin-top:4px">Shown in status bar, login screen, and receipts. Displayed in a circle.</p>
+            </div>
             <button class="btn btn-green" id="saveSettingsBtn" style="margin-top:4px;">Save Store Details</button>
           </div>
 
@@ -1962,14 +2108,16 @@
         if (a.dataset.tab === 'products') loadProducts()
         if (a.dataset.tab === 'staff') loadStaff()
         if (a.dataset.tab === 'deals') loadDeals()
+        if (a.dataset.tab === 'stock') loadStock()
         if (a.dataset.tab === 'network') loadLanSettings()
-        if (a.dataset.tab === 'cashdrawer') loadCashDrawer()
+        if (a.dataset.tab === 'cashdrawer') { loadCashDrawerTills(); loadCashDrawer() }
         if (a.dataset.tab === 'zreport') initZReport()
         if (a.dataset.tab === 'keyboard') loadKeyboard()
         if (a.dataset.tab === 'audit') loadAuditLog()
         if (a.dataset.tab === 'logs') loadLogsTab()
         if (a.dataset.tab === 'labels') initLabelsTab()
         if (a.dataset.tab === 'insights') loadInsights()
+        if (a.dataset.tab === 'diagnostics') loadDiagnostics()
         if (a.dataset.tab === 'settings') { loadSettings(); loadBackups() }
       })
     })
@@ -2134,38 +2282,78 @@
         </tr>`
       }).join('') || '<tr><td colspan="7" style="color:var(--text-dim)">No products found</td></tr>'
 
-      // Low stock alerts
-      try {
-        const lowStock = await window.pos.getLowStock()
-        if (lowStock.length) {
-          $('#lowStockPanel').style.display = 'block'
-          $('#lowStockTable').innerHTML = lowStock.map(p => `<tr>
-            <td>${esc(p.name)}</td>
-            <td>${esc(p.category_name || '-')}</td>
-            <td><span style="color:${p.stock_qty <= 0 ? 'var(--red)' : 'var(--amber)'};font-weight:700">${p.stock_qty}</span></td>
-            <td>
-              <div style="display:flex;gap:4px;align-items:center">
-                <input type="number" value="10" min="1" style="width:60px;padding:4px 6px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12px" data-stock-input="${esc(p.id)}">
-                <button class="btn btn-green" style="padding:4px 10px;font-size:11px" data-stock-add="${esc(p.id)}">+ Add</button>
-              </div>
-            </td>
-          </tr>`).join('')
-        } else {
-          $('#lowStockPanel').style.display = 'none'
-        }
-      } catch (_) {}
     }
 
-    $('#lowStockTable').addEventListener('click', async e => {
-      const btn = e.target.closest('[data-stock-add]')
-      if (!btn) return
-      const id = btn.dataset.stockAdd
-      const input = $(`[data-stock-input="${id}"]`)
-      const qty = parseFloat(input?.value) || 0
-      if (qty <= 0) { showToast('Enter a quantity', 'error'); return }
-      await window.pos.adjustStock(id, qty, 'Manual adjustment')
-      showToast(`Stock +${qty} added`, 'success')
-      loadProducts()
+    // ── Stock Tab ────────────────────────────────────────────────────
+    async function loadStock () {
+      const lowStock = await window.pos.getLowStock()
+      $('#stockAlertCount').textContent = lowStock.length
+      if (lowStock.length) {
+        $('#stockNoAlerts').style.display = 'none'
+        $('#lowStockTable').innerHTML = lowStock.map(p => `<tr>
+          <td>${esc(p.name)}</td>
+          <td>${esc(p.category_name || '-')}</td>
+          <td><span style="color:${p.stock_qty <= 0 ? 'var(--red)' : 'var(--amber)'};font-weight:700">${p.stock_qty}</span></td>
+          <td>
+            <div style="display:flex;gap:4px;align-items:center">
+              <input type="number" value="10" min="1" style="width:60px;padding:4px 6px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12px" data-stock-input="${esc(p.id)}">
+              <button class="btn btn-green" style="padding:4px 10px;font-size:11px" data-stock-add="${esc(p.id)}">+ Add</button>
+            </div>
+          </td>
+        </tr>`).join('')
+      } else {
+        $('#lowStockTable').innerHTML = ''
+        $('#stockNoAlerts').style.display = 'block'
+      }
+
+      const allProds = await window.pos.searchProducts('')
+      const tracked = allProds.filter(p => p.track_stock)
+      const query = ($('#stockSearchInput').value || '').toLowerCase()
+      const filtered = query ? tracked.filter(p => p.name.toLowerCase().includes(query)) : tracked
+      const cats = await window.pos.getCategories()
+      const catMap = {}; cats.forEach(c => catMap[c.id] = c.name)
+
+      $('#stockAllTable').innerHTML = filtered.length ? filtered.map(p => {
+        const low = p.stock_qty <= 5
+        return `<tr>
+          <td>${esc(p.name)}</td>
+          <td>${esc(catMap[p.category_id] || '-')}</td>
+          <td>${esc(p.unit)}</td>
+          <td><span style="${low ? 'color:var(--red);font-weight:700' : ''}">${p.stock_qty}</span></td>
+          <td>
+            <div style="display:flex;gap:4px;align-items:center">
+              <input type="number" value="10" min="1" style="width:60px;padding:4px 6px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12px" data-stock-adj-input="${esc(p.id)}">
+              <button class="btn btn-green" style="padding:4px 8px;font-size:11px" data-stock-adj-add="${esc(p.id)}">+</button>
+              <button class="btn" style="padding:4px 8px;font-size:11px;background:var(--red);color:#fff" data-stock-adj-sub="${esc(p.id)}">−</button>
+            </div>
+          </td>
+        </tr>`
+      }).join('') : '<tr><td colspan="5" style="color:var(--text-dim);text-align:center;padding:20px">No tracked products</td></tr>'
+    }
+
+    $('#stockSearchInput')?.addEventListener('input', debounce(loadStock, 300))
+
+    document.addEventListener('click', async e => {
+      const addBtn = e.target.closest('[data-stock-add]') || e.target.closest('[data-stock-adj-add]')
+      const subBtn = e.target.closest('[data-stock-adj-sub]')
+      if (addBtn) {
+        const id = addBtn.dataset.stockAdd || addBtn.dataset.stockAdjAdd
+        const input = $(`[data-stock-input="${id}"]`) || $(`[data-stock-adj-input="${id}"]`)
+        const qty = parseFloat(input?.value) || 0
+        if (qty <= 0) { showToast('Enter a quantity', 'error'); return }
+        await window.pos.adjustStock(id, qty, 'Manual add')
+        showToast(`Stock +${qty}`, 'success')
+        loadStock()
+      }
+      if (subBtn) {
+        const id = subBtn.dataset.stockAdjSub
+        const input = $(`[data-stock-adj-input="${id}"]`)
+        const qty = parseFloat(input?.value) || 0
+        if (qty <= 0) { showToast('Enter a quantity', 'error'); return }
+        await window.pos.adjustStock(id, -qty, 'Manual subtract')
+        showToast(`Stock −${qty}`, 'info')
+        loadStock()
+      }
     })
 
     $('#productSearch').addEventListener('input', debounce(() => loadProducts(), 300))
@@ -2184,6 +2372,61 @@
 
     $('#addProductBtn').addEventListener('click', () => {
       openProductEdit(null)
+    })
+
+    // ── Category Manager ─────────────────────────────────────────────
+    $('#manageCatsBtn').addEventListener('click', () => {
+      loadCatManager()
+      openModal('catManagerPanel')
+    })
+    $('#catManagerClose').addEventListener('click', () => closeModal('catManagerPanel'))
+
+    async function loadCatManager () {
+      const cats = await window.pos.getCategories()
+      const prods = await window.pos.searchProducts('')
+      const countMap = {}
+      prods.forEach(p => { countMap[p.category_id] = (countMap[p.category_id] || 0) + 1 })
+      $('#catManagerTable').innerHTML = cats.map(c => `<tr data-cat-id="${esc(c.id)}">
+        <td><input type="color" value="${esc(c.colour || '#10b981')}" data-cat-colour="${esc(c.id)}" style="width:32px;height:28px;border:none;border-radius:4px;cursor:pointer"></td>
+        <td><input type="text" value="${esc(c.name)}" data-cat-name="${esc(c.id)}" style="padding:6px 8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;width:100%"></td>
+        <td style="color:var(--text-dim);font-size:12px">${countMap[c.id] || 0}</td>
+        <td>
+          <button class="btn btn-green" style="padding:3px 8px;font-size:11px" data-cat-save="${esc(c.id)}">Save</button>
+          <button class="btn" style="padding:3px 8px;font-size:11px;background:var(--red);color:#fff" data-cat-del="${esc(c.id)}">Del</button>
+        </td>
+      </tr>`).join('') || '<tr><td colspan="4" style="color:var(--text-dim)">No categories</td></tr>'
+    }
+
+    $('#catAddBtn').addEventListener('click', async () => {
+      const name = $('#catNewName').value.trim()
+      if (!name) { showToast('Enter a name', 'error'); return }
+      await window.pos.upsertCategory({ name, colour: $('#catNewColour').value, active: 1 })
+      $('#catNewName').value = ''
+      showToast(`Category "${name}" created`, 'success')
+      loadCatManager()
+      loadProducts()
+    })
+
+    $('#catManagerTable').addEventListener('click', async e => {
+      const saveBtn = e.target.closest('[data-cat-save]')
+      const delBtn = e.target.closest('[data-cat-del]')
+      if (saveBtn) {
+        const id = saveBtn.dataset.catSave
+        const name = $(`[data-cat-name="${id}"]`).value.trim()
+        const colour = $(`[data-cat-colour="${id}"]`).value
+        if (!name) { showToast('Name required', 'error'); return }
+        await window.pos.upsertCategory({ id, name, colour, active: 1 })
+        showToast('Category updated', 'success')
+        loadProducts()
+      }
+      if (delBtn) {
+        const id = delBtn.dataset.catDel
+        if (!confirm('Delete this category? Products will become uncategorised.')) return
+        await window.pos.upsertCategory({ id, active: 0 })
+        showToast('Category deleted', 'info')
+        loadCatManager()
+        loadProducts()
+      }
     })
 
     function openProductEdit (p) {
@@ -2289,18 +2532,22 @@
 
     async function loadCategories () {
       const cats = await window.pos.getCategories()
-      // Count products per category
       const allProds = await window.pos.searchProducts('')
       const countMap = {}
       for (const p of allProds) { countMap[p.category_id] = (countMap[p.category_id] || 0) + 1 }
 
+      // Populate families datalist
+      const families = [...new Set(cats.map(c => c.family).filter(Boolean))]
+      $('#familyList').innerHTML = families.map(f => `<option value="${esc(f)}">`).join('')
+
       $('#catTable').innerHTML = cats.map(c => `<tr>
         <td>${esc(c.name)}</td>
-        <td><span style="display:inline-block;width:20px;height:20px;border-radius:4px;background:${esc(c.colour || '#4fbd77')};vertical-align:middle"></span> ${esc(c.colour || '#4fbd77')}</td>
+        <td style="color:${c.family ? 'var(--text)' : 'var(--text-muted)'}; font-size:12px">${esc(c.family || '—')}</td>
+        <td><span style="display:inline-block;width:16px;height:16px;border-radius:3px;background:${esc(c.colour || '#4fbd77')};vertical-align:middle"></span></td>
         <td>${c.sort_order || 0}</td>
         <td>${countMap[c.id] || 0}</td>
         <td><button class="btn btn-outline" style="padding:3px 10px;font-size:11px" data-edit-cat="${esc(c.id)}">Edit</button></td>
-      </tr>`).join('') || '<tr><td colspan="5" style="color:var(--text-dim)">No categories</td></tr>'
+      </tr>`).join('') || '<tr><td colspan="6" style="color:var(--text-dim)">No categories</td></tr>'
     }
 
     $('#catTable').addEventListener('click', e => {
@@ -2319,11 +2566,13 @@
       if (cat) {
         $('#catEditId').value = cat.id
         $('#catName').value = cat.name
+        $('#catFamily').value = cat.family || ''
         $('#catColour').value = cat.colour || '#4fbd77'
         $('#catSort').value = cat.sort_order || 0
       } else {
         $('#catEditId').value = ''
         $('#catName').value = ''
+        $('#catFamily').value = ''
         $('#catColour').value = '#4fbd77'
         $('#catSort').value = productCategories.length
       }
@@ -2337,6 +2586,7 @@
       await window.pos.upsertCategory({
         id: $('#catEditId').value || undefined,
         name,
+        family: $('#catFamily').value.trim(),
         colour: $('#catColour').value,
         sort_order: parseInt($('#catSort').value) || 0
       })
@@ -2650,20 +2900,16 @@
     $$('[data-txn-preset]').forEach(btn => btn.addEventListener('click', () => applyTxnPreset(btn.dataset.txnPreset)))
 
     async function searchTransactions () {
+      const quickFilter = ($('#txnQuickSearch').value || '').trim().toLowerCase()
       const opts = {
         dateFrom: $('#txnDateFrom').value || null,
         dateTo: $('#txnDateTo').value || null,
-        status: $('#txnStatus').value || null
+        status: $('#txnStatus').value || null,
+        query: quickFilter || null
       }
       const txns = await window.pos.searchTransactions(opts)
 
-      const quickFilter = ($('#txnQuickSearch').value || '').trim().toLowerCase()
-      const filtered = quickFilter
-        ? txns.filter(t =>
-            (t.id || '').toLowerCase().includes(quickFilter) ||
-            (t.staff_name || '').toLowerCase().includes(quickFilter) ||
-            (t.item_names || '').toLowerCase().includes(quickFilter))
-        : txns
+      const filtered = txns
 
       txnCache = filtered
 
@@ -2699,6 +2945,7 @@
         : 'No transactions found'
 
       const statusColors = { completed: 'badge-green', voided: 'badge-red', refunded: 'badge-amber', parked: 'badge-amber' }
+      const statusLabels = { completed: 'Completed', voided: 'Voided', refunded: 'Refunded', parked: 'On Hold' }
       $('#txnTable').innerHTML = filtered.length ? filtered.map(t => {
         const dt = new Date(t.created_at + 'Z')
         const payBadge = t.payment_methods
@@ -2716,14 +2963,39 @@
           <td>${t.item_count || 0}</td>
           <td>${payBadge}</td>
           <td>${money(t.total)}</td>
-          <td><span class="badge ${statusColors[t.status] || ''}">${esc(t.status)}</span></td>
+          <td><span class="badge ${statusColors[t.status] || ''}">${esc(statusLabels[t.status] || t.status)}</span></td>
           <td style="display:flex;gap:4px">${actions.join('')}</td>
         </tr>`
       }).join('') : '<tr><td colspan="8" style="color:var(--text-dim);text-align:center;padding:30px">No transactions found</td></tr>'
     }
 
-    $('#txnSearchBtn').addEventListener('click', searchTransactions)
-    $('#txnQuickSearch').addEventListener('input', debounce(searchTransactions, 300))
+    $('#txnSearchBtn').addEventListener('click', () => { $('#txnSuggestBox').style.display = 'none'; searchTransactions() })
+    $('#txnQuickSearch').addEventListener('input', debounce(async () => {
+      const q = $('#txnQuickSearch').value.trim()
+      const box = $('#txnSuggestBox')
+      if (q.length < 2) { box.style.display = 'none'; searchTransactions(); return }
+      const products = await window.pos.searchProducts(q)
+      if (products.length > 0) {
+        box.style.display = 'block'
+        box.innerHTML = products.slice(0, 8).map(p => {
+          const code = p.barcode || p.plu || ''
+          return `<div style="padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px" data-txn-suggest="${esc(p.name)}" onmouseover="this.style.background='var(--surface3)'" onmouseout="this.style.background=''">
+            <span style="flex:1">${esc(p.name)}</span>
+            ${code ? `<span style="font-size:10px;color:var(--text-dim);font-family:monospace">${esc(code)}</span>` : ''}
+            <span style="font-size:11px;color:var(--green)">${money(p.active_price ?? p.price)}</span>
+          </div>`
+        }).join('')
+      } else { box.style.display = 'none' }
+      searchTransactions()
+    }, 250))
+    $('#txnSuggestBox').addEventListener('click', e => {
+      const el = e.target.closest('[data-txn-suggest]')
+      if (!el) return
+      $('#txnQuickSearch').value = el.dataset.txnSuggest
+      $('#txnSuggestBox').style.display = 'none'
+      searchTransactions()
+    })
+    $('#txnQuickSearch').addEventListener('blur', () => { setTimeout(() => { $('#txnSuggestBox').style.display = 'none' }, 200) })
 
     $('#txnTable').addEventListener('click', async e => {
       const viewBtn = e.target.closest('[data-txn-view]')
@@ -2820,23 +3092,45 @@
 
     // ── Cash Drawer ─────────────────────────────────────────────────
 
+    async function loadCashDrawerTills () {
+      const settings = await window.pos.getAllSettings()
+      const tills = (settings.tills || '').split(',').map(t => t.trim()).filter(Boolean)
+      const currentReg = settings.register_id || 'LANE01'
+      if (!tills.length) tills.push(currentReg)
+      const sel = $('#cdTillSelect')
+      sel.innerHTML = '<option value="">All Tills</option>' + tills.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('')
+    }
+
     async function loadCashDrawer () {
       const today = new Date().toISOString().slice(0, 10)
+      const tillFilter = $('#cdTillSelect').value || null
       const [summary, log] = await Promise.all([
         window.pos.getCashDrawerSummary(today),
         window.pos.getCashDrawerLog(today)
       ])
 
-      $('#cdFloat').textContent = money(summary.float)
-      $('#cdCashSales').textContent = money(summary.cash_sales)
-      $('#cdExpected').textContent = money(summary.expected)
+      const filteredLog = tillFilter ? log.filter(e => e.register_id === tillFilter) : log
 
-      if (log.length) {
+      const floatTotal = filteredLog.filter(e => e.action === 'float').reduce((s, e) => s + (e.amount || 0), 0)
+      const pickupTotal = filteredLog.filter(e => e.action === 'pickup').reduce((s, e) => s + (e.amount || 0), 0)
+      const dropTotal = filteredLog.filter(e => e.action === 'drop').reduce((s, e) => s + (e.amount || 0), 0)
+
+      if (tillFilter) {
+        $('#cdFloat').textContent = money(floatTotal)
+        $('#cdExpected').textContent = money(floatTotal + summary.cash_sales - pickupTotal + dropTotal)
+      } else {
+        $('#cdFloat').textContent = money(summary.float)
+        $('#cdExpected').textContent = money(summary.expected)
+      }
+      $('#cdCashSales').textContent = money(summary.cash_sales)
+
+      if (filteredLog.length) {
         const actionLabels = { float: 'Open Float', pickup: 'Cash Pickup', drop: 'Cash Drop', close: 'Close/EOD', open: 'Drawer Open' }
-        $('#cdLogTable').innerHTML = log.map(e => {
+        $('#cdLogTable').innerHTML = filteredLog.map(e => {
           const dt = new Date(e.created_at + 'Z')
           return `<tr>
             <td>${dt.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })}</td>
+            <td>${esc(e.register_id || '-')}</td>
             <td><span class="badge badge-green">${esc(actionLabels[e.action] || e.action)}</span></td>
             <td>${e.amount != null ? money(e.amount) : '-'}</td>
             <td>${esc(e.staff_name || '-')}</td>
@@ -2844,18 +3138,34 @@
           </tr>`
         }).join('')
       } else {
-        $('#cdLogTable').innerHTML = '<tr><td colspan="5" style="color:var(--text-dim)">No entries today</td></tr>'
+        $('#cdLogTable').innerHTML = '<tr><td colspan="6" style="color:var(--text-dim)">No entries today</td></tr>'
       }
     }
+
+    $('#cdTillSelect').addEventListener('change', loadCashDrawer)
+
+    $('#cdAddTill').addEventListener('click', async () => {
+      const name = prompt('Enter new till/register name (e.g. LANE02):')
+      if (!name || !name.trim()) return
+      const settings = await window.pos.getAllSettings()
+      const tills = (settings.tills || '').split(',').map(t => t.trim()).filter(Boolean)
+      const currentReg = settings.register_id || 'LANE01'
+      if (!tills.length) tills.push(currentReg)
+      if (!tills.includes(name.trim())) tills.push(name.trim())
+      await window.pos.setSetting('tills', tills.join(','))
+      loadCashDrawerTills()
+      showToast(`Till "${name.trim()}" added`, 'success')
+    })
 
     $('#cdSubmit').addEventListener('click', async () => {
       const action = $('#cdAction').value
       const amount = parseFloat($('#cdAmount').value) || 0
       const note = $('#cdNote').value.trim()
+      const registerId = $('#cdTillSelect').value || null
       if ((action === 'float' || action === 'pickup' || action === 'drop') && amount <= 0) {
         showToast('Enter an amount', 'error'); return
       }
-      await window.pos.logCashDrawer({ action, amount, note })
+      await window.pos.logCashDrawer({ action, amount, note, register_id: registerId })
       showToast(`${action} recorded`, 'success')
       $('#cdAmount').value = '0'; $('#cdNote').value = ''
       loadCashDrawer()
@@ -2863,6 +3173,8 @@
 
 
     // ── Settings ────────────────────────────────────────────────────
+
+    let pendingLogoDataUrl = null
 
     async function loadSettings() {
       const s = await window.pos.getAllSettings()
@@ -2878,6 +3190,12 @@
       $('#setSupaUrl').value = s.supabase_url || ''
       $('#setSupaKey').value = s.supabase_anon_key || ''
       $('#setFullscreen').value = s.start_fullscreen || '1'
+      pendingLogoDataUrl = null
+      if (s.company_logo) {
+        $('#companyLogoImg').src = s.company_logo
+      } else {
+        $('#companyLogoImg').src = 'logo-circle.png'
+      }
       if (s.lan_mode === 'client') {
         $('#supabaseDesc').textContent = 'This register is in client mode — product data is synced from the main server via LAN. Supabase settings are managed on the server.'
         $('#setSupaUrl').disabled = true
@@ -2887,12 +3205,42 @@
       }
     }
 
+    $('#companyLogoFile').addEventListener('change', e => {
+      const file = e.target.files[0]; if (!file) return
+      const reader = new FileReader()
+      reader.onload = ev => {
+        const img = new Image()
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          const max = 256
+          let w = img.width, h = img.height
+          if (w > max || h > max) { const r = Math.min(max / w, max / h); w = Math.round(w * r); h = Math.round(h * r) }
+          canvas.width = w; canvas.height = h
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h)
+          pendingLogoDataUrl = canvas.toDataURL('image/png')
+          $('#companyLogoImg').src = pendingLogoDataUrl
+        }
+        img.src = ev.target.result
+      }
+      reader.readAsDataURL(file)
+    })
+    $('#removeLogoBtn').addEventListener('click', () => {
+      pendingLogoDataUrl = '__remove__'
+      $('#companyLogoImg').src = 'logo-circle.png'
+    })
+
     $('#saveSettingsBtn').addEventListener('click', async () => {
       await window.pos.setSetting('store_name', $('#setStoreName').value)
       await window.pos.setSetting('store_abn', $('#setStoreAbn').value)
       await window.pos.setSetting('store_address', $('#setStoreAddr').value)
       await window.pos.setSetting('store_phone', $('#setStorePhone').value)
       await window.pos.setSetting('register_id', $('#setRegisterId').value)
+      if (pendingLogoDataUrl === '__remove__') {
+        await window.pos.setSetting('company_logo', '')
+      } else if (pendingLogoDataUrl) {
+        await window.pos.setSetting('company_logo', pendingLogoDataUrl)
+      }
+      pendingLogoDataUrl = null
       showToast('Settings saved', 'success')
     })
 
@@ -3766,8 +4114,8 @@
       $('#wkReportContent').style.display = 'block'
     })
 
-    // Print
-    $('#rptPrint').addEventListener('click', () => {
+    // Print / Export PDF
+    $('#rptPrint').addEventListener('click', async () => {
       const printStyles = `body{font-family:sans-serif;padding:20px;color:#333}
         table{width:100%;border-collapse:collapse}th,td{padding:6px 8px;text-align:left;border-bottom:1px solid #ddd;font-size:13px}
         th{font-weight:700;font-size:11px;text-transform:uppercase;color:#888}
@@ -3777,8 +4125,7 @@
         .stat-value.green{color:#3a9c5e}
         .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px}
         .section{border:1px solid #ddd;border-radius:6px;padding:14px;margin-bottom:12px}
-        h1{font-size:20px;margin-bottom:4px}h2{font-size:14px;color:#666;margin-bottom:8px}
-        @media print{body{padding:0}.section{break-inside:avoid}}`
+        h1{font-size:20px;margin-bottom:4px}h2{font-size:14px;color:#666;margin-bottom:8px}`
 
       let content, title, subtitle
       if (currentReportType === 'daily') {
@@ -3791,11 +4138,12 @@
         title = 'Weekly Summary'; subtitle = 'Week of ' + $('#wkDate').value
       }
 
-      const win = window.open('', '_blank', 'width=800,height=600')
-      win.document.write(`<html><head><title>${title} - ${subtitle}</title><style>${printStyles}</style>
-      </head><body><h1>${title}</h1><p style="color:#888;margin-bottom:16px">${subtitle}</p>${content.innerHTML}</body></html>`)
-      win.document.close()
-      setTimeout(() => { win.print() }, 300)
+      const html = `<html><head><title>${title} - ${subtitle}</title><style>${printStyles}</style>
+      </head><body><h1>${title}</h1><p style="color:#888;margin-bottom:16px">${subtitle}</p>${content.innerHTML}</body></html>`
+      showToast('Generating PDF...', 'info')
+      try {
+        await window.pos.printHTML(html, `${title.replace(/\s+/g, '_')}_${subtitle}`)
+      } catch (e) { showToast('PDF generation failed: ' + e.message, 'error') }
     })
 
     // ── Page Layout Editor (Unified Grid) ─────────────────────────
@@ -5002,12 +5350,12 @@
         const img = new Image()
         img.onload = () => {
           const canvas = document.createElement('canvas')
-          const max = 128
+          const max = 512
           let w = img.width, h = img.height
           if (w > max || h > max) { const r = Math.min(max / w, max / h); w = Math.round(w * r); h = Math.round(h * r) }
           canvas.width = w; canvas.height = h
           canvas.getContext('2d').drawImage(img, 0, 0, w, h)
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.8)
+          const dataUrl = canvas.toDataURL('image/png')
           $('#kbImageData').value = dataUrl
           $('#kbImagePreview').innerHTML = `<img src="${dataUrl}" style="width:36px;height:36px;border-radius:6px;object-fit:cover">`
         }
@@ -5903,52 +6251,68 @@
 
     // ── Product Search & Add ─────────────────────────────────────────
 
+    let labelProductCache = []
+
     async function loadLabelProducts () {
       const query = $('#labelProductSearch').value.trim()
       const catId = $('#labelCatFilter').value
       let products = await window.pos.searchProducts(query || '')
       if (catId) products = products.filter(p => p.category_id === catId)
       products.sort((a, b) => a.name.localeCompare(b.name))
+      labelProductCache = products
 
       const list = $('#labelProductList')
+      if (!products.length) {
+        list.innerHTML = '<div style="color:var(--text-dim);font-size:12px;padding:12px">No products found</div>'
+        return
+      }
       list.innerHTML = products.slice(0, 80).map(p => {
         const code = p.plu || p.barcode || ''
-        return `<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);cursor:pointer" data-label-add="${esc(p.id)}">
+        return `<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);cursor:pointer;transition:background .1s" draggable="true" data-label-add="${p.id}" onmouseover="this.style.background='rgba(79,189,119,.12)'" onmouseout="this.style.background=''">
           <span style="flex:1;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.name)}</span>
           ${code ? `<span style="font-size:9px;color:var(--text-dim);flex-shrink:0;font-family:monospace">${esc(code)}</span>` : ''}
           <span style="font-size:10px;color:var(--green);font-weight:600;flex-shrink:0">${money(p.active_price ?? p.price)}</span>
-          <button class="btn btn-green" style="padding:2px 8px;font-size:10px;flex-shrink:0" data-label-add="${esc(p.id)}">+</button>
+          <button class="btn btn-green" style="padding:2px 8px;font-size:10px;flex-shrink:0" data-label-add="${p.id}">+</button>
         </div>`
-      }).join('') || '<div style="color:var(--text-dim);font-size:12px;padding:12px">No products found</div>'
+      }).join('')
     }
 
-    $('#labelProductList').addEventListener('click', async e => {
-      const el = e.target.closest('[data-label-add]')
-      if (!el) return
-      const id = el.dataset.labelAdd
+    function addProductToLabelQueue (id) {
       const existing = labelQueue.find(q => q.product.id === id)
       if (existing) { existing.qty++; renderLabelSheet(); return }
-      const p = await window.pos.getProductById(id)
+      const p = labelProductCache.find(x => x.id === id)
       if (!p) return
-      const cats = await window.pos.getCategories()
-      p.category_name = (cats.find(c => c.id === p.category_id) || {}).name || ''
-      labelQueue.push({ product: p, qty: 1 })
+      labelQueue.push({ product: { ...p }, qty: 1 })
       renderLabelSheet()
+      showToast(`${p.name} added to queue`, 'success')
+    }
+
+    $('#labelProductList').addEventListener('click', e => {
+      const el = e.target.closest('[data-label-add]')
+      if (!el) return
+      addProductToLabelQueue(el.dataset.labelAdd)
     })
 
-    $('#labelAddAllBtn').addEventListener('click', async () => {
-      const query = $('#labelProductSearch').value.trim()
-      const catId = $('#labelCatFilter').value
-      let products = await window.pos.searchProducts(query || '')
-      if (catId) products = products.filter(p => p.category_id === catId)
-      const cats = await window.pos.getCategories()
-      const catMap = Object.fromEntries(cats.map(c => [c.id, c.name]))
+    // Drag from product list to queue
+    $('#labelProductList').addEventListener('dragstart', e => {
+      const el = e.target.closest('[data-label-add]')
+      if (!el) return
+      e.dataTransfer.setData('text/plain', el.dataset.labelAdd)
+      e.dataTransfer.effectAllowed = 'copy'
+    })
+    $('#labelQueueList').addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy' })
+    $('#labelQueueList').addEventListener('drop', e => {
+      e.preventDefault()
+      const id = e.dataTransfer.getData('text/plain')
+      if (id) addProductToLabelQueue(id)
+    })
+
+    $('#labelAddAllBtn').addEventListener('click', () => {
       let added = 0
-      for (const p of products) {
+      for (const p of labelProductCache) {
         const existing = labelQueue.find(q => q.product.id === p.id)
         if (existing) { existing.qty++; added++; continue }
-        p.category_name = catMap[p.category_id] || ''
-        labelQueue.push({ product: p, qty: 1 })
+        labelQueue.push({ product: { ...p }, qty: 1 })
         added++
       }
       renderLabelSheet()
@@ -5960,7 +6324,7 @@
 
     // ── Print ────────────────────────────────────────────────────────
 
-    $('#labelPrintBtn').addEventListener('click', () => {
+    $('#labelPrintBtn').addEventListener('click', async () => {
       const flat = expandQueue()
       if (!flat.length) { showToast('Add products to print', 'error'); return }
       const cfg = getLabelConfig()
@@ -5968,7 +6332,6 @@
       const usableW = pageW - margin * 2, usableH = pageH - margin * 2
       const cellW = Math.floor((usableW / cfg.cols) * 100) / 100
       const cellH = Math.floor((usableH / cfg.rows) * 100) / 100
-      const printWin = window.open('', '_blank', 'width=900,height=600')
       let content = '<html><head><title>Price Tags</title><style>'
       content += `@page { size: A4; margin: ${margin}mm; } body { margin: 0; font-family: Arial, sans-serif; }`
       content += `.sheet { display: grid; grid-template-columns: repeat(${cfg.cols}, 1fr); grid-template-rows: repeat(${cfg.rows}, 1fr); width: ${usableW}mm; height: ${usableH}mm; gap: 0; }`
@@ -5986,20 +6349,25 @@
         }
         content += '</div>'
       }
-      content += `<script>${generateBarcodeSVG.toString()}<\/script>`
-      content += '<script>window.print()<\/script></body></html>'
-      printWin.document.write(content)
-      printWin.document.close()
+      content += '</body></html>'
+      showToast('Generating PDF...', 'info')
+      try {
+        await window.pos.printHTML(content, 'Price_Tags')
+      } catch (e) { showToast('PDF generation failed: ' + e.message, 'error') }
     })
 
     // Init labels tab
     async function initLabelsTab () {
-      const cats = await window.pos.getCategories()
-      $('#labelCatFilter').innerHTML = '<option value="">All Categories</option>' + cats.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('')
-      await loadLabelProducts()
-      renderTagCanvas()
-      renderTagElementList()
-      renderLabelSheet()
+      try {
+        const cats = await window.pos.getCategories()
+        $('#labelCatFilter').innerHTML = '<option value="">All Categories</option>' + cats.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('')
+        await loadLabelProducts()
+      } catch (e) { console.error('Labels init error:', e) }
+      requestAnimationFrame(() => {
+        renderTagCanvas()
+        renderTagElementList()
+        renderLabelSheet()
+      })
     }
 
     // -- Mode Switching (Register vs Admin) --------------------------------
@@ -6022,7 +6390,7 @@
         $('#modeIcon').textContent = '\u{1F513}'
         // If current tab is hidden in register mode, switch to products
         const activeTab = $('.sidebar a.active')?.dataset.tab
-        const hiddenInRegister = ['dashboard','transactions','cashdrawer','zreport','audit','logs','settings','staff','keyboard','labels']
+        const hiddenInRegister = ['dashboard','cashdrawer','zreport','audit','logs','diagnostics','settings','staff','keyboard','labels','stock','insights']
         if (hiddenInRegister.includes(activeTab)) {
           $$('.sidebar a').forEach(n => n.classList.remove('active'))
           const prodLink = $('[data-tab="products"]')
@@ -6066,9 +6434,13 @@
           if (modePinBuf.length < 4) { $('#modePinError').textContent = 'PIN must be at least 4 digits'; return }
           const staff = await window.pos.staffLogin(modePinBuf)
           if (staff && (staff.role === 'admin' || staff.role === 'manager')) {
-            applyMode(modeSwitchTarget)
             closeModal('modePinModal')
-            showToast(`Switched to ${modeSwitchTarget === 'admin' ? 'Admin' : 'Register'} mode`, 'success')
+            if (modeSwitchTarget === '__navigate_register__') {
+              window.pos.navigate('index.html')
+            } else {
+              applyMode(modeSwitchTarget)
+              showToast(`Switched to ${modeSwitchTarget === 'admin' ? 'Admin' : 'Register'} mode`, 'success')
+            }
           } else {
             $('#modePinError').textContent = staff ? 'Admin or manager PIN required' : 'Invalid PIN'
             modePinBuf = ''; $('#modePinDots').textContent = ''
@@ -6077,6 +6449,56 @@
         }
         if (modePinBuf.length < 6) { modePinBuf += v; $('#modePinDots').textContent = '●'.repeat(modePinBuf.length); $('#modePinError').textContent = '' }
       })
+    })
+
+    // -- Register Switch (Back to Register button) -------------------------
+    let regSwitchPinBuf = ''
+    function promptRegisterSwitch () {
+      regSwitchPinBuf = ''
+      $('#modePinDots').textContent = ''
+      $('#modePinError').textContent = ''
+      $('#modePinTitle').textContent = 'Switch to Register'
+      $('#modePinDesc').textContent = 'Enter admin PIN to go back to the register'
+      $('#modePinIcon').textContent = '\u{1F4BB}'
+      modeSwitchTarget = '__navigate_register__'
+      openModal('modePinModal')
+    }
+
+    // Check URL param for register-mode entry (from index.html Admin link)
+    if (new URLSearchParams(window.location.search).get('mode') === 'register') {
+      applyMode('register')
+    }
+
+    // -- On-screen keyboard (register mode) --------------------------------
+    let oskTarget = null
+    const oskOverlay = $('#oskOverlay')
+
+    document.addEventListener('focusin', e => {
+      if (!document.body.classList.contains('register-mode')) return
+      if (e.target.matches('input[type="text"], input[type="search"], input[type="number"], input:not([type])')) {
+        oskTarget = e.target
+        oskOverlay.style.display = 'block'
+      }
+    })
+
+    document.addEventListener('focusout', e => {
+      setTimeout(() => {
+        if (document.activeElement === oskTarget) return
+        if (document.activeElement?.closest('#oskOverlay')) return
+        oskOverlay.style.display = 'none'
+        oskTarget = null
+      }, 150)
+    })
+
+    $('#oskOverlay').addEventListener('mousedown', e => { e.preventDefault() })
+    $('#oskOverlay').addEventListener('click', e => {
+      const btn = e.target.closest('[data-osk]')
+      if (!btn || !oskTarget) return
+      const key = btn.dataset.osk
+      if (key === 'DONE') { oskOverlay.style.display = 'none'; oskTarget.blur(); oskTarget = null; return }
+      if (key === 'BKSP') { oskTarget.value = oskTarget.value.slice(0, -1) }
+      else { oskTarget.value += key }
+      oskTarget.dispatchEvent(new Event('input', { bubbles: true }))
     })
 
     // -- Insights --------------------------------------------------------
@@ -6217,6 +6639,142 @@
       window.pos.getSetting('instagram_handle').then(v => { if (v) $('#igHandle').value = v }).catch(() => {})
     }
 
+    // -- Diagnostics -------------------------------------------------------
+
+    const _diagErrors = []
+    window.addEventListener('error', e => {
+      _diagErrors.push({ time: new Date().toISOString(), msg: e.message, src: e.filename + ':' + e.lineno })
+      const el = $('#diagErrorLog')
+      if (el) el.textContent = _diagErrors.map(x => `[${x.time.slice(11,19)}] ${x.msg}\n  at ${x.src}`).join('\n')
+    })
+    window.addEventListener('unhandledrejection', e => {
+      _diagErrors.push({ time: new Date().toISOString(), msg: 'Unhandled rejection: ' + (e.reason?.message || e.reason), src: '' })
+      const el = $('#diagErrorLog')
+      if (el) el.textContent = _diagErrors.map(x => `[${x.time.slice(11,19)}] ${x.msg}${x.src ? '\n  at ' + x.src : ''}`).join('\n')
+    })
+
+    async function loadDiagnostics () {
+      const sysEl = $('#diagSystemInfo')
+      const dbEl = $('#diagDbInfo')
+      const hwEl = $('#diagHardwareInfo')
+      const netEl = $('#diagNetworkInfo')
+
+      try {
+        const version = await window.pos.getVersion()
+        const settings = await window.pos.getAllSettings()
+        sysEl.innerHTML = `
+          <div><strong>App Version:</strong> ${esc(version || 'unknown')}</div>
+          <div><strong>Register ID:</strong> ${esc(settings.register_id || 'LANE01')}</div>
+          <div><strong>Store:</strong> ${esc(settings.store_name || '-')}</div>
+          <div><strong>Platform:</strong> ${navigator.platform}</div>
+          <div><strong>User Agent:</strong> <span style="font-size:10px;color:var(--text-dim)">${esc(navigator.userAgent.slice(0, 80))}</span></div>
+          <div><strong>Screen:</strong> ${screen.width}×${screen.height} @ ${devicePixelRatio}x</div>
+          <div><strong>Window:</strong> ${window.innerWidth}×${window.innerHeight}</div>
+        `
+      } catch (e) { sysEl.textContent = 'Error: ' + e.message }
+
+      try {
+        const health = await window.pos.getHealth()
+        dbEl.innerHTML = `
+          <div><strong>DB Status:</strong> <span style="color:${health.database ? 'var(--green)' : 'var(--red)'}">${health.database ? 'OK' : 'ERROR'}</span></div>
+          <div><strong>Products:</strong> ${health.counts?.products ?? '?'}</div>
+          <div><strong>Categories:</strong> ${health.counts?.categories ?? '?'}</div>
+          <div><strong>Transactions:</strong> ${health.counts?.transactions ?? '?'}</div>
+          <div><strong>Staff:</strong> ${health.counts?.staff ?? '?'}</div>
+          <div><strong>Keyboard Buttons:</strong> ${health.counts?.keyboard_buttons ?? '?'}</div>
+          <div><strong>Sync Queue Pending:</strong> ${health.counts?.sync_pending ?? '?'}</div>
+        `
+      } catch (e) { dbEl.textContent = 'Error: ' + e.message }
+
+      try {
+        const hw = await window.pos.getHardwareConfig()
+        const ports = await window.pos.getSerialPorts().catch(() => [])
+        hwEl.innerHTML = `
+          <div><strong>Printer:</strong> ${esc(hw?.printer_type || 'Not configured')}</div>
+          <div><strong>Scale:</strong> ${esc(hw?.scale_port || 'Not configured')}</div>
+          <div><strong>Scanner:</strong> ${esc(hw?.scanner_mode || 'HID/Keyboard')}</div>
+          <div><strong>Serial Ports:</strong> ${ports.length ? ports.map(p => esc(p.path || p)).join(', ') : 'None detected'}</div>
+        `
+      } catch (e) { hwEl.textContent = 'Error: ' + e.message }
+
+      try {
+        const lan = await window.pos.getLanStatus()
+        const settings = await window.pos.getAllSettings()
+        const supaUrl = settings.supabase_url
+        netEl.innerHTML = `
+          <div><strong>LAN Mode:</strong> ${esc(lan?.mode || settings.lan_mode || 'standalone')}</div>
+          <div><strong>LAN Status:</strong> <span style="color:${lan?.connected ? 'var(--green)' : 'var(--text-dim)'}">${lan?.connected ? 'Connected' : 'Disconnected'}</span></div>
+          <div><strong>Peers:</strong> ${lan?.peers?.length || 0}</div>
+          <div><strong>Supabase:</strong> ${supaUrl ? '<span style="color:var(--green)">Configured</span>' : '<span style="color:var(--text-dim)">Not set</span>'}</div>
+        `
+      } catch (e) { netEl.textContent = 'Error: ' + e.message }
+    }
+
+    $('#diagRunBtn').addEventListener('click', async () => {
+      const results = $('#diagHealthResults')
+      results.textContent = 'Running diagnostics...\n'
+      const log = (msg) => { results.textContent += msg + '\n'; results.scrollTop = results.scrollHeight }
+
+      log('[1/6] Checking database...')
+      try {
+        const health = await window.pos.getHealth()
+        log(health.database ? '  ✓ Database OK' : '  ✗ Database ERROR')
+        if (health.counts) log(`  Products: ${health.counts.products}, Categories: ${health.counts.categories}, Transactions: ${health.counts.transactions}`)
+      } catch (e) { log('  ✗ ' + e.message) }
+
+      log('[2/6] Testing hardware...')
+      try {
+        const diag = await window.pos.hardwareDiagnostic()
+        if (diag.printer) log('  ✓ Printer: ' + (diag.printer.status || 'detected'))
+        else log('  - Printer: not configured')
+        if (diag.scale) log('  ✓ Scale: ' + (diag.scale.status || 'detected'))
+        else log('  - Scale: not configured')
+        if (diag.drawer) log('  ✓ Drawer: available')
+        else log('  - Drawer: not available')
+      } catch (e) { log('  ✗ Hardware check failed: ' + e.message) }
+
+      log('[3/6] Checking network...')
+      try {
+        const lan = await window.pos.getLanStatus()
+        log(`  LAN mode: ${lan?.mode || 'standalone'}`)
+        if (lan?.connected) log('  ✓ Connected to ' + (lan.peers?.length || 0) + ' peers')
+        else log('  - Not connected')
+      } catch (e) { log('  ✗ ' + e.message) }
+
+      log('[4/6] Verifying keyboard layout...')
+      try {
+        const pages = await window.pos.getPages()
+        const buttons = await window.pos.getKeyboardButtons()
+        log(`  ✓ ${pages.length} page(s), ${buttons.length} active buttons`)
+      } catch (e) { log('  ✗ ' + e.message) }
+
+      log('[5/6] Checking settings...')
+      try {
+        const s = await window.pos.getAllSettings()
+        const required = ['store_name', 'register_id', 'tax_rate']
+        const missing = required.filter(k => !s[k])
+        if (missing.length) log('  ⚠ Missing: ' + missing.join(', '))
+        else log('  ✓ All required settings present')
+      } catch (e) { log('  ✗ ' + e.message) }
+
+      log('[6/6] Testing IPC channels...')
+      try {
+        await window.pos.getCategories()
+        await window.pos.getStaff()
+        await window.pos.getDeals()
+        log('  ✓ All core IPC channels responding')
+      } catch (e) { log('  ✗ IPC error: ' + e.message) }
+
+      log('\n── Done ──')
+      await loadDiagnostics()
+    })
+
+    $('#diagRefreshBtn').addEventListener('click', loadDiagnostics)
+    $('#diagClearErrors').addEventListener('click', () => {
+      _diagErrors.length = 0
+      $('#diagErrorLog').textContent = 'No errors captured'
+    })
+
     // -- Init -----------------------------------------------------------
 
     setDashDate(dashboardDate)
@@ -6231,6 +6789,9 @@
       else if (active === 'keyboard') loadKeyboard()
       else if (active === 'labels') initLabelsTab()
     })
+
+    // Expose module-scoped functions for inline handlers
+    window._promptRegisterSwitch = promptRegisterSwitch
   </script>
 </body>
 </html>

@@ -230,13 +230,13 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .search-modal-item .sr-name{font-size:13px;font-weight:600;color:#1a1a2e;margin-bottom:4px;line-height:1.2}
 .search-modal-item .sr-price{font-size:15px;font-weight:700;color:#3a9c5e}
 .search-modal-item .sr-unit{font-size:11px;color:#888}
-.search-kb{background:#e8eaef;border-radius:14px;padding:10px;flex-shrink:0}
-.search-kb-row{display:flex;gap:4px;justify-content:center;margin-bottom:4px}
-.search-kb-key{border:none;border-radius:8px;background:#fff;font-size:16px;font-weight:600;min-width:42px;height:42px;cursor:pointer;transition:all .08s;box-shadow:0 1px 2px rgba(0,0,0,.1)}
+.search-kb{background:#e8eaef;border-radius:14px;padding:12px;flex-shrink:0}
+.search-kb-row{display:flex;gap:5px;justify-content:center;margin-bottom:5px}
+.search-kb-key{border:none;border-radius:10px;background:#fff;font-size:20px;font-weight:700;min-width:56px;height:56px;cursor:pointer;transition:all .08s;box-shadow:0 1px 3px rgba(0,0,0,.12)}
 .search-kb-key:active{transform:scale(.92);background:#ddd}
-.search-kb-key.wide{min-width:65px;font-size:13px}
-.search-kb-key.space{flex:1;max-width:260px}
-.search-kb-key.action{background:#1a3d2a;color:#fff;min-width:65px}
+.search-kb-key.wide{min-width:80px;font-size:15px}
+.search-kb-key.space{flex:1;max-width:320px}
+.search-kb-key.action{background:#1a3d2a;color:#fff;min-width:80px;font-size:15px}
 .search-kb-key.del{background:#fee2e2;color:#991b1b}
 
 .modal{background:#fff;border:none;border-radius:16px;padding:clamp(16px,2.5vw,28px);width:clamp(320px,35vw,420px);box-shadow:0 20px 60px rgba(0,0,0,.2),0 0 0 1px rgba(0,0,0,.05);animation:modalIn .25s ease-out}
@@ -269,7 +269,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 /* ═══ PIN Login ═══════════════════════════════════════════════════ */
 .login-overlay{position:fixed;inset:0;background:#f0f1f3;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200}
 .login-overlay.hidden{display:none}
-.login-logo{width:100px;height:100px;margin-bottom:16px;object-fit:contain;filter:drop-shadow(0 4px 12px rgba(0,0,0,.15))}
+.login-logo{width:100px;height:100px;margin-bottom:16px;object-fit:cover;border-radius:50%;filter:drop-shadow(0 4px 12px rgba(0,0,0,.15))}
 .login-store{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:800;color:#1a1a2e;margin-bottom:4px}
 .login-subtitle{color:#8891a5;margin-bottom:32px;font-size:13px}
 .pin-display{font-size:2rem;letter-spacing:14px;margin-bottom:24px;min-height:40px;color:#1a1a2e;font-weight:700}
@@ -285,7 +285,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .sale-complete{position:fixed;inset:0;background:rgba(15,17,23,.5);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:150}
 .sale-complete.show{display:flex}
 .sale-complete-inner{text-align:center;animation:popIn .3s cubic-bezier(.34,1.56,.64,1)}
-.sale-check{width:72px;height:72px;margin:0 auto 14px;object-fit:contain;filter:drop-shadow(0 8px 24px rgba(0,0,0,.2))}
+.sale-check{width:72px;height:72px;margin:0 auto 14px;object-fit:cover;border-radius:50%;filter:drop-shadow(0 8px 24px rgba(0,0,0,.2))}
 .sale-complete-text{font-family:'Inter',sans-serif;font-size:1.2rem;font-weight:700;color:#1a1a2e;margin-bottom:4px}
 .sale-complete-change{font-family:'Inter',sans-serif;font-size:1.8rem;font-weight:800;color:#1a1a2e;letter-spacing:-.5px}
 @keyframes popIn{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
@@ -365,8 +365,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 
 <!-- ═══ PIN Login ═══════════════════════════════════════════════════ -->
 <div class="login-overlay" id="loginOverlay">
-  <img src="logo.png" class="login-logo" alt="Tillaroo">
-  <div class="login-store">Tillaroo</div>
+  <img src="logo-circle.png" class="login-logo company-logo" alt="Tillaroo" style="width:140px;height:140px">
+  <div class="login-store" id="loginStoreName"></div>
   <div class="login-subtitle">Enter your PIN to start</div>
   <div class="pin-display" id="pinDisplay"></div>
   <div class="pin-pad" id="pinPad">
@@ -401,14 +401,14 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 <!-- ═══ Status Bar ═════════════════════════════════════════════════ -->
 <div class="status-bar">
   <div class="status-left">
-    <img src="logo.png" alt="" style="width:28px;height:28px;object-fit:contain;flex-shrink:0">
+    <img src="logo-circle.png" alt="" class="company-logo" style="width:28px;height:28px;object-fit:cover;border-radius:50%;flex-shrink:0;object-position:center;transform:scale(1.4);clip-path:circle(50%)">
     <span class="store-name">Tillaroo</span>
     <div style="position:relative">
       <input type="text" id="searchInput" class="scan-input" placeholder="" autofocus style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden">
     </div>
     <button id="searchBtn" style="background:none;border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 12px;border-radius:4px;font-size:13px;cursor:pointer;min-height:32px;display:flex;align-items:center;gap:5px" title="Search Products">🔍 Search</button>
     <span class="staff-info" id="staffBadge">Not logged in</span>
-    <a href="admin.html" class="admin-link">Admin</a>
+    <a href="#" class="admin-link" onclick="event.preventDefault(); window.pos.navigate('admin.html?mode=register')">Admin</a>
     <button onclick="window.pos.exitFullscreen()" style="background:none;border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 10px;border-radius:4px;font-size:11px;cursor:pointer;min-height:32px" title="Exit fullscreen (F11)">Exit FS</button>
     <div class="sync-info"><span class="sync-dot" id="syncDot"></span><span id="syncLabel">Online</span></div>
   </div>
@@ -621,7 +621,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
       <select id="recallStatusFilter" style="padding:8px 12px;border-radius:8px;border:1px solid #ddd;font-size:12px;font-family:inherit;min-width:120px">
         <option value="all">All Sales</option>
         <option value="completed">Completed</option>
-        <option value="parked">Held / Parked</option>
+        <option value="parked">On Hold</option>
         <option value="voided">Voided</option>
         <option value="refunded">Refunded</option>
       </select>
@@ -723,9 +723,10 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 </div></div>
 
 <!-- ═══ Price Check Modal ═════════════════════════════════════════ -->
-<div class="modal-overlay" id="priceCheckModal"><div class="modal" style="width:420px">
+<div class="modal-overlay" id="priceCheckModal"><div class="modal" style="width:480px">
   <h2>Price Check</h2>
-  <div style="margin-bottom:12px"><input type="text" id="pcSearchInput" placeholder="Scan barcode or search..." style="width:100%;padding:10px;border-radius:6px;border:1px solid #ccc;font-size:14px;outline:none"></div>
+  <div style="margin-bottom:12px"><input type="text" id="pcSearchInput" placeholder="Scan barcode or type to search..." style="width:100%;padding:10px;border-radius:6px;border:1px solid #ccc;font-size:14px;outline:none"></div>
+  <div id="pcResults" style="max-height:320px;overflow-y:auto"></div>
   <div id="pcResult" class="pricecheck-result" style="display:none"></div>
   <div class="modal-actions"><button class="modal-cancel" id="pcClose">Close</button><button class="modal-confirm" id="pcAddToCart" style="display:none">Add to Cart</button></div>
 </div></div>
@@ -998,7 +999,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 </div>
 
 <div class="sale-complete" id="saleComplete"><div class="sale-complete-inner sale-summary">
-  <img src="logo.png" class="sale-check" alt="">
+  <img src="logo-circle.png" class="sale-check company-logo" alt="">
   <div class="sale-complete-text" id="saleCompleteTitle">Sale Complete</div>
   <div id="saleSummaryBody"></div>
   <div class="sale-complete-change" id="saleChangeDisplay"></div>
@@ -1529,7 +1530,7 @@ $('#posGrid').addEventListener('click', async e => {
           unit: 'kg',
           tax_rate: 0.10,
           is_special: false,
-        }, qty)
+        }, qty, true)
         applyDeals()
         showToast(`${name} ${w.toFixed(3)} kg × $${labelPrice.toFixed(2)} = $${(w*labelPrice).toFixed(2)}`, 'success')
         return
@@ -1545,8 +1546,16 @@ $('#posGrid').addEventListener('click', async e => {
     } else if (btnPrice > 0) {
       // No linked product but has a price — add as fixed-price item
       addToCart({ id: 'KB_' + Date.now(), name, price: btnPrice, active_price: btnPrice, unit: 'each', tax_rate: 0.10, is_special: false })
+    } else if (numBuf) {
+      // Numpad has a value — use it as cents (e.g. 500 = $5.00)
+      const cents = parseInt(numBuf); const price = cents / 100
+      if (price > 0) {
+        cart.addProduct({ id: 'OPEN_' + Date.now(), name, price, active_price: price, unit: 'each', tax_rate: 0.10, is_special: false }, returnMode ? -qtyMultiplier : qtyMultiplier, true)
+        qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); applyDeals()
+        showToast(`${name} $${price.toFixed(2)} added`, 'success')
+      }
     } else {
-      // No product, no price — open price entry
+      // No product, no price, no numBuf — open price entry
       showOpenPriceModal(name, 0)
     }
     return
@@ -1888,7 +1897,7 @@ function addToCart (product) {
     pendingWeightProduct = product; showWeightModal(product); return
   }
   const qty = returnMode ? -qtyMultiplier : qtyMultiplier
-  cart.addProduct(product, qty)
+  cart.addProduct(product, qty, true)
   applyDeals()
   showToast(`${product.name}${Math.abs(qtyMultiplier) > 1 ? ' ×' + Math.abs(qtyMultiplier) : ''}${returnMode ? ' (return)' : ''} added`, 'success')
   qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); updateQtyBadge()
@@ -2045,7 +2054,7 @@ $('#weighedOpenConfirm').addEventListener('click', () => {
     unit: 'kg',
     tax_rate: 0.10,
     is_special: false,
-  }, qty)
+  }, qty, true)
   applyDeals()
   showToast(`${weighedOpenLabel} ${w.toFixed(3)} kg × $${price.toFixed(2)} = $${(w*price).toFixed(2)} added`, 'success')
   $('#weighedOpenModal').classList.remove('show')
@@ -2179,7 +2188,7 @@ $('#weightPad').addEventListener('click', e => {
 $('#weightConfirm').addEventListener('click', () => {
   const q = parseFloat(wBuf); if (!q || q <= 0 || !pendingWeightProduct) return
   const realQty = returnMode ? -q : q
-  cart.addProduct(pendingWeightProduct, realQty); applyDeals()
+  cart.addProduct(pendingWeightProduct, realQty, true); applyDeals()
   showToast(`${pendingWeightProduct.name} added`, 'success')
   cancelScaleAwait()
   $('#weightModal').classList.remove('show'); pendingWeightProduct = null
@@ -2754,18 +2763,42 @@ $('#supPinCancel').addEventListener('click', () => { $('#supervisorModal').class
 // ═══ Price Check Modal ════════════════════════════════════════════
 function showPriceCheckModal () {
   pcFoundProduct = null
-  $('#pcResult').style.display = 'none'; $('#pcAddToCart').style.display = 'none'
+  $('#pcResult').style.display = 'none'; $('#pcResults').innerHTML = ''; $('#pcAddToCart').style.display = 'none'
   $('#pcSearchInput').value = ''
   $('#priceCheckModal').classList.add('show')
   setTimeout(() => $('#pcSearchInput').focus(), 100)
 }
+const pcSearchDebounced = debounce(async () => {
+  const q = $('#pcSearchInput').value.trim()
+  if (!q) { $('#pcResults').innerHTML = ''; $('#pcResult').style.display = 'none'; $('#pcAddToCart').style.display = 'none'; return }
+  const exact = await window.pos.getProductByBarcode(q)
+  if (exact) { showPcResult(exact); $('#pcResults').innerHTML = ''; return }
+  const results = await window.pos.searchProducts(q)
+  $('#pcResult').style.display = 'none'; $('#pcAddToCart').style.display = 'none'; pcFoundProduct = null
+  if (!results.length) { $('#pcResults').innerHTML = '<div style="color:#888;padding:12px;text-align:center">No products found</div>'; return }
+  $('#pcResults').innerHTML = results.map(p => {
+    const price = p.active_price ?? p.price
+    const special = p.is_special ? `<span style="color:#ef4444;font-size:11px;margin-left:6px">SPECIAL</span>` : ''
+    return `<div class="pc-row" data-id="${esc(p.id)}" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid #eee;cursor:pointer;transition:background .1s"><div><div style="font-weight:600;font-size:14px">${esc(p.name)}${special}</div><div style="color:#888;font-size:11px">${esc(p.barcode || '')} ${esc(p.category_name || '')}</div></div><div style="font-weight:800;font-size:16px;color:#3a9c5e">${money(price)}</div></div>`
+  }).join('')
+}, 200)
+$('#pcSearchInput').addEventListener('input', pcSearchDebounced)
 $('#pcSearchInput').addEventListener('keydown', async e => {
   if (e.key !== 'Enter') return
   e.preventDefault()
-  const q = $('#pcSearchInput').value.trim(); if (!q) return
-  const p = await window.pos.getProductByBarcode(q)
-  if (!p) { const results = await window.pos.searchProducts(q); if (results.length) showPcResult(results[0]); else { $('#pcResult').innerHTML = '<div style="color:#888;padding:12px">Not found</div>'; $('#pcResult').style.display = 'block'; $('#pcAddToCart').style.display = 'none' } }
-  else showPcResult(p)
+  pcSearchDebounced.flush ? pcSearchDebounced.flush() : pcSearchDebounced()
+})
+$('#pcResults').addEventListener('click', async e => {
+  const row = e.target.closest('.pc-row')
+  if (!row) return
+  const p = await window.pos.getProductById(row.dataset.id)
+  if (p) showPcResult(p)
+})
+$('#pcResults').addEventListener('mouseover', e => {
+  const row = e.target.closest('.pc-row'); if (row) row.style.background = '#f0f7f4'
+})
+$('#pcResults').addEventListener('mouseout', e => {
+  const row = e.target.closest('.pc-row'); if (row) row.style.background = ''
 })
 function showPcResult (p) {
   pcFoundProduct = p
@@ -3822,44 +3855,61 @@ async function init () {
   tryRestoreSession()
 
   try {
-    allCategories = await window.pos.getCategories()
+    // Critical path — get keyboard interactive ASAP
+    const [storeName, categories, companyLogo] = await Promise.all([
+      window.pos.getSetting('store_name'),
+      window.pos.getCategories(),
+      window.pos.getSetting('company_logo')
+    ])
+    const loginName = document.getElementById('loginStoreName')
+    if (loginName) loginName.textContent = storeName || ''
+    if (companyLogo) {
+      document.querySelectorAll('.company-logo').forEach(img => { img.src = companyLogo })
+    }
+    allCategories = categories
     await renderPosKeyboard()
-    await loadDeals()
+    loadDeals()
     updateTotals()
     restoreCartLocal()
-    // Only connect to Supabase if this register is the server (or standalone)
-    // Client registers get their data from the main PC via LAN sync
-    const lanMode = await window.pos.getSetting('lan_mode')
-    if (lanMode !== 'client') {
-      const url = await window.pos.getSetting('supabase_url')
-      const key = await window.pos.getSetting('supabase_anon_key')
-      if (url && key) {
-        const ok = await initSync(url, key)
-        if (ok) {
-          startAutoSync()
-          updateSync()
-          // Delta pull — only fetches changes since last pull
-          try {
-            const { categories: catCount, products: prodCount } = await pullAll()
-            if (catCount || prodCount) {
-              allCategories = await window.pos.getCategories()
-              await renderPosKeyboard()
-              console.log(`Synced ${catCount} categories, ${prodCount} products from Supabase`)
-            }
-          } catch (e) { console.warn('Initial Supabase pull failed:', e.message) }
-          // Push keyboard layout to Supabase on startup
-          try { const kbCount = await pushKeyboard(); if (kbCount) console.log(`Pushed ${kbCount} keyboard buttons to Supabase`) } catch (_) {}
-          subscribeToChanges(() => { window.pos.getCategories().then(c => { allCategories = c }) })
+
+    // Non-critical — runs in background after keyboard is ready
+    initBackground()
+  } catch (e2) { console.error('Init error:', e2) }
+
+  async function initBackground () {
+    try {
+      const staff = await window.pos.getStaff()
+      if (!staff.some(s => s.active)) {
+        await window.pos.upsertStaff({ name: 'Owner', pin: '1234', role: 'admin' })
+        await window.pos.upsertStaff({ name: 'Cashier', pin: '0000', role: 'cashier' })
+      }
+    } catch (_) {}
+
+    try {
+      const lanMode = await window.pos.getSetting('lan_mode')
+      if (lanMode !== 'client') {
+        const url = await window.pos.getSetting('supabase_url')
+        const key = await window.pos.getSetting('supabase_anon_key')
+        if (url && key) {
+          const ok = await initSync(url, key)
+          if (ok) {
+            startAutoSync()
+            updateSync()
+            try {
+              const { categories: catCount, products: prodCount } = await pullAll()
+              if (catCount || prodCount) {
+                allCategories = await window.pos.getCategories()
+                await renderPosKeyboard()
+                console.log(`Synced ${catCount} categories, ${prodCount} products from Supabase`)
+              }
+            } catch (e) { console.warn('Initial Supabase pull failed:', e.message) }
+            try { const kbCount = await pushKeyboard(); if (kbCount) console.log(`Pushed ${kbCount} keyboard buttons to Supabase`) } catch (_) {}
+            subscribeToChanges(() => { window.pos.getCategories().then(c => { allCategories = c }) })
+          }
         }
       }
-    }
-    const staff = await window.pos.getStaff()
-    const hasActive = staff.some(s => s.active)
-    if (!hasActive) {
-      await window.pos.upsertStaff({ name: 'Owner', pin: '1234', role: 'admin' })
-      await window.pos.upsertStaff({ name: 'Cashier', pin: '0000', role: 'cashier' })
-    }
-  } catch (e2) { console.error('Init error:', e2) }
+    } catch (e) { console.warn('Background init error:', e.message) }
+  }
 
   // LAN server health dot
   setInterval(async () => {
@@ -3985,6 +4035,7 @@ window.pos.onScaleWeight((data) => {
     }
   }
 })
+
 </script>
 </body>
 </html>

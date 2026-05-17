@@ -164,11 +164,11 @@ CREATE TABLE IF NOT EXISTS settings (
 );
 
 INSERT OR IGNORE INTO settings (key, value) VALUES
-  ('store_name', 'Crisp on Creek'),
-  ('store_address', '1832 Logan Rd, Mt Gravatt QLD 4122'),
+  ('store_name', 'Tillaroo'),
+  ('store_address', '1164 Cavendish Rd, Mt Gravatt East QLD 4122'),
   ('store_phone', ''),
   ('store_abn', ''),
-  ('receipt_header', 'Crisp on Creek\n1832 Logan Rd, Mt Gravatt\nFresh Fruit & Veg'),
+  ('receipt_header', 'Tillaroo\n1164 Cavendish Rd, Mt Gravatt East\nFresh Fruit & Veg'),
   ('receipt_footer', 'Thank you for shopping local!\nOpen 6am - 7pm every day'),
   ('register_id', 'LANE01'),
   ('tax_name', 'GST'),

@@ -4,7 +4,7 @@ export class Cart {
     this.onChange = null
   }
 
-  addProduct(product, qty = 1) {
+  addProduct(product, qty = 1, silent = false) {
     const price = product.active_price ?? product.price
     const taxRate = product.tax_rate ?? 0.10
     const existing = this.items.find(i => i.product_id === product.id && product.unit === 'each' && i.unit_price === price)
@@ -32,7 +32,7 @@ export class Cart {
       this._recalcItem(item)
       this.items.push(item)
     }
-    this._notify()
+    if (!silent) this._notify()
   }
 
   updateQty(index, qty) {

@@ -1,104 +1,214 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Tillaroo</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: #0f1117;
-    color: #f1f5f9;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    overflow: hidden;
-    user-select: none;
-  }
-  .close-btn {
-    position: fixed; top: 10px; right: 12px;
-    background: none; border: none; color: #4a5066;
-    font-size: 20px; cursor: pointer; padding: 4px 8px;
-    border-radius: 4px; line-height: 1;
-    -webkit-app-region: no-drag;
-  }
-  .close-btn:hover { color: #f1f5f9; background: rgba(255,255,255,0.08); }
-  .logo {
-    width: 96px; height: 96px;
-    border-radius: 24px;
-    margin-bottom: 24px;
-    animation: pulse 2s ease-in-out infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.85; transform: scale(1.03); }
-  }
-  h1 {
-    font-size: 28px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-    margin-bottom: 32px;
-  }
-  .status {
-    font-size: 13px;
-    color: #8892a8;
-    margin-bottom: 16px;
-    min-height: 20px;
-    transition: opacity 0.3s;
-  }
-  .progress-track {
-    width: 260px;
-    height: 4px;
-    background: #1a1d27;
-    border-radius: 2px;
-    overflow: hidden;
-  }
-  .progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, #4fbd77, #6ed99b);
-    border-radius: 2px;
-    width: 0%;
-    transition: width 0.4s ease;
-  }
-  .progress-bar.error {
-    background: linear-gradient(90deg, #ef4444, #f87171);
-    width: 100%;
-  }
-  .error-box {
-    display: none;
-    margin-top: 16px;
-    padding: 10px 16px;
-    background: rgba(239,68,68,0.1);
-    border: 1px solid rgba(239,68,68,0.3);
-    border-radius: 8px;
-    max-width: 340px;
-    text-align: center;
-  }
-  .error-box .error-msg {
-    font-size: 12px;
-    color: #f87171;
-    word-break: break-word;
-    line-height: 1.4;
-  }
-  .error-box .error-hint {
-    font-size: 10px;
-    color: #6b7280;
-    margin-top: 6px;
-  }
-  .version {
-    position: fixed;
-    bottom: 16px;
-    font-size: 11px;
-    color: #4a5066;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <title>Tillaroo</title>
+  <style>
+    :root {
+      --tillaroo-green: #4fbd77;
+      --bg-1: #050806;
+      --bg-2: #07150d;
+      --glow-small: 12px;
+      --glow-big: 46px;
+      --glow-opacity: 0.65;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: #000;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      user-select: none;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(79, 189, 119, 0.15), transparent 28%),
+        radial-gradient(circle at 30% 10%, rgba(79, 189, 119, 0.08), transparent 25%),
+        linear-gradient(180deg, var(--bg-2), var(--bg-1) 55%, #020302);
+    }
+
+    .close-btn {
+      position: fixed; top: 10px; right: 12px;
+      background: none; border: none; color: rgba(255,255,255,0.2);
+      font-size: 20px; cursor: pointer; padding: 4px 8px;
+      border-radius: 4px; line-height: 1; z-index: 10;
+    }
+    .close-btn:hover { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.06); }
+
+    .splash {
+      width: min(52vw, 220px);
+      aspect-ratio: 590 / 504;
+      position: relative;
+      display: grid;
+      place-items: center;
+      animation: floatLogo 4.8s ease-in-out infinite;
+      margin-bottom: 12px;
+    }
+
+    .splash::before {
+      content: "";
+      position: absolute;
+      inset: 12% 4% 0;
+      background: radial-gradient(circle, rgba(79, 189, 119, 0.32), transparent 62%);
+      filter: blur(34px);
+      opacity: 0.75;
+      transform: translateY(18%);
+      animation: auraPulse 2.6s ease-in-out infinite;
+    }
+
+    .kangaroo {
+      width: 100%; height: 100%;
+      overflow: visible;
+      position: relative;
+      z-index: 1;
+    }
+
+    .kangaroo path {
+      fill: var(--tillaroo-green);
+      transform-origin: 50% 55%;
+      filter:
+        drop-shadow(0 0 var(--glow-small) rgba(79, 189, 119, var(--glow-opacity)))
+        drop-shadow(0 0 var(--glow-big) rgba(79, 189, 119, 0.38));
+      animation: kangarooGlow 2.6s ease-in-out infinite;
+    }
+
+    .brand {
+      text-align: center;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -0.06em;
+      opacity: 0;
+      transform: translateY(12px);
+      animation: brandIn 1.2s ease forwards 0.55s;
+      margin-bottom: 24px;
+    }
+
+    .status {
+      font-size: 12px;
+      color: rgba(255,255,255,0.35);
+      margin-bottom: 14px;
+      min-height: 16px;
+      letter-spacing: 0.3px;
+      opacity: 0;
+      animation: brandIn 0.5s ease forwards 1s;
+    }
+
+    .progress-track {
+      width: 260px;
+      height: 3px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 3px;
+      overflow: visible;
+      position: relative;
+      opacity: 0;
+      animation: brandIn 0.5s ease forwards 1s;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #4fbd77, #6ed99b);
+      border-radius: 3px;
+      width: 0%;
+      transition: width 0.5s ease;
+      position: relative;
+      box-shadow: 0 0 8px rgba(79,189,119,0.5), 0 0 20px rgba(79,189,119,0.25);
+    }
+    .progress-bar::after {
+      content: '';
+      position: absolute;
+      right: -4px; top: -4px;
+      width: 11px; height: 11px;
+      border-radius: 50%;
+      background: #6ed99b;
+      box-shadow: 0 0 10px rgba(79,189,119,0.9), 0 0 28px rgba(79,189,119,0.5);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .progress-bar.active::after { opacity: 1; }
+    .progress-bar.done { box-shadow: 0 0 12px rgba(79,189,119,0.7), 0 0 30px rgba(79,189,119,0.35); }
+    .progress-bar.error {
+      background: linear-gradient(90deg, #ef4444, #f87171);
+      box-shadow: 0 0 8px rgba(239,68,68,0.5);
+      width: 100%;
+    }
+    .progress-bar.error::after { display: none; }
+
+    .error-box {
+      display: none;
+      margin-top: 16px;
+      padding: 10px 16px;
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.2);
+      border-radius: 8px;
+      max-width: 340px;
+      text-align: center;
+    }
+    .error-box .error-msg {
+      font-size: 11px;
+      color: #f87171;
+      word-break: break-word;
+      line-height: 1.4;
+    }
+    .error-box .error-hint {
+      font-size: 10px;
+      color: rgba(255,255,255,0.2);
+      margin-top: 6px;
+    }
+
+    .version {
+      position: fixed;
+      bottom: 12px;
+      font-size: 10px;
+      color: rgba(255,255,255,0.12);
+      letter-spacing: 0.5px;
+    }
+
+    @keyframes kangarooGlow {
+      0%, 100% {
+        filter:
+          drop-shadow(0 0 8px rgba(79, 189, 119, 0.50))
+          drop-shadow(0 0 28px rgba(79, 189, 119, 0.30));
+      }
+      50% {
+        filter:
+          drop-shadow(0 0 18px rgba(79, 189, 119, 0.95))
+          drop-shadow(0 0 64px rgba(79, 189, 119, 0.55));
+      }
+    }
+
+    @keyframes auraPulse {
+      0%, 100% { opacity: 0.42; transform: translateY(18%) scale(0.92); }
+      50% { opacity: 0.90; transform: translateY(18%) scale(1.08); }
+    }
+
+    @keyframes floatLogo {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-8px) scale(1.015); }
+    }
+
+    @keyframes brandIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
   <button class="close-btn" id="closeBtn" title="Close">&times;</button>
-  <img class="logo" src="logo.png" alt="">
-  <h1>Tillaroo</h1>
+
+  <main class="splash">
+    <svg class="kangaroo" viewBox="0 0 590 504" xmlns="http://www.w3.org/2000/svg">
+      <path d="M 514 44 L 509 44 L 497 48 L 480 58 L 474 64 L 473 64 L 466 72 L 460 81 L 456 91 L 453 92 L 451 90 L 451 87 L 447 75 L 445 72 L 445 70 L 432 49 L 416 34 L 399 24 L 396 24 L 393 28 L 392 34 L 391 35 L 391 40 L 390 41 L 390 54 L 391 55 L 391 59 L 392 60 L 392 63 L 393 64 L 393 67 L 395 73 L 400 83 L 406 92 L 415 101 L 427 109 L 427 113 L 426 114 L 426 118 L 424 122 L 424 125 L 421 134 L 419 137 L 417 145 L 415 148 L 415 150 L 409 162 L 399 177 L 384 192 L 375 198 L 365 203 L 353 207 L 345 208 L 344 209 L 339 209 L 338 210 L 327 210 L 326 211 L 294 210 L 293 209 L 260 209 L 259 210 L 245 211 L 244 212 L 229 215 L 220 219 L 218 219 L 213 222 L 211 222 L 194 231 L 180 241 L 156 264 L 146 277 L 137 291 L 125 315 L 124 320 L 120 328 L 115 345 L 113 348 L 110 357 L 110 360 L 107 369 L 105 372 L 99 390 L 89 410 L 83 418 L 82 421 L 73 433 L 57 449 L 43 459 L 35 463 L 27 465 L 24 469 L 25 473 L 30 477 L 37 478 L 38 479 L 63 479 L 64 478 L 77 477 L 78 476 L 82 476 L 83 475 L 90 474 L 108 468 L 120 462 L 122 462 L 137 454 L 147 447 L 150 446 L 168 432 L 185 415 L 219 372 L 233 358 L 250 345 L 266 337 L 272 335 L 275 335 L 276 334 L 279 334 L 280 333 L 284 333 L 285 332 L 309 332 L 310 333 L 314 333 L 318 335 L 324 336 L 331 340 L 334 343 L 335 345 L 335 352 L 329 363 L 305 396 L 305 400 L 306 401 L 315 399 L 345 383 L 364 370 L 388 351 L 412 327 L 424 312 L 434 297 L 440 285 L 442 283 L 453 259 L 466 218 L 470 211 L 478 203 L 483 200 L 495 198 L 496 199 L 503 199 L 504 200 L 511 201 L 515 203 L 518 203 L 530 207 L 544 207 L 552 202 L 557 196 L 564 184 L 565 181 L 565 175 L 564 173 L 526 139 L 520 128 L 511 119 L 505 115 L 482 104 L 482 102 L 493 95 L 503 85 L 510 73 L 512 67 L 512 64 L 513 63 L 513 60 L 514 59 L 514 50 L 515 49 Z" />
+    </svg>
+  </main>
+
+  <div class="brand" style="color:var(--tillaroo-green)">Tillaroo</div>
+  <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:-18px;margin-bottom:18px;letter-spacing:0.4px;opacity:0;animation:brandIn 0.8s ease forwards 0.9s">by Matthias Campbell</div>
   <div class="status" id="status">Starting up...</div>
   <div class="progress-track"><div class="progress-bar" id="progress"></div></div>
   <div class="error-box" id="errorBox">
@@ -106,25 +216,53 @@
     <div class="error-hint">The app will close in a few seconds. Check the logs for details.</div>
   </div>
   <div class="version" id="version"></div>
+
   <script>
     const { ipcRenderer } = require('electron')
 
+    const progressBar = document.getElementById('progress')
+
     ipcRenderer.on('splash:status', (_e, msg, pct) => {
       document.getElementById('status').textContent = msg
-      if (pct != null) document.getElementById('progress').style.width = pct + '%'
+      if (pct != null) {
+        progressBar.style.width = pct + '%'
+        if (pct > 0 && pct < 100) {
+          progressBar.classList.add('active')
+          progressBar.classList.remove('done')
+        } else if (pct >= 100) {
+          progressBar.classList.remove('active')
+          progressBar.classList.add('done')
+        }
+      }
     })
+
     ipcRenderer.on('splash:version', (_e, v) => {
       document.getElementById('version').textContent = 'v' + v
     })
+
     ipcRenderer.on('splash:error', (_e, msg) => {
       document.getElementById('status').textContent = 'Error'
       document.getElementById('status').style.color = '#f87171'
-      document.getElementById('progress').className = 'progress-bar error'
+      progressBar.className = 'progress-bar error'
       document.getElementById('errorBox').style.display = 'block'
       document.getElementById('errorMsg').textContent = msg
-      document.querySelector('.logo').style.animation = 'none'
-      document.querySelector('.logo').style.opacity = '0.4'
+      document.querySelector('.kangaroo path').style.fill = '#ef4444'
+      document.querySelector('.kangaroo path').style.filter =
+        'drop-shadow(0 0 12px rgba(239,68,68,0.6)) drop-shadow(0 0 40px rgba(239,68,68,0.3))'
     })
+
+    // Glow pulse tied to CSS custom properties
+    let t = 0
+    function animateGlow () {
+      t += 0.018
+      const pulse = (Math.sin(t) + 1) / 2
+      const s = document.documentElement.style
+      s.setProperty('--glow-small', `${8 + pulse * 12}px`)
+      s.setProperty('--glow-big', `${28 + pulse * 52}px`)
+      s.setProperty('--glow-opacity', `${0.45 + pulse * 0.45}`)
+      requestAnimationFrame(animateGlow)
+    }
+    animateGlow()
 
     // Close button
     document.getElementById('closeBtn').addEventListener('click', () => {
