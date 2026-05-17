@@ -5337,10 +5337,10 @@
       $('#kbImagePreview').innerHTML = btn.image ? `<img src="${btn.image}" style="width:36px;height:36px;border-radius:6px;object-fit:cover">` : ''
       // Product picker state
       clearProductPicker()
-      if (editType === 'product' && btn.category_filter) {
-        $('#kbProductId').value = btn.category_filter
-        // Try to show the linked product name
-        window.pos.getProductById(btn.category_filter).then(p => {
+      const linkedProductId = btn.product_id || (editType === 'product' && btn.category_filter) || null
+      if (linkedProductId) {
+        $('#kbProductId').value = linkedProductId
+        window.pos.getProductById(linkedProductId).then(p => {
           if (p) {
             const unitTag = p.unit === 'kg' ? ' /kg' : p.unit === '100g' ? ' /100g' : ''
             $('#kbProductName').textContent = `${p.name} — $${(p.active_price||p.price||0).toFixed(2)}${unitTag}`
@@ -5402,7 +5402,7 @@
     function updateTypeFields () {
       const type = $('#kbType').value
       $('#kbPageLinkRow').style.display = type === 'page_link' ? 'flex' : 'none'
-      $('#kbProductRow').style.display = type === 'product' ? 'flex' : 'none'
+      $('#kbProductRow').style.display = (type === 'product' || type === 'open_price' || type === 'fixed_price') ? 'flex' : 'none'
       $('#kbCatRow').style.display = (type === 'section' || type === 'nav') ? 'flex' : 'none'
       if (type === 'page_link') {
         const sel = $('#kbTargetPage')
@@ -5507,8 +5507,8 @@
       }
 
       const btnType = $('#kbType').value
-      // For product type, store product_id in category_filter
-      const catFilter = btnType === 'product' ? ($('#kbProductId').value || null) : ($('#kbCatFilter').value.trim() || null)
+      const linkedProduct = $('#kbProductId').value || null
+      const catFilter = btnType === 'product' ? linkedProduct : ($('#kbCatFilter').value.trim() || null)
       const btn = {
         id: editId || undefined,
         label,
@@ -5526,6 +5526,7 @@
         position: 'grid',
         image: $('#kbImageData').value || null,
         parent_id: btnType === 'page_link' ? ($('#kbTargetPage').value || null) : null,
+        product_id: linkedProduct,
         active: true
       }
       pushUndo()

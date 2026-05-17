@@ -2455,11 +2455,17 @@ function setupIPC() {
   ipcMain.handle('db:keyboard:export', () => {
     const buttons = dbAll("SELECT * FROM keyboard_buttons ORDER BY page, sort_order")
     const pages = dbAll("SELECT * FROM keyboard_pages ORDER BY page")
+    // Include linked products so the layout can be fully restored on import
+    const productIds = buttons.map(b => b.product_id).filter(Boolean)
+    const products = productIds.length
+      ? dbAll(`SELECT * FROM products WHERE id IN (${productIds.map(() => '?').join(',')})`, productIds)
+      : []
     return {
-      version: 3,
+      version: 4,
       exported_at: new Date().toISOString(),
       pages,
-      buttons
+      buttons,
+      products
     }
   })
 
@@ -2487,16 +2493,30 @@ function setupIPC() {
         skipped++; continue
       }
       const id = btn.id || uuid()
-      dbRun(`INSERT OR REPLACE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, active, updated_at)
-        VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,datetime('now'))`,
+      dbRun(`INSERT OR REPLACE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, active, product_id, updated_at)
+        VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,datetime('now'))`,
         [id, btn.label, btn.type, btn.price || 0, btn.image || null, btn.color || '#fff',
          btn.bg_color || '#1a3d2a', btn.parent_id || null, btn.category_filter || null,
          btn.alpha_range || null, btn.sort_order || 0, btn.position || 'grid',
-         btn.page || 1, row, col, cs, rs, btn.active !== undefined ? btn.active : 1])
+         btn.page || 1, row, col, cs, rs, btn.active !== undefined ? btn.active : 1,
+         btn.product_id || null])
       count++
     }
+    // Restore linked products if included in export
+    let productsRestored = 0
+    if (data.products && Array.isArray(data.products)) {
+      for (const p of data.products) {
+        if (!p.id) continue
+        dbRun(`INSERT OR IGNORE INTO products (id, name, barcode, plu, category_id, price, cost_price, unit, tax_rate, track_stock, stock_qty, active, updated_at)
+          VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,datetime('now'))`,
+          [p.id, p.name, p.barcode || null, p.plu || null, p.category_id || null,
+           p.price || 0, p.cost_price || 0, p.unit || 'each', p.tax_rate ?? 0.1,
+           p.track_stock || 0, p.stock_qty || 0, p.active !== undefined ? p.active : 1])
+        productsRestored++
+      }
+    }
     scheduleSave()
-    return { count, skipped }
+    return { count, skipped, productsRestored }
   })
 
   ipcMain.handle('db:keyboard:reset', () => {
