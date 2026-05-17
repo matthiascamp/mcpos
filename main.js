@@ -708,6 +708,37 @@ async function initDatabase() {
     }
   } catch (e) { appLog('error', 'migration', 'Keyboard-product link migration failed', e.message) }
 
+  // Merge products from bundled DB if local is missing any
+  if (dbExists && fs.existsSync(BUNDLED_DB_PATH)) {
+    try {
+      const initSqlJs2 = require('sql.js')
+      const SQL2 = await initSqlJs2()
+      const bundledBuf = fs.readFileSync(BUNDLED_DB_PATH)
+      const bundledDb = new SQL2.Database(bundledBuf)
+      // Import categories
+      const cats = bundledDb.exec("SELECT id, name, sort_order, colour, active FROM categories")
+      if (cats.length) {
+        for (const row of cats[0].values) {
+          db.run("INSERT OR IGNORE INTO categories (id, name, sort_order, colour, active, updated_at) VALUES (?1,?2,?3,?4,?5,datetime('now'))", row)
+        }
+      }
+      // Import products
+      const prods = bundledDb.exec("SELECT id, barcode, plu, name, category_id, price, cost_price, unit, tax_rate, track_stock, stock_qty, active FROM products")
+      let merged = 0
+      if (prods.length) {
+        for (const row of prods[0].values) {
+          const res = db.exec("SELECT 1 FROM products WHERE id = ?1", [row[0]])
+          if (!res.length || !res[0].values.length) {
+            db.run("INSERT INTO products (id, barcode, plu, name, category_id, price, cost_price, unit, tax_rate, track_stock, stock_qty, active, updated_at) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,datetime('now'))", row)
+            merged++
+          }
+        }
+      }
+      bundledDb.close()
+      if (merged > 0) appLog('info', 'database', `Merged ${merged} products from bundled database`)
+    } catch (e) { appLog('warn', 'database', 'Bundled DB merge failed', e.message) }
+  }
+
   saveDBSync()
   appLog('info', 'database', 'Database initialized', `Path: ${DB_PATH}`)
 
