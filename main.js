@@ -734,6 +734,36 @@ async function initDatabase() {
           }
         }
       }
+      // Merge keyboard sub-pages (page > 5) from bundled DB — replace entirely so layout updates propagate
+      const bundledKbVersion = bundledDb.exec("SELECT value FROM settings WHERE key = 'kb_version'")
+      const bundledKbVer = bundledKbVersion.length && bundledKbVersion[0].values.length ? bundledKbVersion[0].values[0][0] : '0'
+      const localKbVersion = db.exec("SELECT value FROM settings WHERE key = 'kb_version'")
+      const localKbVer = localKbVersion.length && localKbVersion[0].values.length ? localKbVersion[0].values[0][0] : '0'
+
+      if (bundledKbVer > localKbVer) {
+        db.run("DELETE FROM keyboard_buttons WHERE page > 5")
+        db.run("DELETE FROM keyboard_pages WHERE page > 5")
+
+        const bPages = bundledDb.exec("SELECT page, name, cols, rows FROM keyboard_pages WHERE page > 5")
+        if (bPages.length) {
+          for (const row of bPages[0].values) {
+            db.run("INSERT OR REPLACE INTO keyboard_pages (page, name, cols, rows) VALUES (?1,?2,?3,?4)", row)
+          }
+        }
+
+        const bButtons = bundledDb.exec("SELECT id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, product_id, active FROM keyboard_buttons WHERE page > 5")
+        let kbMerged = 0
+        if (bButtons.length) {
+          for (const row of bButtons[0].values) {
+            db.run("INSERT OR REPLACE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, product_id, active) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19)", row)
+            kbMerged++
+          }
+        }
+
+        db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('kb_version', ?1)", [bundledKbVer])
+        if (kbMerged > 0) appLog('info', 'database', `Applied ${kbMerged} keyboard button images`)
+      }
+
       bundledDb.close()
       if (merged > 0) appLog('info', 'database', `Merged ${merged} products from bundled database`)
     } catch (e) { appLog('warn', 'database', 'Bundled DB merge failed', e.message) }
