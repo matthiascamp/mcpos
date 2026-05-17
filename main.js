@@ -1239,6 +1239,8 @@ function setupIPC() {
         if (fs.existsSync(lockFile)) {
           try { fs.unlinkSync(lockFile) } catch (_) {}
         }
+        // Kill scanner-bridge.exe so git can overwrite it on Windows
+        try { execSync('taskkill /F /IM scanner-bridge.exe', { timeout: 5000, encoding: 'utf-8' }) } catch (_) {}
         const before = execSync('git rev-parse HEAD', { cwd: appDir, encoding: 'utf-8', timeout: 5000 }).trim()
         // Stash local changes so pull doesn't fail on dirty working tree
         let stashed = false
