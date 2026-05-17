@@ -1234,8 +1234,24 @@ function setupIPC() {
 
     if (hasGit) {
       try {
+        // Remove stale git lock if it exists (from a previous interrupted git operation)
+        const lockFile = path.join(appDir, '.git', 'index.lock')
+        if (fs.existsSync(lockFile)) {
+          try { fs.unlinkSync(lockFile) } catch (_) {}
+        }
         const before = execSync('git rev-parse HEAD', { cwd: appDir, encoding: 'utf-8', timeout: 5000 }).trim()
-        const pullOutput = execSync('git pull origin main', { cwd: appDir, encoding: 'utf-8', timeout: 30000 })
+        // Stash local changes so pull doesn't fail on dirty working tree
+        let stashed = false
+        try {
+          const stashOut = execSync('git stash --include-untracked', { cwd: appDir, encoding: 'utf-8', timeout: 10000 })
+          stashed = !stashOut.includes('No local changes')
+        } catch (_) {}
+        let pullOutput
+        try {
+          pullOutput = execSync('git pull origin main', { cwd: appDir, encoding: 'utf-8', timeout: 30000 })
+        } finally {
+          if (stashed) try { execSync('git stash pop', { cwd: appDir, encoding: 'utf-8', timeout: 10000 }) } catch (_) {}
+        }
         const after = execSync('git rev-parse HEAD', { cwd: appDir, encoding: 'utf-8', timeout: 5000 }).trim()
         if (before === after) return { upToDate: true, log: pullOutput.trim() }
         const diffLog = execSync(`git log --oneline ${before}..${after}`, { cwd: appDir, encoding: 'utf-8', timeout: 5000 }).trim()
