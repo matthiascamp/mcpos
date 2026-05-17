@@ -15,6 +15,7 @@ let hardwareCleanup = null  // set by setupIPC, called on shutdown
 let appShuttingDown = false
 
 const DB_PATH = path.join(app.getPath('userData'), 'crisp-pos.sqlite')
+const BUNDLED_DB_PATH = path.join(__dirname, 'db', 'crisp-pos.sqlite')
 const SCHEMA_PATH = path.join(__dirname, 'db', 'schema.sql')
 const LOG_DIR = path.join(app.getPath('userData'), 'logs')
 const BACKUP_DIR = path.join(app.getPath('userData'), 'backups')
@@ -96,6 +97,10 @@ async function initDatabase() {
   if (dbExists) {
     const buf = fs.readFileSync(DB_PATH)
     db = new SQL.Database(buf)
+  } else if (fs.existsSync(BUNDLED_DB_PATH)) {
+    const buf = fs.readFileSync(BUNDLED_DB_PATH)
+    db = new SQL.Database(buf)
+    appLog('info', 'database', 'Seeded from bundled database')
   } else {
     db = new SQL.Database()
   }

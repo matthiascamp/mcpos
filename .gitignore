@@ -1,8 +1,10 @@
 node_modules/
 dist/
 build/
-*.sqlite
 *.sqlite-journal
+
+# Allow the bundled product database
+!db/crisp-pos.sqlite
 .env
 .DS_Store
 Thumbs.db
