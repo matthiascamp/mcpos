@@ -550,6 +550,113 @@
         <span id="modeLabel">Switch to Register Mode</span>
       </button>
     </div>
+    <script>
+    (function() {
+      var pinBuf = '';
+      var btn = document.getElementById('modeToggleBtn');
+      if (!btn) return;
+
+      function closePin() {
+        var modal = document.getElementById('modePinModal');
+        var backdrop = document.getElementById('modalBackdrop');
+        if (modal) modal.classList.remove('modal-open');
+        if (backdrop) backdrop.classList.remove('active');
+        pinBuf = '';
+      }
+
+      function switchToAdmin() {
+        document.body.classList.remove('register-mode');
+        document.getElementById('modeBadge').textContent = 'Admin';
+        document.getElementById('modeLabel').textContent = 'Switch to Register Mode';
+        document.getElementById('modeIcon').textContent = '\u{1F512}';
+        localStorage.setItem('tillaroo_admin_mode', 'admin');
+        if (window.pos) window.pos.setSetting('app_mode', 'admin');
+      }
+
+      function switchToRegister() {
+        document.body.classList.add('register-mode');
+        document.getElementById('modeBadge').textContent = 'Register';
+        document.getElementById('modeLabel').textContent = 'Switch to Admin Mode';
+        document.getElementById('modeIcon').textContent = '\u{1F513}';
+        localStorage.setItem('tillaroo_admin_mode', 'register');
+        if (window.pos) window.pos.setSetting('app_mode', 'register');
+        var active = document.querySelector('.sidebar a.active');
+        var tab = active && active.dataset.tab;
+        var hidden = ['dashboard','cashdrawer','zreport','audit','logs','diagnostics','settings','staff','keyboard','labels','stock','insights'];
+        if (hidden.indexOf(tab) !== -1) {
+          var prodLink = document.querySelector('[data-tab="products"]');
+          if (prodLink) prodLink.click();
+        }
+      }
+
+      btn.addEventListener('click', function() {
+        var isAdmin = !document.body.classList.contains('register-mode');
+        if (isAdmin) {
+          switchToRegister();
+        } else {
+          pinBuf = '';
+          document.getElementById('modePinDots').textContent = '';
+          document.getElementById('modePinError').textContent = '';
+          document.getElementById('modePinTitle').textContent = 'Enter Admin Code';
+          document.getElementById('modePinDesc').textContent = 'Admin PIN required to access full settings';
+          document.getElementById('modePinIcon').textContent = '\u{1F512}';
+          var modal = document.getElementById('modePinModal');
+          var backdrop = document.getElementById('modalBackdrop');
+          if (modal) modal.classList.add('modal-open');
+          if (backdrop) backdrop.classList.add('active');
+        }
+      });
+
+      // PIN pad buttons — use event delegation (modal HTML comes later in DOM)
+      document.addEventListener('click', function(e) {
+        var pbtn = e.target.closest('#modePinModal .mode-pin-btn');
+        if (!pbtn) return;
+        var v = pbtn.dataset.val;
+        if (v === 'C') {
+          pinBuf = '';
+          document.getElementById('modePinDots').textContent = '';
+          document.getElementById('modePinError').textContent = '';
+          return;
+        }
+        if (v === 'OK') {
+          if (pinBuf.length < 4) {
+            document.getElementById('modePinError').textContent = 'PIN must be at least 4 digits';
+            return;
+          }
+          window.pos.staffLogin(pinBuf).then(function(staff) {
+            if (staff && (staff.role === 'admin' || staff.role === 'manager')) {
+              closePin();
+              switchToAdmin();
+            } else {
+              document.getElementById('modePinError').textContent = staff ? 'Admin or manager PIN required' : 'Invalid PIN';
+              pinBuf = '';
+              document.getElementById('modePinDots').textContent = '';
+            }
+          });
+          return;
+        }
+        if (pinBuf.length < 6) {
+          pinBuf += v;
+          document.getElementById('modePinDots').textContent = '●'.repeat(pinBuf.length);
+          document.getElementById('modePinError').textContent = '';
+        }
+      });
+
+      // Close on backdrop click (delegated)
+      document.addEventListener('click', function(e) {
+        if (e.target.id === 'modalBackdrop') closePin();
+      });
+
+      // Apply saved mode on load
+      var saved = localStorage.getItem('tillaroo_admin_mode');
+      if (saved === 'register') switchToRegister();
+
+      // Also check URL param
+      if (new URLSearchParams(window.location.search).get('mode') === 'register') {
+        switchToRegister();
+      }
+    })();
+    </script>
 
     <div class="sidebar-group">
       <div class="sidebar-group-label">Overview</div>
@@ -632,7 +739,7 @@
     </div>
 
     <div class="sidebar-footer">
-      <a href="#" id="backToRegisterBtn" onclick="event.preventDefault(); window._promptRegisterSwitch()">
+      <a href="index.html" id="backToRegisterBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
         Back to Register
       </a>
@@ -2803,11 +2910,14 @@
       const q = $('#dealProductSearch').value.trim()
       if (q.length < 2) { $('#dealProductResults').innerHTML = ''; return }
       const results = await window.pos.searchProducts(q)
-      $('#dealProductResults').innerHTML = results.slice(0, 10).map(p =>
-        `<div style="padding:5px 8px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;display:flex;justify-content:space-between" data-add-dp="${esc(p.id)}" data-dp-name="${esc(p.name)}" data-dp-price="${p.price}">
-          <span>${esc(p.name)}</span><span style="color:var(--text-dim)">${money(p.price)}</span>
+      $('#dealProductResults').innerHTML = results.slice(0, 10).map(p => {
+        const code = p.plu || p.barcode || ''
+        return `<div style="padding:6px 8px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;display:flex;align-items:center;gap:8px" data-add-dp="${esc(p.id)}" data-dp-name="${esc(p.name)}" data-dp-price="${p.price}">
+          <span style="flex:1">${esc(p.name)}</span>
+          ${code ? `<span style="font-size:10px;color:var(--text-dim);font-family:monospace">${esc(code)}</span>` : ''}
+          <span style="color:var(--green);font-weight:600;font-size:12px">${money(p.active_price ?? p.price)}</span>
         </div>`
-      ).join('')
+      }).join('')
     }, 250))
 
     $('#dealProductResults').addEventListener('click', e => {
@@ -6370,103 +6480,11 @@
       })
     }
 
-    // -- Mode Switching (Register vs Admin) --------------------------------
-
+    // Mode switching is handled by the standalone <script> after the sidebar button.
+    // Keep applyMode available for other module code that may reference it.
     let currentMode = localStorage.getItem('tillaroo_admin_mode') || 'admin'
-
-    // Also load from DB (survives localStorage clears)
-    window.pos.getSetting('app_mode').then(v => {
-      if (v && v !== currentMode) { currentMode = v; applyMode(v) }
-    })
-
     function applyMode (mode) {
       currentMode = mode
-      localStorage.setItem('tillaroo_admin_mode', mode)
-      window.pos.setSetting('app_mode', mode)
-      if (mode === 'register') {
-        document.body.classList.add('register-mode')
-        $('#modeBadge').textContent = 'Register'
-        $('#modeLabel').textContent = 'Switch to Admin Mode'
-        $('#modeIcon').textContent = '\u{1F513}'
-        // If current tab is hidden in register mode, switch to products
-        const activeTab = $('.sidebar a.active')?.dataset.tab
-        const hiddenInRegister = ['dashboard','cashdrawer','zreport','audit','logs','diagnostics','settings','staff','keyboard','labels','stock','insights']
-        if (hiddenInRegister.includes(activeTab)) {
-          $$('.sidebar a').forEach(n => n.classList.remove('active'))
-          const prodLink = $('[data-tab="products"]')
-          if (prodLink) { prodLink.classList.add('active'); prodLink.click() }
-        }
-      } else {
-        document.body.classList.remove('register-mode')
-        $('#modeBadge').textContent = 'Admin'
-        $('#modeLabel').textContent = 'Switch to Register Mode'
-        $('#modeIcon').textContent = '\u{1F512}'
-      }
-    }
-
-    applyMode(currentMode)
-
-    let modePinBuf = ''
-    let modeSwitchTarget = ''
-
-    $('#modeToggleBtn').addEventListener('click', () => {
-      modeSwitchTarget = currentMode === 'admin' ? 'register' : 'admin'
-      modePinBuf = ''
-      $('#modePinDots').textContent = ''
-      $('#modePinError').textContent = ''
-      if (modeSwitchTarget === 'admin') {
-        $('#modePinTitle').textContent = 'Enter Admin Code'
-        $('#modePinDesc').textContent = 'Admin PIN required to access full settings'
-        $('#modePinIcon').textContent = '\u{1F512}'
-      } else {
-        $('#modePinTitle').textContent = 'Switch to Register Mode'
-        $('#modePinDesc').textContent = 'Enter admin PIN to confirm mode change'
-        $('#modePinIcon').textContent = '\u{1F4BB}'
-      }
-      openModal('modePinModal')
-    })
-
-    $$('#modePinModal .mode-pin-btn').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const v = btn.dataset.val
-        if (v === 'C') { modePinBuf = ''; $('#modePinDots').textContent = ''; $('#modePinError').textContent = ''; return }
-        if (v === 'OK') {
-          if (modePinBuf.length < 4) { $('#modePinError').textContent = 'PIN must be at least 4 digits'; return }
-          const staff = await window.pos.staffLogin(modePinBuf)
-          if (staff && (staff.role === 'admin' || staff.role === 'manager')) {
-            closeModal('modePinModal')
-            if (modeSwitchTarget === '__navigate_register__') {
-              window.pos.navigate('index.html')
-            } else {
-              applyMode(modeSwitchTarget)
-              showToast(`Switched to ${modeSwitchTarget === 'admin' ? 'Admin' : 'Register'} mode`, 'success')
-            }
-          } else {
-            $('#modePinError').textContent = staff ? 'Admin or manager PIN required' : 'Invalid PIN'
-            modePinBuf = ''; $('#modePinDots').textContent = ''
-          }
-          return
-        }
-        if (modePinBuf.length < 6) { modePinBuf += v; $('#modePinDots').textContent = '●'.repeat(modePinBuf.length); $('#modePinError').textContent = '' }
-      })
-    })
-
-    // -- Register Switch (Back to Register button) -------------------------
-    let regSwitchPinBuf = ''
-    function promptRegisterSwitch () {
-      regSwitchPinBuf = ''
-      $('#modePinDots').textContent = ''
-      $('#modePinError').textContent = ''
-      $('#modePinTitle').textContent = 'Switch to Register'
-      $('#modePinDesc').textContent = 'Enter admin PIN to go back to the register'
-      $('#modePinIcon').textContent = '\u{1F4BB}'
-      modeSwitchTarget = '__navigate_register__'
-      openModal('modePinModal')
-    }
-
-    // Check URL param for register-mode entry (from index.html Admin link)
-    if (new URLSearchParams(window.location.search).get('mode') === 'register') {
-      applyMode('register')
     }
 
     // -- On-screen keyboard (register mode) --------------------------------
@@ -6790,8 +6808,6 @@
       else if (active === 'labels') initLabelsTab()
     })
 
-    // Expose module-scoped functions for inline handlers
-    window._promptRegisterSwitch = promptRegisterSwitch
   </script>
 </body>
 </html>

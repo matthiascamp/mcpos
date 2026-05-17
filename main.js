@@ -608,6 +608,101 @@ async function initDatabase() {
     }
   } catch (_) {}
 
+  // ── Link keyboard buttons to product records ──
+  // Creates product records for open_price/fixed_price buttons that lack a product_id,
+  // so they appear in deals search and transaction reports with proper PLU codes.
+  try {
+    const linkDone = dbAll("SELECT value FROM settings WHERE key = 'migration_link_kb_products_v1'")
+    if (!linkDone.length) {
+      const buttons = dbAll(`
+        SELECT id, label, type, price, page, category_filter
+        FROM keyboard_buttons
+        WHERE active = 1
+          AND product_id IS NULL
+          AND type IN ('open_price', 'fixed_price')
+          AND price > 0
+      `)
+
+      let created = 0, linked = 0
+      let pluCounter = 5000 // Start PLU range for keyboard-generated products
+
+      // Get highest existing PLU to avoid collisions
+      const maxPlu = dbGet("SELECT MAX(CAST(plu AS INTEGER)) as m FROM products WHERE plu IS NOT NULL AND plu != ''")
+      if (maxPlu && maxPlu.m && maxPlu.m >= pluCounter) pluCounter = maxPlu.m + 1
+
+      for (const btn of buttons) {
+        // Parse label to get clean product name and unit
+        let rawLabel = (btn.label || '').replace(/\\n/g, '\n')
+        let nameLine = rawLabel.split('\n')[0].trim()
+        // Remove trailing price info from name
+        nameLine = nameLine.replace(/\s*\$[\d.]+.*$/i, '').trim()
+
+        if (!nameLine) continue
+
+        // Determine unit from label
+        let unit = 'each'
+        if (/\bKG\b/i.test(rawLabel) || /\/kg/i.test(rawLabel)) unit = 'kg'
+        else if (/\b100g\b/i.test(rawLabel)) unit = '100g'
+
+        // Remove unit suffixes from name
+        let cleanName = nameLine
+          .replace(/\s+KG$/i, '')
+          .replace(/\s+EA$/i, '')
+          .replace(/\s+100G$/i, '')
+          .trim()
+
+        // Title-case the name
+        cleanName = cleanName.split(/\s+/).map(w =>
+          w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+        ).join(' ')
+
+        // Determine category from page
+        let categoryId = 'cat-fruit'
+        if (btn.page === 4 || btn.page === 5) categoryId = 'cat-veg'
+        else if (btn.page === 6) categoryId = 'cat-grocery'
+        // If button has a category_filter, try to find matching category
+        if (btn.category_filter) {
+          const matchCat = dbGet("SELECT id FROM categories WHERE LOWER(name) = LOWER(?1)", [btn.category_filter])
+          if (matchCat) categoryId = matchCat.id
+        }
+
+        // Try to find existing product by similar name
+        const existing = dbGet(`
+          SELECT id FROM products
+          WHERE active = 1 AND (
+            LOWER(name) = LOWER(?1)
+            OR LOWER(name) LIKE '%' || LOWER(?1) || '%'
+            OR LOWER(?1) LIKE '%' || LOWER(name) || '%'
+          )
+          LIMIT 1
+        `, [cleanName])
+
+        if (existing) {
+          // Link button to existing product
+          db.run("UPDATE keyboard_buttons SET product_id = ?1 WHERE id = ?2", [existing.id, btn.id])
+          linked++
+        } else {
+          // Create new product and link
+          const productId = 'p-kb-' + btn.id
+          const plu = String(pluCounter++)
+
+          db.run(`INSERT OR IGNORE INTO products (id, plu, name, category_id, price, unit, tax_rate, active)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, 0.00, 1)`,
+            [productId, plu, cleanName, categoryId, btn.price, unit])
+
+          db.run("UPDATE keyboard_buttons SET product_id = ?1 WHERE id = ?2", [productId, btn.id])
+          created++
+          linked++
+        }
+      }
+
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('migration_link_kb_products_v1', '1')")
+      if (created || linked) {
+        appLog('info', 'migration', `Linked keyboard buttons to products: ${created} created, ${linked} total linked`)
+      }
+    }
+  } catch (e) { appLog('error', 'migration', 'Keyboard-product link migration failed', e.message) }
+
   saveDBSync()
   appLog('info', 'database', 'Database initialized', `Path: ${DB_PATH}`)
 
@@ -998,6 +1093,8 @@ app.whenReady().then(async () => {
   ipcMain.on('splash:close', () => { closeSplash(); app.quit() })
 
   const wait = ms => new Promise(r => setTimeout(r, ms))
+  const splashStart = Date.now()
+  const SPLASH_MIN_MS = 2000
 
   try {
     splashSend('splash:status', 'Initialising database...', 10)
@@ -1047,7 +1144,8 @@ app.whenReady().then(async () => {
     }
 
     splashSend('splash:status', 'Ready!', 100)
-    await wait(300)
+    const elapsed = Date.now() - splashStart
+    if (elapsed < SPLASH_MIN_MS) await wait(SPLASH_MIN_MS - elapsed)
 
     closeSplash()
     if (mainWindow && !mainWindow.isDestroyed()) {
@@ -1110,11 +1208,11 @@ function setupIPC() {
     return tmpPath
   })
 
-  ipcMain.handle('window:navigate', (_e, page) => {
+  ipcMain.handle('window:navigate', async (_e, page) => {
     if (mainWindow && !mainWindow.isDestroyed()) {
       const [filePart, queryPart] = page.split('?')
       const opts = queryPart ? { query: Object.fromEntries(new URLSearchParams(queryPart)) } : {}
-      mainWindow.loadFile(path.join(__dirname, 'pos', filePart), opts)
+      await mainWindow.loadFile(path.join(__dirname, 'pos', filePart), opts)
     }
   })
 
@@ -2221,11 +2319,11 @@ function setupIPC() {
   // ── Keyboard Layout ─────────────────────────────────────────────────────
 
   ipcMain.handle('db:keyboard:getAll', () => {
-    return dbAll("SELECT kb.*, p.image_url AS product_image_url FROM keyboard_buttons kb LEFT JOIN products p ON kb.product_id = p.id WHERE kb.active = 1 ORDER BY kb.page, kb.sort_order")
+    return dbAll("SELECT kb.*, p.image_url AS product_image_url, p.plu AS product_plu FROM keyboard_buttons kb LEFT JOIN products p ON kb.product_id = p.id WHERE kb.active = 1 ORDER BY kb.page, kb.sort_order")
   })
 
   ipcMain.handle('db:keyboard:getByPage', (_e, page) => {
-    return dbAll("SELECT kb.*, p.image_url AS product_image_url FROM keyboard_buttons kb LEFT JOIN products p ON kb.product_id = p.id WHERE kb.active = 1 AND kb.page = ?1 ORDER BY kb.grid_row, kb.grid_col", [page])
+    return dbAll("SELECT kb.*, p.image_url AS product_image_url, p.plu AS product_plu FROM keyboard_buttons kb LEFT JOIN products p ON kb.product_id = p.id WHERE kb.active = 1 AND kb.page = ?1 ORDER BY kb.grid_row, kb.grid_col", [page])
   })
 
   ipcMain.handle('db:keyboard:getPages', () => {

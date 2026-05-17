@@ -122,6 +122,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 
 /* ─── Price badge (bottom-right corner) ─────────────────────────── */
 .btn-price-badge{position:absolute;bottom:3px;right:4px;z-index:3;font-size:clamp(9px,0.85vw,12px);font-weight:700;color:#4ade80;background:rgba(0,0,0,.55);padding:1px 5px;border-radius:4px;letter-spacing:-.3px;pointer-events:none}
+/* ─── PLU badge (top-left corner) ───────────────────────────────── */
+.btn-plu-badge{position:absolute;top:2px;left:3px;z-index:3;font-size:clamp(7px,0.65vw,9px);font-weight:600;color:rgba(255,255,255,.6);background:rgba(0,0,0,.4);padding:1px 3px;border-radius:3px;letter-spacing:-.2px;pointer-events:none;font-family:'JetBrains Mono','Courier New',monospace}
 
 /* ─── Numpad zone ────────────────────────────────────────────────── */
 .pos-grid-btn.digit-btn{font-size:clamp(18px,2.5vw,28px);font-weight:700;background:linear-gradient(180deg,#ffffff 0%,#f4f5f7 100%);color:#1a1a2e;border:1px solid rgba(0,0,0,.06);border-radius:clamp(8px,1vw,14px);box-shadow:0 4px 10px rgba(0,0,0,.12),0 2px 3px rgba(0,0,0,.06),inset 0 -3px 0 rgba(0,0,0,.04),inset 0 1px 0 rgba(255,255,255,.95)}
@@ -1441,21 +1443,23 @@ function renderPosButton (btn, gridStyle) {
     const priceMatch = dispLabel.match(/<br>(\$[\d.]+.*)$/)
     if (priceMatch) { priceBadge = `<span class="btn-price-badge">${priceMatch[1]}</span>`; dispLabel = dispLabel.replace(/<br>\$[\d.]+.*$/, '') }
     else if (btn.price > 0) { priceBadge = `<span class="btn-price-badge">${money(btn.price)}</span>` }
+    const pluBadge2 = btn.product_plu ? `<span class="btn-plu-badge">${esc(btn.product_plu)}</span>` : ''
     return `<div class="pos-grid-btn dept-key${imgClass}" data-type="${esc(type)}" data-page-link="${btn.parent_id}"
-      style="${gridStyle};background:${bg};color:${color}${catColorStyle}">${imgHtml}<span>${dispLabel}</span>${priceBadge}</div>`
+      style="${gridStyle};background:${bg};color:${color}${catColorStyle}">${imgHtml}<span>${dispLabel}</span>${priceBadge}${pluBadge2}</div>`
   }
 
   // Department / product / nav — everything else
   const isItem = type === 'fixed_price' || type === 'open_price' || type === 'product'
   const priceVal = btn.price || 0
   const priceBadge = isItem && priceVal > 0 ? `<span class="btn-price-badge">${money(priceVal)}</span>` : ''
+  const pluBadge = btn.product_plu ? `<span class="btn-plu-badge">${esc(btn.product_plu)}</span>` : ''
   // Strip embedded price line from label when we have a proper price tag
   let displayLabel = label.replace(/\\n/g,'<br>')
   if (priceBadge) displayLabel = displayLabel.replace(/<br>\$[\d.]+.*$/, '')
-  const labelHtml = `<span>${displayLabel}</span>${priceBadge}`
+  const labelHtml = `<span>${displayLabel}</span>${priceBadge}${pluBadge}`
   return `<div class="pos-grid-btn dept-key${imgClass}" data-type="${esc(type)}" data-cat="${esc(btn.category_filter || '')}"
     data-alpha="${esc(btn.alpha_range || '')}" data-label2="${label}" data-price="${priceVal}"
-    data-action="${esc(type)}" data-page-link="${btn.parent_id || ''}"
+    data-action="${esc(type)}" data-page-link="${btn.parent_id || ''}" data-product-id="${esc(btn.product_id || '')}"
     style="${gridStyle};background:${bg};color:${color}${catColorStyle}">${imgHtml}${labelHtml}</div>`
 }
 
@@ -1500,14 +1504,18 @@ $('#posGrid').addEventListener('click', async e => {
     if (type === 'section') { await navigateToSection(btn.dataset.cat); return }
 
     // Unified product handler — covers product, open_price, fixed_price
-    const productRef = btn.dataset.cat  // product_id or PLU stored in category_filter
+    const productId = btn.dataset.productId
+    const productRef = btn.dataset.cat
     const rawLabel = btn.dataset.label2 || btn.textContent.trim()
     const name = rawLabel.split('\\n')[0].split('\n')[0].trim()
     const btnPrice = parseFloat(btn.dataset.price) || 0
 
     // Try to look up linked product from DB
     let prod = null
-    if (productRef) {
+    if (productId) {
+      prod = await window.pos.getProductById(productId)
+    }
+    if (!prod && productRef) {
       prod = await window.pos.getProductById(productRef) || await window.pos.getProductByBarcode(productRef)
     }
 
@@ -1541,6 +1549,17 @@ $('#posGrid').addEventListener('click', async e => {
     }
     if (prod) {
       // Product found — behavior determined by product data
+      if (type === 'open_price' && numBuf) {
+        // Open-price button with numpad entry: use entered cents as price
+        const cents = parseInt(numBuf); const customPrice = cents / 100
+        if (customPrice > 0) {
+          const p2 = { ...prod, price: customPrice, active_price: customPrice }
+          cart.addProduct(p2, returnMode ? -qtyMultiplier : qtyMultiplier, true)
+          qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); applyDeals()
+          showToast(`${prod.name} $${customPrice.toFixed(2)} added`, 'success')
+          return
+        }
+      }
       if (prod.unit === 'kg' || prod.unit === '100g') { pendingWeightProduct = prod; showWeightModal(prod) }
       else { addToCart(prod) }
     } else if (btnPrice > 0) {
