@@ -181,38 +181,30 @@ async function initDatabase() {
     "UPDATE keyboard_buttons SET bg_color = '#16a34a', color = '#fff' WHERE id IN ('pg2-back','pg3-back','pg4-back','pg5-back')",
     "UPDATE keyboard_buttons SET bg_color = '#22c55e', color = '#000' WHERE id IN ('pg2-veg-menu','pg3-prev-fruit','pg4-fruit-menu','pg5-fruit-menu')",
     "UPDATE keyboard_buttons SET bg_color = '#4ade80', color = '#000' WHERE id IN ('pg2-next-fruit','pg4-next-veg','pg5-prev-veg')",
-    // ── Vibrant colour coding for main register page ──
-    // Department buttons — rich, distinct category colors
-    "UPDATE keyboard_buttons SET bg_color = '#e63946' WHERE id = 'btn-meat'",       // vivid red
-    "UPDATE keyboard_buttons SET bg_color = '#e91e90' WHERE id = 'btn-flowers'",    // hot pink
-    "UPDATE keyboard_buttons SET bg_color = '#27ae60', color = '#fff' WHERE id = 'btn-fv'", // emerald green
-    "UPDATE keyboard_buttons SET bg_color = '#6f4e37' WHERE id = 'btn-coffee'",     // rich coffee brown
-    "UPDATE keyboard_buttons SET bg_color = '#d4a017' WHERE id = 'btn-bread'",      // golden wheat
-    "UPDATE keyboard_buttons SET bg_color = '#1a8a4a', color = '#fff' WHERE id = 'btn-fvkg'", // forest green
-    "UPDATE keyboard_buttons SET bg_color = '#e8a000' WHERE id = 'btn-deli'",       // rich amber
-    "UPDATE keyboard_buttons SET bg_color = '#f5c542' WHERE id = 'btn-cheese'",     // warm gold
-    "UPDATE keyboard_buttons SET bg_color = '#2c2c2c', color = '#fff' WHERE id = 'btn-bags'", // charcoal
-    // Bottom nav — category-matched colors
-    "UPDATE keyboard_buttons SET bg_color = '#3498db', color = '#fff' WHERE id = 'btn-grocery'", // bright blue
-    "UPDATE keyboard_buttons SET bg_color = '#c49a6c' WHERE id = 'btn-nuts'",       // warm tan
-    "UPDATE keyboard_buttons SET bg_color = '#7f8c8d', color = '#fff' WHERE id = 'btn-gas'", // slate
-    "UPDATE keyboard_buttons SET bg_color = '#e67e22', color = '#fff' WHERE id = 'btn-fruit-am'", // warm orange
-    "UPDATE keyboard_buttons SET bg_color = '#d35400', color = '#fff' WHERE id = 'btn-fruit-nz'", // burnt orange
-    "UPDATE keyboard_buttons SET bg_color = '#27ae60', color = '#fff' WHERE id = 'btn-veg-ag'",   // emerald green
-    "UPDATE keyboard_buttons SET bg_color = '#1e8449', color = '#fff' WHERE id = 'btn-veg-hz'",   // dark emerald
-    // Function buttons — clearer purpose colors
-    "UPDATE keyboard_buttons SET bg_color = '#8b5cf6', color = '#fff' WHERE id = 'fn-endofday'", // vivid purple
-    "UPDATE keyboard_buttons SET bg_color = '#3b82f6', color = '#fff' WHERE id = 'fn-hold'",     // blue
-    "UPDATE keyboard_buttons SET bg_color = '#3a9c5e', color = '#fff' WHERE id = 'fn-itemsearch'", // green
-    "UPDATE keyboard_buttons SET bg_color = '#f97316', color = '#fff' WHERE id = 'fn-nosale'",   // orange
-    "UPDATE keyboard_buttons SET bg_color = '#d97706', color = '#fff' WHERE id = 'fn-discount'", // amber
-    "UPDATE keyboard_buttons SET bg_color = '#dc2626', color = '#fff' WHERE id = 'fn-movedrawer'", // red
-    "UPDATE keyboard_buttons SET bg_color = '#ef4444', color = '#fff' WHERE id = 'fn-return'",   // bright red
-    "UPDATE keyboard_buttons SET bg_color = '#6366f1', color = '#fff' WHERE id = 'fn-recall'",   // indigo
-    "UPDATE keyboard_buttons SET bg_color = '#cc1818', color = '#fff' WHERE id = 'btn-subtotal'", // red (already)
-    // Reprint & Price Check — subtle but distinct
-    "UPDATE keyboard_buttons SET bg_color = '#64748b', color = '#fff' WHERE id = 'fn-reprint'",    // slate
-    "UPDATE keyboard_buttons SET bg_color = '#0ea5e9', color = '#fff' WHERE id = 'fn-pricecheck'", // sky blue
+    // ── Semantic colour scheme for main register page ──
+    // Green = selling actions / item search / confirm
+    "UPDATE keyboard_buttons SET bg_color = '#16a34a', color = '#fff' WHERE id = 'fn-itemsearch'",
+    // Orange = quantity / modifiers / drawer
+    "UPDATE keyboard_buttons SET bg_color = '#ea580c', color = '#fff' WHERE id = 'fn-nosale'",
+    "UPDATE keyboard_buttons SET bg_color = '#ea580c', color = '#fff' WHERE id = 'fn-discount'",
+    // Red = dangerous: logout, return, subtotal
+    "UPDATE keyboard_buttons SET bg_color = '#dc2626', color = '#fff' WHERE id = 'fn-movedrawer'",
+    "UPDATE keyboard_buttons SET bg_color = '#dc2626', color = '#fff' WHERE id = 'fn-return'",
+    "UPDATE keyboard_buttons SET bg_color = '#b91c1c', color = '#fff' WHERE id = 'btn-subtotal'",
+    // Blue = lookup tools: price check, find sale
+    "UPDATE keyboard_buttons SET bg_color = '#2563eb', color = '#fff' WHERE id = 'fn-pricecheck'",
+    "UPDATE keyboard_buttons SET bg_color = '#2563eb', color = '#fff' WHERE id = 'fn-recall'",
+    // Grey = neutral: reprint, hold, end of day
+    "UPDATE keyboard_buttons SET bg_color = '#475569', color = '#fff' WHERE id = 'fn-reprint'",
+    "UPDATE keyboard_buttons SET bg_color = '#475569', color = '#fff' WHERE id = 'fn-hold'",
+    "UPDATE keyboard_buttons SET bg_color = '#475569', color = '#fff' WHERE id = 'fn-endofday'",
+    // Department buttons — uniform dark slate, let product images pop
+    "UPDATE keyboard_buttons SET bg_color = '#1e293b', color = '#fff' WHERE id IN ('btn-meat','btn-flowers','btn-coffee','btn-bread','btn-deli','btn-cheese','btn-bags','btn-grocery','btn-nuts','btn-gas')",
+    // Fruit & veg departments — dark green family
+    "UPDATE keyboard_buttons SET bg_color = '#14532d', color = '#fff' WHERE id IN ('btn-fv','btn-fvkg')",
+    // Bottom nav — fruit = muted green, veg = muted green (unified fresh produce look)
+    "UPDATE keyboard_buttons SET bg_color = '#15803d', color = '#fff' WHERE id IN ('btn-fruit-am','btn-fruit-nz')",
+    "UPDATE keyboard_buttons SET bg_color = '#166534', color = '#fff' WHERE id IN ('btn-veg-ag','btn-veg-hz')",
     // Add family grouping for categories
     "ALTER TABLE categories ADD COLUMN family TEXT DEFAULT ''",
     // Performance indexes for transaction lookups and reports
@@ -884,105 +876,180 @@ const KB_IMAGE_MAP = {
   'btn-cheese':  { base: 'direct', file: PX(4109938) },
   'btn-flowers': { base: 'direct', file: PX(5996678) },
   'btn-bread':   { base: 'ext', file: 'F_R_CIABATTA_LOAF.jpg' },
-  'btn-bags':    { base: 'img', file: 'Home_Force_Garbage_Bags_Handle_Tie.jpg' },
+  'btn-bags':    { base: 'direct', file: 'https://cdn0.woolworths.media/content/wowproductimages/large/674216.jpg' },
   'btn-deli':    { base: 'direct', file: PX(8775044) },
   'btn-nuts':    { base: 'direct', file: PX(529632) },
   'btn-grocery': { base: 'direct', file: PX(1366594) },
-  'btn-gas':     { base: 'img', file: 'Coca_Cola_1.25L.jpg' },
-  // Page 2: Fruit A-M (Pexels)
-  'pg2-apples':        { base: 'direct', file: PX(2487443) },
-  'pg2-apricots':      { base: 'direct', file: PX(31427390) },
-  'pg2-avocados':      { base: 'direct', file: PX(557659) },
-  'pg2-bananas':       { base: 'direct', file: PX(2238316) },
+  'btn-gas':     { base: 'direct', file: 'https://ubgeneralstore.com.au/cdn/shop/files/swapgo9kggasbottle.jpg?v=1702524703&width=1946' },
+  // Page 2: Fruit A-M (Coles white-background product photos)
+  'pg2-apples':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/1/1/5111654-zm.jpg' },
+  'pg2-apricots':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/9/409477-zm.jpg' },
+  'pg2-avocados':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/9/0/5900530-zm.jpg' },
+  'pg2-bananas':       { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/9/409499-zm.jpg' },
   'pg2-berries':       { base: 'fv', file: 'Strawberries.jpg' },
-  'pg2-cherries':      { base: 'direct', file: PX(1178610) },
-  'pg2-coconut':       { base: 'direct', file: PX(1652001) },
-  'pg2-custard-apple': { base: 'direct', file: PX(15506342) },
-  'pg2-dragon-fruit':  { base: 'direct', file: PX(5217958) },
-  'pg2-figs':          { base: 'direct', file: PX(5419213) },
-  'pg2-grapes':        { base: 'direct', file: PX(1098529) },
-  'pg2-grapefruit':    { base: 'direct', file: PX(209549) },
-  'pg2-guava':         { base: 'direct', file: PX(5945789) },
-  'pg2-kiwi':          { base: 'direct', file: PX(7675956) },
-  'pg2-lemons':        { base: 'direct', file: PX(1414122) },
-  'pg2-limes':         { base: 'direct', file: PX(8615395) },
-  'pg2-longan':        { base: 'direct', file: PX(6870819) },
-  'pg2-lychee':        { base: 'direct', file: PX(17201891) },
-  'pg2-mandarins':     { base: 'direct', file: PX(2135677) },
-  'pg2-mangoes':       { base: 'direct', file: PX(28939331) },
-  'pg2-melons':        { base: 'direct', file: PX(4397729) },
-  // Page 3: Fruit N-Z (Pexels)
-  'pg3-nectarines':    { base: 'direct', file: PX(33589129) },
-  'pg3-oranges':       { base: 'direct', file: PX(2247142) },
-  'pg3-passion-fruit': { base: 'direct', file: PX(5945951) },
-  'pg3-papaya':        { base: 'direct', file: PX(4611443) },
-  'pg3-pawpaw':        { base: 'direct', file: PX(14100444) },
-  'pg3-peaches':       { base: 'direct', file: PX(4397924) },
-  'pg3-pears':         { base: 'direct', file: PX(1656665) },
-  'pg3-persimmons':    { base: 'direct', file: PX(5945961) },
-  'pg3-pineapple-sm':  { base: 'direct', file: PX(947879) },
-  'pg3-pineapple-md':  { base: 'direct', file: PX(947879) },
-  'pg3-pineapple-xl':  { base: 'direct', file: PX(947879) },
-  'pg3-plums':         { base: 'direct', file: PX(17964695) },
-  'pg3-pomegranate':   { base: 'direct', file: PX(7657065) },
-  'pg3-pommelo':       { base: 'direct', file: PX(7214312) },
-  'pg3-quince':        { base: 'direct', file: PX(9944541) },
+  'pg2-cherries':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/9/409535-zm.jpg' },
+  'pg2-coconut':       { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/9/409557-zm.jpg' },
+  'pg2-custard-apple': { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/9/409568-zm.jpg' },
+  'pg2-dragon-fruit':  { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/6/8/6/6866880-zm.jpg' },
+  'pg2-figs':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/6/8/6/6867033-zm.jpg' },
+  'pg2-grapes':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/6/7/0/6706191-zm.jpg' },
+  'pg2-grapefruit':    { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/3/2/5323153-zm.jpg' },
+  'pg2-guava':         { base: 'direct', file: 'https://pngimg.com/uploads/guava/guava_PNG56.png' },
+  'pg2-kiwi':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/4/2/4425883-zm.jpg' },
+  'pg2-lemons':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/3/1/5318302-zm.jpg' },
+  'pg2-limes':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/9/7/197594-zm.jpg' },
+  'pg2-longan':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/4/0/4409923-zm.jpg' },
+  'pg2-lychee':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/5/6/156542-zm.jpg' },
+  'pg2-mandarins':     { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/9/409750-zm.jpg' },
+  'pg2-mangoes':       { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/8/9/2/8925050-zm.jpg' },
+  'pg2-melons':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/2/8/428915-zm.jpg' },
+  // Page 3: Fruit N-Z
+  'pg3-nectarines':    { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/9/409808-zm.jpg' },
+  'pg3-oranges':       { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/2/5/4255717-zm.jpg' },
+  'pg3-passion-fruit': { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/4/1/5415852-zm.jpg' },
+  'pg3-papaya':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/6/9/5/6950578-zm.jpg' },
+  'pg3-pawpaw':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/8/8/7/8875214-zm.jpg' },
+  'pg3-peaches':       { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/5/6/156713-zm.jpg' },
+  'pg3-pears':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/5/6/156258-zm.jpg' },
+  'pg3-persimmons':    { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/1/0/410035-zm.jpg' },
+  'pg3-pineapple-sm':  { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/1/0/410046-zm.jpg' },
+  'pg3-pineapple-md':  { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/1/0/410046-zm.jpg' },
+  'pg3-pineapple-xl':  { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/1/0/410046-zm.jpg' },
+  'pg3-plums':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/5/6/156382-zm.jpg' },
+  'pg3-pomegranate':   { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/1/4519320-zm.jpg' },
+  'pg3-pommelo':       { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/9/0/5907370-zm.jpg' },
+  'pg3-quince':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/1/0/410115-zm.jpg' },
   'pg3-raspberries':   { base: 'fv', file: 'Raspberries_Punnet.jpg' },
   'pg3-blueberries':   { base: 'fv', file: 'Blueberries_Punnet.jpg' },
   'pg3-rockmelon':     { base: 'fv', file: 'Rockmelon.jpg' },
   'pg3-strawberries':  { base: 'fv', file: 'Strawberries.jpg' },
   'pg3-watermelon':    { base: 'fv', file: '(S)Seedless_Watermelon_Whole.jpg' },
-  'pg3-tangello':      { base: 'direct', file: PX(14705001) },
-  // Page 4: Vegetables A-G (Pexels)
-  'pg4-asian-vege':    { base: 'direct', file: PX(2518893) },
-  'pg4-asparagus':     { base: 'direct', file: PX(351679) },
-  'pg4-beans':         { base: 'direct', file: PX(10487661) },
-  'pg4-beetroot':      { base: 'direct', file: PX(5502852) },
+  'pg3-tangello':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/6/8/0/6803198-zm.jpg' },
+  // Page 4: Vegetables A-G
+  'pg4-asian-vege':    { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/6/4565907-zm.jpg' },
+  'pg4-asparagus':     { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/8/3/4838737-zm.jpg' },
+  'pg4-beans':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/7/407675-zm.jpg' },
+  'pg4-beetroot':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/2/8/5288711-zm.jpg' },
   'pg4-broccolini':    { base: 'fv', file: 'Broccolini_Bunch.jpg' },
-  'pg4-broccoli':      { base: 'direct', file: PX(1118177) },
-  'pg4-brussels':      { base: 'direct', file: PX(5662188) },
-  'pg4-cabbage':       { base: 'direct', file: PX(134877) },
-  'pg4-capsicum':      { base: 'direct', file: PX(128536) },
-  'pg4-carrots':       { base: 'direct', file: PX(1306559) },
-  'pg4-carrot-bag':    { base: 'direct', file: PX(1306559) },
-  'pg4-cauliflower':   { base: 'direct', file: PX(23235232) },
-  'pg4-celery':        { base: 'direct', file: PX(5620885) },
-  'pg4-celeriac':      { base: 'direct', file: PX(10112735) },
-  'pg4-chillies':      { base: 'direct', file: PX(221140) },
-  'pg4-chokos':        { base: 'direct', file: PX(7543109) },
-  'pg4-corn':          { base: 'direct', file: PX(1459331) },
-  'pg4-cucumbers':     { base: 'direct', file: PX(2329440) },
-  'pg4-eggplant':      { base: 'direct', file: PX(6576755) },
-  'pg4-leb-eggplant':  { base: 'direct', file: PX(6576755) },
-  'pg4-fennel':        { base: 'direct', file: PX(7511809) },
-  'pg4-garlic':        { base: 'direct', file: PX(1460862) },
-  'pg4-ginger':        { base: 'direct', file: PX(20234970) },
-  'pg4-bottle-gourd':  { base: 'direct', file: PX(36873528) },
-  // Page 5: Vegetables H-Z (Pexels)
-  'pg5-herbs':         { base: 'direct', file: PX(1391503) },
-  'pg5-kale':          { base: 'direct', file: PX(5949097) },
-  'pg5-leeks':         { base: 'direct', file: PX(8054732) },
-  'pg5-lettuces':      { base: 'direct', file: PX(26951809) },
-  'pg5-lettuce-bags':  { base: 'direct', file: PX(26951809) },
-  'pg5-mushrooms':     { base: 'direct', file: PX(5950443) },
-  'pg5-olives':        { base: 'direct', file: PX(4109908) },
-  'pg5-onions':        { base: 'direct', file: PX(144206) },
-  'pg5-parsnip':       { base: 'direct', file: PX(36517116) },
-  'pg5-peas':          { base: 'direct', file: PX(255469) },
-  'pg5-potatoes':      { base: 'direct', file: PX(2286776) },
-  'pg5-pumpkins':      { base: 'direct', file: PX(4187620) },
-  'pg5-radish':        { base: 'direct', file: PX(775207) },
-  'pg5-rhubarb':       { base: 'direct', file: PX(31930001) },
-  'pg5-shallots':      { base: 'direct', file: PX(15220072) },
-  'pg5-silverbeet':    { base: 'direct', file: PX(9005958) },
-  'pg5-snow-peas':     { base: 'direct', file: PX(4963969) },
-  'pg5-sugar-snap':    { base: 'direct', file: PX(8067748) },
+  'pg4-broccoli':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/7/407755-zm.jpg' },
+  'pg4-brussels':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/9/9/8/9989810-zm.jpg' },
+  'pg4-cabbage':       { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/7/2/3/7233448-zm.jpg' },
+  'pg4-capsicum':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/8/4580208-zm.jpg' },
+  'pg4-carrots':       { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/2/2/4223335-zm.jpg' },
+  'pg4-carrot-bag':    { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/2/2/4223335-zm.jpg' },
+  'pg4-cauliflower':   { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/6/0/4601603-zm.jpg' },
+  'pg4-celery':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/8/4/4845732-zm.jpg' },
+  'pg4-celeriac':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/8/9/4894352-zm.jpg' },
+  'pg4-chillies':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/8/7/6/8760314-zm.jpg' },
+  'pg4-chokos':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/2/2/5229814-zm.jpg' },
+  'pg4-corn':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/6/4562603-zm.jpg' },
+  'pg4-cucumbers':     { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/7/4575208-zm.jpg' },
+  'pg4-eggplant':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/8/4583206-zm.jpg' },
+  'pg4-leb-eggplant':  { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/8/4583261-zm.jpg' },
+  'pg4-fennel':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/9/1/4910980-zm.jpg' },
+  'pg4-garlic':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/6/1/0/6105715-zm.jpg' },
+  'pg4-ginger':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/0/3/5034484-zm.jpg' },
+  'pg4-bottle-gourd':  { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/6/6/3/6630216-zm.jpg' },
+  // Page 5: Vegetables H-Z
+  'pg5-herbs':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/7/4575569-zm.jpg' },
+  'pg5-kale':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/8/6/9/8696598-zm.jpg' },
+  'pg5-leeks':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/9/4595930-zm.jpg' },
+  'pg5-lettuces':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/8/4584071-zm.jpg' },
+  'pg5-lettuce-bags':  { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/6/8/8/6885716-zm.jpg' },
+  'pg5-mushrooms':     { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/8/2/4829420-zm.jpg' },
+  'pg5-olives':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/5/5/5554156-zm.jpg' },
+  'pg5-onions':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/8/0/4803991-zm.jpg' },
+  'pg5-parsnip':       { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/1/0/5108183-zm.jpg' },
+  'pg5-peas':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/3/8/438409-zm.jpg' },
+  'pg5-potatoes':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/3/9/5/3958573-zm.jpg' },
+  'pg5-pumpkins':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/1/8/4183558-zm.jpg' },
+  'pg5-radish':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/9/1/4911870-zm.jpg' },
+  'pg5-rhubarb':       { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/8/408372-zm.jpg' },
+  'pg5-shallots':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/1/3/5134809-zm.jpg' },
+  'pg5-silverbeet':    { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/8/408383-zm.jpg' },
+  'pg5-snow-peas':     { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/2/3/123328-zm.jpg' },
+  'pg5-sugar-snap':    { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/6/1/4619289-zm.jpg' },
   'pg5-sprouts':       { base: 'fv', file: 'Alfalfa_Sprout_Salad.jpg' },
-  'pg5-swedes':        { base: 'fv', file: 'Swedes.jpg' },
-  'pg5-sweet-potato':  { base: 'direct', file: PX(5505462) },
-  'pg5-tomatoes':      { base: 'direct', file: PX(1327838) },
-  'pg5-turnip':        { base: 'direct', file: PX(11663131) },
-  'pg5-zucchini':      { base: 'direct', file: PX(3375263) },
+  'pg5-swedes':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/9/6/4966930-zm.jpg' },
+  'pg5-sweet-potato':  { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/1/9/4199503-zm.jpg' },
+  'pg5-tomatoes':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/8/3/4835171-zm.jpg' },
+  'pg5-turnip':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/9/6/4966737-zm.jpg' },
+  'pg5-zucchini':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/9/1/4910506-zm.jpg' },
+  // Subpage: Apples (pg7)
+  'pg7-btn0':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/8/9/5899410-zm.jpg' },
+  'pg7-btn12':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/2/2/5226011-zm.jpg' },
+  'pg7-btn10':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/8/408554-zm.jpg' },
+  'pg7-btn4':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/6/4/2/6427471-zm.jpg' },
+  'pg7-btn9':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/8/5/5/8559542-zm.jpg' },
+  'pg7-btn7':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/8/408554-zm.jpg' },
+  'pg7-btn6':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/1/1/5111654-zm.jpg' },
+  'pg7-btn8':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/2/2/5226000-zm.jpg' },
+  'pg7-btn5':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/9/409251-zm.jpg' },
+  'pg7-btn11':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/9/409251-zm.jpg' },
+  'pg7-btn2':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/8/408554-zm.jpg' },
+  'pg7-btn1':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/1/1/5111654-zm.jpg' },
+  'pg7-btn3':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/2/2/5226000-zm.jpg' },
+  // Subpage: Avocados (pg9)
+  'pg9-btn4':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/9/0/5900530-zm.jpg' },
+  'pg9-btn0':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/9/0/5900530-zm.jpg' },
+  'pg9-btn1':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/3/7/6/3766540-zm.jpg' },
+  'pg9-btn2':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/9/0/5900891-zm.jpg' },
+  'pg9-btn3':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/9/0/5900530-zm.jpg' },
+  // Subpage: Bananas (pg10)
+  'pg10-btn0':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/9/409499-zm.jpg' },
+  'pg10-btn2':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/9/409499-zm.jpg' },
+  'pg10-btn1':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/3/2/132056-zm.jpg' },
+  'pg10-btn3':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/3/2/132056-zm.jpg' },
+  // Subpage: Lemons (pg13)
+  'pg13-btn0':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/3/1/5318302-zm.jpg' },
+  'pg13-btn1':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/9/409728-zm.jpg' },
+  // Subpage: Limes (pg14)
+  'pg14-btn0':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/9/7/197594-zm.jpg' },
+  'pg14-btn1':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/8/1/2/8128020-zm.jpg' },
+  // Subpage: Mandarins (pg15)
+  'pg15-btn5':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/7/1/7/7174994-zm.jpg' },
+  'pg15-btn0':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/9/409750-zm.jpg' },
+  'pg15-btn1':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/2/0/4/204893-zm.jpg' },
+  // Catpage fixes
+  'pg2-mandarins':     { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/9/409750-zm.jpg' },
+  // Subpage: Melons (pg17)
+  'pg17-btn1':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/9/4/5945620-zm.jpg' },
+  'pg17-btn0':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/2/8/428915-zm.jpg' },
+  'pg17-btn6':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/2/0/4205264-zm.jpg' },
+  'pg17-btn2':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/2/0/4205264-zm.jpg' },
+  'pg17-btn3':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/2/8/428915-zm.jpg' },
+  'pg17-btn4':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/9/4/5945620-zm.jpg' },
+  'pg17-btn5':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/2/5/1252053-zm.jpg' },
+  // Subpage: Pears (pg21) — Piqa Boo
+  'pg21-btn4':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/3/5/2/3525725-zm.jpg' },
+  // Subpage: Plums (pg22)
+  'pg22-btn2':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/4/2/5424026-zm.jpg' },
+  'pg22-btn0':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/5/6/156382-zm.jpg' },
+  'pg22-btn1':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/7/4/3/7435690-zm.jpg' },
+  'pg22-btn3':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/3/5/0/3504157-zm.jpg' },
+  'pg22-btn4':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/5/6/156382-zm.jpg' },
+  // Subpage: Lettuces (pg29)
+  'pg29-btn0':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/8/4584071-zm.jpg' },
+  'pg29-btn1':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/8/7/9/8791125-zm.jpg' },
+  'pg29-btn2':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/9/4596649-zm.jpg' },
+  // Subpage: Mushrooms (pg30)
+  'pg30-btn0':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/9/4594010-zm.jpg' },
+  'pg30-btn1':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/9/4590551-zm.jpg' },
+  'pg30-btn2':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/9/4594031-zm.jpg' },
+  // Subpage: Sweet Potatoes (pg34)
+  'pg34-btn0':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/1/9/4199503-zm.jpg' },
+  'pg34-btn3':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/1/9/4199503-zm.jpg' },
+  'pg34-btn1':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/3/6/1/3616751-zm.jpg' },
+  'pg34-btn2':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/2/9/4291131-zm.jpg' },
+  // Subpage: Zucchini (pg36)
+  'pg36-btn0':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/9/1/4910506-zm.jpg' },
+  'pg36-btn1':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/9/1/4910506-zm.jpg' },
+  // Subpage: Potatoes (pg32) — not Kipfler
+  'pg32-btn0':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/3/9/5/3958573-zm.jpg' },
+  'pg32-btn1':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/2/0/1206748-zm.jpg' },
+  'pg32-btn2':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/2/4/8/2488485-zm.jpg' },
+  'pg32-btn4':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/7/9/6/7963859-zm.jpg' },
+  'pg32-btn5':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/7/1/4/7141758-zm.jpg' },
 }
 
 // Apply direct image mappings to keyboard buttons
@@ -993,7 +1060,7 @@ function relinkKeyboardProducts() {
     for (const [btnId, entry] of Object.entries(KB_IMAGE_MAP)) {
       if (!entry) continue
       const imgUrl = entry.base === 'direct' ? entry.file : bases[entry.base] + entry.file
-      db.run("UPDATE keyboard_buttons SET image = ? WHERE id = ? AND (image IS NULL OR image = '')", [imgUrl, btnId])
+      db.run("UPDATE keyboard_buttons SET image = ? WHERE id = ?", [imgUrl, btnId])
       linked++
     }
     if (linked > 0) {
