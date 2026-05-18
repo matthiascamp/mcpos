@@ -1,6 +1,6 @@
-// Keyboard sub-pages (pages 7-36) — extracted from Profit Track register photos
+// Keyboard sub-pages (pages 7-36) - extracted from Profit Track register photos
 // Auto-generated, do not edit manually
-const VERSION = '2026-05-18-c'
+const VERSION = '2026-05-18-d'
 
 const pages = [
   {
@@ -2979,8 +2979,8 @@ function apply(db) {
   const localVer = (() => { try { const r = db.exec("SELECT value FROM settings WHERE key = 'kb_subpages_ver'"); return r.length && r[0].values.length ? r[0].values[0][0] : '0' } catch (_) { return '0' } })()
   if (localVer >= VERSION) return 0
 
-  db.run("DELETE FROM keyboard_buttons WHERE page > 5")
-  db.run("DELETE FROM keyboard_pages WHERE page > 5")
+  db.run("DELETE FROM keyboard_buttons WHERE page > 5 AND page NOT IN (37,38,39)")
+  db.run("DELETE FROM keyboard_pages WHERE page > 5 AND page NOT IN (37,38,39)")
 
   const pgStmt = db.prepare("INSERT OR REPLACE INTO keyboard_pages (page, name, cols, rows) VALUES (?,?,?,?)")
   for (const p of pages) { pgStmt.run([p.page, p.name, p.cols, p.rows]); }
