@@ -752,28 +752,12 @@ async function initDatabase() {
     } catch (e) { appLog('warn', 'database', 'Bundled DB merge failed', e.message) }
   }
 
-  // Merge keyboard sub-pages from bundled DB (independent of product merge)
-  if (fs.existsSync(BUNDLED_DB_PATH)) {
-    try {
-      const SQL3 = await (require('sql.js'))()
-      const bDb = new SQL3.Database(fs.readFileSync(BUNDLED_DB_PATH))
-      const bundledKbVer = (() => { const r = bDb.exec("SELECT value FROM settings WHERE key = 'kb_version'"); return r.length && r[0].values.length ? r[0].values[0][0] : '0' })()
-      const localKbVer = (() => { const r = db.exec("SELECT value FROM settings WHERE key = 'kb_version'"); return r.length && r[0].values.length ? r[0].values[0][0] : '0' })()
-
-      if (bundledKbVer > localKbVer) {
-        db.run("DELETE FROM keyboard_buttons WHERE page > 5")
-        db.run("DELETE FROM keyboard_pages WHERE page > 5")
-        const bPages = bDb.exec("SELECT page, name, cols, rows FROM keyboard_pages WHERE page > 5")
-        if (bPages.length) for (const row of bPages[0].values) db.run("INSERT OR REPLACE INTO keyboard_pages (page, name, cols, rows) VALUES (?1,?2,?3,?4)", row)
-        const bBtns = bDb.exec("SELECT id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, product_id, active FROM keyboard_buttons WHERE page > 5")
-        let kbMerged = 0
-        if (bBtns.length) for (const row of bBtns[0].values) { db.run("INSERT OR REPLACE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, product_id, active) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19)", row); kbMerged++ }
-        db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('kb_version', ?1)", [bundledKbVer])
-        appLog('info', 'database', `Merged ${kbMerged} keyboard sub-page buttons from bundled DB (v${bundledKbVer})`)
-      }
-      bDb.close()
-    } catch (e) { appLog('error', 'database', 'Keyboard sub-page merge failed', e.message) }
-  }
+  // Populate keyboard sub-pages from bundled JS data (no SQLite-to-SQLite merge needed)
+  try {
+    const kbSubpages = require('./db/keyboard-subpages')
+    const applied = kbSubpages.apply(db)
+    if (applied > 0) appLog('info', 'database', `Applied ${applied} keyboard sub-page buttons (v${kbSubpages.VERSION})`)
+  } catch (e) { appLog('error', 'database', 'Keyboard sub-page apply failed', e.message) }
 
   saveDBSync()
   appLog('info', 'database', 'Database initialized', `Path: ${DB_PATH}`)
