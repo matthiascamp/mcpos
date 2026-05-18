@@ -2724,6 +2724,17 @@ function setupIPC() {
 
   function checkOpos () {
     if (oposAvailable !== null) return oposAvailable
+    // Use cached result from last session to avoid spawning PowerShell every startup
+    const cached = dbGet("SELECT value FROM settings WHERE key='opos_cached_result'")?.value
+    if (cached) {
+      try {
+        oposAvailable = JSON.parse(cached)
+        if (!oposAvailable.printer && !oposAvailable.drawer && !oposAvailable.scale && !oposAvailable.scanner) {
+          appLog('info', 'hardware', 'OPOS previously checked — not available (skipping)')
+          return oposAvailable
+        }
+      } catch (_) {}
+    }
     appLog('info', 'hardware', 'Checking OPOS availability...')
     const result = oposCall('check')
     if (result.ok && result.data) {
@@ -2736,6 +2747,7 @@ function setupIPC() {
       oposAvailable = { printer: false, drawer: false, scale: false, scanner: false }
       appLog('info', 'hardware', `OPOS not available: ${result.error || 'check failed'}`)
     }
+    try { dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('opos_cached_result', ?1)", [JSON.stringify(oposAvailable)]); saveDBSync() } catch (_) {}
     // Load saved OPOS device names
     oposPrinterName = dbGet("SELECT value FROM settings WHERE key='opos_printer_name'")?.value || ''
     oposDrawerName = dbGet("SELECT value FROM settings WHERE key='opos_drawer_name'")?.value || ''
@@ -2853,7 +2865,10 @@ function setupIPC() {
         break
       case 'fatal':
         appLog('error', 'scanner', `Listener fatal: ${msg.message}`)
-        if (msg.message && msg.message.includes('not registered')) scannerFatalStop = true
+        if (msg.message && msg.message.includes('not registered')) {
+          scannerFatalStop = true
+          try { dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('scanner_opos_unavailable', '1')"); saveDBSync() } catch (_) {}
+        }
         break
       case 'error':
       case 'poll_error':
@@ -4465,13 +4480,16 @@ function setupIPC() {
     startScalePolling()
     try { cleanupDuplicateQueues() } catch (_) {}
 
-    // Run environment diagnostics and warn about issues
+    // Only run heavy diagnostics if we actually found hardware — no point on dev machines
+    if (!initialProbeFoundHardware) {
+      appLog('info', 'hardware', 'No hardware detected — skipping diagnostics')
+      return
+    }
     try {
       const diag = await diagnoseEnvironment()
       for (const issue of diag.issues) {
         appLog('warn', 'hardware', `[DIAG] ${issue.message}${issue.fix ? ' — Fix: ' + issue.fix : ''}`)
       }
-      // Send high-severity issues to renderer for toast notifications
       const critical = diag.issues.filter(i => i.severity === 'high')
       if (critical.length > 0 && mainWindow && !mainWindow.isDestroyed()) {
         mainWindow.webContents.send('hardware:issues', critical)
@@ -5368,13 +5386,18 @@ function setupIPC() {
     }
   } catch (_) {}
 
-  // Start the OPOS scanner listener — deferred 10s so it doesn't compete with UI startup
-  setTimeout(() => {
-    try { startScannerListener() } catch (e) { appLog('warn', 'scanner', `Failed to start listener: ${e.message}`) }
-  }, 10000)
+  // Start the OPOS scanner listener — skip if it previously failed with "not registered"
+  const scannerDisabled = dbGet("SELECT value FROM settings WHERE key='scanner_opos_unavailable'")?.value
+  if (scannerDisabled) {
+    appLog('info', 'scanner', 'OPOS scanner previously unavailable — skipping (use Hardware tab to retry)')
+  } else {
+    setTimeout(() => {
+      try { startScannerListener() } catch (e) { appLog('warn', 'scanner', `Failed to start listener: ${e.message}`) }
+    }, 10000)
+  }
 
   // Expose IPC controls for the scanner listener (used by Hardware tab / debug)
-  ipcMain.handle('hardware:scannerRestart', () => { stopScannerListener(); scannerFatalStop = false; scannerRetryCount = 0; startScannerListener(); return { ok: true } })
+  ipcMain.handle('hardware:scannerRestart', () => { stopScannerListener(); scannerFatalStop = false; scannerRetryCount = 0; try { dbRun("DELETE FROM settings WHERE key='scanner_opos_unavailable'"); scheduleSave() } catch (_) {}; startScannerListener(); return { ok: true } })
   ipcMain.handle('hardware:scannerTest', () => oposCall('scanner-test', { deviceName: oposScannerName, timeout: 5000 }))
 }
 
