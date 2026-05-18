@@ -213,6 +213,7 @@ async function initDatabase() {
     "CREATE INDEX IF NOT EXISTS idx_transactions_created ON transactions(created_at)",
     "CREATE INDEX IF NOT EXISTS idx_transactions_status ON transactions(status)",
     "CREATE INDEX IF NOT EXISTS idx_cash_drawer_created ON cash_drawer(created_at)",
+    "INSERT OR IGNORE INTO settings (key, value) VALUES ('next_receipt_number', '1')",
   ]
   for (const m of migrations) {
     try { db.run(m) } catch (_) {}
@@ -713,6 +714,35 @@ async function initDatabase() {
     }
   } catch (e) { appLog('error', 'migration', 'Keyboard-product link migration failed', e.message) }
 
+  // ── Intentional color coding for function buttons ──
+  // Red = destructive (logout, return), Blue = navigation (hold, find sale),
+  // Amber = caution (discount, open drawer), Teal = search, Purple = admin,
+  // Gray = utility (reprint, price check), Green = payment (subtotal)
+  try {
+    const colorDone = dbAll("SELECT value FROM settings WHERE key = 'migration_btn_colors_v1'")
+    if (!colorDone.length) {
+      const colorMap = [
+        ['fn-reprint',    '#000', '#9ca3af'],
+        ['fn-endofday',   '#fff', '#7c3aed'],
+        ['fn-hold',       '#fff', '#2563eb'],
+        ['fn-itemsearch', '#fff', '#0d9488'],
+        ['fn-nosale',     '#fff', '#d97706'],
+        ['fn-pricecheck', '#000', '#9ca3af'],
+        ['fn-discount',   '#fff', '#d97706'],
+        ['fn-movedrawer', '#fff', '#dc2626'],
+        ['fn-return',     '#fff', '#dc2626'],
+        ['fn-recall',     '#fff', '#2563eb'],
+        ['btn-subtotal',  '#fff', '#16a34a'],
+      ]
+      for (const [id, color, bg] of colorMap) {
+        db.run("UPDATE keyboard_buttons SET color = ?1, bg_color = ?2 WHERE id = ?3", [color, bg, id])
+      }
+      db.run("UPDATE keyboard_buttons SET image = NULL, label = 'FRUIT & VEG\nOPEN PRICE' WHERE id = 'btn-fv'")
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('migration_btn_colors_v1', '1')")
+      appLog('info', 'migration', 'Applied intentional color coding to function buttons')
+    }
+  } catch (e) { appLog('error', 'migration', 'Button color migration failed', e.message) }
+
   // Merge products from bundled DB if local is missing any
   if (dbExists && fs.existsSync(BUNDLED_DB_PATH)) {
     try {
@@ -1108,7 +1138,9 @@ function createWindow() {
     }
   })
 
-  mainWindow.loadFile(path.join(__dirname, 'pos', 'admin.html'))
+  const appMode = (() => { try { const r = db.exec("SELECT value FROM settings WHERE key = 'app_mode'"); return r.length && r[0].values.length ? r[0].values[0][0] : 'admin' } catch (_) { return 'admin' } })()
+  const startPage = appMode === 'register' ? 'index.html' : 'admin.html'
+  mainWindow.loadFile(path.join(__dirname, 'pos', startPage))
 
   if (isDevMode) {
     mainWindow.webContents.openDevTools({ mode: 'detach' })
@@ -1365,6 +1397,21 @@ function setupIPC() {
       const [filePart, queryPart] = page.split('?')
       const opts = queryPart ? { query: Object.fromEntries(new URLSearchParams(queryPart)) } : {}
       await mainWindow.loadFile(path.join(__dirname, 'pos', filePart), opts)
+    }
+  })
+
+  ipcMain.handle('window:setMode', async (_e, mode, role) => {
+    dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('app_mode', ?)", [mode])
+    scheduleSave()
+    if (mode === 'register') {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        await mainWindow.loadFile(path.join(__dirname, 'pos', 'index.html'))
+      }
+    } else {
+      const startMode = (role === 'admin' || role === 'manager') ? 'admin' : 'register'
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        await mainWindow.loadFile(path.join(__dirname, 'pos', 'admin.html'), { query: { mode: startMode } })
+      }
     }
   })
 
@@ -1946,8 +1993,13 @@ function setupIPC() {
     }
 
     queueSync('transactions', txnId, 'insert')
+
+    const rcptRow = dbGet("SELECT value FROM settings WHERE key = 'next_receipt_number'")
+    const receiptNumber = parseInt(rcptRow?.value || '1', 10)
+    dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('next_receipt_number', ?1)", [String(receiptNumber + 1)])
+
     saveDB()
-    return { id: txnId }
+    return { id: txnId, receiptNumber }
   })
 
   ipcMain.handle('db:transaction:get', (_e, txnId) => {
@@ -4075,54 +4127,119 @@ function setupIPC() {
   // ── Build receipt buffer (ESC/POS) ─────────────────────────────────────────
 
   function buildReceiptBuffer (receiptData) {
+    const W = 42
     const parts = []
     const text = s => parts.push(Buffer.from(s + '\n', 'latin1'))
     const cmd = buf => parts.push(buf)
+    const lr = (l, r) => `${l}${' '.repeat(Math.max(1, W - l.length - r.length))}${r}`
 
     cmd(ESCPOS.INIT)
-    // Set codepage to PC437 (standard for thermal printers)
     cmd(Buffer.from([ESC, 0x74, 0x00]))
     cmd(ESCPOS.ALIGN_CENTER)
 
+    // Header block
+    text('WELCOME TO')
     cmd(ESCPOS.BOLD_ON); cmd(ESCPOS.DOUBLE_SIZE)
     text(receiptData.storeName || 'Tillaroo')
     cmd(ESCPOS.NORMAL_SIZE); cmd(ESCPOS.BOLD_OFF)
 
-    if (receiptData.storeAddress) text(receiptData.storeAddress)
-    if (receiptData.storePhone) text(`Ph: ${receiptData.storePhone}`)
-    if (receiptData.storeAbn) text(`ABN: ${receiptData.storeAbn}`)
-    if (receiptData.header) { text(''); text(receiptData.header) }
-
-    text(''); cmd(ESCPOS.ALIGN_LEFT)
-    text(`Date:     ${receiptData.date}`)
-    text(`Register: ${receiptData.registerId || 'LANE01'}`)
-    text(`Txn:      ${receiptData.txnId?.slice(0, 8) || ''}`)
-    text(`Staff:    ${receiptData.staffName || ''}`)
-    text('-'.repeat(42))
-
-    for (const item of receiptData.items) {
-      const name = item.name.substring(0, 28)
-      const price = item.line_total.toFixed(2).padStart(10)
-      text(`${name}${' '.repeat(Math.max(0, 42 - name.length - price.length))}${price}`)
-      if (item.qty !== 1) text(`  ${item.qty} x $${item.unit_price.toFixed(2)}`)
-      if (item.discount > 0) text(`  Discount: -$${item.discount.toFixed(2)}`)
+    if (receiptData.header) {
+      for (const line of receiptData.header.split('\n')) if (line.trim()) text(line.trim())
     }
-
-    text('-'.repeat(42)); cmd(ESCPOS.ALIGN_RIGHT)
-    if (receiptData.discount > 0) text(`Discount: -$${receiptData.discount.toFixed(2)}`)
-    cmd(ESCPOS.BOLD_ON); cmd(ESCPOS.DOUBLE_SIZE)
-    text(`TOTAL: $${receiptData.total.toFixed(2)}`)
-    cmd(ESCPOS.NORMAL_SIZE); cmd(ESCPOS.BOLD_OFF)
-    text(`Total includes GST of $${receiptData.tax.toFixed(2)}`)
+    if (receiptData.storePhone) text(`PH# ${receiptData.storePhone}`)
+    if (receiptData.storeAddress) text(receiptData.storeAddress)
+    if (receiptData.storeAbn) text(`ABN# ${receiptData.storeAbn}`)
+    text('Thank you for shopping with us')
+    text('Please retain receipt for refunds')
+    cmd(ESCPOS.BOLD_ON)
+    text('TAX INVOICE')
+    cmd(ESCPOS.BOLD_OFF)
     text('')
 
-    for (const pay of receiptData.payments) text(`${pay.method.toUpperCase()}: $${pay.amount.toFixed(2)}`)
-    if (receiptData.change > 0) text(`Change: $${receiptData.change.toFixed(2)}`)
+    // GST / discount legend
+    cmd(ESCPOS.ALIGN_LEFT)
+    text('(*) denotes items which attract GST')
+    text('(D) denotes Discounted items')
 
-    text(''); cmd(ESCPOS.ALIGN_CENTER)
-    text(receiptData.footer || 'Thank you for shopping local!')
+    // Date and staff on one line
+    const dateStr = receiptData.date || new Date().toLocaleString('en-AU')
+    const staffStr = receiptData.staffName || ''
+    text(lr(dateStr, staffStr))
+    text('')
 
-    // Transaction barcode at bottom (scannable for returns/lookups)
+    // Items
+    for (const item of receiptData.items) {
+      const hasGst = (item.tax || 0) > 0
+      const hasDiscount = (item.discount || 0) > 0
+      const prefix = hasDiscount ? 'D ' : hasGst ? '* ' : '  '
+      const nameStr = (prefix + item.name).substring(0, 32)
+      const priceStr = `$${item.line_total.toFixed(2)}`
+      text(lr(nameStr, priceStr))
+      if (item.qty !== 1) text(`    ${item.qty} x $${item.unit_price.toFixed(2)}`)
+      if (hasDiscount) text(`    Discount: -$${item.discount.toFixed(2)}`)
+    }
+    text('')
+
+    // Totals
+    cmd(ESCPOS.ALIGN_LEFT)
+    text(lr('Subtotal', `$${receiptData.subtotal.toFixed(2)}`))
+
+    if (receiptData.discount > 0) {
+      const discLabel = receiptData.discountLabel || 'Discount'
+      text(lr(discLabel, `-$${receiptData.discount.toFixed(2)}`))
+    }
+
+    const itemCount = (receiptData.items || []).reduce((s, it) => s + Math.abs(it.qty), 0)
+    cmd(ESCPOS.BOLD_ON)
+    text(lr(`Total (${itemCount} Item${itemCount !== 1 ? 's' : ''})`, `$${receiptData.total.toFixed(2)}`))
+    cmd(ESCPOS.BOLD_OFF)
+
+    // Payment methods
+    for (const pay of receiptData.payments) {
+      const methodName = pay.method === 'card' ? 'Eftpos' : pay.method.charAt(0).toUpperCase() + pay.method.slice(1)
+      text(lr(methodName, `$${pay.amount.toFixed(2)}`))
+    }
+    if (receiptData.change > 0) text(lr('Change', `$${receiptData.change.toFixed(2)}`))
+
+    // EFTPOS terminal receipt lines (from Linkly)
+    if (receiptData.eftposReceipt && receiptData.eftposReceipt.length) {
+      text('-'.repeat(W))
+      cmd(ESCPOS.ALIGN_CENTER)
+      for (const line of receiptData.eftposReceipt) text(line)
+    }
+
+    text('')
+    text('-'.repeat(W))
+
+    // Footer: staff + lane
+    cmd(ESCPOS.ALIGN_LEFT)
+    const rawRole = receiptData.staffRole || 'Cashier'
+    const staffRole = rawRole.charAt(0).toUpperCase() + rawRole.slice(1)
+    const servedBy = `Served by ${staffRole} ${staffStr}`
+    const laneStr = `Lane #${receiptData.registerId || '01'}`
+    text(lr(servedBy, laneStr))
+
+    // Receipt number
+    if (receiptData.receiptNumber) {
+      const rcptNum = String(receiptData.receiptNumber).padStart(8, '0')
+      text(lr('Receipt Number', rcptNum))
+    }
+    text('')
+
+    // GST summary
+    cmd(ESCPOS.ALIGN_CENTER)
+    text(`Total includes GST of $${receiptData.tax.toFixed(2)}`)
+
+    // Surcharge note
+    const hasEftposSurcharge = receiptData.eftposSurcharge > 0
+    if (hasEftposSurcharge) { text(''); text('Eftpos Surcharge Applied') }
+
+    text('')
+    if (receiptData.footer) {
+      for (const line of receiptData.footer.split('\n')) if (line.trim()) text(line.trim())
+    }
+
+    // Transaction barcode at bottom
     if (receiptData.barcode) {
       text('')
       cmd(ESCPOS.BARCODE_HEIGHT); cmd(ESCPOS.BARCODE_WIDTH); cmd(ESCPOS.BARCODE_HRI_BELOW)

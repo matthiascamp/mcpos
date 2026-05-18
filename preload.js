@@ -157,6 +157,7 @@ contextBridge.exposeInMainWorld('pos', {
   exitFullscreen:     ()      => ipcRenderer.invoke('window:exitFullscreen'),
   quit:               ()      => ipcRenderer.invoke('window:quit'),
   navigate:           (page)  => ipcRenderer.invoke('window:navigate', page),
+  setMode:            (mode, role)  => ipcRenderer.invoke('window:setMode', mode, role),
   printHTML:           (html, title) => ipcRenderer.invoke('window:printHTML', html, title),
 
   // App Update

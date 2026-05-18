@@ -51,7 +51,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .subtotal-amount{font-family:'Inter',sans-serif;font-weight:800;font-size:clamp(18px,2.5vw,28px);color:#6ed99b;min-width:clamp(80px,10vw,130px);text-align:right;letter-spacing:-1px;text-shadow:0 0 18px rgba(110,217,155,.25)}
 
 /* ═══ Main Layout ══════════════════════════════════════════════════ */
-.main-row{display:flex;flex:1;overflow:hidden}
+.main-row{display:flex;flex:1;overflow:hidden;min-height:0}
 
 /* ═══ Cart Panel (LEFT) ══════════════════════════════════════════ */
 .cart-panel{width:clamp(240px,22vw,350px);display:flex;flex-direction:column;background:#fff;border-right:none;flex-shrink:0;box-shadow:4px 0 20px rgba(0,0,0,.15)}
@@ -94,10 +94,10 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 /* ═══ Keyboard Panel (RIGHT — all buttons) ════════════════════════ */
 .keyboard-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;background:linear-gradient(165deg,#1a1d28 0%,#12141c 40%,#0e1017 100%)}
 
-.keyboard-home{flex:1;display:flex;flex-direction:column;padding:clamp(3px,0.5vw,6px);gap:clamp(2px,0.4vw,5px)}
+.keyboard-home{flex:1;display:flex;flex-direction:column;padding:clamp(3px,0.5vw,6px);gap:clamp(2px,0.4vw,5px);min-height:0}
 
 /* Dynamic POS grid from keyboard_buttons DB */
-.pos-grid{flex:1;display:grid;gap:clamp(3px,0.45vw,6px);padding:0}
+.pos-grid{flex:1;display:grid;gap:clamp(3px,0.45vw,6px);padding:0;min-height:0}
 .pos-grid-btn{border:none;border-radius:clamp(8px,1vw,14px);font-weight:600;font-size:clamp(9px,1.1vw,13px);cursor:pointer;text-align:center;line-height:1.2;font-family:'Inter',sans-serif;transition:transform .12s cubic-bezier(.2,0,0,1),box-shadow .12s,filter .12s;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:clamp(2px,0.5vh,5px) clamp(3px,0.5vw,6px);word-break:break-word;position:relative;overflow:hidden;user-select:none;box-shadow:0 4px 10px rgba(0,0,0,.35),0 1px 3px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.07)}
 .pos-grid-btn:active{transform:scale(.94) translateY(2px);box-shadow:0 1px 2px rgba(0,0,0,.3),inset 0 2px 4px rgba(0,0,0,.15);filter:brightness(.85)}
 .pos-grid-btn img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit}
@@ -408,9 +408,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
     <div style="position:relative">
       <input type="text" id="searchInput" class="scan-input" placeholder="" autofocus style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden">
     </div>
-    <button id="searchBtn" style="background:none;border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 12px;border-radius:4px;font-size:13px;cursor:pointer;min-height:32px;display:flex;align-items:center;gap:5px" title="Search Products">🔍 Search</button>
     <span class="staff-info" id="staffBadge">Not logged in</span>
-    <a href="#" class="admin-link" onclick="event.preventDefault(); window.pos.navigate('admin.html?mode=register')">Admin</a>
+    <a href="#" class="admin-link" id="adminSwitchBtn">Admin</a>
     <button onclick="window.pos.exitFullscreen()" style="background:none;border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 10px;border-radius:4px;font-size:11px;cursor:pointer;min-height:32px" title="Exit fullscreen (F11)">Exit FS</button>
     <div class="sync-info"><span class="sync-dot" id="syncDot"></span><span id="syncLabel">Online</span></div>
   </div>
@@ -1395,7 +1394,9 @@ function renderPosButton (btn, gridStyle) {
   const color = esc(btn.color || '#000')
   const label = esc(btn.label || '')
   const imgSrc = btn.image || btn.product_image_url || ''
-  const imgHtml = imgSrc ? `<img src="${esc(imgSrc)}" alt="">` : ''
+  const cs = btn.col_span || 1, rs = btn.row_span || 1
+  const containFit = imgSrc && cs === 1 && rs === 1
+  const imgHtml = imgSrc ? `<img src="${esc(imgSrc)}" alt=""${containFit ? ' style="object-fit:contain;padding:4px"' : ''}>` : ''
   const imgClass = imgSrc ? ' has-img' : ''
 
   // Numpad display — not a button but an indicator cell
@@ -2941,6 +2942,8 @@ function cashRound (amount) {
 
 // ═══ Cash Payment (with split payment support) ═══════════════════
 let pendingPayments = []
+let lastEftposReceipt = []
+let lastEftposSurcharge = 0
 
 function getRemaining () {
   const paid = pendingPayments.reduce((s, p) => s + p.amount, 0)
@@ -2968,10 +2971,13 @@ async function buildReceiptData (txn, r) {
     storeName: s.store_name || 'Tillaroo', storeAddress: s.store_address || '',
     storePhone: s.store_phone || '', storeAbn: s.store_abn || '',
     header: s.receipt_header || '', date: new Date().toLocaleString('en-AU'),
-    txnId: r.id, staffName: currentStaff?.name || '', registerId: s.register_id || 'LANE01',
+    txnId: r.id, receiptNumber: r.receiptNumber || null,
+    staffName: currentStaff?.name || '', staffRole: currentStaff?.role || 'cashier',
+    registerId: s.register_id || 'LANE01',
     items: txn.items, subtotal: txn.subtotal, tax: txn.tax, discount: txn.discount, total: txn.total,
     payments: txn.payments, change: 0, status: txn.status || 'completed',
-    footer: s.receipt_footer || 'Thank you!'
+    footer: s.receipt_footer || 'Thank you!',
+    eftposReceipt: r.eftposReceipt || [], eftposSurcharge: r.eftposSurcharge || 0
   }
 }
 
@@ -3049,6 +3055,8 @@ async function processTerminalPayment (amountCents, amountDollars, isRefund) {
       const txn = cart.toTransaction(currentStaff?.id, [{ method: 'card', amount: amountDollars, reference: ref }])
       txn.status = status
       const r = await window.pos.saveTransaction(txn)
+      r.eftposReceipt = result.receipt || []
+      r.eftposSurcharge = result.raw?.surcharge || 0
       const receiptData = await buildReceiptData(txn, r)
       lastCompletedTxns.unshift(receiptData); if (lastCompletedTxns.length > 10) lastCompletedTxns.pop()
       try { await window.pos.printReceipt(receiptData) } catch (_) {}
@@ -3164,6 +3172,8 @@ $('#splitCardBtn').addEventListener('click', async () => {
       if (result.success) {
         const ref = [result.cardType, result.bankRef].filter(Boolean).join(' ') || 'EFTPOS'
         pendingPayments.push({ method: 'card', amount: remaining, reference: ref })
+        lastEftposReceipt = result.receipt || []
+        lastEftposSurcharge = result.raw?.surcharge || 0
         $('#cashModal').classList.add('show')
         renderSplitPayments()
         $('#cashTendered').value = ''
@@ -3275,16 +3285,19 @@ $('#cashConfirm').addEventListener('click', async () => {
       storeName: s.store_name || 'Tillaroo', storeAddress: s.store_address || '',
       storePhone: s.store_phone || '', storeAbn: s.store_abn || '',
       header: s.receipt_header || '', date: new Date().toLocaleString('en-AU'),
-      txnId: r.id, staffName: currentStaff?.name || '', registerId: s.register_id || 'LANE01',
+      txnId: r.id, receiptNumber: r.receiptNumber || null,
+      staffName: currentStaff?.name || '', staffRole: currentStaff?.role || 'cashier',
+      registerId: s.register_id || 'LANE01',
       items: txn.items, subtotal: txn.subtotal, tax: txn.tax, discount: txn.discount, total: txn.total,
-      payments: txn.payments, change: ch, status, footer: s.receipt_footer || 'Thank you!'
+      payments: txn.payments, change: ch, status, footer: s.receipt_footer || 'Thank you!',
+      eftposReceipt: lastEftposReceipt, eftposSurcharge: lastEftposSurcharge
     }
     lastCompletedTxns.unshift(receiptData)
     if (lastCompletedTxns.length > 10) lastCompletedTxns.length = 10
     if (autoReceipt) { try { const pr = await window.pos.printReceipt(receiptData); if (pr?.error) showToast('Printer: ' + pr.error, 'error') } catch (pe) { showToast('Printer: ' + pe.message, 'error') } }
     const hasCash = payments.some(p => p.method === 'cash')
     if (hasCash) { try { const dr = await window.pos.openDrawer(); if (dr?.error) showToast('Drawer: ' + dr.error, 'error') } catch (de) { showToast('Drawer: ' + de.message, 'error') } }
-    cart.clear(); clearCartLocal(); pendingPayments = []
+    cart.clear(); clearCartLocal(); pendingPayments = []; lastEftposReceipt = []; lastEftposSurcharge = 0
     if (returnMode) { returnMode = false; $('#returnBanner').classList.remove('active') }
     if (supervisorMode) { supervisorMode = false; $('#supervisorBanner').classList.remove('active'); if (supervisorTimer) clearTimeout(supervisorTimer) }
     $('#cashModal').classList.remove('show')
@@ -3756,8 +3769,6 @@ $('#eodNotes').addEventListener('focus', (e) => {
 })
 
 // ═══ Item Search Modal ════════════════════════════════════════════
-$('#searchBtn').addEventListener('click', () => showItemSearchModal())
-
 function showItemSearchModal () {
   $('#itemSearchInput').value = ''
   $('#isFilterCat').value = ''
@@ -4055,6 +4066,16 @@ window.pos.onScaleWeight((data) => {
   }
 })
 
+// ── Admin switch (no PIN required — role-based tabs are handled on admin page) ──
+;(function() {
+  const btn = document.getElementById('adminSwitchBtn')
+  if (!btn) return
+  btn.addEventListener('click', e => {
+    e.preventDefault()
+    const role = currentStaff?.role || 'cashier'
+    window.pos.setMode('admin', role)
+  })
+})()
 </script>
 </body>
 </html>

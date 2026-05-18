@@ -174,7 +174,8 @@ INSERT OR IGNORE INTO settings (key, value) VALUES
   ('tax_name', 'GST'),
   ('tax_rate', '0.10'),
   ('layout_v3_shifted', '1'),
-  ('nav_buttons_fixed', '1');
+  ('nav_buttons_fixed', '1'),
+  ('next_receipt_number', '1');
 
 -- ─── Sample Categories & Products ─────────────────────────────────────────
 
@@ -303,12 +304,12 @@ INSERT OR IGNORE INTO keyboard_pages (page, name, cols, rows) VALUES
 -- Default Page 1 layout — matches user's working register
 -- Row 0: Function buttons (cols 0-12)
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, category_filter) VALUES
-  ('fn-reprint',    'REPRINT\nRECEIPT', 'reprint',   '#000', '#dddddd', 1,  'grid', 1, 0, 0, 3, 1, NULL),
-  ('fn-endofday',   'END OF\nDAY',      'endofday',  '#000', '#8b5cf6', 2,  'grid', 1, 0, 3, 2, 1, NULL),
-  ('fn-hold',       'HOLD\nSALE',       'hold',      '#000', '#dddddd', 3,  'grid', 1, 0, 5, 2, 1, NULL),
-  ('fn-itemsearch', 'ITEM\nSEARCH',     'item_search','#4ade80','#1a4034',4, 'grid', 1, 0, 7, 2, 1, NULL),
-  ('fn-nosale',     'OPEN\nDRAWER',     'nosale',    '#fff', '#e07020', 5,  'grid', 1, 0, 9, 2, 1, NULL),
-  ('fn-pricecheck', 'PRICE CHECK',      'pricecheck','#000', '#dddddd', 6,  'grid', 1, 0, 11, 2, 2, NULL);
+  ('fn-reprint',    'REPRINT\nRECEIPT', 'reprint',   '#000', '#9ca3af', 1,  'grid', 1, 0, 0, 3, 1, NULL),
+  ('fn-endofday',   'END OF\nDAY',      'endofday',  '#fff', '#7c3aed', 2,  'grid', 1, 0, 3, 2, 1, NULL),
+  ('fn-hold',       'HOLD\nSALE',       'hold',      '#fff', '#2563eb', 3,  'grid', 1, 0, 5, 2, 1, NULL),
+  ('fn-itemsearch', 'ITEM\nSEARCH',     'item_search','#fff','#0d9488', 4,  'grid', 1, 0, 7, 2, 1, NULL),
+  ('fn-nosale',     'OPEN\nDRAWER',     'nosale',    '#fff', '#d97706', 5,  'grid', 1, 0, 9, 2, 1, NULL),
+  ('fn-pricecheck', 'PRICE CHECK',      'pricecheck','#000', '#9ca3af', 6,  'grid', 1, 0, 11, 2, 2, NULL);
 
 -- Cart display area (cols 0-2, rows 1-6)
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, category_filter) VALUES
@@ -316,16 +317,16 @@ INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_o
 
 -- Row 1: Function buttons (cols 3-12)
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, category_filter) VALUES
-  ('fn-discount',   'DISCOUNT',         'discount',  '#000', '#d8a820', 11, 'grid', 1, 1, 3, 2, 1, NULL),
-  ('fn-movedrawer', 'LOG OUT',          'movedrawer','#000', '#ff0000', 12, 'grid', 1, 1, 5, 2, 1, NULL),
-  ('fn-return',     'RETURN\nITEM',     'return',    '#000', '#ff0000', 13, 'grid', 1, 1, 7, 2, 1, NULL),
-  ('fn-recall',     'FIND\nSALE',       'recall',    '#000', '#ff0000', 14, 'grid', 1, 1, 9, 2, 1, NULL);
+  ('fn-discount',   'DISCOUNT',         'discount',  '#fff', '#d97706', 11, 'grid', 1, 1, 3, 2, 1, NULL),
+  ('fn-movedrawer', 'LOG OUT',          'movedrawer','#fff', '#dc2626', 12, 'grid', 1, 1, 5, 2, 1, NULL),
+  ('fn-return',     'RETURN\nITEM',     'return',    '#fff', '#dc2626', 13, 'grid', 1, 1, 7, 2, 1, NULL),
+  ('fn-recall',     'FIND\nSALE',       'recall',    '#fff', '#2563eb', 14, 'grid', 1, 1, 9, 2, 1, NULL);
 
 -- Rows 2-4: Department buttons (cols 3-6) + single items (col 7) + Numpad (cols 8-12)
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, category_filter) VALUES
   ('btn-meat',    'MEAT',              'section',     0,    '#000', '#d87868', 20, 'grid', 1, 2, 3, 2, 1, 'Meat'),
   ('btn-flowers', 'FLOWERS',           'section',     0,    '#000', '#ff0095', 21, 'grid', 1, 2, 5, 2, 1, 'Flowers'),
-  ('btn-fv',      'FRUIT & VEG',       'open_price',  0,    '#000', '#409850', 22, 'grid', 1, 2, 7, 1, 1, NULL),
+  ('btn-fv',      'FRUIT & VEG\nOPEN PRICE', 'open_price',  0,    '#000', '#409850', 22, 'grid', 1, 2, 7, 1, 1, NULL),
   ('btn-coffee',  'COFFEE',            'section',     0,    '#000', '#78b8d0', 23, 'grid', 1, 3, 3, 2, 1, 'Coffee'),
   ('btn-bread',   'BREAD &\nCROISSAN', 'section',     0,    '#000', '#98c030', 24, 'grid', 1, 3, 5, 2, 1, 'Bread & Croissants'),
   ('btn-fvkg',    'FRUIT & VEG\n/KG',  'weighed_open',0,    '#fff', '#2d6a4f', 25, 'grid', 1, 3, 7, 1, 1, NULL),
@@ -357,7 +358,7 @@ INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_o
 
 -- SUB TOTAL button (rows 5-6, cols 11-12)
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, category_filter) VALUES
-  ('btn-subtotal', 'SUB TOTAL', 'subtotal', '#000', '#cc1818', 55, 'grid', 1, 5, 11, 2, 2, NULL);
+  ('btn-subtotal', 'SUB TOTAL', 'subtotal', '#fff', '#16a34a', 55, 'grid', 1, 5, 11, 2, 2, NULL);
 
 -- Row 6: Bottom navigation (cols 3-10)
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, parent_id, category_filter, alpha_range) VALUES

@@ -585,7 +585,17 @@
         var hidden = ['dashboard','cashdrawer','zreport','audit','logs','diagnostics','settings','staff','keyboard','labels','stock','insights'];
         if (hidden.indexOf(tab) !== -1) {
           var prodLink = document.querySelector('[data-tab="products"]');
-          if (prodLink) prodLink.click();
+          if (prodLink) {
+            // Switch active sidebar link
+            var allLinks = document.querySelectorAll('.sidebar a');
+            for (var i = 0; i < allLinks.length; i++) allLinks[i].classList.remove('active');
+            prodLink.classList.add('active');
+            // Switch active tab content
+            var allTabs = document.querySelectorAll('.tab-content');
+            for (var j = 0; j < allTabs.length; j++) allTabs[j].classList.remove('active');
+            var prodTab = document.getElementById('tab-products');
+            if (prodTab) prodTab.classList.add('active');
+          }
         }
       }
 
@@ -612,6 +622,7 @@
         var pbtn = e.target.closest('#modePinModal .mode-pin-btn');
         if (!pbtn) return;
         var v = pbtn.dataset.val;
+        if (v === 'X') { closePin(); return; }
         if (v === 'C') {
           pinBuf = '';
           document.getElementById('modePinDots').textContent = '';
@@ -647,14 +658,12 @@
         if (e.target.id === 'modalBackdrop') closePin();
       });
 
-      // Apply saved mode on load
+      // Apply mode: URL param takes precedence, then localStorage
+      var urlMode = new URLSearchParams(window.location.search).get('mode');
       var saved = localStorage.getItem('tillaroo_admin_mode');
-      if (saved === 'register') switchToRegister();
-
-      // Also check URL param
-      if (new URLSearchParams(window.location.search).get('mode') === 'register') {
-        switchToRegister();
-      }
+      var startMode = urlMode || saved || 'admin';
+      if (startMode === 'register') switchToRegister();
+      else switchToAdmin();
     })();
     </script>
 
@@ -774,6 +783,7 @@
       <button class="mode-pin-btn" data-val="C" style="color:var(--red)">C</button>
       <button class="mode-pin-btn" data-val="0">0</button>
       <button class="mode-pin-btn" data-val="OK" style="background:var(--green);color:#fff">OK</button>
+      <button class="mode-pin-btn" data-val="X" style="grid-column:span 3;background:var(--surface);color:var(--text-dim);border-color:var(--border)">✕ Cancel</button>
     </div>
   </div>
 
