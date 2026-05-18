@@ -752,6 +752,13 @@ async function initDatabase() {
     } catch (e) { appLog('warn', 'database', 'Bundled DB merge failed', e.message) }
   }
 
+  // Populate keyboard category pages (2-5) from bundled JS data
+  try {
+    const kbCatpages = require('./db/keyboard-catpages')
+    const applied = kbCatpages.apply(db)
+    if (applied > 0) appLog('info', 'database', `Applied ${applied} keyboard category-page buttons (v${kbCatpages.VERSION})`)
+  } catch (e) { appLog('error', 'database', 'Keyboard category-page apply failed', e.message) }
+
   // Populate keyboard sub-pages from bundled JS data (no SQLite-to-SQLite merge needed)
   try {
     const kbSubpages = require('./db/keyboard-subpages')
