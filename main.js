@@ -758,6 +758,28 @@ async function initDatabase() {
     if (applied > 0) appLog('info', 'database', `Applied ${applied} keyboard sub-page buttons (v${kbSubpages.VERSION})`)
   } catch (e) { appLog('error', 'database', 'Keyboard sub-page apply failed', e.message) }
 
+  // ── Multi-buy deals (one-time) ──
+  try {
+    const dealsDone = dbAll("SELECT value FROM settings WHERE key = 'deals_v1'")
+    if (!dealsDone.length) {
+      const deals = [
+        { id: 'deal-carrot-bags-2for5',  name: 'Carrot Bags 2 for $5',   qty: 2, price: 5 },
+        { id: 'deal-fennel-2for4',       name: 'Fennel 2 for $4',        qty: 2, price: 4 },
+        { id: 'deal-corn-2for2',         name: 'Sweet Corn 2 for $2',    qty: 2, price: 2 },
+        { id: 'deal-avocado-2for5',      name: 'Hass Avocado 2 for $5',  qty: 2, price: 5 },
+        { id: 'deal-limes-3for5',        name: 'Limes 3 for $5',         qty: 3, price: 5 },
+        { id: 'deal-kiwi-gold-2for5',    name: 'Gold Kiwi Fruit 2 for $5', qty: 2, price: 5 },
+        { id: 'deal-blackberries-2for5', name: 'Blackberries 2 for $5',  qty: 2, price: 5 },
+      ]
+      for (const d of deals) {
+        db.run("INSERT OR IGNORE INTO deals (id, name, type, config, active) VALUES (?, ?, 'multi_buy', ?, 1)",
+          [d.id, d.name, JSON.stringify({ qty: d.qty, price: d.price })])
+      }
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('deals_v1', '1')")
+      appLog('info', 'database', `Added ${deals.length} multi-buy deals`)
+    }
+  } catch (e) { appLog('error', 'database', 'Deals migration failed', e.message) }
+
   saveDBSync()
   appLog('info', 'database', 'Database initialized', `Path: ${DB_PATH}`)
 
