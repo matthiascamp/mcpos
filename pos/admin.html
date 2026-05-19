@@ -1019,45 +1019,33 @@
     <!-- ── Price Tags / Labels ──────────────────────────────────────── -->
     <div class="tab-content" id="tab-labels">
       <h1 style="margin-bottom:12px">Price Tags</h1>
-      <div style="display:grid;grid-template-columns:1fr 360px;gap:14px;height:calc(100vh - 120px);">
+      <div style="display:grid;grid-template-columns:1fr 320px;gap:14px;height:calc(100vh - 120px);">
 
-        <!-- Left column: Designer + Sheet Preview -->
+        <!-- Left: Tag Designer + Sheet Preview -->
         <div style="display:flex;flex-direction:column;gap:14px;overflow:hidden">
-          <!-- Tag Designer (WYSIWYG) -->
+
+          <!-- Tag Designer -->
           <div class="section" style="padding:14px;flex-shrink:0">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
               <h2 style="margin:0">Tag Designer</h2>
-              <span style="font-size:11px;color:var(--text-dim)">Drag elements to position them</span>
-              <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
-                <div class="form-field" style="margin:0"><label style="font-size:9px">Width mm</label><input type="number" id="labelWidth" value="66" min="20" max="100" style="width:50px;padding:3px 5px;font-size:11px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--text)"></div>
-                <span style="color:var(--text-dim);font-size:10px">×</span>
-                <div class="form-field" style="margin:0"><label style="font-size:9px">Height mm</label><input type="number" id="labelHeight" value="28" min="15" max="80" style="width:50px;padding:3px 5px;font-size:11px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--text)"></div>
-              </div>
+              <span style="font-size:11px;color:var(--text-dim)">Drag to position, resize from corners</span>
+              <button class="btn btn-outline" id="tagResetBtn" style="margin-left:auto;padding:3px 10px;font-size:10px">Reset Layout</button>
             </div>
             <div style="display:flex;gap:14px;align-items:start">
-              <!-- Scaled-up tag canvas -->
-              <div id="tagCanvas" style="position:relative;background:#fff;border:2px solid var(--border);border-radius:4px;overflow:hidden;cursor:default;flex-shrink:0"></div>
-              <!-- Element controls -->
-              <div style="flex:1;min-width:200px">
-                <div id="tagElementList" style="display:flex;flex-direction:column;gap:4px"></div>
-                <div id="tagElProps" style="margin-top:10px;padding:10px;background:var(--surface2);border-radius:6px;border:1px solid var(--border);display:none">
+              <div id="tagCanvas" style="position:relative;background:#fff;border:2px solid var(--border);border-radius:4px;overflow:hidden;cursor:default;flex-shrink:0;width:280px;height:200px"></div>
+              <div style="flex:1;min-width:180px">
+                <div id="tagElementList" style="display:flex;flex-direction:column;gap:3px;margin-bottom:10px"></div>
+                <div id="tagElProps" style="padding:10px;background:var(--surface2);border-radius:6px;border:1px solid var(--border);display:none">
                   <div style="font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;margin-bottom:6px" id="tagElPropsTitle">Element</div>
                   <div style="display:flex;gap:6px;flex-wrap:wrap">
-                    <div class="form-field" style="flex:2;min-width:100px;margin:0"><label style="font-size:9px">Font</label>
-                      <select id="tagElFont" style="width:100%;padding:3px;font-size:11px;border-radius:4px;border:1px solid var(--border);background:var(--surface);color:var(--text)">
-                        <option value="Arial">Arial</option><option value="Helvetica">Helvetica</option><option value="Verdana">Verdana</option>
-                        <option value="Georgia">Georgia</option><option value="Times New Roman">Times New Roman</option>
-                        <option value="Courier New">Courier New</option><option value="Impact">Impact</option><option value="Segoe UI">Segoe UI</option>
-                      </select>
-                    </div>
-                    <div class="form-field" style="flex:1;min-width:55px;margin:0"><label style="font-size:9px">Size</label>
+                    <div class="form-field" style="flex:1;min-width:80px;margin:0"><label style="font-size:9px">Size</label>
                       <select id="tagElSize" style="width:100%;padding:3px;font-size:11px;border-radius:4px;border:1px solid var(--border);background:var(--surface);color:var(--text)">
-                        <option value="7">7pt</option><option value="8">8pt</option><option value="9">9pt</option><option value="10">10pt</option>
-                        <option value="11">11pt</option><option value="12">12pt</option><option value="14">14pt</option><option value="16">16pt</option>
-                        <option value="18">18pt</option><option value="20">20pt</option><option value="24">24pt</option><option value="28">28pt</option><option value="32">32pt</option>
+                        <option value="6">6pt</option><option value="7">7pt</option><option value="8">8pt</option><option value="9">9pt</option>
+                        <option value="10">10pt</option><option value="11">11pt</option><option value="12">12pt</option><option value="14">14pt</option>
+                        <option value="16">16pt</option><option value="18">18pt</option><option value="20">20pt</option><option value="24">24pt</option>
                       </select>
                     </div>
-                    <div class="form-field" style="flex:1;min-width:55px;margin:0"><label style="font-size:9px">Align</label>
+                    <div class="form-field" style="flex:1;min-width:70px;margin:0"><label style="font-size:9px">Align</label>
                       <select id="tagElAlign" style="width:100%;padding:3px;font-size:11px;border-radius:4px;border:1px solid var(--border);background:var(--surface);color:var(--text)">
                         <option value="center">Center</option><option value="left">Left</option><option value="right">Right</option>
                       </select>
@@ -1074,40 +1062,24 @@
           <!-- Sheet Preview -->
           <div class="section" style="display:flex;flex-direction:column;overflow:hidden;padding:14px;flex:1">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-shrink:0">
-              <h2 style="margin:0">Sheet Preview</h2>
-              <span style="font-size:11px;color:var(--text-dim)" id="labelSheetInfo"></span>
-              <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
-                <div class="form-field" style="margin:0"><label style="font-size:9px">Cols</label>
-                  <select id="labelCols" style="padding:3px;font-size:11px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--text)">
-                    <option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
-                    <option value="6">6</option><option value="7">7</option><option value="8">8</option>
-                    <option value="10">10</option>
-                  </select>
-                </div>
-                <span style="color:var(--text-dim);font-size:10px">×</span>
-                <div class="form-field" style="margin:0"><label style="font-size:9px">Rows</label>
-                  <select id="labelRows" style="padding:3px;font-size:11px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--text)">
-                    <option value="2">2</option><option value="3">3</option><option value="4">4</option>
-                    <option value="5">5</option><option value="6">6</option><option value="7">7</option>
-                    <option value="8">8</option><option value="10" selected>10</option>
-                  </select>
-                </div>
-                <button class="btn btn-blue" id="labelPrintBtn" style="padding:5px 14px;font-size:12px">Print</button>
-                <button class="btn btn-outline" id="labelClearBtn" style="padding:5px 10px;font-size:11px">Clear All</button>
-              </div>
+              <h2 style="margin:0">A4 Sheet Preview</h2>
+              <span style="font-size:11px;color:var(--text-dim)" id="labelSheetInfo">3 × 10 = 30 tags per page</span>
+              <button class="btn btn-blue" id="labelPrintBtn" style="margin-left:auto;padding:6px 16px;font-size:12px">Print Sheet</button>
+              <button class="btn btn-outline" id="labelClearBtn" style="padding:6px 10px;font-size:11px">Clear All</button>
             </div>
-            <div id="labelSheet" style="flex:1;overflow:auto;background:#fff;border-radius:var(--radius);border:1px solid var(--border);padding:6px"></div>
+            <div id="labelSheet" style="flex:1;overflow:auto;background:#e8e8e8;border-radius:var(--radius);border:1px solid var(--border);padding:10px;display:flex;justify-content:center"></div>
           </div>
         </div>
 
-        <!-- Right column: Print Queue + Product Search -->
+        <!-- Right: Queue + Product Search -->
         <div style="display:flex;flex-direction:column;gap:12px;overflow:hidden">
-          <!-- Print Queue with quantities -->
+
+          <!-- Print Queue -->
           <div class="section" style="padding:14px;flex:1;display:flex;flex-direction:column;overflow:hidden">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-shrink:0">
               <h2 style="margin:0">Print Queue</h2>
               <span id="labelQueueCount" style="font-size:11px;color:var(--text-dim)"></span>
-              <button class="btn btn-outline" id="labelClearBtn2" style="margin-left:auto;font-size:10px;padding:4px 8px">Clear</button>
+              <button class="btn btn-outline" id="labelClearQueueBtn" style="margin-left:auto;font-size:10px;padding:4px 8px">Clear</button>
             </div>
             <div id="labelQueueList" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:3px"></div>
           </div>
@@ -1119,10 +1091,8 @@
             <select id="labelCatFilter" style="padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12px;margin-bottom:6px;width:100%">
               <option value="">All Categories</option>
             </select>
-            <div id="labelProductList" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:4px"></div>
-            <div style="margin-top:6px;display:flex;gap:8px">
-              <button class="btn btn-green" id="labelAddAllBtn" style="font-size:11px;padding:6px 10px;flex:1">Add All Visible</button>
-            </div>
+            <div id="labelProductList" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:3px"></div>
+            <button class="btn btn-green" id="labelAddAllBtn" style="font-size:11px;padding:6px 10px;margin-top:6px">Add All Visible</button>
           </div>
         </div>
       </div>
@@ -6272,27 +6242,29 @@
 
     // -- Price Tags / Labels ------------------------------------------------
 
-    let labelQueue = [] // [{product, qty}]
-    const TAG_SCALE = 4 // designer canvas scale factor
+    let labelQueue = []
+    const TAG_COLS = 3, TAG_ROWS = 10
+
     const DEFAULT_TAG_LAYOUT = [
-      { type: 'name',         x: 5,  y: 3,  w: 90, h: 18, size: 9,  bold: true,  align: 'center', font: 'Arial', visible: true },
-      { type: 'price',        x: 5,  y: 22, w: 90, h: 22, size: 14, bold: true,  align: 'center', font: 'Arial', visible: true },
-      { type: 'barcode',      x: 10, y: 46, w: 80, h: 28, size: 25, bold: false, align: 'center', font: 'Arial', visible: true },
-      { type: 'barcode_text', x: 15, y: 76, w: 70, h: 12, size: 7,  bold: false, align: 'center', font: 'Courier New', visible: true },
-      { type: 'unit',         x: 5,  y: 90, w: 90, h: 10, size: 7,  bold: false, align: 'center', font: 'Arial', visible: false },
-      { type: 'category',     x: 5,  y: 90, w: 90, h: 10, size: 7,  bold: false, align: 'center', font: 'Arial', visible: false },
+      { type: 'name',    x: 2,  y: 2,  w: 96, h: 20, size: 9,  bold: true,  align: 'center', visible: true },
+      { type: 'price',   x: 2,  y: 22, w: 96, h: 20, size: 16, bold: true,  align: 'center', visible: true },
+      { type: 'barcode', x: 5,  y: 44, w: 90, h: 36, size: 20, bold: false, align: 'center', visible: true },
+      { type: 'barcode_text', x: 10, y: 80, w: 80, h: 10, size: 7, bold: false, align: 'center', visible: true },
+      { type: 'unit',    x: 2,  y: 91, w: 96, h: 8,  size: 7,  bold: false, align: 'center', visible: false },
     ]
-    let tagLayout = JSON.parse(localStorage.getItem('tillaroo_tag_layout') || 'null') || JSON.parse(JSON.stringify(DEFAULT_TAG_LAYOUT))
+    let tagLayout = JSON.parse(localStorage.getItem('tillaroo_tag_layout2') || 'null') || JSON.parse(JSON.stringify(DEFAULT_TAG_LAYOUT))
     let selectedTagEl = null
 
-    function saveTagLayout () { localStorage.setItem('tillaroo_tag_layout', JSON.stringify(tagLayout)) }
+    function saveTagLayout () { localStorage.setItem('tillaroo_tag_layout2', JSON.stringify(tagLayout)) }
 
-    const ELEMENT_LABELS = { name: 'Product Name', price: 'Price', barcode: 'Barcode', barcode_text: 'Barcode #', unit: 'Unit', category: 'Category' }
-    const SAMPLE_PRODUCT = { name: 'Strawberries', price: 4.99, barcode: '9310015241234', plu: '', unit: 'punnet', category_name: 'Fruit' }
+    const TAG_LABELS = { name: 'Product Name', price: 'Price', barcode: 'Barcode', barcode_text: 'Barcode #', unit: 'Unit' }
+    const SAMPLE = { name: 'Strawberries 250g', price: 4.99, barcode: '9310015241234', plu: '', unit: 'punnet' }
 
-    function generateBarcodeSVG (text, height = 25) {
+    // ── Code 128B barcode SVG generator ──────────────────────────────
+
+    function barcodeSVG (text, height = 30) {
       if (!text) return ''
-      const PATTERNS = [
+      const P = [
         '11011001100','11001101100','11001100110','10010011000','10010001100',
         '10001001100','10011001000','10011000100','10001100100','11001001000',
         '11001000100','11000100100','10110011100','10011011100','10011001110',
@@ -6316,411 +6288,294 @@
         '11101011110','11110101110','11010000100','11010010000','11010011100',
         '11000111010'
       ]
-      const MW = 2
-      const QUIET = 10 * MW
-      let encoded = PATTERNS[104]; let checksum = 104
+      let enc = P[104], chk = 104
       for (let i = 0; i < text.length; i++) {
-        const val = text.charCodeAt(i) - 32
-        if (val < 0 || val > 95) continue
-        encoded += PATTERNS[val]; checksum += val * (i + 1)
+        const v = text.charCodeAt(i) - 32
+        if (v < 0 || v > 95) continue
+        enc += P[v]; chk += v * (i + 1)
       }
-      encoded += PATTERNS[checksum % 103] + PATTERNS[106] + '11'
-      const barcodeW = encoded.length * MW
-      const totalW = barcodeW + QUIET * 2
-      let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${totalW}" height="${height}" viewBox="0 0 ${totalW} ${height}" preserveAspectRatio="xMidYMid meet" style="shape-rendering:crispEdges">`
-      svg += `<rect x="0" y="0" width="${totalW}" height="${height}" fill="#fff"/>`
-      let x = QUIET
-      for (const bit of encoded) {
-        if (bit === '1') svg += `<rect x="${x}" y="0" width="${MW}" height="${height}" fill="#000"/>`
-        x += MW
-      }
+      enc += P[chk % 103] + P[106] + '11'
+      const bw = 2, q = 20, tw = enc.length * bw + q * 2
+      let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${tw}" height="${height}" viewBox="0 0 ${tw} ${height}" style="shape-rendering:crispEdges"><rect width="${tw}" height="${height}" fill="#fff"/>`
+      let x = q
+      for (const b of enc) { if (b === '1') svg += `<rect x="${x}" y="0" width="${bw}" height="${height}" fill="#000"/>`; x += bw }
       svg += '</svg>'
       return `data:image/svg+xml;base64,${btoa(svg)}`
     }
 
-    // ── Tag Designer Canvas ──────────────────────────────────────────
+    // ── Tag Designer ─────────────────────────────────────────────────
 
     function renderTagCanvas () {
       const canvas = $('#tagCanvas')
-      const tagW = parseInt($('#labelWidth').value) || 38
-      const tagH = parseInt($('#labelHeight').value) || 25
-      const cw = tagW * TAG_SCALE, ch = tagH * TAG_SCALE
-      canvas.style.width = cw + 'px'; canvas.style.height = ch + 'px'
-
-      const p = SAMPLE_PRODUCT
+      const cw = canvas.offsetWidth, ch = canvas.offsetHeight
+      if (!cw || !ch) return
       let html = ''
       for (const el of tagLayout) {
         if (!el.visible) continue
         const left = el.x * cw / 100, top = el.y * ch / 100
         const w = el.w * cw / 100, h = el.h * ch / 100
         const isSel = selectedTagEl === el.type
-        const sel = isSel ? 'outline:2px solid #5b8def;z-index:10;' : ''
+        const sel = isSel ? 'outline:2px solid #3b82f6;z-index:10;' : ''
         const fw = el.bold ? 'font-weight:700;' : ''
-        const ta = `text-align:${el.align || 'center'};`
-        const ff = `font-family:'${el.font || 'Arial'}',sans-serif;`
-        const base = `position:absolute;left:${left}px;top:${top}px;width:${w}px;height:${h}px;display:flex;align-items:center;justify-content:${el.align === 'left' ? 'flex-start' : el.align === 'right' ? 'flex-end' : 'center'};overflow:hidden;cursor:move;border-radius:2px;${sel}${fw}${ta}${ff}`
-
-        const resizeGrip = isSel ? `<div class="tag-resize" data-tag-resize="${el.type}" style="position:absolute;right:-1px;bottom:-1px;width:10px;height:10px;cursor:se-resize;background:#5b8def;border-radius:2px 0 2px 0;z-index:20"></div>` : ''
-        const barcodeVal = p.plu || p.barcode || ''
-        if (el.type === 'name') {
-          html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}font-size:${el.size * TAG_SCALE / 3}px;line-height:1.1;color:#000">${esc(p.name)}${resizeGrip}</div>`
-        } else if (el.type === 'price') {
-          html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}font-size:${el.size * TAG_SCALE / 3}px;color:#000">${money(p.price)}${resizeGrip}</div>`
-        } else if (el.type === 'barcode') {
-          const svg = generateBarcodeSVG(barcodeVal, h)
-          html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}">${svg ? `<img src="${svg}" style="width:100%;height:100%;object-fit:contain">` : '<span style="font-size:10px;color:#999">barcode</span>'}${resizeGrip}</div>`
-        } else if (el.type === 'barcode_text') {
-          html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}font-size:${el.size * TAG_SCALE / 3}px;color:#444">${esc(barcodeVal)}${resizeGrip}</div>`
-        } else if (el.type === 'unit') {
-          html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}font-size:${el.size * TAG_SCALE / 3}px;color:#666">${p.unit === 'each' ? 'each' : 'per ' + p.unit}${resizeGrip}</div>`
-        } else if (el.type === 'category') {
-          html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}font-size:${el.size * TAG_SCALE / 3}px;color:#888">${esc(p.category_name || '')}${resizeGrip}</div>`
+        const jc = el.align === 'left' ? 'flex-start' : el.align === 'right' ? 'flex-end' : 'center'
+        const base = `position:absolute;left:${left}px;top:${top}px;width:${w}px;height:${h}px;display:flex;align-items:center;justify-content:${jc};overflow:hidden;cursor:move;border-radius:2px;${sel}${fw}font-family:Arial,sans-serif;text-align:${el.align||'center'};`
+        const grip = isSel ? `<div class="tag-resize" data-tag-resize="${el.type}" style="position:absolute;right:0;bottom:0;width:10px;height:10px;cursor:se-resize;background:#3b82f6;border-radius:2px 0 2px 0;z-index:20"></div>` : ''
+        const bc = SAMPLE.plu || SAMPLE.barcode || ''
+        const fs = el.size * (cw / 280 * 3)
+        if (el.type === 'name') html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}font-size:${fs}px;line-height:1.1;color:#000">${esc(SAMPLE.name)}${grip}</div>`
+        else if (el.type === 'price') html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}font-size:${fs}px;color:#000">${money(SAMPLE.price)}${grip}</div>`
+        else if (el.type === 'barcode') {
+          const svg = barcodeSVG(bc, Math.round(h))
+          html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}">${svg ? `<img src="${svg}" style="width:100%;height:100%;object-fit:contain">` : '<span style="font-size:10px;color:#999">no barcode</span>'}${grip}</div>`
         }
+        else if (el.type === 'barcode_text') html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}font-size:${fs}px;color:#444;font-family:'Courier New',monospace">${esc(bc)}${grip}</div>`
+        else if (el.type === 'unit') html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}font-size:${fs}px;color:#666">${SAMPLE.unit === 'each' ? 'each' : 'per ' + SAMPLE.unit}${grip}</div>`
       }
       canvas.innerHTML = html
     }
 
-    function renderTagElementList () {
-      const list = $('#tagElementList')
-      list.innerHTML = tagLayout.map(el => {
-        const sel = selectedTagEl === el.type ? 'border-color:var(--blue);background:rgba(91,141,239,.1);' : ''
-        return `<div style="display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:5px;background:var(--surface2);border:1px solid var(--border);font-size:11px;cursor:pointer;${sel}" data-tag-toggle="${el.type}">
+    function renderTagElements () {
+      $('#tagElementList').innerHTML = tagLayout.map(el => {
+        const sel = selectedTagEl === el.type ? 'border-color:#3b82f6;background:rgba(59,130,246,.1);' : ''
+        return `<div style="display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:5px;background:var(--surface2);border:1px solid var(--border);font-size:11px;cursor:pointer;${sel}" data-tag-toggle="${el.type}">
           <input type="checkbox" ${el.visible ? 'checked' : ''} data-tag-vis="${el.type}" style="flex-shrink:0">
-          <span style="flex:1">${ELEMENT_LABELS[el.type] || el.type}</span>
+          <span style="flex:1">${TAG_LABELS[el.type] || el.type}</span>
           <span style="font-size:9px;color:var(--text-dim)">${el.size}pt</span>
         </div>`
       }).join('')
     }
 
-    function showElProps (type) {
+    function selectTagEl (type) {
       const el = tagLayout.find(e => e.type === type)
       if (!el) return
       selectedTagEl = type
-      const panel = $('#tagElProps')
-      panel.style.display = 'block'
-      $('#tagElPropsTitle').textContent = ELEMENT_LABELS[type] || type
-      $('#tagElFont').value = el.font || 'Arial'
+      $('#tagElProps').style.display = 'block'
+      $('#tagElPropsTitle').textContent = TAG_LABELS[type] || type
       $('#tagElSize').value = String(el.size)
       $('#tagElAlign').value = el.align || 'center'
       $('#tagElBold').checked = !!el.bold
-      renderTagCanvas()
-      renderTagElementList()
+      renderTagCanvas(); renderTagElements()
     }
 
     $('#tagElementList').addEventListener('click', e => {
       const vis = e.target.closest('[data-tag-vis]')
-      if (vis) {
-        const el = tagLayout.find(x => x.type === vis.dataset.tagVis)
-        if (el) { el.visible = vis.checked; saveTagLayout(); renderTagCanvas(); renderLabelSheet() }
-        return
-      }
+      if (vis) { const el = tagLayout.find(x => x.type === vis.dataset.tagVis); if (el) { el.visible = vis.checked; saveTagLayout(); renderTagCanvas(); renderSheet() }; return }
       const tog = e.target.closest('[data-tag-toggle]')
-      if (tog) showElProps(tog.dataset.tagToggle)
+      if (tog) selectTagEl(tog.dataset.tagToggle)
     })
 
-    $('#tagElFont').addEventListener('change', () => {
-      const el = tagLayout.find(e => e.type === selectedTagEl)
-      if (el) { el.font = $('#tagElFont').value; saveTagLayout(); renderTagCanvas(); renderLabelSheet() }
-    })
-    $('#tagElSize').addEventListener('change', () => {
-      const el = tagLayout.find(e => e.type === selectedTagEl)
-      if (el) { el.size = parseInt($('#tagElSize').value); saveTagLayout(); renderTagCanvas(); renderLabelSheet() }
-    })
-    $('#tagElAlign').addEventListener('change', () => {
-      const el = tagLayout.find(e => e.type === selectedTagEl)
-      if (el) { el.align = $('#tagElAlign').value; saveTagLayout(); renderTagCanvas(); renderLabelSheet() }
-    })
+    for (const id of ['tagElSize', 'tagElAlign']) {
+      $('#' + id).addEventListener('change', () => {
+        const el = tagLayout.find(e => e.type === selectedTagEl); if (!el) return
+        if (id === 'tagElSize') el.size = parseInt($('#tagElSize').value)
+        else el.align = $('#tagElAlign').value
+        saveTagLayout(); renderTagCanvas(); renderSheet()
+      })
+    }
     $('#tagElBold').addEventListener('change', () => {
-      const el = tagLayout.find(e => e.type === selectedTagEl)
-      if (el) { el.bold = $('#tagElBold').checked; saveTagLayout(); renderTagCanvas(); renderLabelSheet() }
+      const el = tagLayout.find(e => e.type === selectedTagEl); if (!el) return
+      el.bold = $('#tagElBold').checked; saveTagLayout(); renderTagCanvas(); renderSheet()
     })
 
-    // ── Drag elements on the canvas ──────────────────────────────────
+    $('#tagResetBtn').addEventListener('click', () => {
+      tagLayout = JSON.parse(JSON.stringify(DEFAULT_TAG_LAYOUT))
+      selectedTagEl = null; saveTagLayout()
+      $('#tagElProps').style.display = 'none'
+      renderTagCanvas(); renderTagElements(); renderSheet()
+      showToast('Layout reset to default', 'success')
+    })
 
+    // ── Drag & resize on canvas ──────────────────────────────────────
     {
-      let dragging = null, resizing = null, startX = 0, startY = 0, origX = 0, origY = 0, origW = 0, origH = 0
-      const canvas = $('#tagCanvas')
-
-      canvas.addEventListener('mousedown', e => {
-        const resizeHandle = e.target.closest('.tag-resize')
-        if (resizeHandle) {
-          e.preventDefault()
-          const type = resizeHandle.dataset.tagResize
-          const layout = tagLayout.find(x => x.type === type)
-          if (!layout) return
-          resizing = layout
-          startX = e.clientX; startY = e.clientY
-          origW = layout.w; origH = layout.h
-          return
-        }
+      let drag = null, resize = null, sx = 0, sy = 0, ox = 0, oy = 0, ow = 0, oh = 0
+      $('#tagCanvas').addEventListener('mousedown', e => {
+        const rh = e.target.closest('.tag-resize')
+        if (rh) { e.preventDefault(); const l = tagLayout.find(x => x.type === rh.dataset.tagResize); if (!l) return; resize = l; sx = e.clientX; sy = e.clientY; ow = l.w; oh = l.h; return }
         const el = e.target.closest('.tag-el')
         if (!el) return
-        e.preventDefault()
-        const type = el.dataset.tagEl
-        const layout = tagLayout.find(x => x.type === type)
-        if (!layout) return
-        dragging = layout
-        showElProps(type)
-        startX = e.clientX; startY = e.clientY
-        origX = layout.x; origY = layout.y
+        e.preventDefault(); const l = tagLayout.find(x => x.type === el.dataset.tagEl); if (!l) return
+        drag = l; selectTagEl(l.type); sx = e.clientX; sy = e.clientY; ox = l.x; oy = l.y
       })
-
       window.addEventListener('mousemove', e => {
-        if (resizing) {
-          const canvas = $('#tagCanvas')
-          const cw = canvas.offsetWidth, ch = canvas.offsetHeight
-          const dw = ((e.clientX - startX) / cw) * 100
-          const dh = ((e.clientY - startY) / ch) * 100
-          resizing.w = Math.max(10, Math.min(100 - resizing.x, Math.round(origW + dw)))
-          resizing.h = Math.max(5, Math.min(100 - resizing.y, Math.round(origH + dh)))
-          renderTagCanvas()
-          return
-        }
-        if (!dragging) return
-        const canvas = $('#tagCanvas')
-        const cw = canvas.offsetWidth, ch = canvas.offsetHeight
-        const dx = ((e.clientX - startX) / cw) * 100
-        const dy = ((e.clientY - startY) / ch) * 100
-        dragging.x = Math.max(0, Math.min(100 - dragging.w, Math.round(origX + dx)))
-        dragging.y = Math.max(0, Math.min(100 - dragging.h, Math.round(origY + dy)))
+        const c = $('#tagCanvas'); const cw = c.offsetWidth, ch = c.offsetHeight
+        if (resize) { resize.w = Math.max(10, Math.min(100 - resize.x, Math.round(ow + (e.clientX - sx) / cw * 100))); resize.h = Math.max(5, Math.min(100 - resize.y, Math.round(oh + (e.clientY - sy) / ch * 100))); renderTagCanvas(); return }
+        if (!drag) return
+        drag.x = Math.max(0, Math.min(100 - drag.w, Math.round(ox + (e.clientX - sx) / cw * 100)))
+        drag.y = Math.max(0, Math.min(100 - drag.h, Math.round(oy + (e.clientY - sy) / ch * 100)))
         renderTagCanvas()
       })
-
-      window.addEventListener('mouseup', () => {
-        if (dragging || resizing) { saveTagLayout(); renderLabelSheet(); dragging = null; resizing = null }
-      })
+      window.addEventListener('mouseup', () => { if (drag || resize) { saveTagLayout(); renderSheet() }; drag = null; resize = null })
     }
 
-    // ── Sheet size changes ───────────────────────────────────────────
+    // ── Render a single tag as HTML (for sheet preview and print) ────
 
-    $('#labelWidth').addEventListener('change', () => { renderTagCanvas(); renderLabelSheet() })
-    $('#labelHeight').addEventListener('change', () => { renderTagCanvas(); renderLabelSheet() })
-    $('#labelCols').addEventListener('change', renderLabelSheet)
-    $('#labelRows').addEventListener('change', renderLabelSheet)
-
-    // ── Label Sheet (uses tagLayout for rendering) ───────────────────
-
-    function getLabelConfig () {
-      return {
-        cols: parseInt($('#labelCols').value) || 3,
-        rows: parseInt($('#labelRows').value) || 10,
-        width: parseInt($('#labelWidth').value) || 66,
-        height: parseInt($('#labelHeight').value) || 28,
-      }
-    }
-
-    function expandQueue () {
-      const flat = []
-      for (const entry of labelQueue) {
-        for (let i = 0; i < (entry.qty || 1); i++) flat.push(entry.product)
-      }
-      return flat
-    }
-
-    function renderTagHTML (product, tagW, tagH) {
+    function renderTagHTML (product, wMM, hMM, forPrint = false) {
       let html = ''
       for (const el of tagLayout) {
         if (!el.visible) continue
-        const left = (el.x * tagW / 100) + 'mm'
-        const top = (el.y * tagH / 100) + 'mm'
-        const w = (el.w * tagW / 100) + 'mm'
-        const h = (el.h * tagH / 100) + 'mm'
+        const l = (el.x * wMM / 100), t = (el.y * hMM / 100), w = (el.w * wMM / 100), h = (el.h * hMM / 100)
+        const unit = forPrint ? 'mm' : 'px'
         const fw = el.bold ? 'font-weight:700;' : ''
         const jc = el.align === 'left' ? 'flex-start' : el.align === 'right' ? 'flex-end' : 'center'
-        const ff = `font-family:'${el.font || 'Arial'}',sans-serif;`
-        const base = `position:absolute;left:${left};top:${top};width:${w};height:${h};display:flex;align-items:center;justify-content:${jc};overflow:hidden;${fw}${ff}text-align:${el.align || 'center'};`
-        const barcodeVal = product.plu || product.barcode || ''
-        if (el.type === 'name') html += `<div style="${base}font-size:${el.size}pt;line-height:1.1">${esc(product.name)}</div>`
-        else if (el.type === 'price') html += `<div style="${base}font-size:${el.size}pt">${money(product.active_price ?? product.price)}</div>`
+        const base = `position:absolute;left:${l}${unit};top:${t}${unit};width:${w}${unit};height:${h}${unit};display:flex;align-items:center;justify-content:${jc};overflow:hidden;${fw}font-family:Arial,sans-serif;text-align:${el.align||'center'};line-height:1.1;`
+        const bc = product.plu || product.barcode || ''
+        const fs = forPrint ? `${el.size}pt` : `${el.size * 0.8}px`
+        if (el.type === 'name') html += `<div style="${base}font-size:${fs}">${esc(product.name)}</div>`
+        else if (el.type === 'price') html += `<div style="${base}font-size:${fs}">${money(product.active_price ?? product.price)}</div>`
         else if (el.type === 'barcode') {
-          const svg = generateBarcodeSVG(barcodeVal, Math.round(el.h * tagH / 100 * 3.78))
+          const svg = barcodeSVG(bc, forPrint ? Math.round(h * 3.78) : Math.round(h))
           if (svg) html += `<div style="${base}"><img src="${svg}" style="width:100%;height:100%;object-fit:contain"></div>`
         }
-        else if (el.type === 'barcode_text') html += `<div style="${base}font-size:${el.size}pt;color:#444">${esc(barcodeVal)}</div>`
-        else if (el.type === 'unit') html += `<div style="${base}font-size:${el.size}pt;color:#666">${product.unit === 'each' ? 'each' : 'per ' + product.unit}</div>`
-        else if (el.type === 'category') html += `<div style="${base}font-size:${el.size}pt;color:#888">${esc(product.category_name || '')}</div>`
+        else if (el.type === 'barcode_text') html += `<div style="${base}font-size:${fs};color:#444;font-family:'Courier New',monospace">${esc(bc)}</div>`
+        else if (el.type === 'unit') html += `<div style="${base}font-size:${fs};color:#666">${product.unit === 'each' ? 'each' : 'per ' + product.unit}</div>`
       }
       return html
     }
 
-    function renderLabelSheet () {
-      const cfg = getLabelConfig()
-      const sheet = $('#labelSheet')
-      const totalSlots = cfg.cols * cfg.rows
-      const flat = expandQueue()
-      const totalLabels = flat.length
-      $('#labelSheetInfo').textContent = `${cfg.cols}×${cfg.rows} = ${totalSlots}/page · ${totalLabels} label${totalLabels !== 1 ? 's' : ''} queued`
-      $('#labelQueueCount').textContent = `${totalLabels} labels`
+    // ── Sheet preview (scaled A4 with 3×10 grid) ─────────────────────
 
-      let html = `<div style="display:grid;grid-template-columns:repeat(${cfg.cols}, ${cfg.width}mm);grid-template-rows:repeat(${cfg.rows}, ${cfg.height}mm);gap:1px;width:fit-content;margin:0 auto">`
-      for (let i = 0; i < totalSlots; i++) {
-        const product = flat[i]
-        if (product) {
-          html += `<div style="border:1px solid #ccc;position:relative;overflow:hidden;background:#fff">${renderTagHTML(product, cfg.width, cfg.height)}</div>`
-        } else {
-          html += `<div style="border:1px dashed #ddd;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:10px">+</div>`
-        }
+    function expandQueue () {
+      const flat = []
+      for (const entry of labelQueue) for (let i = 0; i < (entry.qty || 1); i++) flat.push(entry.product)
+      return flat
+    }
+
+    function renderSheet () {
+      const sheet = $('#labelSheet')
+      const total = TAG_COLS * TAG_ROWS
+      const flat = expandQueue()
+      $('#labelSheetInfo').textContent = `${TAG_COLS} × ${TAG_ROWS} = ${total} tags/page · ${flat.length} queued`
+      $('#labelQueueCount').textContent = `${flat.length} labels`
+
+      const pageW = 200, pageH = 287
+      const cellW = pageW / TAG_COLS, cellH = pageH / TAG_ROWS
+      let html = `<div style="background:#fff;width:${pageW}px;height:${pageH}px;flex-shrink:0;display:grid;grid-template-columns:repeat(${TAG_COLS},1fr);grid-template-rows:repeat(${TAG_ROWS},1fr);border:1px solid #ccc;box-shadow:0 2px 8px rgba(0,0,0,.15)">`
+      for (let i = 0; i < total; i++) {
+        const p = flat[i]
+        if (p) html += `<div style="border:.5px dashed #ddd;position:relative;overflow:hidden">${renderTagHTML(p, cellW, cellH)}</div>`
+        else html += `<div style="border:.5px dashed #eee"></div>`
       }
       html += '</div>'
       sheet.innerHTML = html
-      renderLabelQueue()
+      renderQueue()
     }
 
-    // ── Print Queue (product + qty) ──────────────────────────────────
+    // ── Print Queue ──────────────────────────────────────────────────
 
-    function renderLabelQueue () {
+    function renderQueue () {
       const list = $('#labelQueueList')
-      if (!labelQueue.length) {
-        list.innerHTML = '<div style="color:var(--text-dim);font-size:12px;padding:12px;text-align:center">No products in queue.<br>Search and add products below.</div>'
-        return
-      }
-      list.innerHTML = labelQueue.map((entry, i) => `
-        <div style="display:flex;align-items:center;gap:5px;padding:5px 8px;border-radius:5px;background:var(--surface2);border:1px solid var(--border);font-size:11px">
-          <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(entry.product.name)}</span>
-          <span style="color:var(--green);font-weight:600;flex-shrink:0;font-size:10px">${money(entry.product.active_price ?? entry.product.price)}</span>
+      if (!labelQueue.length) { list.innerHTML = '<div style="color:var(--text-dim);font-size:12px;padding:12px;text-align:center">No products.<br>Search and add below.</div>'; return }
+      list.innerHTML = labelQueue.map((e, i) => `
+        <div style="display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:5px;background:var(--surface2);border:1px solid var(--border);font-size:11px">
+          <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(e.product.name)}</span>
+          <span style="color:var(--green);font-weight:600;font-size:10px">${money(e.product.active_price ?? e.product.price)}</span>
           <button class="btn" style="padding:1px 4px;font-size:10px;background:var(--surface);border:1px solid var(--border);color:var(--text);min-width:18px" data-q-minus="${i}">−</button>
-          <span style="min-width:20px;text-align:center;font-weight:700;font-size:12px">${entry.qty}</span>
+          <span style="min-width:18px;text-align:center;font-weight:700;font-size:12px">${e.qty}</span>
           <button class="btn" style="padding:1px 4px;font-size:10px;background:var(--surface);border:1px solid var(--border);color:var(--text);min-width:18px" data-q-plus="${i}">+</button>
-          <button class="btn" style="padding:1px 5px;font-size:9px;background:#f44;color:#fff;border:none" data-q-del="${i}" title="Remove">&times;</button>
+          <button class="btn" style="padding:1px 5px;font-size:9px;background:#f44;color:#fff;border:none" data-q-del="${i}">&times;</button>
         </div>`).join('')
     }
 
     $('#labelQueueList').addEventListener('click', e => {
       const del = e.target.closest('[data-q-del]')
-      if (del) { labelQueue.splice(parseInt(del.dataset.qDel), 1); renderLabelSheet(); return }
+      if (del) { labelQueue.splice(+del.dataset.qDel, 1); renderSheet(); return }
       const plus = e.target.closest('[data-q-plus]')
-      if (plus) { labelQueue[parseInt(plus.dataset.qPlus)].qty++; renderLabelSheet(); return }
+      if (plus) { labelQueue[+plus.dataset.qPlus].qty++; renderSheet(); return }
       const minus = e.target.closest('[data-q-minus]')
-      if (minus) {
-        const idx = parseInt(minus.dataset.qMinus)
-        if (labelQueue[idx].qty > 1) labelQueue[idx].qty--
-        else labelQueue.splice(idx, 1)
-        renderLabelSheet()
-      }
+      if (minus) { const i = +minus.dataset.qMinus; if (labelQueue[i].qty > 1) labelQueue[i].qty--; else labelQueue.splice(i, 1); renderSheet() }
     })
 
-    $('#labelClearBtn2').addEventListener('click', () => { labelQueue = []; renderLabelSheet() })
-    $('#labelClearBtn').addEventListener('click', () => { labelQueue = []; renderLabelSheet() })
+    $('#labelClearQueueBtn').addEventListener('click', () => { labelQueue = []; renderSheet() })
+    $('#labelClearBtn').addEventListener('click', () => { labelQueue = []; renderSheet() })
 
-    // ── Product Search & Add ─────────────────────────────────────────
+    // ── Product Search ───────────────────────────────────────────────
 
-    let labelProductCache = []
+    let labelProducts = []
 
     async function loadLabelProducts () {
-      const query = $('#labelProductSearch').value.trim()
-      const catId = $('#labelCatFilter').value
-      let products = await window.pos.searchProducts(query || '')
-      if (catId) products = products.filter(p => p.category_id === catId)
-      products.sort((a, b) => a.name.localeCompare(b.name))
-      labelProductCache = products
-
+      const q = $('#labelProductSearch').value.trim()
+      const cat = $('#labelCatFilter').value
+      let prods = await window.pos.searchProducts(q || '')
+      if (cat) prods = prods.filter(p => p.category_id === cat)
+      prods.sort((a, b) => a.name.localeCompare(b.name))
+      labelProducts = prods
       const list = $('#labelProductList')
-      if (!products.length) {
-        list.innerHTML = '<div style="color:var(--text-dim);font-size:12px;padding:12px">No products found</div>'
-        return
-      }
-      list.innerHTML = products.slice(0, 80).map(p => {
+      if (!prods.length) { list.innerHTML = '<div style="color:var(--text-dim);font-size:12px;padding:12px">No products found</div>'; return }
+      list.innerHTML = prods.slice(0, 80).map(p => {
         const code = p.plu || p.barcode || ''
-        return `<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);cursor:pointer;transition:background .1s" draggable="true" data-label-add="${p.id}" onmouseover="this.style.background='rgba(79,189,119,.12)'" onmouseout="this.style.background=''">
-          <span style="flex:1;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.name)}</span>
-          ${code ? `<span style="font-size:9px;color:var(--text-dim);flex-shrink:0;font-family:monospace">${esc(code)}</span>` : ''}
-          <span style="font-size:10px;color:var(--green);font-weight:600;flex-shrink:0">${money(p.active_price ?? p.price)}</span>
-          <button class="btn btn-green" style="padding:2px 8px;font-size:10px;flex-shrink:0" data-label-add="${p.id}">+</button>
+        return `<div style="display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:5px;background:var(--surface2);border:1px solid var(--border);cursor:pointer;font-size:11px" data-label-add="${p.id}">
+          <span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.name)}</span>
+          ${code ? `<span style="font-size:9px;color:var(--text-dim);font-family:monospace">${esc(code)}</span>` : ''}
+          <span style="color:var(--green);font-weight:600;font-size:10px">${money(p.active_price ?? p.price)}</span>
+          <span style="color:var(--blue);cursor:pointer;font-size:14px;line-height:1" data-label-add="${p.id}">+</span>
         </div>`
       }).join('')
     }
 
-    function addProductToLabelQueue (id) {
+    function addToQueue (id) {
       const existing = labelQueue.find(q => q.product.id === id)
-      if (existing) { existing.qty++; renderLabelSheet(); return }
-      const p = labelProductCache.find(x => x.id === id)
+      if (existing) { existing.qty++; renderSheet(); return }
+      const p = labelProducts.find(x => x.id === id)
       if (!p) return
       labelQueue.push({ product: { ...p }, qty: 1 })
-      renderLabelSheet()
-      showToast(`${p.name} added to queue`, 'success')
+      renderSheet()
     }
 
     $('#labelProductList').addEventListener('click', e => {
-      const el = e.target.closest('[data-label-add]')
-      if (!el) return
-      addProductToLabelQueue(el.dataset.labelAdd)
-    })
-
-    // Drag from product list to queue
-    $('#labelProductList').addEventListener('dragstart', e => {
-      const el = e.target.closest('[data-label-add]')
-      if (!el) return
-      e.dataTransfer.setData('text/plain', el.dataset.labelAdd)
-      e.dataTransfer.effectAllowed = 'copy'
-    })
-    $('#labelQueueList').addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy' })
-    $('#labelQueueList').addEventListener('drop', e => {
-      e.preventDefault()
-      const id = e.dataTransfer.getData('text/plain')
-      if (id) addProductToLabelQueue(id)
+      const el = e.target.closest('[data-label-add]'); if (el) addToQueue(el.dataset.labelAdd)
     })
 
     $('#labelAddAllBtn').addEventListener('click', () => {
-      let added = 0
-      for (const p of labelProductCache) {
-        const existing = labelQueue.find(q => q.product.id === p.id)
-        if (existing) { existing.qty++; added++; continue }
-        labelQueue.push({ product: { ...p }, qty: 1 })
-        added++
-      }
-      renderLabelSheet()
-      showToast(`Added ${added} products`, 'success')
+      for (const p of labelProducts) { const e = labelQueue.find(q => q.product.id === p.id); if (e) e.qty++; else labelQueue.push({ product: { ...p }, qty: 1 }) }
+      renderSheet(); showToast(`Added ${labelProducts.length} products`, 'success')
     })
 
     $('#labelProductSearch').addEventListener('input', debounce(loadLabelProducts, 300))
     $('#labelCatFilter').addEventListener('change', loadLabelProducts)
 
-    // ── Print ────────────────────────────────────────────────────────
+    // ── Print to A4 PDF ──────────────────────────────────────────────
 
     $('#labelPrintBtn').addEventListener('click', async () => {
       const flat = expandQueue()
-      if (!flat.length) { showToast('Add products to print', 'error'); return }
-      const cfg = getLabelConfig()
-      const pageW = 210, pageH = 297, margin = 5
-      const usableW = pageW - margin * 2, usableH = pageH - margin * 2
-      const cellW = Math.floor((usableW / cfg.cols) * 100) / 100
-      const cellH = Math.floor((usableH / cfg.rows) * 100) / 100
-      let content = '<html><head><title>Price Tags</title><style>'
-      content += `@page { size: A4; margin: ${margin}mm; } body { margin: 0; font-family: Arial, sans-serif; }`
-      content += `.sheet { display: grid; grid-template-columns: repeat(${cfg.cols}, 1fr); grid-template-rows: repeat(${cfg.rows}, 1fr); width: ${usableW}mm; height: ${usableH}mm; gap: 0; }`
-      content += `.tag { position: relative; border: 0.3px solid #ccc; overflow: hidden; box-sizing: border-box; }`
-      content += `.tag img { image-rendering: crisp-edges; -webkit-print-color-adjust: exact; }`
-      content += '</style></head><body>'
+      if (!flat.length) { showToast('Add products to print queue first', 'error'); return }
+      const margin = 5, pw = 210, ph = 297
+      const uw = pw - margin * 2, uh = ph - margin * 2
+      const cw = Math.floor((uw / TAG_COLS) * 100) / 100
+      const ch = Math.floor((uh / TAG_ROWS) * 100) / 100
+      const total = TAG_COLS * TAG_ROWS
 
-      const totalSlots = cfg.cols * cfg.rows
-      for (let page = 0; page < Math.ceil(flat.length / totalSlots); page++) {
-        if (page > 0) content += '<div style="page-break-before:always"></div>'
-        content += '<div class="sheet">'
-        for (let i = 0; i < totalSlots; i++) {
-          const p = flat[page * totalSlots + i]
-          content += `<div class="tag">${p ? renderTagHTML(p, cellW, cellH) : ''}</div>`
+      let html = `<html><head><title>Price Tags</title><style>
+        @page { size: A4; margin: ${margin}mm; }
+        body { margin: 0; font-family: Arial, sans-serif; }
+        .sheet { display: grid; grid-template-columns: repeat(${TAG_COLS}, 1fr); grid-template-rows: repeat(${TAG_ROWS}, 1fr); width: ${uw}mm; height: ${uh}mm; }
+        .tag { position: relative; border: 0.3px dashed #ccc; overflow: hidden; box-sizing: border-box; }
+        .tag img { image-rendering: crisp-edges; -webkit-print-color-adjust: exact; }
+      </style></head><body>`
+
+      for (let pg = 0; pg < Math.ceil(flat.length / total); pg++) {
+        if (pg > 0) html += '<div style="page-break-before:always"></div>'
+        html += '<div class="sheet">'
+        for (let i = 0; i < total; i++) {
+          const p = flat[pg * total + i]
+          html += `<div class="tag">${p ? renderTagHTML(p, cw, ch, true) : ''}</div>`
         }
-        content += '</div>'
+        html += '</div>'
       }
-      content += '</body></html>'
+      html += '</body></html>'
       showToast('Generating PDF...', 'info')
-      try {
-        await window.pos.printHTML(content, 'Price_Tags')
-      } catch (e) { showToast('PDF generation failed: ' + e.message, 'error') }
+      try { await window.pos.printHTML(html, 'Price_Tags') }
+      catch (e) { showToast('PDF failed: ' + e.message, 'error') }
     })
 
-    // Init labels tab
+    // ── Init ─────────────────────────────────────────────────────────
+
     async function initLabelsTab () {
       try {
         const cats = await window.pos.getCategories()
         $('#labelCatFilter').innerHTML = '<option value="">All Categories</option>' + cats.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('')
         await loadLabelProducts()
-      } catch (e) { console.error('Labels init error:', e) }
-      requestAnimationFrame(() => {
-        renderTagCanvas()
-        renderTagElementList()
-        renderLabelSheet()
-      })
+      } catch (e) { console.error('Labels init:', e) }
+      requestAnimationFrame(() => { renderTagCanvas(); renderTagElements(); renderSheet() })
     }
 
     // Mode switching is handled by the standalone <script> after the sidebar button.
