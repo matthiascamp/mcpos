@@ -5066,65 +5066,70 @@ function setupIPC() {
   }
 
   // ── Load saved config and auto-probe on startup ────────────────────────────
+  // Only run hardware probing/polling in register mode — admin mode doesn't need it
+  const hwAppMode = (() => { try { const r = dbGet("SELECT value FROM settings WHERE key = 'app_mode'"); return r?.value || 'admin' } catch (_) { return 'admin' } })()
+  const isRegisterMode = hwAppMode === 'register'
 
   loadSavedHardwareConfig()
   // Note: printer queue health is verified inside detectPrinter() during probeHardware()
 
   // Delay hardware probe so the UI is fully interactive before heavy WMI/serial probing
-  setTimeout(() => probeHardware().then(async r => {
-    if (hwPrinter || hwScale) initialProbeFoundHardware = true
-    if (hwPrinter) appLog('info', 'hardware', `Printer: ${hwPrinter.name} (${hwPrinter.interface})`)
-    if (hwScale) appLog('info', 'hardware', `Scale: ${hwScale.vendor || hwScale.product}`)
-    startScalePolling()
-    try { cleanupDuplicateQueues() } catch (_) {}
-
-    // Only run heavy diagnostics if we actually found hardware — no point on dev machines
-    if (!initialProbeFoundHardware) {
-      appLog('info', 'hardware', 'No hardware detected — skipping diagnostics')
-      return
-    }
-    try {
-      const diag = await diagnoseEnvironment()
-      for (const issue of diag.issues) {
-        appLog('warn', 'hardware', `[DIAG] ${issue.message}${issue.fix ? ' — Fix: ' + issue.fix : ''}`)
-      }
-      const critical = diag.issues.filter(i => i.severity === 'high')
-      if (critical.length > 0 && mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.send('hardware:issues', critical)
-      }
-    } catch (e) { appLog('warn', 'hardware', 'Environment diagnostic failed', e.message) }
-  }).catch(e => appLog('error', 'hardware', 'Auto-probe failed', e.message)), 8000)
-
-  // Auto-reprobe every 120s — also checks printer queue health
-  // Skips entirely when no hardware was found on initial probe (no point hammering WMI)
   let initialProbeFoundHardware = false
-  setInterval(async () => {
-    try {
-      if (!initialProbeFoundHardware && !hwPrinter && !hwScale) return
-      const hadPrinter = !!hwPrinter
-      const scaleWorking = (hwScalePort?.isOpen && scaleErrorCount < 10) || !!pythonScaleProc
-      const scaleHealthy = scaleWorking || !hwScale
-      if (hwPrinter && scaleHealthy) return
-      if (scaleWorking) {
-        const devices = enumerateDevices()
-        const printer = detectPrinter(devices)
-        if (!printer?.needsSetup) hwPrinter = printer
-        if (!hadPrinter && hwPrinter) appLog('info', 'hardware', `Printer connected: ${hwPrinter.name}`)
-      } else {
-        const hadScale = !!hwScale
-        await probeHardware()
-        if (!hadPrinter && hwPrinter) appLog('info', 'hardware', `Printer connected: ${hwPrinter.name}`)
-        if (!hadScale && hwScale) {
-          appLog('info', 'hardware', `Scale connected: ${hwScale.vendor || hwScale.product}`)
-          startScalePolling()
+  if (isRegisterMode) {
+    setTimeout(() => probeHardware().then(async r => {
+      if (hwPrinter || hwScale) initialProbeFoundHardware = true
+      if (hwPrinter) appLog('info', 'hardware', `Printer: ${hwPrinter.name} (${hwPrinter.interface})`)
+      if (hwScale) appLog('info', 'hardware', `Scale: ${hwScale.vendor || hwScale.product}`)
+      startScalePolling()
+      try { cleanupDuplicateQueues() } catch (_) {}
+
+      if (!initialProbeFoundHardware) {
+        appLog('info', 'hardware', 'No hardware detected — skipping diagnostics')
+        return
+      }
+      try {
+        const diag = await diagnoseEnvironment()
+        for (const issue of diag.issues) {
+          appLog('warn', 'hardware', `[DIAG] ${issue.message}${issue.fix ? ' — Fix: ' + issue.fix : ''}`)
         }
-      }
-      if (isWin && hwPrinter?.name && hwPrinter.interface === 'windows') {
-        const qs = getQueueStatus(hwPrinter.name)
-        if (qs && (qs.JobCount || 0) > 0) clearPrinterQueue(hwPrinter.name)
-      }
-    } catch (_) {}
-  }, 120000)
+        const critical = diag.issues.filter(i => i.severity === 'high')
+        if (critical.length > 0 && mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.webContents.send('hardware:issues', critical)
+        }
+      } catch (e) { appLog('warn', 'hardware', 'Environment diagnostic failed', e.message) }
+    }).catch(e => appLog('error', 'hardware', 'Auto-probe failed', e.message)), 8000)
+
+    // Auto-reprobe every 120s — also checks printer queue health
+    setInterval(async () => {
+      try {
+        if (!initialProbeFoundHardware && !hwPrinter && !hwScale) return
+        const hadPrinter = !!hwPrinter
+        const scaleWorking = (hwScalePort?.isOpen && scaleErrorCount < 10) || !!pythonScaleProc
+        const scaleHealthy = scaleWorking || !hwScale
+        if (hwPrinter && scaleHealthy) return
+        if (scaleWorking) {
+          const devices = enumerateDevices()
+          const printer = detectPrinter(devices)
+          if (!printer?.needsSetup) hwPrinter = printer
+          if (!hadPrinter && hwPrinter) appLog('info', 'hardware', `Printer connected: ${hwPrinter.name}`)
+        } else {
+          const hadScale = !!hwScale
+          await probeHardware()
+          if (!hadPrinter && hwPrinter) appLog('info', 'hardware', `Printer connected: ${hwPrinter.name}`)
+          if (!hadScale && hwScale) {
+            appLog('info', 'hardware', `Scale connected: ${hwScale.vendor || hwScale.product}`)
+            startScalePolling()
+          }
+        }
+        if (isWin && hwPrinter?.name && hwPrinter.interface === 'windows') {
+          const qs = getQueueStatus(hwPrinter.name)
+          if (qs && (qs.JobCount || 0) > 0) clearPrinterQueue(hwPrinter.name)
+        }
+      } catch (_) {}
+    }, 120000)
+  } else {
+    appLog('info', 'hardware', 'Admin mode — skipping hardware probe and polling')
+  }
 
   // ── Continuous scale weight reading ──────────────────────────────────────
   let scalePollingTimer = null
@@ -5984,14 +5989,16 @@ function setupIPC() {
     }
   } catch (_) {}
 
-  // Start the OPOS scanner listener — skip if it previously failed with "not registered"
-  const scannerDisabled = dbGet("SELECT value FROM settings WHERE key='scanner_opos_unavailable'")?.value
-  if (scannerDisabled) {
-    appLog('info', 'scanner', 'OPOS scanner previously unavailable — skipping (use Hardware tab to retry)')
-  } else {
-    setTimeout(() => {
-      try { startScannerListener() } catch (e) { appLog('warn', 'scanner', `Failed to start listener: ${e.message}`) }
-    }, 10000)
+  // Start the OPOS scanner listener — only in register mode
+  if (isRegisterMode) {
+    const scannerDisabled = dbGet("SELECT value FROM settings WHERE key='scanner_opos_unavailable'")?.value
+    if (scannerDisabled) {
+      appLog('info', 'scanner', 'OPOS scanner previously unavailable — skipping (use Hardware tab to retry)')
+    } else {
+      setTimeout(() => {
+        try { startScannerListener() } catch (e) { appLog('warn', 'scanner', `Failed to start listener: ${e.message}`) }
+      }, 10000)
+    }
   }
 
   // Expose IPC controls for the scanner listener (used by Hardware tab / debug)
