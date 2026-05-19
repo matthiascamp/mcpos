@@ -1510,8 +1510,21 @@
             <button class="btn btn-outline" style="padding:2px 8px;font-size:10px" id="addPageBtn" title="New page">+</button>
           </div>
           <div id="pageTree" style="font-size:12px"></div>
+          <div id="addPageInline" style="display:none;margin-top:4px;margin-bottom:4px">
+            <input type="text" id="addPageNameInput" placeholder="Page name" style="width:100%;padding:4px 6px;font-size:11px;border:1px solid var(--border);border-radius:4px;background:var(--surface2);color:var(--text);margin-bottom:4px;box-sizing:border-box">
+            <div style="display:flex;gap:4px">
+              <button class="btn btn-green" style="flex:1;padding:3px;font-size:10px" id="addPageConfirmBtn">Create</button>
+              <button class="btn btn-outline" style="flex:1;padding:3px;font-size:10px" id="addPageCancelBtn">Cancel</button>
+            </div>
+          </div>
+          <div id="renamePageInline" style="display:none;margin-top:4px;margin-bottom:4px">
+            <input type="text" id="renamePageInput" placeholder="Page name" style="width:100%;padding:4px 6px;font-size:11px;border:1px solid var(--border);border-radius:4px;background:var(--surface2);color:var(--text);margin-bottom:4px;box-sizing:border-box">
+            <div style="display:flex;gap:4px">
+              <button class="btn btn-green" style="flex:1;padding:3px;font-size:10px" id="renamePageConfirmBtn">Rename</button>
+              <button class="btn btn-outline" style="flex:1;padding:3px;font-size:10px" id="renamePageCancelBtn">Cancel</button>
+            </div>
+          </div>
           <div style="margin-top:8px;border-top:1px solid var(--border);padding-top:8px">
-            <button class="btn btn-outline" style="width:100%;padding:4px;font-size:10px;margin-bottom:4px" id="addSubPageBtn">+ Sub-page</button>
             <button class="btn btn-outline" style="width:100%;padding:4px;font-size:10px;margin-bottom:4px" id="copyPageBtn">Duplicate</button>
             <button class="btn" style="width:100%;padding:4px;font-size:10px;background:var(--red);color:#fff" id="deletePageBtn">Delete Page</button>
           </div>
@@ -4690,50 +4703,66 @@
       applyPageSize(); renderPageTree(); renderGrid(); closeEditPanel()
     })
 
+    let renamingPage = null
+
     $('#pageTree').addEventListener('dblclick', async e => {
       const node = e.target.closest('[data-tree-page]')
       if (!node) return
-      const page = parseInt(node.dataset.treePage)
-      const info = getPageInfo(page)
-      const name = prompt('Page name:', info.name || `Page ${page}`)
-      if (name === null || !name.trim()) return
-      await window.pos.renamePage(page, name.trim())
-      info.name = name.trim()
+      renamingPage = parseInt(node.dataset.treePage)
+      const info = getPageInfo(renamingPage)
+      $('#renamePageInput').value = info.name || `Page ${renamingPage}`
+      $('#renamePageInline').style.display = ''
+      $('#addPageInline').style.display = 'none'
+      $('#renamePageInput').focus()
+      $('#renamePageInput').select()
+    })
+
+    $('#renamePageConfirmBtn').addEventListener('click', async () => {
+      const name = $('#renamePageInput').value.trim()
+      if (!name || renamingPage === null) { $('#renamePageInline').style.display = 'none'; return }
+      await window.pos.renamePage(renamingPage, name)
+      const info = getPageInfo(renamingPage)
+      info.name = name
+      $('#renamePageInline').style.display = 'none'
       renderPageTree()
       applyPageSize()
       showToast('Page renamed', 'success')
     })
 
-    $('#addPageBtn').addEventListener('click', async () => {
-      const name = prompt('Page name:', 'New Page')
-      if (name === null) return
-      const res = await window.pos.createPage({ name: name.trim() || 'New Page', cols: 13, rows: 7 })
+    $('#renamePageCancelBtn').addEventListener('click', () => {
+      $('#renamePageInline').style.display = 'none'
+    })
+
+    $('#renamePageInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') $('#renamePageConfirmBtn').click()
+      if (e.key === 'Escape') $('#renamePageCancelBtn').click()
+    })
+
+    $('#addPageBtn').addEventListener('click', () => {
+      $('#addPageNameInput').value = 'New Page'
+      $('#addPageInline').style.display = ''
+      $('#renamePageInline').style.display = 'none'
+      $('#addPageNameInput').focus()
+      $('#addPageNameInput').select()
+    })
+
+    $('#addPageConfirmBtn').addEventListener('click', async () => {
+      const name = $('#addPageNameInput').value.trim() || 'New Page'
+      $('#addPageInline').style.display = 'none'
+      const res = await window.pos.createPage({ name, cols: gridCols, rows: gridRows })
       allPages.push(res)
       currentPage = res.page
       applyPageSize(); renderPageTree(); renderGrid()
       showToast(`"${res.name}" created`, 'success')
     })
 
-    $('#addSubPageBtn').addEventListener('click', async () => {
-      const name = prompt('Sub-page name:', '')
-      if (name === null || !name.trim()) return
-      const res = await window.pos.createPage({ name: name.trim(), cols: 13, rows: 7 })
-      allPages.push(res)
-      const btnId = 'link-' + Date.now()
-      await window.pos.upsertButton({
-        id: btnId, label: name.trim(), type: 'page_link', page: currentPage,
-        parent_id: String(res.page), bg_color: '#86efac', color: '#000',
-        grid_row: 0, grid_col: 0, col_span: 2, row_span: 1
-      })
-      kbButtons = await window.pos.getAllButtons()
-      await window.pos.upsertButton({
-        id: 'back-' + Date.now(), label: 'BACK', type: 'back_home', page: res.page,
-        bg_color: '#22c55e', color: '#000', grid_row: 0, grid_col: 10, col_span: 3, row_span: 1
-      })
-      kbButtons = await window.pos.getAllButtons()
-      currentPage = res.page
-      applyPageSize(); renderPageTree(); renderGrid()
-      showToast(`Sub-page "${name.trim()}" created with link + BACK button`, 'success')
+    $('#addPageCancelBtn').addEventListener('click', () => {
+      $('#addPageInline').style.display = 'none'
+    })
+
+    $('#addPageNameInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') $('#addPageConfirmBtn').click()
+      if (e.key === 'Escape') $('#addPageCancelBtn').click()
     })
 
     $('#deletePageBtn').addEventListener('click', async () => {
