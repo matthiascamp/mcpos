@@ -1153,6 +1153,28 @@ async function initDatabase() {
     }
   } catch (e) { appLog('error', 'migration', 'Keyboard import migration failed', e.message) }
 
+  // ── Migration: Convert broccoli/cabbage/chillies/tomatoes to section buttons ──
+  try {
+    const secDone = dbAll("SELECT value FROM settings WHERE key = 'migration_section_buttons_v1'")
+    if (!secDone.length || !secDone[0].value) {
+      const conversions = [
+        ['pg4-broccoli', 'Broccoli'],
+        ['pg4-cabbage', 'Cabbage'],
+        ['pg4-chillies', 'Chillies'],
+        ['pg5-tomatoes', 'Tomatoes'],
+      ]
+      for (const [btnId, catName] of conversions) {
+        const catRow = db.exec("SELECT id FROM categories WHERE name = ?1", [catName])
+        if (catRow.length && catRow[0].values.length) {
+          db.run("UPDATE keyboard_buttons SET type = 'section', category_filter = ?1 WHERE id = ?2",
+            [catRow[0].values[0][0], btnId])
+        }
+      }
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('migration_section_buttons_v1', '1')")
+      appLog('info', 'migration', 'Converted broccoli/cabbage/chillies/tomatoes to section buttons')
+    }
+  } catch (e) { appLog('error', 'migration', 'Section buttons migration failed', e.message) }
+
   saveDBSync()
   appLog('info', 'database', 'Database initialized', `Path: ${DB_PATH}`)
 
@@ -1578,6 +1600,17 @@ if (!gotTheLock) {
 
 app.whenReady().then(async () => {
   if (!gotTheLock) return
+
+  // Kill PTPOS Guardian and PTPOS processes (Linkly replaces them)
+  if (require('os').platform() === 'win32') {
+    try {
+      require('child_process').execSync('taskkill /F /IM PTPos_Guardian.exe 2>nul', { stdio: 'ignore' })
+    } catch (_) {}
+    try {
+      require('child_process').execSync('taskkill /F /IM PTPos.exe 2>nul', { stdio: 'ignore' })
+    } catch (_) {}
+    appLog('info', 'startup', 'Killed PTPOS processes (if running)')
+  }
 
   // Show splash screen during startup
   splashWindow = new BrowserWindow({

@@ -344,12 +344,30 @@ async function main () {
   }
   console.log(`Deals: created ${deals.length} deals, linked ${dealCount} products`)
 
-  // ── 7. Mark all migrations done ──────────────────────────────────
+  // ── 7. Convert broccoli/cabbage/chillies/tomatoes to section buttons ─
+  const sectionConversions = [
+    ['pg4-broccoli', 'Broccoli'],
+    ['pg4-cabbage', 'Cabbage'],
+    ['pg4-chillies', 'Chillies'],
+    ['pg5-tomatoes', 'Tomatoes'],
+  ]
+  let secCount = 0
+  for (const [btnId, catName] of sectionConversions) {
+    const catRow = get("SELECT id FROM categories WHERE LOWER(name) = LOWER(?)", [catName])
+    if (catRow) {
+      db.run("UPDATE keyboard_buttons SET type = 'section', category_filter = ? WHERE id = ?", [catRow.id, btnId])
+      secCount++
+    }
+  }
+  console.log(`Section buttons: converted ${secCount}`)
+
+  // ── 8. Mark all migrations done ──────────────────────────────────
   const migrationFlags = [
     'migration_import_products_v1', 'migration_import_keyboard_v1',
     'migration_prices_may2026_v1', 'deals_v1',
     'migration_gst_rates_v1', 'migration_repair_labels_v1', 'migration_fv_subcats_v1',
     'migration_link_kb_products_v1', 'migration_btn_colors_v1', 'migration_local_images_v1',
+    'migration_section_buttons_v1',
   ]
   for (const key of migrationFlags) {
     db.run("INSERT OR REPLACE INTO settings (key, value) VALUES (?, '1')", [key])

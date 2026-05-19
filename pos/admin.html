@@ -2199,6 +2199,34 @@
             </div>
             <div id="updateLog" style="margin-top:10px;font-size:11px;font-family:monospace;color:var(--text-dim);max-height:120px;overflow-y:auto;display:none;background:var(--surface2);padding:8px;border-radius:var(--radius);white-space:pre-wrap"></div>
           </div>
+
+          <div class="section">
+            <h2>EFTPOS Terminal (Linkly)</h2>
+            <p style="color:var(--text-dim);margin-bottom:12px;font-size:13px;">
+              Connect to your payment terminal via Linkly Cloud. Supports PayNuts, Ingenico, Verifone, and other Linkly-compatible terminals.
+            </p>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+              <span id="dotLinkly" style="width:10px;height:10px;border-radius:50%;background:#555;flex-shrink:0"></span>
+              <span id="linklyStatusText" style="font-size:13px;color:var(--text-dim)">Checking...</span>
+            </div>
+            <div class="form-field" style="margin-bottom:10px">
+              <label>Environment</label>
+              <select id="linklyEnv" style="padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);width:100%">
+                <option value="sandbox">Sandbox (testing)</option>
+                <option value="production">Production (live)</option>
+              </select>
+            </div>
+            <div class="form-field" style="margin-bottom:10px"><label>Username</label><input type="text" id="linklyUser" placeholder="Linkly Cloud username"></div>
+            <div class="form-field" style="margin-bottom:10px"><label>Password</label><input type="password" id="linklyPass" placeholder="Linkly Cloud password"></div>
+            <div class="form-field" style="margin-bottom:10px"><label>Pair Code <span style="color:var(--text-dim);font-size:11px">(from terminal)</span></label><input type="text" id="linklyPairCode" placeholder="e.g. ABC123" style="font-family:monospace;letter-spacing:2px"></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+              <button class="btn btn-green" id="linklyPairBtn">Pair Terminal</button>
+              <button class="btn btn-blue" id="linklySaveBtn">Save Credentials</button>
+              <button class="btn btn-outline" id="linklyTestBtn">Test Connection</button>
+              <button class="btn btn-outline" id="linklySettleBtn" style="color:#f59e0b;border-color:#f59e0b">Settlement</button>
+            </div>
+            <div id="linklyResult" style="margin-top:10px;font-size:13px;min-height:20px"></div>
+          </div>
         </div>
       </div>
     </div>

@@ -4,10 +4,15 @@
 // Docs: https://www.linkly.com.au/apidoc/
 
 const https = require('https')
+const { v4: genuuid } = require('uuid')
 
-const ENDPOINTS = {
-  sandbox: 'rest.pos.sandbox.cloud.linkly.com.au',
-  production: 'rest.pos.cloud.linkly.com.au'
+const AUTH_HOSTS = {
+  sandbox: 'auth.sandbox.cloud.pceftpos.com',
+  production: 'auth.cloud.pceftpos.com'
+}
+const API_HOSTS = {
+  sandbox: 'rest.pos.sandbox.cloud.pceftpos.com',
+  production: 'rest.pos.cloud.pceftpos.com'
 }
 
 let state = {
@@ -15,61 +20,39 @@ let state = {
   secret: null,
   token: null,
   tokenExpiry: null,
-  sessionId: null,
   environment: 'sandbox',
   username: '',
   password: '',
-  pairCode: '',
   lastTxn: null,
   polling: false
 }
 
-function getHost () {
-  return ENDPOINTS[state.environment] || ENDPOINTS.sandbox
-}
-
 // ─── HTTP Helpers ────────────────────────────────────────────────────────────
 
-function request (method, path, body) {
+function request (host, method, path, body, token) {
   return new Promise((resolve, reject) => {
     const data = body ? JSON.stringify(body) : null
-    const headers = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    }
-    if (state.token) {
-      headers['Authorization'] = `Bearer ${state.token}`
-    }
-    if (data) {
-      headers['Content-Length'] = Buffer.byteLength(data)
-    }
+    const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' }
+    if (token) headers['Authorization'] = `Bearer ${token}`
+    if (data) headers['Content-Length'] = Buffer.byteLength(data)
 
-    const opts = {
-      hostname: getHost(),
-      port: 443,
-      path: `/v1${path}`,
-      method,
-      headers,
-      timeout: 30000
-    }
-
-    const req = https.request(opts, res => {
+    const req = https.request({
+      hostname: host, port: 443, path, method, headers, timeout: 120000
+    }, res => {
       let chunks = ''
       res.on('data', d => { chunks += d })
       res.on('end', () => {
         try {
           const json = chunks ? JSON.parse(chunks) : {}
+          if (res.statusCode === 202) { resolve({ _httpStatus: 202, ...json }); return }
           if (res.statusCode >= 400) {
-            reject(new Error(json.message || json.error || `HTTP ${res.statusCode}`))
+            reject(new Error(json.Message || json.message || json.error || `HTTP ${res.statusCode}`))
           } else {
             resolve(json)
           }
-        } catch (e) {
-          reject(new Error(`Invalid response: ${chunks.slice(0, 200)}`))
-        }
+        } catch (e) { reject(new Error(`Invalid response: ${chunks.slice(0, 200)}`)) }
       })
     })
-
     req.on('error', reject)
     req.on('timeout', () => { req.destroy(); reject(new Error('Request timed out')) })
     if (data) req.write(data)
@@ -77,134 +60,246 @@ function request (method, path, body) {
   })
 }
 
+function authHost () { return AUTH_HOSTS[state.environment] || AUTH_HOSTS.sandbox }
+function apiHost () { return API_HOSTS[state.environment] || API_HOSTS.sandbox }
+
 // ─── Authentication & Pairing ────────────────────────────────────────────────
 
 async function pair (username, password, pairCode) {
   state.username = username
   state.password = password
-  state.pairCode = pairCode
 
-  const result = await request('POST', '/pairing/cloudpos', {
-    username,
-    password,
-    pairCode
+  const result = await request(authHost(), 'POST', '/v1/pairing/cloudpos', {
+    username, password, pairCode
   })
 
   if (result.secret) {
     state.secret = result.secret
     state.paired = true
   }
-
   return result
 }
 
-async function authenticate () {
+async function getToken () {
   if (!state.secret) throw new Error('Terminal not paired — pair first')
 
-  const result = await request('POST', '/sessions', {
-    username: state.username,
-    password: state.password,
-    secret: state.secret
+  const result = await request(authHost(), 'POST', '/v1/tokens/cloudpos', {
+    secret: state.secret,
+    posName: 'Tillaroo POS',
+    posVersion: '1.0.0',
+    posId: genuuid(),
+    posVendorId: 'b8f0e2a0-1234-4abc-9def-567890abcdef'
   })
 
-  if (result.sessionId) {
-    state.sessionId = result.sessionId
-    state.token = result.token || result.sessionId
-    state.tokenExpiry = Date.now() + 3500000 // ~58 min
+  if (result.token) {
+    state.token = result.token
+    const expSec = result.expirySeconds || 86400
+    state.tokenExpiry = Date.now() + (expSec - 300) * 1000
   }
-
   return result
 }
 
-let _authPromise = null
-async function ensureSession () {
+let _tokenPromise = null
+async function ensureToken () {
   if (!state.token || !state.tokenExpiry || Date.now() > state.tokenExpiry) {
-    if (!_authPromise) {
-      _authPromise = authenticate().finally(() => { _authPromise = null })
+    if (!_tokenPromise) {
+      _tokenPromise = getToken().finally(() => { _tokenPromise = null })
     }
-    await _authPromise
+    await _tokenPromise
   }
+}
+
+// ─── API call helper ─────────────────────────────────────────────────────────
+
+async function apiCall (method, path, body) {
+  await ensureToken()
+  return request(apiHost(), method, path, body, state.token)
 }
 
 // ─── Transactions ────────────────────────────────────────────────────────────
 
 async function purchase (amountCents, txnRef) {
-  await ensureSession()
-
-  const result = await request('POST', `/sessions/${state.sessionId}/transaction`, {
-    request: {
-      txnType: 'P',
-      amtPurchase: Math.round(amountCents),
-      txnRef: txnRef || `TXN-${Date.now()}`,
-      merchant: '00',
-      currencyCode: 'AUD'
-    },
-    notification: { uri: null }
-  })
-
-  state.lastTxn = {
-    reference: result.reference || result.sessionId,
-    status: 'in_progress',
-    startedAt: Date.now()
-  }
-
-  return result
-}
-
-async function refund (amountCents, txnRef) {
-  await ensureSession()
-
-  const result = await request('POST', `/sessions/${state.sessionId}/transaction`, {
-    request: {
-      txnType: 'R',
-      amtPurchase: Math.round(amountCents),
-      txnRef: txnRef || `REF-${Date.now()}`,
-      merchant: '00',
-      currencyCode: 'AUD'
-    },
-    notification: { uri: null }
-  })
-
-  state.lastTxn = {
-    reference: result.reference || result.sessionId,
-    status: 'in_progress',
-    startedAt: Date.now()
-  }
-
-  return result
-}
-
-async function pollResult (reference) {
-  await ensureSession()
-  const ref = reference || state.lastTxn?.reference
-  if (!ref) throw new Error('No transaction reference to poll')
-
-  const result = await request('GET', `/sessions/${state.sessionId}/transaction/${ref}`)
-  return result
-}
-
-async function settlement () {
-  await ensureSession()
-
-  const result = await request('POST', `/sessions/${state.sessionId}/settlement`, {
-    request: {
-      merchant: '00'
+  const sessionId = genuuid()
+  const result = await apiCall('POST', `/v1/sessions/${sessionId}/transaction?async=false`, {
+    Request: {
+      Merchant: '00',
+      TxnType: 'P',
+      AmtPurchase: Math.round(amountCents),
+      TxnRef: (txnRef || `TXN-${Date.now()}`).slice(0, 16),
+      CurrencyCode: 'AUD',
+      CutReceipt: '0',
+      ReceiptAutoPrint: '0',
+      Application: '00'
     }
   })
 
+  state.lastTxn = { sessionId, status: 'in_progress', startedAt: Date.now() }
+
+  if (result.Response) {
+    return parseTransactionResponse(result, amountCents)
+  }
+  if (result._httpStatus === 202) {
+    return await pollUntilComplete(sessionId, amountCents)
+  }
   return result
 }
 
-async function cancelTransaction () {
-  if (!state.sessionId || !state.lastTxn?.reference) return null
-  try {
-    const result = await request('POST', `/sessions/${state.sessionId}/key`, {
-      request: { key: 'OkCancel', data: 'cancel' }
-    })
-    return result
-  } catch (_) {
-    return null
+async function refund (amountCents, txnRef, originalRfn) {
+  const sessionId = genuuid()
+  const pad = {}
+  if (originalRfn) pad.RFN = originalRfn
+
+  const result = await apiCall('POST', `/v1/sessions/${sessionId}/transaction?async=false`, {
+    Request: {
+      Merchant: '00',
+      TxnType: 'R',
+      AmtPurchase: Math.round(amountCents),
+      TxnRef: (txnRef || `REF-${Date.now()}`).slice(0, 16),
+      CurrencyCode: 'AUD',
+      CutReceipt: '0',
+      ReceiptAutoPrint: '0',
+      Application: '00',
+      PurchaseAnalysisData: pad
+    }
+  })
+
+  state.lastTxn = { sessionId, status: 'in_progress', startedAt: Date.now() }
+
+  if (result.Response) {
+    return parseTransactionResponse(result, amountCents)
   }
+  if (result._httpStatus === 202) {
+    return await pollUntilComplete(sessionId, amountCents)
+  }
+  return result
+}
+
+function parseTransactionResponse (result, amountCents) {
+  const r = result.Response || {}
+  const receipt = []
+  if (result.Receipt) {
+    for (const rcpt of (Array.isArray(result.Receipt) ? result.Receipt : [result.Receipt])) {
+      if (rcpt.Response && rcpt.Response.Lines) receipt.push(...rcpt.Response.Lines)
+    }
+  }
+
+  return {
+    success: r.Success === true || r.ResponseCode === '00',
+    responseCode: r.ResponseCode,
+    responseText: r.ResponseText,
+    cardType: r.CardType,
+    accountType: r.AccountType,
+    bankRef: r.RRN,
+    authCode: r.AuthCode,
+    pan: r.Pan,
+    amount: r.AmtPurchase || amountCents,
+    surcharge: r.AmtTip || 0,
+    rfn: r.PurchaseAnalysisData?.RFN || null,
+    receipt,
+    raw: r
+  }
+}
+
+async function pollTransaction (sessionId) {
+  return await apiCall('GET', `/v1/sessions/${sessionId}/transaction`)
+}
+
+async function pollUntilComplete (sessionId, amountCents) {
+  const TIMEOUT = 120000
+  const startTime = Date.now()
+  let delay = 1000
+
+  while (Date.now() - startTime < TIMEOUT) {
+    await sleep(delay)
+    delay = Math.min(delay * 2, 5000)
+
+    try {
+      const poll = await pollTransaction(sessionId)
+      if (poll.Response) {
+        return parseTransactionResponse(poll, amountCents)
+      }
+    } catch (e) {
+      if (e.message.includes('404')) throw new Error('Transaction not found on terminal')
+      if (e.message.includes('401')) { state.token = null; await ensureToken() }
+    }
+  }
+  throw new Error('Payment timed out — check terminal')
+}
+
+async function settlement () {
+  const sessionId = genuuid()
+  return await apiCall('POST', `/v1/sessions/${sessionId}/settlement?async=false`, {
+    Request: {
+      Merchant: '00',
+      SettlementType: 'S',
+      Application: '00',
+      ReceiptAutoPrint: '0',
+      CutReceipt: '0'
+    }
+  })
+}
+
+async function sendKey (key) {
+  if (!state.lastTxn?.sessionId) return null
+  try {
+    return await apiCall('POST', `/v1/sessions/${state.lastTxn.sessionId}/sendkey?async=false`, {
+      Request: { Key: String(key), Data: '' }
+    })
+  } catch (_) { return null }
+}
+
+async function cancelTransaction () {
+  return sendKey('0')
+}
+
+async function logon () {
+  const sessionId = genuuid()
+  return await apiCall('POST', `/v1/sessions/${sessionId}/logon?async=false`, {
+    Request: { LogonType: ' ', Merchant: '00' }
+  })
+}
+
+async function terminalStatus () {
+  const sessionId = genuuid()
+  return await apiCall('POST', `/v1/sessions/${sessionId}/status?async=false`, {
+    Request: { StatusType: '0', Merchant: '00' }
+  })
+}
+
+// ─── High-level payment flow ─────────────────────────────────────────────────
+
+async function processPayment (amountCents, txnRef, onStatus) {
+  if (onStatus) onStatus({ stage: 'waiting', message: 'Present card on terminal...' })
+  state.polling = true
+
+  try {
+    const result = await purchase(amountCents, txnRef)
+    state.polling = false
+    state.lastTxn = { ...state.lastTxn, status: result.success ? 'approved' : 'declined', result }
+    return result
+  } catch (e) {
+    state.polling = false
+    throw e
+  }
+}
+
+async function processRefund (amountCents, txnRef, onStatus, originalRfn) {
+  if (onStatus) onStatus({ stage: 'waiting', message: 'Present card for refund...' })
+  state.polling = true
+
+  try {
+    const result = await refund(amountCents, txnRef, originalRfn)
+    state.polling = false
+    return result
+  } catch (e) {
+    state.polling = false
+    throw e
+  }
+}
+
+function cancelPolling () {
+  state.polling = false
+  cancelTransaction()
 }
 
 // ─── Status & Config ─────────────────────────────────────────────────────────
@@ -224,140 +319,19 @@ function configure (opts) {
   if (opts.username) state.username = opts.username
   if (opts.password) state.password = opts.password
   if (opts.secret) { state.secret = opts.secret; state.paired = true }
-  if (opts.pairCode) state.pairCode = opts.pairCode
 }
 
 function reset () {
   state.token = null
   state.tokenExpiry = null
-  state.sessionId = null
   state.lastTxn = null
   state.polling = false
-}
-
-// ─── High-level payment flow (polls until complete or timeout) ───────────────
-
-async function processPayment (amountCents, txnRef, onStatus) {
-  const TIMEOUT = 120000 // 2 minutes
-  const POLL_INTERVAL = 1500
-
-  // Initiate
-  const initResult = await purchase(amountCents, txnRef)
-  const reference = initResult.reference || initResult.sessionId || state.lastTxn?.reference
-  if (!reference) throw new Error('No transaction reference returned')
-
-  if (onStatus) onStatus({ stage: 'waiting', message: 'Present card on terminal...' })
-  state.polling = true
-
-  const startTime = Date.now()
-
-  while (state.polling && (Date.now() - startTime) < TIMEOUT) {
-    await sleep(POLL_INTERVAL)
-    if (!state.polling) break
-
-    try {
-      const poll = await pollResult(reference)
-
-      if (poll.response) {
-        state.polling = false
-        state.lastTxn = {
-          ...state.lastTxn,
-          status: poll.response.success ? 'approved' : 'declined',
-          result: poll.response
-        }
-
-        return {
-          success: poll.response.success || poll.response.responseCode === '00',
-          responseCode: poll.response.responseCode,
-          responseText: poll.response.responseText,
-          cardType: poll.response.cardType,
-          accountType: poll.response.accountType,
-          bankRef: poll.response.bankRef || poll.response.rrn,
-          amount: poll.response.amtPurchase || amountCents,
-          receipt: poll.response.receipt || [],
-          raw: poll.response
-        }
-      }
-
-      // Still in progress — update status
-      if (poll.status && onStatus) {
-        onStatus({ stage: 'processing', message: poll.status })
-      }
-    } catch (e) {
-      if (onStatus) onStatus({ stage: 'error', message: e.message })
-    }
-  }
-
-  state.polling = false
-  if (Date.now() - startTime >= TIMEOUT) {
-    throw new Error('Payment timed out — check terminal')
-  }
-  throw new Error('Payment cancelled')
-}
-
-async function processRefund (amountCents, txnRef, onStatus) {
-  const TIMEOUT = 120000
-  const POLL_INTERVAL = 1500
-
-  const initResult = await refund(amountCents, txnRef)
-  const reference = initResult.reference || initResult.sessionId || state.lastTxn?.reference
-  if (!reference) throw new Error('No transaction reference returned')
-
-  if (onStatus) onStatus({ stage: 'waiting', message: 'Present card for refund...' })
-  state.polling = true
-
-  const startTime = Date.now()
-
-  while (state.polling && (Date.now() - startTime) < TIMEOUT) {
-    await sleep(POLL_INTERVAL)
-    if (!state.polling) break
-
-    try {
-      const poll = await pollResult(reference)
-      if (poll.response) {
-        state.polling = false
-        return {
-          success: poll.response.success || poll.response.responseCode === '00',
-          responseCode: poll.response.responseCode,
-          responseText: poll.response.responseText,
-          cardType: poll.response.cardType,
-          bankRef: poll.response.bankRef || poll.response.rrn,
-          amount: poll.response.amtPurchase || amountCents,
-          receipt: poll.response.receipt || [],
-          raw: poll.response
-        }
-      }
-    } catch (e) {
-      if (onStatus) onStatus({ stage: 'error', message: e.message })
-    }
-  }
-
-  state.polling = false
-  if (Date.now() - startTime >= TIMEOUT) {
-    throw new Error('Refund timed out — check terminal')
-  }
-  throw new Error('Refund cancelled')
-}
-
-function cancelPolling () {
-  state.polling = false
-  cancelTransaction()
 }
 
 function sleep (ms) { return new Promise(r => setTimeout(r, ms)) }
 
 module.exports = {
-  pair,
-  authenticate,
-  purchase,
-  refund,
-  pollResult,
-  settlement,
-  cancelTransaction,
-  cancelPolling,
-  processPayment,
-  processRefund,
-  getStatus,
-  configure,
-  reset
+  pair, getToken, purchase, refund, pollTransaction, settlement,
+  sendKey, cancelTransaction, cancelPolling, logon, terminalStatus,
+  processPayment, processRefund, getStatus, configure, reset
 }
