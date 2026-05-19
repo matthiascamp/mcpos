@@ -1,0 +1,1850 @@
+                        EPSON OPOS ADK Version 2.80E R5
+                     EPSON OPOS ADK for TM-T88V Version 1.24E
+                     EPSON OPOS ADK for TM-T20 Version 1.21E
+                     EPSON OPOS ADK for TM-T81 Version 1.22E
+                     EPSON OPOS ADK for TM-T82 Version 1.22E
+                     EPSON OPOS ADK for TM-T81II Version 1.03E
+                     EPSON OPOS ADK for TM-T82II Version 1.01E
+                     EPSON OPOS ADK for TM-T70II Version 1.04E
+                     EPSON OPOS ADK for TM-L90 Version 1.00E
+                     EPSON OPOS ADK for TM-T20II Version 1.03E
+                     EPSON OPOS ADK for TM-P20 Version 1.03E
+                     EPSON OPOS ADK for TM-P80 Version 1.00E
+                     EPSON OPOS ADK for TM-T88VI Version 1.01E
+                                  Release Note
+
+                                                      SEIKO EPSON CORPORATION
+                                                                14. Oct. 2016
+
+1. Overview
+    We are proud to announce the release of the EPSON OPOS ADK.
+    Using this development kit makes it easy to build applications based on 
+    the OPOS Application Programmer's Guide, Release 1.14.1.
+
+    This release note contains information for multiple packages.  Please 
+    refer to the information for the product you are installing.
+
+     [EPSON OPOS ADK Version 2.80E R5]
+       2. Explanation of OPOS ADK Contents
+       3. Confirmed operating environment
+       4. Installation and uninstallation
+       5. Support devices of EPSON OPOS ADK Version 2.80E R5
+       6. Notes of EPSON OPOS ADK Version 2.80E R5
+       7. Change History of EPSON OPOS ADK Version 2.80E R5
+
+     [EPSON OPOS ADK for TM-T88V Version 1.24E]
+       2. Explanation of OPOS ADK Contents
+       3. Confirmed operating environment
+       4. Installation and uninstallation
+       8. Support devices of EPSON OPOS ADK for TM-T88V Version 1.24E
+       9. Notes of EPSON OPOS ADK for TM-T88V Version 1.24E
+      10. Change History of EPSON OPOS ADK for TM-T88V Version 1.24E
+
+     [EPSON OPOS ADK for TM-T20 Version 1.21E]
+       2. Explanation of OPOS ADK Contents
+       3. Confirmed operating environment
+       4. Installation and uninstallation
+      11. Support devices of EPSON OPOS ADK for TM-T20 Version 1.21E
+      12. Notes of EPSON OPOS ADK for TM-T20 Version 1.21E
+      13. Change History of EPSON OPOS ADK for TM-T20 Version 1.21E
+
+     [EPSON OPOS ADK for TM-T81 Version 1.22E]
+       2. Explanation of OPOS ADK Contents
+       3. Confirmed operating environment
+       4. Installation and uninstallation
+      14. Support devices of EPSON OPOS ADK for TM-T81 Version 1.22E
+      15. Notes of EPSON OPOS ADK for TM-T81 Version 1.22E
+      16. Change History of EPSON OPOS ADK for TM-T81 Version 1.22E
+
+     [EPSON OPOS ADK for TM-T82 Version 1.22E]
+       2. Explanation of OPOS ADK Contents
+       3. Confirmed operating environment
+       4. Installation and uninstallation
+      17. Support devices of EPSON OPOS ADK for TM-T82 Version 1.22E
+      18. Notes of EPSON OPOS ADK for TM-T82 Version 1.22E
+      19. Change History of EPSON OPOS ADK for TM-T82 Version 1.22E
+
+     [EPSON OPOS ADK for TM-T81II Version 1.03E]
+       2. Explanation of OPOS ADK Contents
+       3. Confirmed operating environment
+       4. Installation and uninstallation
+      20. Support devices of EPSON OPOS ADK for TM-T81II Version 1.03E
+      21. Notes of EPSON OPOS ADK for TM-T81II Version 1.03E
+      22. Change History of EPSON OPOS ADK for TM-T81II Version 1.03E
+
+     [EPSON OPOS ADK for TM-T82II Version 1.01E]
+       2. Explanation of OPOS ADK Contents
+       3. Confirmed operating environment
+       4. Installation and uninstallation
+      23. Support devices of EPSON OPOS ADK for TM-T82II Version 1.01E
+      24. Notes of EPSON OPOS ADK for TM-T82II Version 1.01E
+      25. Change History of EPSON OPOS ADK for TM-T82II Version 1.01E
+
+     [EPSON OPOS ADK for TM-T70II Version 1.04E]
+       2. Explanation of OPOS ADK Contents
+       3. Confirmed operating environment
+       4. Installation and uninstallation
+      26. Support devices of EPSON OPOS ADK for TM-T70II Version 1.04E
+      27. Notes of EPSON OPOS ADK for TM-T70II Version 1.04E
+      28. Change History of EPSON OPOS ADK for TM-T70II Version 1.04E
+
+     [EPSON OPOS ADK for TM-L90 Version 1.00E]
+       2. Explanation of OPOS ADK Contents
+       3. Confirmed operating environment
+       4. Installation and uninstallation
+      29. Support devices of EPSON OPOS ADK for TM-L90 Version 1.00E
+      30. Notes of EPSON OPOS ADK for TM-L90 Version 1.00E
+      31. Change History of EPSON OPOS ADK for TM-L90 Version 1.00E
+
+     [EPSON OPOS ADK for TM-T20II Version 1.03E]
+       2. Explanation of OPOS ADK Contents
+       3. Confirmed operating environment
+       4. Installation and uninstallation
+      32. Support devices of EPSON OPOS ADK for TM-T20II Version 1.03E
+      33. Notes of EPSON OPOS ADK for TM-T20II Version 1.03E
+      34. Change History of EPSON OPOS ADK for TM-T20II Version 1.03E
+
+     [EPSON OPOS ADK for TM-P20 Version 1.03E]
+       2. Explanation of OPOS ADK Contents
+       3. Confirmed operating environment
+       4. Installation and uninstallation
+      35. Support devices of EPSON OPOS ADK for TM-P20 Version 1.03E
+      36. Notes of EPSON OPOS ADK for TM-P20 Version 1.03E
+      37. Change History of EPSON OPOS ADK for TM-P20 Version 1.03E
+
+     [EPSON OPOS ADK for TM-P80 Version 1.00E]
+       2. Explanation of OPOS ADK Contents
+       3. Confirmed operating environment
+       4. Installation and uninstallation
+      38. Support devices of EPSON OPOS ADK for TM-P80 Version 1.00E
+      39. Notes of EPSON OPOS ADK for TM-P80 Version 1.01E
+      40. Change History of EPSON OPOS ADK for TM-P80 Version 1.00E
+
+     [EPSON OPOS ADK for TM-T88VI Version 1.01E]
+       2. Explanation of OPOS ADK Contents
+       3. Confirmed operating environment
+       4. Installation and uninstallation
+      41. Support devices of EPSON OPOS ADK for TM-T88VI Version 1.01E
+      42. Notes of EPSON OPOS ADK for TM-T88VI Version 1.01E
+      43. Change History of EPSON OPOS ADK for TM-T88VI Version 1.01E
+
+2. Explanation of OPOS ADK Contents
+    In this release, the installed files are as follows:
+     - OPOS driver
+        For details, please refer to the manuals.
+     - Sample program
+        For details on file contents, please open Sample Programs from Start 
+        Menu - OPOS after installation is complete.
+     - Manual
+        For details on file contents, please open Manual from Start Menu - 
+        OPOS after installation is complete.
+
+        * Using the following software can refer the manuals.
+           Windows 2000/XP: Adobe Reader 7.0 or higher
+           Windows Vista or newer: Adobe Reader 8.0 or higher
+        * OPOS APG/CPG documents
+          Starting with version 1.7, the OPOS document is no longer available 
+          as it has been integrated with the UnifiedPOS document.  Please
+          refer to the UnifiedPOS document.
+          The OPOS APG/CPG(UPOS) documents are available at: (As of Dec,2011)
+            http://www.nrf-arts.org/content/unifiedpos
+
+3. Confirmed operating environment
+    This product has been confirmed in the following environments.
+      Windows 10 (32bit)
+      Windows 10 (64bit) *
+      Windows 8.1 (32bit)
+      Windows 8.1 (64bit) *
+      Windows 8 (32bit)
+      Windows 8 (64bit) *
+      Windows 7 SP1 (32bit)
+      Windows 7 SP1 (64bit) *
+      Windows Vista SP2 (32bit)
+      Windows Vista SP2 (64bit) *
+      Windows XP SP3 (32bit)
+      Windows 2000 SP4
+      Windows Server 2008 SP2 (32bit)
+      Windows Server 2008 SP2 (64bit) *
+      Windows Server 2008 R2 SP1 (64bit) *
+      Windows Server 2012 (64bit) *
+      Windows Server 2012 R2 (64bit) *
+      Windows Embedded for Point Of Service
+      Windows Embedded POSReady 2009
+      Windows Embedded Standard
+      Windows Embedded Standard 7
+      Windows Embedded POSReady 7 (32bit)
+      Windows Embedded POSReady 7 (64bit) *
+
+      * This can only be used with 32-bit applications.
+
+4. Installation and uninstallation
+
+4.1 Operation method
+    Follow the procedure in "EPSON OPOS ADK MANUAL Installer Manual" 
+    (Installer.pdf) for installation and uninstallation.
+
+4.2 Full package and Unit package
+    This product contains 2 types of packages.
+     - Full Package: Provides drivers for all devices
+     - Unit Package: Provides drivers for a specific POSPrinter and Hydra 
+       devices that can be connected to this printer
+    There is a base Full package version for the Unit package.
+    The Unit package can coexist with other Full packages and Unit packages.
+    Please note the following regarding coexistence with other packages:
+     - If the same version or newer version of the Full package is already 
+       installed, installation of the Unit package is unnecessary
+     - When uninstalling the Unit package, all OPOS packages will be 
+       uninstalled
+     - The latest version of one of the following packages will be displayed 
+       in "Add and Remove Programs" and the SetupPOS title bar:
+        - Full package version
+        - Full package version on which the Unit package is based
+
+     Note:
+       Unit package will replace the driver that conforms to UPOS1.14, when 
+       this package is installed after unit package was installed.
+
+5. Support devices of EPSON OPOS ADK Version 2.80E R5
+    For more details, please refer to the "SupportedDevicesList.txt" that is a 
+    different file.
+
+6. Notes of EPSON OPOS ADK Version 2.80E R5
+    The following list describes items restricted in this version and how to 
+    deal with problems.  Also, please be sure to refer to the warnings of the 
+    "User's manual" and "Application Development Guide GENERAL DEVELOPMENT".
+     - 6.1 Installation and uninstallation
+     - 6.2 Interface connection
+     - 6.3 Devices
+     - 6.4 Others
+
+6.1 Installation and uninstallation
+    1) While operating the Installer with a keyboard, the back screen may 
+       switch to a screen that is unable to operate with a keyboard after an 
+       error message or caution.
+       In such a case, please depress <Alt + F6> and switch the screen.
+    2) If a device that is not supported is already registered in the 
+       environment where this version will be installed, registration 
+       information for the unsupported device must be deleted.  Please delete 
+       the registration information prior to installing this version.  If this 
+       version is installed without deleting this information, the registration
+       information will be deleted during installation.
+    3) When installing alongside one of the older versions(Ver1.60 - Ver1.95),
+       please be sure to install the older version prior to installing this
+       version.
+    4) When uninstalling in an environment with other versions(Ver1.60 - Ver1.95),
+       please run this version's uninstaller.
+    5) There is an unresolved issue with the OPOS ADK version 2.60 uninstaller.
+       Therefore, when uninstalling the OPOS ADK version 2.60, please uninstall
+       after installing this version.
+    6) When uninstalling OPOS after doing an upgrade install, it's possible
+       that there may still be some remaining empty folders inside the
+       installation folder. If desired, these empty folders can be deleted.
+       Note that if these empty folders are not deleted it will not have any
+       effect on the operation of the driver.
+    7) Please restart your system after upgrade install When installing by silent
+       from the older versions(Ver.2.68 - Ver.2.80)
+
+6.2 Interface connection
+6.2.1 Parallel connection
+    1) We checked the performance of the program at LPT1.
+    2) Please set "Bi-Directional" for either the ECP or EPP settings in the 
+       parallel mode settings in the BIOS.
+    3) Depending on the BIOS, there is a possibility of "ECP doesn't work but 
+       EPP does work" or conversely "EPP doesn't work but ECP does work" 
+       occurring. If it doesn't work properly, please change these settings 
+       and try again.
+    4) After turning the device off, there is a delay of several seconds 
+       before the ServiceObject recognizes that the power is off. Please 
+       consider in the application.
+    5) When registering a device in SetupPOS and using the device in a 64bit 
+       OS environment, and if the model does not use the "TMPORT" port type, 
+       the device will be supported by the Windows' standard parallel driver.
+       In this case, there are the following limitations:
+        - Monitoring of power functions is not supported.
+        - Using commands to clear recoverable errors is not supported. Remove 
+          an error state by power supply OFF/ON.
+        - It is not possible to open the cash drawer when the printer is in 
+          an error state.
+          Open the cash drawer after an error state is removed.
+        - If the printer (Parallel model) is connected to the PC, a "Found 
+          New Hardware" dialog will be displayed with the title "Windows 
+          needs to  install software for your EPSON TM-P X.xx".
+          Since it is not necessary to install the driver, search for the 
+          driver using the "Locate and install driver software (recommended)" 
+          option.
+          Press the "Close" button after Windows indicates that it is unable 
+          to locate the driver. Once this is done, the message will no longer 
+          be displayed.
+
+          * If the [Cancel] button is pressed to close the dialog, the same 
+            message will be displayed next time the device is connected.
+
+6.2.2 USB connection
+    1) We checked the performance of the program, connecting with a maximum of 
+       10 printers via the USB interface.
+    2) When device which use a "TMPORT" are registered in SetupPOS, please
+       create the USB TMPORT with the "TMPORT Making" dialog before turning
+       on the device. 
+       If the device is turned on before the port is created, it's possible 
+       that the device will not be connected to the desired port. 
+    3) If the "Found new hardware wizard" is displayed when the printer is 
+       turned ON/OFF, cancel the wizard and install the EPSON Advanced Printer 
+       Driver (Version 4.50 or later). 
+
+6.2.3 Network connection
+    1) We checked the performance of the program, connecting with a maximum of 
+       20 printers via the network interface.
+    2) Please exercise caution to the following points when using the Network 
+       Interface Device.
+        - During use the OPOS driver, the TM printer's power Off / On operation
+          is supported, but after it is turned On, it cannot be guaranteed that
+          it will reconnect, so exercise caution. During use the OPOS driver, 
+          that PC has a monopoly on its connection with the TM printer. (Another
+          PC cannot connect with it.) However, if the TM printer's power is 
+          turned OFF once, then turned On again, any PC existing on the 
+          network can connect with that TM printer. At that time, the OPOS of 
+          a PC which is in the middle of a Claim will attempt to reconnect 
+          automatically, but if another PC's OPOS also attempts to make a 
+          Claim, it is not clear which will be able to make the connection. 
+          The PC which is the earliest to request connection can establish the 
+          connection. Accordingly, a TM printer which has had its power turned 
+          Off and On after Open and Claim, may not necessarily be available to 
+          reconnect to, so exercise caution.  When the TM printer's power is 
+          turned On.
+        - It can take up to maximun 20 seconds when turning on or resetting a
+          TM printer, or using a network function.  Please wait for this
+          interval to pass before starting any processing.
+6.2.4 Bluetooth connection
+    1) After turning off TM printer power, wait at least 20 seconds before 
+       turning power back on. The printer will not print if power is turned 
+       on before this time has elapsed.
+    2) When the power supply of a printer is Off, if a Claim method is 
+       performed,before a response will return, it will take 7 seconds or more.
+
+6.3 Devices
+6.3.1 POSPrinter
+    1) Multi-tone printing:
+       There are following two ways for gray scale printing:
+       - PrintBitmap
+         Set to "Multi-tone" from SetupPOS [Device Specific Settings]->
+         [Color Bitmap]->[Gradation Method], or, Change the mode by DirectIO
+         method (DI_SET_BITMAP_PRINTING_TYPE)
+         For your information, white line might be seen in the print result when
+         gray scale printing via serial or Ethernet interface. Also, printing
+         speed might be slower.
+       -NVRAM
+         To register images in the NVRAM, it is necessary to register the image
+         by the utility software at first, then print by DerectIO method
+         (DI_PRINT_FLASH_BITMAP2).
+    2) Data sent from the printer after OPOS is used
+       Device settings are overwritten once OPOS is used.  Depending on this 
+       action, data could subsequently be sent from the device.  If you then 
+       directly connect to the device without using OPOS, please disregard the 
+       following data.
+        - 3-byte printer status sent when the power is turned ON
+        - 3-byte power ON notification sent when the power is turned ON
+
+6.3.2 CheckScanner
+    1) Do not touch the CheckScanner device when scanning image data.
+       In particular, do not turn the power OFF/ON during scanning.  Problems 
+       with the operation of ServiceObject may occur.
+
+6.3.3 HardTotals
+    1) Hard Totals using EPSON series NVRAM needs a driver to access the NVRAM:
+       EPSON NVRAM Driver.  In an environment where the EPSON NVRAM Driver is 
+       not installed, Hard Totals cannot be installed.  To install Hard Totals 
+       onto a machine on which you are going to use the EPSON NVRAM Driver, 
+       install the driver first.  For how to purchase the EPSON NVRAM Driver, 
+       check with the company where you bought the IM hardware.
+
+6.3.4 KeyLock
+    1) If you try to use the function in Windows2000, OPOS can't detect the 
+       keylock position correctly.  Therefore, the keylock function of the 
+       DM-KX060 (which is an optional keyboard for the ARCX(IM-700)/URBANII(SR-
+       610)) is not available.
+
+6.4 Others
+    1) Stand by/hibernation mode for the OS
+       Since it is possible that the driver will become unstable if the 
+       computer goes into stand by/hibernation mode while the printer is in 
+       use, please avoid the use of stand by/hibernation mode.
+    2) OS upgrade
+       When you upgrade OS in the environment where driver is already installed, 
+       devices must be re-registered after upgrade of OS is complete.
+    3) Sample program
+       When using the EPSON OPOS ADK for TM-T88V Version 1.24E:
+       Please exercise caution when updating/reinstalling this release:
+        - The Oposepsn.bas file has been upgraded.
+        - The definition names have been changed at the step 19.
+          [Before]               [After]
+          PTR_DI_NORMAL      ->  PTR_DI_BITMAP_PRINTING_NORMAL
+          PTR_DI_MULTI_TONE  ->  PTR_DI_BITMAP_PRINTING_MULTI_TONE
+    4) The location to save the log files
+       The default location to save the trace log file and POSPrinter error 
+       log files is as follows:
+        Windows Vista/7/8/Embedded POSReady 7/Embedded Standard 7:
+          (System Drive):
+            \ProgramData\EPSON\OPOS
+        Windows 2000/XP:
+          (System Drive):
+            \Documents and Settings\All Users\Application Data\EPSON\OPOS
+        Windows Server:
+          (System Drive):
+            \Program Data\EPSON\OPOS
+        Windows Embedded:
+          (System Drive):
+            \Documents and Settings\All Users\Application Data\EPSON\OPOS
+    4) Outer module
+       In this release, the following software is used.
+        - LEADTOOLS 12.0: Copyright (C) 2001 LEAD Technologies, Inc.
+
+7. Change History of EPSON OPOS ADK Version 2.80E R5
+    [Version2.80 R5]
+       - The bug is fixed that the time-out error will occur in 45 seconds
+         after the continuous printing stop.
+    [Version2.80 R4]
+       - TM-T81II Vietnam model was added as a supported device.
+    [Version2.80 R3]
+     (1)POSPrinter
+       - TM-T88VI model was added as a supported device.
+       - TM-T88VI and TM-m30 was added support for Printing Using Multiple Interfaces.
+       - USB was added to the TM-U950 support interfaces.
+       - The bug is fixed that there are no response when Release method is run
+         while the network connection is recovering or the printer is rebooting.
+     (2)LineDisplay
+       - Bluetooth, Parallel, and Ethernet was added to the DM-D110 support interfaces.
+       - Bluetooth, Parallel, and Ethernet was added to the DM-D210 support interfaces.
+       - Serial and Parallel was added to the DM-D30 support interfaces.
+       - DM-D30 was supported standalone connection.
+    [Version2.80 R2]
+     (1)Common
+       - Added support for Windows10 (32bit), Windows10 (64bit).
+     (2)POSPrinter
+       - TM-m10 model was added as a supported device.
+       - TM-m30 model was added as a supported device.
+         * Note
+           TM-m10 and TM-m30 are not supported printing using
+           multiple interfaces.
+     (3)LineDisplay
+       - DM-D30 model was added as a supported device.
+         * Note
+           DM-D30 is not supported standalone connection.
+       - When setting MarqueeRepeatWait or MarqueeUnitWait below 300msec
+         with DM-D30,it'll be 300msec.
+    [Version2.80]
+       - Unified POS Version 1.14.1 is newly supported.
+       - Newly supports TM-P80 Auto Cutter model.
+       - Calculation method of barcode size is improved.
+       - Fixed an issue that it cannot escape from offline status after
+         buzzer beeps.
+       - Bug fix that BankNumber was falsely recognized as MoneyOrder 
+         on MICR parsing.
+    [Version2.70 R20]
+       - TM-L90LinerFree model was added as a supported device.
+         The user interface for SetupPOS has been changed for users of EPSON
+         OPOS ADK Version 2.70E for TM-L90LinerFree Version 1.00. For the 
+         details, please refer to "EPSON OPOS ADK MANUAL APPLICATION 
+         DEVELOPMENT GUIDE for TM-L90LinerFree".
+    [Version2.70 R19]
+       - Fixed an issue that fails to initialize POSPrinter of Bluetooth connection.
+    [Version2.70 R18]
+       - TM-P20 model was added as a supported device.
+       - TM-P60II Traditional Chinese model was added as a supported device.
+       - TM-P80 Traditional Chinese model was added as a supported device.
+       - TM-P80-42C Traditional Chinese model was added as a supported device.
+    [Version2.70 R17]
+       - TM-U330B model was added as a supported device.
+       - TM-U330D model was added as a supported device.
+    [Version2.70 R16]
+     (1)POSPrinter
+       - Bluetooth was added to the TM-T20II support interfaces.
+       - Bluetooth was added to the TM-T20II-42C support interfaces.
+       - Bluetooth was added to the TM-T88V support interfaces.
+       - Bluetooth was added to the TM-T70II support interfaces.
+     (2)CashDrawer
+       - Bluetooth was added to the CashDrawer support interfaces.
+    [Version2.70 R15]
+       - Fixed an issue that fails to register CashDrawer of TM-T70II by SetupPOS.
+       - Fixed an issue that fails to initialize CashDrawer of TM-T70II.
+    [Version2.70 R14]
+       - Fixed an issue that fails to initialize OPOS in TM-T70II.
+    [Version2.70 R13]
+       - Added support for Windows 8.1 (32bit), Windows 8.1 (64bit) 
+         and Windows Server 2012 R2 (64bit).
+       - Added support for ARP (Automatic Reduction of Paper) function in TM-T82.
+       - Added support for ARP (Automatic Reduction of Paper) function in TM-T82-42C.
+       - Parallel was added to the TM-T82 support interfaces.
+       - Parallel was added to the TM-T82-42C support interfaces.
+    [Version2.70 R12]
+       - TM-P80 model was added as a supported device.
+       - TM-P80-42C model was added as a supported device.
+    [Version2.70 R11]
+      (1)POSPrinter
+        - TM-T20II model was added as a supported device.
+        - TM-T20II-42C model was added as a supported device.
+      (2)ElectronicJournal
+        - TM-T20II model was added as a supported device.
+        - TM-T20II-42C model was added as a supported device.
+    [Version2.70 R10]
+      Bug Fixed.
+    [Version2.70 R9]
+       - TM-L90 Simplified Chinese(GB18030) model was added as a supported device.
+       - Added support for ARP (Automatic Reduction of Paper) function in TM-L90.
+       - Added the Optional external buzzer in TM-L90.
+       - Added support for GS1, Composit, Datamatrix and Micro QR code symbols in TM-L90.
+    [Version2.70 R7]
+       - TM-T70II model was added as a supported device.
+    [Version2.70 R6]
+      - TM-P60IIPEELER model was added as a supported device.
+    [Version2.70 R5]
+       - Added support for Windows 8 (32bit), Windows 8 (64bit) and Windows Server 2012 (64bit).
+       - TM-T82II model was added as a supported device.
+    [Version2.70 R4]
+       - TM-P60II model was added as a supported device.
+    [Version2.70 R3]
+      No change.
+    [Version2.70 R2]
+     (1)POSPrinter
+       - TM-T81II Simplified Chinese model was added as a supported device.
+    [Version2.70]
+     (1)New function based on the UPOS V1.12, V1.13 listed below
+         POSPrinter:
+           -ESC sequences
+             Asterisk ESC sequences.
+             Strike-though
+           - Define QR and GS1 bar code symbols for PrintBarCode method
+     (2)SetupPOS
+       - Trace log function: "Notify when trace log file becomes full." is set 
+         to disable as default. See "5.2.1 Menu"- "5. Option" in "User's Manual"
+         (Users.pdf) for the detail.
+     (3) POSPrinter
+       - Increase variety of ESC/POS command response which can be notified by
+         DirectIOEvent.
+       - Remove restriction on the number of images which can be stored in the
+         nonvolatile memory (NVRAM). See 
+        "3.5.2.1 NV bitmap" in "APPLICATION DEVELPOMENT GUIDE(POSPrinter)"
+         (POSPrinter.pdf) for the detail
+
+      Note:The above changes are for the following categories and devices.
+          Category:POSPrinter,MICR,CheckScanner,LineDisplay,CashDrawer
+          Device:TM-H6000II/III/IV,TM-T20,TM-T70,TM-T88III/IV/V,
+                  TM-T90,TM-U220
+    [Version2.68]
+     (1)Common
+       - Added support for Windows Embedded POSReady 7 (32bit), 
+         Windows Embedded POSReady 7 (64bit).
+     (2)POSPrinter
+       - TM-T82 Traditional Chinese model was added as a supported device.
+       - Added support for ARP (Automatic Reduction of Paper) function in 
+         TM-T88V.
+    [Version2.67 R9]
+     (1)POSPrinter
+       - Ethernet was added to the TM-T20 support interfaces.
+       - Ethernet was added to the TM-T20-42C support interfaces.
+     (2)ElectronicJournal
+       - Ethernet was added to the TM-T20 support interfaces.
+       - Ethernet was added to the TM-T20-42C support interfaces.
+    [Version2.67 R8]
+     (1)POSPrinter
+        EPSON OPOS ADK for TM-T82 Version 1.01E:
+        - Added support for South Asian languages in a multilingual model of 
+          the TM-T82.
+        - Added support for South Asian languages in a multilingual model of 
+          the TM-T82-42C.
+        - Ethernet was added to the TM-T82 support interfaces.
+        - Ethernet was added to the TM-T82-42C support interfaces.
+    [Version2.67 R7]
+     (1)Common
+       - Added support for Windows 7 SP1 (32bit), Windows 7 SP1 (64bit), and 
+         Windows Server 2008 R2 SP1 (64bit).
+     (2)POSPrinter
+       - TM-H6000IV Multilingual Character model was added as a supported 
+         device.
+    [Version2.67 R6]
+     (1)Common
+       - EPSON OPOS ADK for TM-T82 Version 1.00E:
+         Added Simplified Chinese localization.
+     (2)POSPrinter
+       - TM-T82M model was added as a supported device.
+       - TM-T82M-42C model was added as a supported device.
+       - 58-mm width model of the TM-U120II was added as a supported device.
+    [Version2.67 R5]
+     (1)Common
+       - Windows Embedded Standard 7 was added to the list of supported 
+         Operating Systems.
+     (2)POSPrinter
+       - TM-H6000IV model was added as a supported device.
+       - TM-H2000 model was added as a supported device.
+     (3)ElectronicJournal
+       - TM-H6000IV model was added as a supported device.
+     (4)MICR
+       - TM-H6000IV model was added as a supported device.
+       - TM-H2000 model was added as a supported device.
+    [Version2.67 R4]
+     (1)Common
+       - EPSON OPOS ADK for TM-T81 Version 1.01E:
+         Added Simplified Chinese localization.
+     (2)POSPrinter
+       - Added the TM-T81 Utility (specific logo registration utility).
+    [Version2.67 R3]
+     (1)POSPrinter
+       - TM-T81M model was added as a supported device.
+       - Added support for the TM-T20 with a serial interface.
+       - Added support for the TM-T20-42C with a serial interface.
+     (2)ElectronicJournal
+       - Added support for the TM-T20 with a serial interface.
+       - Added support for the TM-T20-42C with a serial interface.
+    [Version2.67 R2]
+     (1)POSPrinter
+       - TM-T88VM model was added as a supported device.
+       - TM-T20 model was added as a supported device.
+       - Added the Multi-tone printing feature.(TM-T88V and TM-T88VM only)
+       - Added the Optional external buzzer.(TM-T88V, TM-T88VM and TM-T20 only)
+     (2)ElectronicJournal
+       - TM-T88VM model was added as a supported device.
+       - TM-T20 model was added as a supported device.
+     (3)TMFlogo
+       - Fixed an issue where if a logo is registered with the TMFlogo tool 
+         with Monochrome selected and keycode enabled, the "Paper selection" 
+         setting of the following devices would be changed.
+         (Affected devices: TM-T88IV, TM-L90, and TM-T90)
+    [Version2.67]
+     (1)POSPrinter
+       - TM-T88V model was added as a supported device.
+       - Added a setting to allow the default character code to be changed. 
+         (TM-T88V only)
+     (2)ElectronicJournal
+       - TM-T88V model was added as a supported device.
+    [Version2.66]
+     (1)Common
+       - Windows Server 2008 SP2 (32bit), Windows Server 2008 SP2 (64bit), 
+         Windows Server 2008 R2 (64bit), Windows Embedded Standard, 
+         Windows 7 (32bit), Windows 7 (64bit) was added to the list of 
+         supported Operating Systems.
+     (2)POSPrinter
+       - Fixed the following issues.
+          - For the TM-T88IIIM, although the international font is specified
+            in the initial settings of SetupPOS, this is not reflected in the
+            property value after Open.
+          - For the TM-T88IIIXM, even though initialization is completed, the
+            property is not updated to the character set which corresponds to
+            the device.
+     (3)MICR
+       - Fixed an issue where the paper is ejected while reading the MICR with 
+         a Serial connection.
+    [Version2.65SP3]
+     (1)POSPrinter
+       - Fixed an issue regarding the lack of communication with a few of the 
+         TM-T88IIIX and TM-T88IIIXM devices.
+    [Version2.65SP2]
+     (1)POSPrinter
+       - TM-U120II Multilingual Character model was added as a supported 
+         device.
+    [Version2.65SP1]
+     (1)POSPrinter
+       - TM-T70 Multilingual Character model was added as a supported device.
+    [Version2.65]
+     (1)Common
+       - Windows Vista 64-bit edition Ultimate/Business/Enterprise was added 
+         to the list of supported Operating Systems.
+       - The Windows standard driver is used to support the parallel interface 
+         on Windows Vista 64-bit edition.
+       - The TMUSB driver has been upgraded.
+    [Version2.64]
+     (1)Common
+       - The TMUSB driver has been upgraded.
+         Windows Embedded POSReady 2009 was added to the list of supported 
+         Operating Systems.
+       - Fixed an issue where binary and multi-string registry values from 
+         third parties were being over-written when OPOS is uninstalled.
+     (2)POSPrinter
+       - The following settings are now possible for the TM-U220:
+       - Added a setting to allow the default character font to be changed.
+       - Added a setting to allow the default character line height to be 
+         changed.
+    [Version2.63]
+     (1)Uninstaller
+       - Fixed an issue where other company's OPOS configuration information 
+         in the registry will be rewritten when OPOS is uninstalled.
+         e.g.:
+          Berfore uninstallation: "\\.\COM10"
+          After uninstallation: ".\COM10"
+    [Version2.62SP1]
+     (1)POSPrinter
+       - Added a setting to allow the default character font to be changed.
+       - Added a setting to allow the default character line height to be 
+         changed.
+       - The size of downloaded bitmaps that can be registered in the TM-T70 
+         was corrected.
+       - Fixed the overlapping characters defect.
+     (2)CheckScanner
+       - Fixed an issue where automatic sized correction was not called during 
+         sharpening.
+       - TIFF image tag values were changed to conform to ANSI standards.
+    [Version2.62]
+     (1)Common
+       - The TMUSB driver has been upgraded.
+    [Version2.61]
+     (1)Information of Version 2.61 for all devices
+       - New function based on the UPOS V1.10, V1.11 listed below
+         Common:
+           Error Handling
+           Device Initialization
+           Hydra Device Considerations
+           ClearInputProperties method
+         POS Printers
+           ESC sequences
+             Disabled ESC sequences.
+             Aligns following text at the left
+             Prints the defined barcode in-line.
+           PrintMemoryBitmap method
+         MSR
+           Statistics Definition of the MSR-Specific.
+         ElectronicJournal
+           Added the Electronic Journal.
+     (2)CashDrawer
+       - Trace function. (When CCO is registered)
+     (3)LineDisplay
+       - Trace function. (When CCO is registered)
+     (4)POSPrinter
+       - Alignment function.
+     (5)ElectronicJournal
+       - Trace function. (When CCO is registered)
+     (6)Installer, Uninstaller
+       - The procedures for both silent install and silent uninstall were 
+         changed.
+       - For a clean install of OPOS, the default CO that will be installed 
+         was changed from EPSON CO to CCO.
+
+
+8. Support devices of EPSON OPOS ADK for TM-T88V Version 1.24E
+    The reference versions of firmware is described regarding Line Displays 
+    and POS Printers.  Use the indicated firmware version or newer.
+    Although it will work with an earlier version, use the indicated version 
+    (or newer) if you experience any difficulties.
+
+    If the printer name includes "M", it means that the printer is the 
+    multilingual model.
+
+    POS Printers                                Reference versions of firmware
+      EPSON TM-T88V                                            Ver 30.12
+      EPSON TM-T88VB (Bluetooth)                               Ver 30.12
+      EPSON TM-T88VE (Ethernet)                                Ver 30.12
+      EPSON TM-T88VU (USB)                                     Ver 30.12
+      EPSON TM-T88VP                                           Ver 30.12
+      EPSON TM-T88VM                                           Ver 30.12
+      EPSON TM-T88VME (Ethernet)                               Ver 30.12
+      EPSON TM-T88VMU (USB)                                    Ver 30.12
+      EPSON TM-T88VPM                                          Ver 30.12
+
+    Line Displays                               Reference versions of firmware
+      EPSON DM-D110                                            Ver 1.01
+      EPSON DM-D210                                            Ver 1.01
+      EPSON DM-D110U (USB)                                     Ver 1.01
+      EPSON DM-D210U (USB)                                     Ver 1.01
+      EPSON DM-D500                                            Ver 1.10
+      EPSON DM-D500U (USB)                                     Ver 1.10
+      EPSON DM-D120 (For ARCX(IM-700))                         Ver 1.00
+
+    Cash Drawer
+      Standard Cash Drawer for TM series (Serial,Parallel,USB,Ethernet,Bluetooth)
+      Multi_A Cash Drawer (2 Drawer) (Serial,Parallel,USB,Ethernet,Bluetooth)
+      Multi_B Cash Drawer (2 Drawer) (Serial,Parallel,USB,Ethernet,Bluetooth)
+
+    ElectronicJournal                           Reference versions of firmware
+      EPSON TM-T88V                                            Ver 30.12
+      EPSON TM-T88VE (Ethernet)                                Ver 30.12
+      EPSON TM-T88VU (USB)                                     Ver 30.12
+      EPSON TM-T88VP                                           Ver 30.12
+      EPSON TM-T88VM                                           Ver 30.12
+      EPSON TM-T88VME (Ethernet)                               Ver 30.12
+      EPSON TM-T88VMU (USB)                                    Ver 30.12
+      EPSON TM-T88VPM                                          Ver 30.12
+
+ * Note
+   For the following devices, the operation is not supported in Windows Vista
+   or newer.
+     LineDisplay
+     EPSON DM-D120 (For ARCX(IM-700))
+
+9. Notes of EPSON OPOS ADK for TM-T88V Version 1.24E
+    The following list describes items restricted in this version and how to 
+    deal with problems.  Also, please be sure to refer to the warnings of the 
+    "User's manual" and "Application Development Guide GENERAL DEVELOPMENT".
+     - 9.1 Installation and uninstallation
+     - 9.2 Interface connection
+     - 9.3 Devices
+     - 9.4 Others
+
+9.1 Installation and uninstallation
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.1 Installation and uninstallation".
+
+9.2 Interface connection
+9.2.1 Parallel connection
+    1) We checked the performance of the program at LPT1.
+    2) Please set "Bi-Directional" for either the ECP or EPP settings in the 
+       parallel mode settings in the BIOS.
+    3) Depending on the BIOS, there is a possibility of "ECP doesn't work but 
+       EPP does work" or conversely "EPP doesn't work but ECP does work" 
+       occurring.  If it doesn't work properly, please change these settings 
+       and try again.
+    4) After turning the device off, there is a delay of several seconds 
+       before the ServiceObject recognizes that the power is off.  Please 
+       consider in the application.
+
+9.2.2 USB connection
+    1) We checked the performance of the program, connecting with a maximum of 
+       10 printers via the USB interface.
+    2) When device which use a "TMPORT" are registered in SetupPOS, please
+       create the USB TMPORT with the "TMPORT Making" dialog before turning
+       on the device. 
+       If the device is turned on before the port is created, it's possible 
+       that the device will not be connected to the desired port. 
+ 
+9.2.3 Network connection
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.2.3 Network connection".
+9.2.4 Bluetooth connection
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.2.4 Bluetooth connection".
+
+9.3 Devices
+9.3.1 POSPrinter
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.3.1 POSPrinter".
+
+9.4 Others
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.4 Others".
+
+10. Change History of EPSON OPOS ADK for TM-T88V Version 1.24E
+    [Version1.24]
+       - Fixed an issue that fails to initialize POSPrinter of Bluetooth connection.
+    [Version1.23]
+     (1)POSPrinter
+       - Bluetooth was added to the TM-T88V support interfaces.
+     (2)CashDrawer
+       - Bluetooth was added to the CashDrawer support interfaces.
+    [Version1.22]
+       - Added support for Windows 8 (32bit), Windows 8 (64bit) and Windows Server 2012 (64bit).
+    [Version1.21]
+      No change.
+    [Version1.20]
+      No change.
+    [Version1.10]
+     (1)New function based on the UPOS V1.12, V1.13 listed below
+         POSPrinter:
+           -ESC sequences
+             Asterisk ESC sequences.
+             Strike-though
+           - Define QR and GS1 bar code symbols for PrintBarCode method
+     (2)SetupPOS
+       - Trace log function: "Notify when trace log file becomes full." is set 
+         to disable as default. See "5.2.1 Menu"- "5. Option" in "User's Manual"
+         (Users.pdf) for the detail.
+     (3) POSPrinter
+       - Increase variety of ESC/POS command response which can be notified by
+         DirectIOEvent.
+       - Remove restriction on the number of images which can be stored in the
+         nonvolatile memory (NVRAM). See 
+        "3.5.2.1 NV bitmap" in "APPLICATION DEVELPOMENT GUIDE(POSPrinter)"
+         (POSPrinter.pdf) for the detail
+    [Version 1.03]
+     (1)Common
+       - Windows Embedded Standard 7 was added to the list of supported 
+         Operating Systems.
+       - Added support for Windows 7 SP1 (32bit), Windows 7 SP1 (64bit), and 
+         Windows Server 2008 R2 SP1 (64bit).
+    [Version 1.02]
+     (1)Common
+       - The Oposepsn.bas file has been upgraded. Depending on the situation, 
+         the Sample program may have been upgraded.
+    [Version 1.01]
+     (1)POSPrinter
+       - TM-T88VM model was added as a supported device.
+       - Added the Optional external buzzer.
+     (2)ElectronicJournal
+       - TM-T88VM model was added as a supported device.
+    [Version 1.00]
+     New release
+
+11. Support devices of EPSON OPOS ADK for TM-T20 Version 1.21E
+    The reference versions of firmware is described regarding Line Displays 
+    and POS Printers.  Use the indicated firmware version or newer.
+    Although it will work with an earlier version, use the indicated version 
+    (or newer) if you experience any difficulties.
+
+    If the printer name includes "M", it means that the printer is the 
+    multilingual model.
+
+    POS Printers                                Reference versions of firmware
+      EPSON TM-T20                                             Ver  1.01
+      EPSON TM-T20-42C                                         Ver  1.01
+      EPSON TM-T20U (USB)                                      Ver  1.00
+      EPSON TM-T20-42CU (USB)                                  Ver  1.00
+      EPSON TM-T20E (Ethernet)                                 Ver  2.00
+      EPSON TM-T20-42CE (Ethernet)                             Ver  2.00
+
+    Line Displays                               Reference versions of firmware
+      EPSON DM-D110                                             Ver 1.01
+      EPSON DM-D210                                             Ver 1.01
+      EPSON DM-D500                                             Ver 1.10
+      EPSON DM-D120 (For ARCX(IM-700))                          Ver 1.00
+
+    Cash Drawer
+      Standard Cash Drawer for TM series (Serial,USB,Ethernet)
+      Multi_A Cash Drawer (2 Drawer) (Serial,USB,Ethernet)
+      Multi_B Cash Drawer (2 Drawer) (Serial,USB,Ethernet)
+
+    ElectronicJournal                           Reference versions of firmware
+      EPSON TM-T20                                             Ver  1.01
+      EPSON TM-T20-42C                                         Ver  1.01
+      EPSON TM-T20U (USB)                                      Ver  1.00
+      EPSON TM-T20-42CU (USB)                                  Ver  1.00
+      EPSON TM-T20E (Ethernet)                                 Ver  2.00
+      EPSON TM-T20-42CE (Ethernet)                             Ver  2.00
+
+ * Note
+   For the following devices, the operation is not supported in Windows Vista
+   or newer.
+     LineDisplay
+     EPSON DM-D120 (For ARCX(IM-700))
+
+12. Notes of EPSON OPOS ADK for TM-T20 Version 1.21E
+    The following list describes items restricted in this version and how to 
+    deal with problems.  Also, please be sure to refer to the warnings of the 
+    "User's manual" and "Application Development Guide GENERAL DEVELOPMENT".
+     - 12.1 Installation and uninstallation
+     - 12.2 Interface connection
+     - 12.3 Devices
+     - 12.4 Others
+
+12.1 Installation and uninstallation
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.1 Installation and uninstallation".
+
+12.2 Interface connection
+12.2.1 USB connection
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.2.2 USB connection".
+
+12.2.2 Network connection
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.2.3 Network connection".
+
+12.3 Devices
+12.3.1 POSPrinter
+    1) Data sent from the printer after OPOS is used
+       Device settings are overwritten once OPOS is used.  Depending on this 
+       action, data could subsequently be sent from the device.  If you then 
+       directly connect to the device without using OPOS, please disregard the 
+       following data.
+        - 3-byte printer status sent when the power is turned ON
+        - 3-byte power ON notification sent when the power is turned ON
+
+12.4 Others
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.4 Others".
+
+13. Change History of EPSON OPOS ADK for TM-T20 Version 1.21E
+    [Version1.21]
+      No change.
+    [Version1.20]
+      No change.
+    [Version1.10]
+     (1)New function based on the UPOS V1.12, V1.13 listed below
+         POSPrinter:
+           -ESC sequences
+             Asterisk ESC sequences.
+             Strike-though
+           - Define QR and GS1 bar code symbols for PrintBarCode method
+     (2)SetupPOS
+       - Trace log function: "Notify when trace log file becomes full." is set 
+         to disable as default. See "5.2.1 Menu"- "5. Option" in "User's Manual"
+         (Users.pdf) for the detail.
+     (3) POSPrinter
+       - Increase variety of ESC/POS command response which can be notified by
+         DirectIOEvent.
+       - Remove restriction on the number of images which can be stored in the
+         nonvolatile memory (NVRAM). See 
+        "3.5.2.1 NV bitmap" in "APPLICATION DEVELPOMENT GUIDE(POSPrinter)"
+         (POSPrinter.pdf) for the detail
+    [Version 1.02]
+     (1)POSPrinter
+       - Ethernet was added to the TM-T20 support interfaces.
+       - Ethernet was added to the TM-T20-42C support interfaces.
+     (2)ElectronicJournal
+       - Ethernet was added to the TM-T20 support interfaces.
+       - Ethernet was added to the TM-T20-42C support interfaces.
+    [Version 1.01]
+     Added support for the model with a serial interface.
+    [Version 1.00]
+     New release
+
+
+14. Support devices of EPSON OPOS ADK for TM-T81 Version 1.22E
+    The reference versions of firmware is described regarding Line Displays 
+    and POS Printers.  Use the indicated firmware version or newer.
+    Although it will work with an earlier version, use the indicated version 
+    (or newer) if you experience any difficulties.
+
+    If the printer name includes "M", it means that the printer is the 
+    multilingual model.
+
+    POS Printers                                Reference versions of firmware
+      EPSON TM-T81M                                            Ver  2.00
+      EPSON TM-T81ME (Ethernet)                                Ver  2.00
+      EPSON TM-T81MU (USB)                                     Ver  2.00
+      EPSON TM-T81PM                                           Ver  2.00
+
+    Cash Drawer
+      Standard Cash Drawer for TM series (Serial,Parallel,USB,Ethernet)
+      Multi_A Cash Drawer (2 Drawer) (Serial,Parallel,USB,Ethernet)
+      Multi_B Cash Drawer (2 Drawer) (Serial,Parallel,USB,Ethernet)
+
+15. Notes of EPSON OPOS ADK for TM-T81 Version 1.22E
+    The following list describes items restricted in this version and how to 
+    deal with problems.  Also, please be sure to refer to the warnings of the 
+    "User's manual" and "Application Development Guide GENERAL DEVELOPMENT".
+     - 15.1 Installation and uninstallation
+     - 15.2 Interface connection
+     - 15.3 Devices
+     - 15.4 Others
+
+15.1 Installation and uninstallation
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.1 Installation and uninstallation".
+
+15.2 Interface connection
+15.2.1 Parallel connection
+    1) We checked the performance of the program at LPT1.
+    2) Please set "Bi-Directional" for either the ECP or EPP settings in the 
+       parallel mode settings in the BIOS.
+    3) Depending on the BIOS, there is a possibility of "ECP doesn't work but 
+       EPP does work" or conversely "EPP doesn't work but ECP does work" 
+       occurring.  If it doesn't work properly, please change these settings 
+       and try again.
+    4) After turning the device off, there is a delay of several seconds 
+       before the ServiceObject recognizes that the power is off.  Please 
+       consider in the application.
+
+15.2.2 USB connection
+    1) We checked the performance of the program, connecting with a maximum of 
+       10 printers via the USB interface.
+    2) When device which use a "TMPORT" are registered in SetupPOS, please
+       create the USB TMPORT with the "TMPORT Making" dialog before turning
+       on the device. 
+       If the device is turned on before the port is created, it's possible 
+       that the device will not be connected to the desired port. 
+
+15.2.3 Network connection
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.2.3 Network connection".
+
+15.3 Devices
+15.3.1 POSPrinter
+    1) Data sent from the printer after OPOS is used
+       Device settings are overwritten once OPOS is used.  Depending on this 
+       action, data could subsequently be sent from the device.  If you then 
+       directly connect to the device without using OPOS, please disregard the 
+       following data.
+        - 3-byte printer status sent when the power is turned ON
+        - 3-byte power ON notification sent when the power is turned ON
+
+15.4 Others
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.4 Others".
+
+16. Change History of EPSON OPOS ADK for TM-T81 Version 1.22E
+    [Version1.22]
+     (1)Common
+       - Added support for Windows8 (32bit), 
+         Windows8 (64bit).
+    [Version1.21]
+      No change.
+    [Version1.20]
+      No change.
+   [Version1.10]
+     (1)New function based on the UPOS V1.12, V1.13 listed below
+         POSPrinter:
+           -ESC sequences
+             Asterisk ESC sequences.
+             Strike-though
+           - Define QR and GS1 bar code symbols for PrintBarCode method
+     (2)SetupPOS
+       - Trace log function: "Notify when trace log file becomes full." is set 
+         to disable as default. See "5.2.1 Menu"- "5. Option" in "User's Manual"
+         (Users.pdf) for the detail.
+     (3) POSPrinter
+       - Increase variety of ESC/POS command response which can be notified by
+         DirectIOEvent.
+       - Remove restriction on the number of images which can be stored in the
+         nonvolatile memory (NVRAM). See 
+        "3.5.2.1 NV bitmap" in "APPLICATION DEVELPOMENT GUIDE(POSPrinter)"
+         (POSPrinter.pdf) for the detail
+    [Version 1.01]
+     (1)Common
+       - Added Simplified Chinese localization.
+     (2)POSPrinter
+       - Added the TM-T81 Utility (specific logo registration utility).
+    [Version 1.00]
+     New release
+
+17. Support devices of EPSON OPOS ADK for TM-T82 Version 1.22E
+    The reference versions of firmware is described regarding Line Displays 
+    and POS Printers.  Use the indicated firmware version or newer.
+    Although it will work with an earlier version, use the indicated version 
+    (or newer) if you experience any difficulties.
+
+    If the printer name includes "M", it means that the printer is the 
+    multilingual model.
+
+    POS Printers                                Reference versions of firmware
+      EPSON TM-T82M                                            Ver  1.00
+      EPSON TM-T82M-42C                                        Ver  1.00
+      EPSON TM-T82MU (USB)                                     Ver  1.00
+      EPSON TM-T82M-42CU (USB)                                 Ver  1.00
+      EPSON TM-T82ME (Ethernet)                                Ver  2.00
+      EPSON TM-T82M-42CE (Ethernet)                            Ver  2.00
+
+    Cash Drawer
+      Standard Cash Drawer for TM series (Serial,USB,Ethernet)
+      Multi_A Cash Drawer (2 Drawer) (Serial,USB,Ethernet)
+      Multi_B Cash Drawer (2 Drawer) (Serial,USB,Ethernet)
+
+18. Notes of EPSON OPOS ADK for TM-T82 Version 1.22E
+    The following list describes items restricted in this version and how to 
+    deal with problems.  Also, please be sure to refer to the warnings of the 
+    "User's manual" and "Application Development Guide GENERAL DEVELOPMENT".
+     - 18.1 Installation and uninstallation
+     - 18.2 Interface connection
+     - 18.3 Devices
+     - 18.4 Others
+
+18.1 Installation and uninstallation
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.1 Installation and uninstallation".
+
+18.2 Interface connection
+18.2.1 USB connection
+    1) We checked the performance of the program, connecting with a maximum of 
+       10 printers via the USB interface.
+    2) When device which use a "TMPORT" are registered in SetupPOS, please
+       create the USB TMPORT with the "TMPORT Making" dialog before turning
+       on the device. 
+       If the device is turned on before the port is created, it's possible 
+       that the device will not be connected to the desired port. 
+
+18.2.2 Network connection
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.2.3 Network connection".
+
+18.3 Devices
+18.3.1 POSPrinter
+    1) Data sent from the printer after OPOS is used
+       Device settings are overwritten once OPOS is used.  Depending on this 
+       action, data could subsequently be sent from the device.  If you then 
+       directly connect to the device without using OPOS, please disregard the 
+       following data.
+        - 3-byte printer status sent when the power is turned ON
+        - 3-byte power ON notification sent when the power is turned ON
+
+18.4 Others
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.4 Others".
+
+19. Change History of EPSON OPOS ADK for TM-T82 Version 1.22E
+    [Version1.22]
+       - Added support for ARP (Automatic Reduction of Paper) function in TM-T82.
+       - Added support for ARP (Automatic Reduction of Paper) function in TM-T82-42C.
+       - Parallel was added to the TM-T82 support interfaces.
+       - Parallel was added to the TM-T82-42C support interfaces.
+    [Version1.21]
+      No change.
+    [Version1.20]
+      No change.
+    [Version1.10]
+     (1)New function based on the UPOS V1.12, V1.13 listed below
+         POSPrinter:
+           -ESC sequences
+             Asterisk ESC sequences.
+             Strike-though
+           - Define QR and GS1 bar code symbols for PrintBarCode method
+     (2)SetupPOS
+       - Trace log function: "Notify when trace log file becomes full." is set 
+         to disable as default. See "5.2.1 Menu"- "5. Option" in "User's Manual"
+         (Users.pdf) for the detail.
+     (3) POSPrinter
+       - Increase variety of ESC/POS command response which can be notified by
+         DirectIOEvent.
+       - Remove restriction on the number of images which can be stored in the
+         nonvolatile memory (NVRAM). See 
+        "3.5.2.1 NV bitmap" in "APPLICATION DEVELPOMENT GUIDE(POSPrinter)"
+         (POSPrinter.pdf) for the detail
+    [Version 1.01]
+     (1)POSPrinter
+       - Added support for South Asian languages in a multilingual model of 
+         the TM-T82.
+       - Added support for South Asian languages in a multilingual model of 
+         the TM-T82-42C.
+       - Ethernet was added to the TM-T82 support interfaces.
+       - Ethernet was added to the TM-T82-42C support interfaces.
+    [Version 1.00]
+     New release
+
+20. Support devices of EPSON OPOS ADK for TM-T81II Version 1.03E
+    The reference versions of firmware is described regarding Line Displays 
+    and POS Printers.  Use the indicated firmware version or newer.
+    Although it will work with an earlier version, use the indicated version 
+    (or newer) if you experience any difficulties.
+
+    If the printer name includes "M", it means that the printer is the 
+    multilingual model.
+
+    POS Printers                                Reference versions of firmware
+      EPSON TM-T81IIM                                            Ver  6.00
+      EPSON TM-T81IIME (Ethernet)                                Ver  7.00
+      EPSON TM-T81IIMU (USB)                                     Ver  7.00
+
+    Cash Drawer
+      Standard Cash Drawer for TM series (Serial,Parallel,USB,Ethernet)
+      Multi_A Cash Drawer (2 Drawer) (Serial,Parallel,USB,Ethernet)
+      Multi_B Cash Drawer (2 Drawer) (Serial,Parallel,USB,Ethernet)
+
+21. Notes of EPSON OPOS ADK for TM-T81II Version 1.03E
+    The following list describes items restricted in this version and how to 
+    deal with problems.  Also, please be sure to refer to the warnings of the 
+    "User's manual" and "Application Development Guide GENERAL DEVELOPMENT".
+     - 15.1 Installation and uninstallation
+     - 15.2 Interface connection
+     - 15.3 Devices
+     - 15.4 Others
+
+21.1 Installation and uninstallation
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.1 Installation and uninstallation".
+
+21.2 Interface connection
+21.2.1 USB connection
+    1) We checked the performance of the program, connecting with a maximum of 
+       10 printers via the USB interface.
+    2) When device which use a "TMPORT" are registered in SetupPOS, please
+       create the USB TMPORT with the "TMPORT Making" dialog before turning
+       on the device. 
+       If the device is turned on before the port is created, it's possible 
+       that the device will not be connected to the desired port. 
+
+21.2.2 Network connection
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.2.3 Network connection".
+
+21.3 Devices
+21.3.1 POSPrinter
+    1) Data sent from the printer after OPOS is used
+       Device settings are overwritten once OPOS is used.  Depending on this 
+       action, data could subsequently be sent from the device.  If you then 
+       directly connect to the device without using OPOS, please disregard the 
+       following data.
+        - 3-byte printer status sent when the power is turned ON
+        - 3-byte power ON notification sent when the power is turned ON
+
+21.4 Others
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.4 Others".
+
+22. Change History of EPSON OPOS ADK for TM-T81II Version 1.03E
+    [Version 1.03]
+       - TM-T81II Vietnam model was added as a supported device.
+    [Version 1.02]
+     No change.
+    [Version 1.01]
+     No change.
+    [Version 1.00]
+     New release
+
+23. Support devices of EPSON OPOS ADK for TM-T82II Version 1.01E
+    The reference versions of firmware is described regarding Line Displays 
+    and POS Printers.  Use the indicated firmware version or newer.
+    Although it will work with an earlier version, use the indicated version 
+    (or newer) if you experience any difficulties.
+
+    If the printer name includes "M", it means that the printer is the 
+    multilingual model.
+
+    POS Printers                                Reference versions of firmware
+      EPSON TM-T82II                                             Ver  5.00
+      EPSON TM-T82IIM                                            Ver  5.00
+      EPSON TM-T82IIM-42C                                        Ver  5.00
+      EPSON TM-T82IIP (Parallel)                                 Ver  5.00
+      EPSON TM-T82IIMP (Parallel)                                Ver  5.00
+      EPSON TM-T82IIM-42CP (Parallel)                            Ver  5.00
+      EPSON TM-T82IIU (USB)                                      Ver  5.00
+      EPSON TM-T82IIMU (USB)                                     Ver  5.00
+      EPSON TM-T82IIM-42CU (USB)                                 Ver  5.00
+      EPSON TM-T82IIE (Ethernet)                                 Ver  5.00
+      EPSON TM-T82IIME (Ethernet)                                Ver  5.00
+      EPSON TM-T82IIM-42CE (Ethernet)                            Ver  5.00
+
+    Cash Drawer
+      Standard Cash Drawer for TM series (Serial,USB,Ethernet)
+      Multi_A Cash Drawer (2 Drawer) (Serial,USB,Ethernet)
+      Multi_B Cash Drawer (2 Drawer) (Serial,USB,Ethernet)
+
+24. Notes of EPSON OPOS ADK for TM-T82II Version 1.01E
+    The following list describes items restricted in this version and how to 
+    deal with problems.  Also, please be sure to refer to the warnings of the 
+    "User's manual" and "Application Development Guide GENERAL DEVELOPMENT".
+     - 18.1 Installation and uninstallation
+     - 18.2 Interface connection
+     - 18.3 Devices
+     - 18.4 Others
+
+24.1 Installation and uninstallation
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.1 Installation and uninstallation".
+
+24.2 Interface connection
+24.2.1 USB connection
+    1) We checked the performance of the program, connecting with a maximum of 
+       10 printers via the USB interface.
+    2) When device which use a "TMPORT" are registered in SetupPOS, please
+       create the USB TMPORT with the "TMPORT Making" dialog before turning
+       on the device. 
+       If the device is turned on before the port is created, it's possible 
+       that the device will not be connected to the desired port. 
+
+24.2.2 Network connection
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.2.3 Network connection".
+
+24.3 Devices
+24.3.1 POSPrinter
+    1) Data sent from the printer after OPOS is used
+       Device settings are overwritten once OPOS is used.  Depending on this 
+       action, data could subsequently be sent from the device.  If you then 
+       directly connect to the device without using OPOS, please disregard the 
+       following data.
+        - 3-byte printer status sent when the power is turned ON
+        - 3-byte power ON notification sent when the power is turned ON
+
+24.4 Others
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.4 Others".
+
+25. Change History of EPSON OPOS ADK for TM-T82II Version 1.01E
+   [Version 1.01]
+       - Unified POS Version 1.14.1 is newly supported.
+       - Calculation method of barcode size is improved.
+       - The bug is fixed that there are no response when Release method is run
+         while the network connection is recovering or the printer is rebooting.
+   [Version 1.00]
+     New release
+
+26. Support devices of EPSON OPOS ADK for TM-T70II Version 1.04E
+    The reference versions of firmware is described regarding Line Displays 
+    and POS Printers.  Use the indicated firmware version or newer.
+    Although it will work with an earlier version, use the indicated version 
+    (or newer) if you experience any difficulties.
+
+    If the printer name includes "M", it means that the printer is the 
+    multilingual model.
+
+    POS Printers                                Reference versions of firmware
+      EPSON TM-T70II                                             Ver  1.00
+      EPSON TM-T70IIM                                            Ver  1.00
+      EPSON TM-T70IIP (Parallel)                                 Ver  1.00
+      EPSON TM-T70IIMP (Parallel)                                Ver  1.00
+      EPSON TM-T70IIU (USB)                                      Ver  1.00
+      EPSON TM-T70IIMU (USB)                                     Ver  1.00
+      EPSON TM-T70IIE (Ethernet)                                 Ver  1.00
+      EPSON TM-T70IIME (Ethernet)                                Ver  1.00
+      EPSON TM-T70IIB (Bluetooth)                                Ver  1.00
+
+    Line Displays                               Reference versions of firmware
+      EPSON DM-D110                                             Ver 1.01
+      EPSON DM-D210                                             Ver 1.01
+      EPSON DM-D500                                             Ver 1.10
+
+    Cash Drawer
+      Standard Cash Drawer for TM series (Serial,Parallel,USB,Ethernet,Bluetooth)
+      Multi_A Cash Drawer (2 Drawer) (Serial,Parallel,USB,Ethernet,Bluetooth)
+      Multi_B Cash Drawer (2 Drawer) (Serial,Parallel,USB,Ethernet,Bluetooth)
+
+27. Notes of EPSON OPOS ADK for TM-T70II Version 1.04E
+    The following list describes items restricted in this version and how to 
+    deal with problems.  Also, please be sure to refer to the warnings of the 
+    "User's manual" and "Application Development Guide GENERAL DEVELOPMENT".
+     - 27.1 Installation and uninstallation
+     - 27.2 Interface connection
+     - 27.3 Devices
+     - 27.4 Others
+
+27.1 Installation and uninstallation
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.1 Installation and uninstallation".
+
+27.2 Interface connection
+27.2.1 USB connection
+    1) We checked the performance of the program, connecting with a maximum of 
+       10 printers via the USB interface.
+    2) When device which use a "TMPORT" are registered in SetupPOS, please
+       create the USB TMPORT with the "TMPORT Making" dialog before turning
+       on the device. 
+       If the device is turned on before the port is created, it's possible 
+       that the device will not be connected to the desired port. 
+
+27.2.2 Network connection
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.2.3 Network connection".
+27.2.3 Network connection
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.2.4 Bluetooth connection".
+
+27.3 Devices
+27.3.1 POSPrinter
+    1) Data sent from the printer after OPOS is used
+       Device settings are overwritten once OPOS is used.  Depending on this 
+       action, data could subsequently be sent from the device.  If you then 
+       directly connect to the device without using OPOS, please disregard the 
+       following data.
+        - 3-byte printer status sent when the power is turned ON
+        - 3-byte power ON notification sent when the power is turned ON
+
+27.4 Others
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.4 Others".
+
+28. Change History of EPSON OPOS ADK for TM-T70II Version 1.04E
+   [Version 1.04]
+       - Fixed an issue that fails to initialize POSPrinter of Bluetooth connection.
+   [Version 1.03]
+     (1)POSPrinter
+       - Bluetooth was added to the TM-T70II support interfaces.
+     (2)CashDrawer
+       - Bluetooth was added to the CashDrawer support interfaces.
+   [Version 1.02]
+       - Fixed an issue that fails to register CashDrawer of TM-T70II by SetupPOS.
+       - Fixed an issue that fails to initialize CashDrawer of TM-T70II.
+   [Version 1.01]
+       - Fixed an issue that fails to initialize OPOS in TM-T70II.
+   [Version 1.00]
+     New release
+
+29. Support devices of EPSON OPOS ADK for TM-L90 Version 1.00E
+    The reference versions of firmware is described regarding Line Displays 
+    and POS Printers.  Use the indicated firmware version or newer.
+    Although it will work with an earlier version, use the indicated version 
+    (or newer) if you experience any difficulties.
+
+    If the printer name includes "M", it means that the printer is the 
+    multilingual model.
+
+    POS Printers                                Reference versions of firmware
+      EPSON TM-L90                                             Ver  1.00
+      EPSON TM-L90M                                            Ver  1.00
+      EPSON TM-L90P (Parallel)                                 Ver  1.00
+      EPSON TM-L90MP (Parallel)                                Ver  1.00
+      EPSON TM-L90U (USB)                                      Ver  1.00
+      EPSON TM-L90U (USB)                                      Ver  1.00
+      EPSON TM-L90E (Ethernet)                                 Ver  1.00
+      EPSON TM-L90ME (Ethernet)                                Ver  1.00
+
+    Line Displays                               Reference versions of firmware
+      EPSON DM-D110                                             Ver 1.01
+      EPSON DM-D210                                             Ver 1.01
+      EPSON DM-D500                                             Ver 1.10
+
+    Cash Drawer
+      Standard Cash Drawer for TM series (Serial,USB,Ethernet)
+      Multi_A Cash Drawer (2 Drawer) (Serial,USB,Ethernet)
+      Multi_B Cash Drawer (2 Drawer) (Serial,USB,Ethernet)
+
+30. Notes of EPSON OPOS ADK for TM-L90 Version 1.00E
+    The following list describes items restricted in this version and how to 
+    deal with problems.  Also, please be sure to refer to the warnings of the 
+    "User's manual" and "Application Development Guide GENERAL DEVELOPMENT".
+     - 18.1 Installation and uninstallation
+     - 18.2 Interface connection
+     - 18.3 Devices
+     - 18.4 Others
+
+30.1 Installation and uninstallation
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.1 Installation and uninstallation".
+
+30.2 Interface connection
+30.2.1 USB connection
+    1) We checked the performance of the program, connecting with a maximum of 
+       10 printers via the USB interface.
+    2) When device which use a "TMPORT" are registered in SetupPOS, please
+       create the USB TMPORT with the "TMPORT Making" dialog before turning
+       on the device. 
+       If the device is turned on before the port is created, it's possible 
+       that the device will not be connected to the desired port. 
+
+30.2.2 Network connection
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.2.3 Network connection".
+
+30.3 Devices
+30.3.1 POSPrinter
+    1) Data sent from the printer after OPOS is used
+       Device settings are overwritten once OPOS is used.  Depending on this 
+       action, data could subsequently be sent from the device.  If you then 
+       directly connect to the device without using OPOS, please disregard the 
+       following data.
+        - 3-byte printer status sent when the power is turned ON
+        - 3-byte power ON notification sent when the power is turned ON
+
+30.4 Others
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.4 Others".
+
+31. Change History of EPSON OPOS ADK for TM-L90 Version 1.00E
+   [Version 1.00]
+     New release
+
+32. Support devices of EPSON OPOS ADK for TM-T20II Version 1.03E
+    The reference versions of firmware is described regarding Line Displays 
+    and POS Printers.  Use the indicated firmware version or newer.
+    Although it will work with an earlier version, use the indicated version 
+    (or newer) if you experience any difficulties.
+
+    If the printer name includes "M", it means that the printer is the 
+    multilingual model.
+
+    POS Printers                                Reference versions of firmware
+      EPSON TM-T20II                                           Ver  5.00
+      EPSON TM-T20II-42C                                       Ver  5.00
+      EPSON TM-T20IIU (USB)                                    Ver  5.00
+      EPSON TM-T20II-42CU (USB)                                Ver  5.00
+      EPSON TM-T20IIE (Ethernet)                               Ver  5.00
+      EPSON TM-T20II-42CE (Ethernet)                           Ver  5.00
+      EPSON TM-T20IIB (Bluetooth)                              Ver  5.00
+      EPSON TM-T20II-42CB (Bluetooth)                          Ver  5.00
+
+    Line Displays                               Reference versions of firmware
+      EPSON DM-D110                                             Ver 1.01
+      EPSON DM-D210                                             Ver 1.01
+      EPSON DM-D500                                             Ver 1.10
+
+    Cash Drawer
+      Standard Cash Drawer for TM series (Serial,USB,Ethernet,Bluetooth)
+      Multi_A Cash Drawer (2 Drawer) (Serial,USB,Ethernet,Bluetooth)
+      Multi_B Cash Drawer (2 Drawer) (Serial,USB,Ethernet,Bluetooth)
+
+    ElectronicJournal                           Reference versions of firmware
+      EPSON TM-T20II                                           Ver  5.00
+      EPSON TM-T20II-42C                                       Ver  5.00
+      EPSON TM-T20IIU (USB)                                    Ver  5.00
+      EPSON TM-T20II-42CU (USB)                                Ver  5.00
+      EPSON TM-T20IIE (Ethernet)                               Ver  5.00
+      EPSON TM-T20II-42CE (Ethernet)                           Ver  5.00
+
+33. Notes of EPSON OPOS ADK for TM-T20II Version 1.03E
+    The following list describes items restricted in this version and how to 
+    deal with problems.  Also, please be sure to refer to the warnings of the 
+    "User's manual" and "Application Development Guide GENERAL DEVELOPMENT".
+     - 33.1 Installation and uninstallation
+     - 33.2 Interface connection
+     - 33.3 Devices
+     - 33.4 Others
+
+33.1 Installation and uninstallation
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.1 Installation and uninstallation".
+
+33.2 Interface connection
+33.2.1 USB connection
+    1) We checked the performance of the program, connecting with a maximum of 
+       10 printers via the USB interface.
+    2) When device which use a "TMPORT" are registered in SetupPOS, please
+       create the USB TMPORT with the "TMPORT Making" dialog before turning
+       on the device. 
+       If the device is turned on before the port is created, it's possible 
+       that the device will not be connected to the desired port. 
+
+33.2.2 Network connection
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.2.3 Network connection".
+33.2.3 Bluetooth connection
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.2.4 Bluetooth connection".
+
+33.3 Devices
+33.3.1 POSPrinter
+    1) Data sent from the printer after OPOS is used
+       Device settings are overwritten once OPOS is used.  Depending on this 
+       action, data could subsequently be sent from the device.  If you then 
+       directly connect to the device without using OPOS, please disregard the 
+       following data.
+        - 3-byte printer status sent when the power is turned ON
+        - 3-byte power ON notification sent when the power is turned ON
+
+33.4 Others
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.4 Others".
+
+34. Change History of EPSON OPOS ADK for TM-T20II Version 1.03E
+   [Version 1.03]
+       - Unified POS Version 1.14.1 is newly supported.
+       - Calculation method of barcode size is improved.
+       - The bug is fixed that there are no response when Release method is run
+         while the network connection is recovering or the printer is rebooting.
+   [Version 1.02]
+       - Fixed an issue that fails to initialize POSPrinter of Bluetooth connection.
+   [Version 1.01]
+     (1)POSPrinter
+       - Bluetooth was added to the TM-T20II support interfaces.
+       - Bluetooth was added to the TM-T20II-42C support interfaces.
+     (2)CashDrawer
+       - Bluetooth was added to the CashDrawer support interfaces.
+   [Version 1.00]
+     New release
+
+35. Support devices of EPSON OPOS ADK for TM-P20 Version 1.03E
+    The reference versions of firmware is described regarding POS Printers.  
+    Use the indicated firmware version or newer.
+    Although it will work with an earlier version, use the indicated version 
+    (or newer) if you experience any difficulties.
+
+    If the printer name includes "M", it means that the printer is the 
+    multilingual model.
+
+    POS Printers                                Reference versions of firmware
+      EPSON TM-P20U  (USB)                                     Ver  1.00
+      EPSON TM-P20MU (USB)                                     Ver  1.00
+      EPSON TM-P20W  (IEEE802.11b/g/n)                         Ver  1.00
+      EPSON TM-P20MW (IEEE802.11b/g/n)                         Ver  1.00
+      EPSON TM-P20B  (Bluetooth)                               Ver  1.00
+      EPSON TM-P20MB (Bluetooth)                               Ver  1.00
+      
+36. Notes of EPSON OPOS ADK for TM-P20 Version 1.03E
+    The following list describes items restricted in this version and how to 
+    deal with problems.  Also, please be sure to refer to the warnings of the 
+    "User's manual" and "Application Development Guide GENERAL DEVELOPMENT".
+     - 36.1 Installation and uninstallation
+     - 36.2 Interface connection
+     - 36.3 Devices
+     - 36.4 Others
+
+36.1 Installation and uninstallation
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.1 Installation and uninstallation".
+
+36.2 Interface connection
+36.2.1 USB connection
+    1) We checked the performance of the program, connecting with a maximum of 
+       10 printers via the USB interface.
+    2) When device which use a "TMPORT" are registered in SetupPOS, please
+       create the USB TMPORT with the "TMPORT Making" dialog before turning
+       on the device. 
+       If the device is turned on before the port is created, it's possible 
+       that the device will not be connected to the desired port. 
+
+36.2.2 Network connection
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.2.3 Network connection".
+36.2.3 Bluetooth connection
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.2.4 Bluetooth connection".
+
+36.3 Devices
+36.3.1 POSPrinter
+    1) Data sent from the printer after OPOS is used
+       Device settings are overwritten once OPOS is used.  Depending on this 
+       action, data could subsequently be sent from the device.  If you then 
+       directly connect to the device without using OPOS, please disregard the 
+       following data.
+        - 3-byte printer status sent when the power is turned ON
+        - 3-byte power ON notification sent when the power is turned ON
+
+36.4 Others
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.4 Others".
+
+37. Change History of EPSON OPOS ADK for TM-P20 Version 1.03E
+   [Version 1.03]
+       - The bug is fixed that there are no response when Release method is run
+         while the network connection is recovering or the printer is rebooting.
+   [Version 1.02]
+       - Unified POS Version 1.14.1 is newly supported.
+   [Version 1.01]
+       - Fixed an issue that fails to initialize POSPrinter of Bluetooth connection.
+   [Version 1.00]
+     New release
+38. Support devices of EPSON OPOS ADK for TM-P80 Version 1.00E
+    The reference versions of firmware is described regarding POS Printers.  
+    Use the indicated firmware version or newer.
+    Although it will work with an earlier version, use the indicated version 
+    (or newer) if you experience any difficulties.
+
+    If the printer name includes "M", it means that the printer is the 
+    multilingual model.
+
+    POS Printers                                Reference versions of firmware
+     EPSON TM-P80U (USB)                                       Ver 1.00
+     EPSON TM-P80W (IEEE802.11b/g/n)                           Ver 1.00
+     EPSON TM-P80B (Bluetooth)                                 Ver 1.00
+     EPSON TM-P80-42CU (USB)                                   Ver 1.00
+     EPSON TM-P80-42CW (IEEE802.11b/g/n)                       Ver 1.00
+     EPSON TM-P80-42CB (Bluetooth)                             Ver 1.00
+     EPSON TM-P80MU (USB)                                      Ver 1.01
+     EPSON TM-P80MW (IEEE802.11b/g/n)                          Ver 1.01
+     EPSON TM-P80MB (Bluetooth)                                Ver 1.01
+     EPSON TM-P80M-42CU (USB)                                  Ver 1.01
+     EPSON TM-P80M-42CW (IEEE802.11b/g/n)                      Ver 1.01
+     EPSON TM-P80M-42CB (Bluetooth)                            Ver 1.01
+      
+39. Notes of EPSON OPOS ADK for TM-P80 Version 1.00E
+    The following list describes items restricted in this version and how to 
+    deal with problems.  Also, please be sure to refer to the warnings of the 
+    "User's manual" and "Application Development Guide GENERAL DEVELOPMENT".
+     - 39.1 Installation and uninstallation
+     - 39.2 Interface connection
+     - 39.3 Devices
+     - 39.4 Others
+
+39.1 Installation and uninstallation
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.1 Installation and uninstallation".
+
+39.2 Interface connection
+39.2.1 USB connection
+    1) We checked the performance of the program, connecting with a maximum of 
+       10 printers via the USB interface.
+    2) When device which use a "TMPORT" are registered in SetupPOS, please
+       create the USB TMPORT with the "TMPORT Making" dialog before turning
+       on the device. 
+       If the device is turned on before the port is created, it's possible 
+       that the device will not be connected to the desired port. 
+
+39.2.2 Network connection
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.2.3 Network connection".
+39.2.3 Bluetooth connection
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.2.4 Bluetooth connection".
+
+39.3 Devices
+39.3.1 POSPrinter
+    1) Data sent from the printer after OPOS is used
+       Device settings are overwritten once OPOS is used.  Depending on this 
+       action, data could subsequently be sent from the device.  If you then 
+       directly connect to the device without using OPOS, please disregard the 
+       following data.
+        - 3-byte printer status sent when the power is turned ON
+        - 3-byte power ON notification sent when the power is turned ON
+
+39.4 Others
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.4 Others".
+
+40. Change History of EPSON OPOS ADK for TM-P80 Version 1.00E
+   [Version 1.00]
+     New release
+
+41. Support devices of EPSON OPOS ADK for TM-T88VI Version 1.01E
+    The reference versions of firmware is described regarding Line Displays 
+    and POS Printers.  Use the indicated firmware version or newer.
+    Although it will work with an earlier version, use the indicated version 
+    (or newer) if you experience any difficulties.
+
+    If the printer name includes "M", it means that the printer is the 
+    multilingual model.
+
+    POS Printers                                Reference versions of firmware
+      EPSON TM-T88VI                                            Ver 40.00
+      EPSON TM-T88VIB (Bluetooth)                               Ver 40.00
+      EPSON TM-T88VIE (Ethernet)                                Ver 40.00
+      EPSON TM-T88VIU (USB)                                     Ver 40.00
+      EPSON TM-T88VIP                                           Ver 40.00
+      EPSON TM-T88VIM                                           Ver 40.00
+      EPSON TM-T88VIME (Ethernet)                               Ver 40.00
+      EPSON TM-T88VIMU (USB)                                    Ver 40.00
+      EPSON TM-T88VIPM                                          Ver 40.00
+
+    Line Displays                               Reference versions of firmware
+      EPSON DM-D110                                            Ver 1.01
+      EPSON DM-D110(TM USB Connection)                         ROM-T1586A79
+      EPSON DM-D210                                            Ver 1.01
+      EPSON DM-D210(TM USB Connection)                         ROM-T1586A72
+      EPSON DM-D110U (USB)                                     Ver 1.01
+      EPSON DM-D210U (USB)                                     Ver 1.01
+      EPSON DM-D30                                             ROM-T1659A70
+      EPSON DM-D500                                            Ver 1.10
+      EPSON DM-D500U (USB)                                     Ver 1.10
+
+    Cash Drawer
+      Standard Cash Drawer for TM series (Serial,Parallel,USB,Ethernet,Bluetooth)
+      Multi_A Cash Drawer (2 Drawer) (Serial,Parallel,USB,Ethernet,Bluetooth)
+      Multi_B Cash Drawer (2 Drawer) (Serial,Parallel,USB,Ethernet,Bluetooth)
+
+    ElectronicJournal                           Reference versions of firmware
+      EPSON TM-T88VI                                            Ver 40.00
+      EPSON TM-T88VIE (Ethernet)                                Ver 40.00
+      EPSON TM-T88VIU (USB)                                     Ver 40.00
+      EPSON TM-T88VIP                                           Ver 40.00
+      EPSON TM-T88VIM                                           Ver 40.00
+      EPSON TM-T88VIME (Ethernet)                               Ver 40.00
+      EPSON TM-T88VIMU (USB)                                    Ver 40.00
+      EPSON TM-T88VIPM                                          Ver 40.00
+
+42. Notes of EPSON OPOS ADK for TM-T88VI Version 1.01E
+    The following list describes items restricted in this version and how to 
+    deal with problems.  Also, please be sure to refer to the warnings of the 
+    "User's manual" and "Application Development Guide GENERAL DEVELOPMENT".
+     - 42.1 Installation and uninstallation
+     - 42.2 Interface connection
+     - 42.3 Devices
+     - 42.4 Others
+
+42.1 Installation and uninstallation
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.1 Installation and uninstallation".
+
+42.2 Interface connection
+42.2.1 Parallel connection
+    1) We checked the performance of the program at LPT1.
+    2) Please set "Bi-Directional" for either the ECP or EPP settings in the 
+       parallel mode settings in the BIOS.
+    3) Depending on the BIOS, there is a possibility of "ECP doesn't work but 
+       EPP does work" or conversely "EPP doesn't work but ECP does work" 
+       occurring.  If it doesn't work properly, please change these settings 
+       and try again.
+    4) After turning the device off, there is a delay of several seconds 
+       before the ServiceObject recognizes that the power is off.  Please 
+       consider in the application.
+
+42.2.2 USB connection
+    1) We checked the performance of the program, connecting with a maximum of 
+       10 printers via the USB interface.
+    2) When device which use a "TMPORT" are registered in SetupPOS, please
+       create the USB TMPORT with the "TMPORT Making" dialog before turning
+       on the device. 
+       If the device is turned on before the port is created, it's possible 
+       that the device will not be connected to the desired port. 
+ 
+42.2.3 Network connection
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.2.3 Network connection".
+42.2.4 Bluetooth connection
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.2.4 Bluetooth connection".
+
+42.3 Devices
+42.3.1 POSPrinter
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.3.1 POSPrinter".
+
+42.4 Others
+    Notes are the same EPSON OPOS ADK Version 2.80E R5.
+    See the "6.4 Others".
+
+43. Change History of EPSON OPOS ADK for TM-T88VI Version 1.01E
+    [Version 1.01]
+       - The bug is fixed that the time-out error will occur in 45 seconds
+         after the continuous printing stop.
+    [Version 1.00]
+     New release

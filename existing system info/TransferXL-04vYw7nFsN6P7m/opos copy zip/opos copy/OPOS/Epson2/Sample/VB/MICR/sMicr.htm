@@ -1,0 +1,173 @@
+
+<html>
+
+<head>
+<title>Sample Program [MICR]</title>
+<style type="text/css">
+<!--
+a:link       { color: #003399 }
+a:visited    { color: #003399 }
+a:hover      { color: red }
+-->
+</style>
+</head>
+
+<body bgcolor="#FFFFD8">
+
+<h1><font size="4">EPSON OPOS ADK Sample Program</font></h1>
+<h2>Device:<strong>&nbsp;&nbsp; MICR</strong></h2>  
+<table border="0" cellpadding="3" cellspacing="3" width="100%">
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step1\sMICR1.vbp">Step 1  Normal operation: Display the read data.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Read a check and display the read data.</dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">Open, ClaimDevice, ReleaseDevice, Close, BeginInsertion, EndInsertion, EndRemoval</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0">DeviceEnabled, DataEventEnabled</td>
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step2\sMICR2.vbp">Step 2  Adding "Time-out" function.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Adding "Time-out" function when reading a check preventing from improper insertion.</dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">BeginRemoval</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step3\sMICR3.vbp">Step 3  Display detailed information of the read data.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Display detailed information of the read data from the check.</dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0">AccountNumber, Amount, BankNumber, CheckType, CountryCode, EPC, SerialNumber, TransitNumber</td>
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step4\sMICR4.vbp">Step 4  Adding "Error information" function to Step 3.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Adding "Error information" function to Step 3.</dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step5\sMICR5.vbp">Step 5  Adding a function printing on the other side of the slip.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>When using the POSPrinter, printing on the other side of the read slip.<br>  
+      <font color="#FF0000" size="2">This Step cannot be used if MICR and 
+      POSPrinter aren't registered.</font></dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step6\sMICR6.vbp">Step 6  Obtains the statistics of the device.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Obtains the statistics of the device. <FONT SIZE="2">(UPOS 1.8)<br>  
+      </FONT><font color="#FF0000" size="2">This Step cannot be used if MICR and 
+      POSPrinter aren't registered.</font></dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">RetrieveStatistics</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0">CapStatisticsReporting</td>
+ </tr>
+
+</table>
+
+</body>
+
+</html>

@@ -1,0 +1,279 @@
+<html>
+
+<head>
+<title>Sample Program [Display]</title>
+<style type="text/css">
+<!--
+a:link       { color: #003399 }
+a:visited    { color: #003399 }
+a:hover      { color: red }
+-->
+</style>
+</head>
+
+<body bgcolor="#FFFFD8">
+
+<h1><font size="4">EPSON OPOS ADK Sample Program</font></h1>
+<h2>Device:<strong>&nbsp;&nbsp; Line/Graphic Display</strong></h2>
+<table border="0" cellpadding="3" cellspacing="3" width="100%">
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step1/sDisplay1.vbp">Step 1  Display characters.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>When using Display Text method, display characters in a display.</dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">Open, ClaimDevice, ReleaseDevice, Close, ClearText, DisplayText</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0">DeviceEnabled</td>
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step2/sDisplay2.vbp">Step 2  A display and acquisition of the character to the specified position.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>A display and acquisition of the character to the specified position.Display characters at the specified position.</dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">DisplayTextAt, ReadCharacterAtCursor <FONT SIZE="2">(UPOS 1.6)</FONT></td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0">CursorColumn, CursorRow</td>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step3/sDisplay3.vbp">Step 3  Display blinking characters.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Catch the user's attention by displaying blinking characters.</dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0"></FONT></td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0">BlinkRate <FONT SIZE="2">(UPOS 1.6)</FONT></td>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step4/sDisplay4.vbp">Step 4  Display in a teletype mode.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Display characters in a teletype mode using the InterCharacterWait property.</dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0">InterCharacterWait</td>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step5/sDisplay5.vbp">Step 5  Scroll displayed characters.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Moves the displayed strings as specified counts.</dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">ScrollText</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0"></td>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step6/sDisplay6.vbp">Step 6  Make a window to display in a marquee mode.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Make a window to display characters in a marquee mode.</dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">CreateWindow, DestroyWindow</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0">MarqueeFormat, MarqueeType, MarqueeRepeatWait, MarqueeUnitWait</td>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step7/sDisplay7.vbp">Step 7  Adding error handlers.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>If error handlers are added, the display operation is limited.</dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0"></td>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step8/sDisplay8.vbp">Step 8  Set the various kinds of characters.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>When using the EPSON original escape commands, display various kinds of characters.(Supports only for Graphic Display.)</dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">ClearText</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0"></td>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step9/sDisplay9.vbp">Step 9  Display bitmaps.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>When using the DirectIO, display bitmaps. (Supports only for GraphicDisplay)</dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">DirectIO</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0"></td>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step10/sDisplay10.vbp">Step 10  External character registration.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>When using the DefineGlyph, External character registration. <FONT SIZE="2">(UPOS 1.6)</FONT></dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">DefineGlyph</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0">CustomGlyphList, GlyphHeight, GlyphWidth</td>
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step11/sDisplay11.vbp">Step 11  Obtains the statistics of the device.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Obtains the statistics of the device. <FONT SIZE="2">(UPOS 1.8)</FONT></dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">RetrieveStatistics</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0">CapStatisticsReporting</td>
+ </tr>
+ </table>
+
+</body>
+
+</html>

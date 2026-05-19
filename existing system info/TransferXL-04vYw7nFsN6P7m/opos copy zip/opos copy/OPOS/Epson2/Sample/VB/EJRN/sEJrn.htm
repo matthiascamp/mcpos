@@ -1,0 +1,164 @@
+
+<html>
+
+<head>
+<title>Sample Program [Electronic Journal]</title>
+<style type="text/css">
+<!--
+a:link       { color: #003399 }
+a:visited    { color: #003399 }
+a:hover      { color: red }
+-->
+</style>
+</head>
+
+<body bgcolor="#FFFFD8">
+
+<h1><font size="4">EPSON OPOS ADK Sample Program</font></h1>
+<h2>Device:<strong>&nbsp;&nbsp; ElectronicJournal</strong></h2>  
+<table border="0" cellpadding="3" cellspacing="3" width="100%">
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step1\sElectronicJournal1.vbp">Step 1 Storing PosPrinter Output.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Saves PosPrinter output data in an ElectronicJournal file and assigns markers.</dt>
+   </dl>
+	<p class="MsoNormal"><span lang="EN-US" style='font-size:10.0pt;color:red'>Printed content is the same as PosPrinter Sample Program Step 8.</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">Open, ClaimDevice, AddMarker, ReleaseDevice, Close</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0">DeviceEnabled, StorageEnabled</td>
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step2\sElectronicJournal2.vbp">Step 2
+  Printing the data saved in storage medium.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>After specifying the start and end markers, prints the saved data between these markers. Erases all the data that has been saved in ElectronicJournal</dt>
+   </dl>
+	<p class="MsoNormal"><span lang="EN-US" style='font-size:10.0pt;color:red'>Printed content is the same as PosPrinter Sample Program Step 8.</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">PrintContent, EraseMedium</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step3\sElectronicJournal3.vbp">Step 3
+ Extract Content to a Separate file and print from file.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Extracts the data between the specifed start and end markers, and saves the data to a file. Prints the extracted data from the file. Demonstrates the use of ErrorResponse and ErrorEvent during an asynchronous process.
+  <br>While in AsyncMode, the following events will be notified:</dt>
+   </dl>
+   <ul>
+    <li>OutputCompleteEvent</li>
+    <li>DataEvent</li>
+    <li>ErrorEvent</li>
+   </ul>
+	<p class="MsoNormal"><span lang="EN-US" style='font-size:10.0pt;color:red'>Printed content is the same as PosPrinter Sample Program Step 8.</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">QueryContent, PrintContentFile</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0">AsyncMode, DataEventEnabled</td>
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step4\sElectronicJournal4.vbp">Step 4
+  Using Suspend Mode.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Suspends, Resumes and Cancels ElectronicJournal asynchronous processes.<br>
+     The Suspend Button is Enabled only when the following State Events occur.</dt>
+   </dl>
+   <ul>
+    <li>PosPrinter Paper Near End</li>
+   </ul>
+	<p class="MsoNormal"><span lang="EN-US" style='font-size:10.0pt;color:red'>Printed content is the same as PosPrinter Sample Program Step 8.</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">SuspendPrintContent, ResumePrintContent, CancelPrintContent</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step5\sElectronicJournal5.vbp">Step 5
+  Retrieve Device Statistics</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Using RetrieveStatistics method, obtains the ElectronicJournal device statistics.<br>  
+   </dl>
+	<p class="MsoNormal"><span lang="EN-US" style='font-size:10.0pt;color:red'>Printed content is the same as PosPrinter Sample Program Step 8.</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">RetrieveStatistics</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+
+</table>
+
+</body>
+
+</html>

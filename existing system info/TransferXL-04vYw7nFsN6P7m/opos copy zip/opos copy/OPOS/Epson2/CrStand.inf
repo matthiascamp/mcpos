@@ -1,0 +1,127 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; File Name		: CrStand.INF
+;; Function Outline	: OPOS Machine Dependent Data File of Cash Drawer
+;; Copyright (C) SEIKO EPSON CORP. 1995-2016
+;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;/
+
+[MAIN]
+DeviceClass		= CashDrawer					; Device Class
+DeviceName		= Standard					; Device Name
+SOName			= SOEPSON.CashDrawer.1				; Service Object Name
+RegFormatType		= EPSON						; RegFormat Type
+RegFormatVersion	= 2						; RegFormat Version
+NumberOfDevice		= 5
+SupportCoreVersion	= STRING:					; Support CoreModuleGroup Version
+UseESDPRT		= INT:2						; EPSON SD Printer Port(Enable(Without LD, CD):1 Enable(LD, CD):2 Disable:0)
+
+[MULTICOREINFO]
+SupportCoreNumber	= INT:2						; Support CoreModuleGroup Number
+SOName01		= STRING:SOEPSON.CashDrawer.140			; SO Name
+SOName01CoreVersion	= STRING:1.14.0.0				; CoreModuleGroup Version
+SOName02		= STRING:SOEPSON.CashDrawer.200			; SO Name
+SOName02CoreVersion	= STRING:1.14.1.0				; CoreModuleGroup Version
+
+[MAIN_1]
+DeviceName		= Standard					; Device Name
+DeviceDesc		= Standard Cash Drawer for EPSON TM series	; Device Description
+GroupID			= Cashes_S					; Device Group
+
+[MAIN_2]
+DeviceName		= StandardP					; Device Name
+DeviceDesc		= Standard Cash Drawer for EPSON TM series for Parallel I/F Printer ; Device Description
+GroupID 		= Cashes_P					; Device Group
+
+[MAIN_3]
+DeviceName		= StandardU					; Device Name
+DeviceDesc		= Standard Cash Drawer(USB) for EPSON TM series	; Device Description
+GroupID 		= Cashes_U					; Device Group
+
+[MAIN_4]
+DeviceName		= StandardE					; Device Name
+DeviceDesc		= Standard Cash Drawer(Ethernet) for EPSON TM series	; Device Description
+GroupID 		= Cashes_E					; Device Group
+
+[MAIN_5]
+DeviceName		= StandardB					; Device Name
+DeviceDesc		= Standard Cash Drawer(Bluetooth) for EPSON TM series	; Device Description
+GroupID 		= Cashes_B					; Device Group
+
+[PORT_1]
+BaudrateSel		= 3,4,5,6,7,8,10,11				; 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200
+BitLengthSel		= 0,1						; 7bit, 8 bit
+ParitySel		= 0,1,2						; NONE, EVEN, ODD
+StopSel			= 1						; 1 bit only
+XonXoffSel		= 0						; Disabled only
+HandShakeSel		= 2						; DTR/DSR only
+
+[PORT_2]
+
+[PORT_3]
+
+[PORT_4]
+
+[PORT_5]
+
+[DEVINFO]
+Master			= "POSPrinter"
+InternalVersion		= 200
+
+StatsUnifiedPOSVersion		= DWORD:101
+StatsDeviceCategory		= DWORD:101
+StatsManufacturerName		= DWORD:101
+StatsModelName			= DWORD:101
+StatsSerialNumber		= DWORD:101
+StatsManufactureDate		= DWORD:101
+StatsMechanicalRevision		= DWORD:101
+StatsFirmwareRevision		= DWORD:101
+StatsInterface			= DWORD:101
+StatsInstallationDate		= DWORD:101
+
+StatsHoursPoweredCount		= DWORD:107
+StatsCommunicationErrorCount	= DWORD:107
+
+StatsDrawerGoodOpenCount	= DWORD:107
+StatsDrawerFailedOpenCount	= DWORD:107
+
+[SETTING]
+IdleSleep		= int:20					; sleep time(msec) in idle loop
+InputSleep		= int:10					; sleep time(msec) in input loop
+PulseOnTime		= int:100					; 100
+PulseUNITTime		= INT:02					; 
+ConnectorPinNo		= int:2						; pin number (2 or 5)
+OpenStatusPhase		= int:0						; phase when drawer open(0 or 1)
+CapASB			= DWORD:01
+CapRealtimeKick		= DWORD:00					; BOOL Realtime command unavailible
+
+[SETTING_1]
+Port			= COM1						; Default COM Port
+Baudrate		= 6						; 9600
+BitLength		= INT:1						; 8 bit
+Parity			= INT:0						; None
+Stop			= INT:1						; 1 bit
+XonXoff			= INT:0						; Disabled
+HandShake		= INT:2						; DTR/DSR
+InputBuf		= 1024
+OutputBuf		= 1024
+Timeout			= 500						; Output timeout time
+
+[SETTING_2]
+Port			= LPT1						; Default Port
+OutputBuf		= 1024
+Timeout			= 500						; Output timeout time
+
+[SETTING_3]
+Port			= USB1						; Default COM Port
+Timeout			= 500						; Output timeout time
+
+[SETTING_4]
+Port			= NET0.0.0.0					; Default IP Address
+Timeout			= 500						; Output timeout time
+OutputBuf		= 1024
+
+[SETTING_5]
+Port			= STRING:TMPORT1				; Default Port
+Timeout			= 500						; Output timeout time
+OutputBuf		= 1024

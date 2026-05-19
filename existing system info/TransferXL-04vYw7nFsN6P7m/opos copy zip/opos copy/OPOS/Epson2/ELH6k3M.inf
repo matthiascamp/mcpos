@@ -1,0 +1,126 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; File Name		: ejH6000IIIM.inf
+;; Function Outline	: OPOS Machine Dependent Data File of ElectronicJournal
+;; Copyright (C) SEIKO EPSON CORP. 2007-2015
+;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;/
+
+[MAIN]
+DeviceClass		= ElectronicJournal				; Device Class
+DeviceName		= TM-H6000IIIM				; Device Name
+DeviceDesc		= EPSON TM-H6000IIIM ElectronicJournal	; Device Description
+ModelName		= STRING:TM-H6000III			; Device Model Name
+SOName			= SOEPSON.ElectronicJournal.140		; Service Object Name
+NumberOfDevice		= 4					; Number of Device
+GroupID			= Ejrn_S					; Device Group
+RegFormatType		= EPSON					; RegFormat Type
+RegFormatVersion		= 2					; RegFormat Version
+SupportCoreVersion	= STRING:1.14.0.0				; Support CoreModuleGroup Version
+UseESDPRT		= INT:1						; EPSON SD Printer Port(Enable:1 Disable:0)
+
+[MAIN_1]
+DeviceName		= TM-H6000IIIM				; Device Name
+DeviceDesc		= EPSON TM-H6000IIIM ElectronicJournal	; Device Description
+GroupID			= Ejrn_S					; Device Group
+
+[MAIN_2]
+DeviceName		= TM-H6000IIIPM				; Device Name
+DeviceDesc		= EPSON TM-H6000IIIPM ElectronicJournal	; Device Description
+GroupID			= Ejrn_P					; Device Group
+
+[MAIN_3]
+DeviceName		= TM-H6000IIIMU				; Device Name
+DeviceDesc		= EPSON TM-H6000IIIMU ElectronicJournal	; Device Description
+GroupID			= Ejrn_U					; Device Group
+
+[MAIN_4]
+DeviceName		= TM-H6000IIIME				; Device Name
+DeviceDesc		= EPSON TM-H6000IIIME ElectronicJournal	; Device Description
+GroupID			= Ejrn_E					; Device Group
+
+[PORT_1]
+BaudrateSel		= 5,6,7,8					; 4800, 9600, 19200, 38400
+BitLengthSel		= 0,1					; 7bit, 8 bit
+ParitySel			= 0,1,2					; NONE, EVEN, ODD
+StopSel			= 1					; 1 bit only
+XonXoffSel		= 0					; Disabled only
+HandShakeSel		= 2					; DTR/DSR only
+
+[PORT_2]
+
+[PORT_3]
+
+[PORT_4]
+
+[DEVINFO]
+Master				= "POSPrinter"
+InternalVersion			= 200
+PrinterDllName			= STRING:PtrH6k140.Dll		; DLL File Name
+
+
+StatsUnifiedPOSVersion		= DWORD:101
+StatsDeviceCategory		= DWORD:101
+StatsManufacturerName		= DWORD:1420109
+StatsModelName			= DWORD:1430109
+StatsSerialNumber			= DWORD:1440109
+StatsManufactureDate		= DWORD:101
+StatsMechanicalRevision		= DWORD:101
+StatsFirmwareRevision		= DWORD:101
+StatsInterface			= DWORD:101
+StatsInstallationDate		= DWORD:101
+
+StatsHoursPoweredCount		= DWORD:2C6010B
+StatsCommunicationErrorCount	= DWORD:107
+
+StatsWriteCount			= DWORD:107
+StatsFailedWriteCount		= DWORD:107
+StatsEraseCount			= DWORD:107
+StatsMediumRemovedCount		= DWORD:101
+StatsMediumSize			= DWORD:101
+StatsMediumFreeSpace		= DWORD:101
+
+CapASB				= DWORD:1101			; ASB Type(Normal, Ink, Extend, Custom)
+
+[DEVINFO_1]
+Master				= "TM-H6000IIIM"
+
+[DEVINFO_2]
+Master				= "TM-H6000IIIPM"
+
+[DEVINFO_3]
+Master				= "TM-H6000IIIMU"
+
+[DEVINFO_4]
+Master				= "TM-H6000IIIME"
+
+[SETTING]
+IdleSleep				= int:20				; sleep time(msec) in idle loop
+Timeout				= INT:2500			; Output timeout time
+MediumNearFullSize		= INT:1048576
+StoredDataMaxFileSize		= INT:4294967295
+FileSystemMaxFileSize		= INT:4294967295
+
+
+[SETTING_1]
+Port			= COM1					; Default COM Port
+Baudrate			= 7					; 19200
+BitLength			= INT:1					; 8 bit
+Parity			= INT:0					; None
+Stop			= INT:1					; 1 bit
+XonXoff			= INT:0					; Disabled
+HandShake		= INT:2					; DTR/DSR
+InputBuf			= 1024
+OutputBuf			= 1024
+
+[SETTING_2]
+Port			= LPT1					; Default Port
+OutputBuf			= 1024
+
+[SETTING_3]
+Port			= USB1					; Default COM Port
+
+[SETTING_4]
+Port			= NET0.0.0.0				; Default IP Address
+OutputBuf			= 1024
+

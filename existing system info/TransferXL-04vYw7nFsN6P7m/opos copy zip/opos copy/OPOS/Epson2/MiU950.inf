@@ -1,0 +1,87 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; File Name		: MIU950.INF
+;; Function Outline	: OPOS Machine Dependent Data File of MICR
+;; Copyright (C) SEIKO EPSON CORP. 1999-2000
+;; Copyright (C) EPSON Software Development Laboratory, Inc. 1999-2000
+;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+[MAIN]
+DeviceClass		= MICR				; Device Class
+DeviceName		= TM-U950			; Device Name
+DeviceDesc		= EPSON TM-U950 MICR		; Device Description
+SOName			= SoEPSON.MICR.1		; Service Object Name
+GroupID 		= Micrs				; Device Group
+RegFormatType		= EPSON				; RegFormat Type
+RegFormatVersion	= 2				; RegFormat Version
+
+[PORT]
+Port		= COM1			; Default COM Port
+Baudrate	= 6			; 9600
+BitLength	= 1			; 8 bit
+Parity		= 0			; None
+Stop		= 1			; 1 bit
+XonXoff		= 0			; Disabled
+HandShake	= 2			; DTR/DSR
+OutputBuf	= 1024
+Timeout		= 2500			; Output timeout time
+
+BaudrateSel	= 3,4,5,6		; 1200, 2400, 4800, 9600
+BitLengthSel	= 0,1			; 7 bit, 8 bit
+ParitySel	= 0,1,2			; NONE, EVEN, ODD
+StopSel		= 1			; 1 bit only
+XonXoffSel	= 0			; Disabled only
+HandShakeSel	= 2			; DTR/DSR only
+
+
+[DEVINFO]
+INFVersion	= INT:001008000
+InternalVersion	= 200			; INF Version
+
+IdleSleep	= int:20		; sleep time(msec) in idle loop
+
+Master		= TM-U950		; attachable Master device
+
+ReadCommand	= DWORD:20
+DataWaitTime	= INT:45000	; 40s + a
+DeleteChar	= DWORD:03
+
+SpecificSetting	= DWORD:00
+RomIDBorder	= DWORD:00	
+
+CapASB		= DWORD:01		; ASB Type(Normal, Ink, Extend, Custom)
+
+DllName		= MiU95011.dll
+
+StatsUnifiedPOSVersion		= DWORD:101
+StatsDeviceCategory		= DWORD:101
+StatsManufacturerName		= DWORD:101
+StatsModelName			= DWORD:101
+StatsSerialNumber		= DWORD:101
+StatsManufactureDate		= DWORD:101
+StatsMechanicalRevision		= DWORD:101
+StatsFirmwareRevision		= DWORD:101
+StatsInterface			= DWORD:101
+StatsInstallationDate		= DWORD:101
+
+StatsHoursPoweredCount		= DWORD:107
+StatsCommunicationErrorCount	= DWORD:107
+
+StatsGoodReadCount		= DWORD:107
+StatsFailedReadCount		= DWORD:107
+StatsFailedDataParseCount	= DWORD:107
+
+[SETTING]
+INFVersion	= INT:001008000
+
+Master		= TM-U950
+IdleSleep	= int:20		; sleep time(msec) in idle loop
+
+ReadCommand	= DWORD:20
+DataWaitTime	= INT:45000	; 40s + a
+DeleteChar	= DWORD:03
+
+Settings	= DWORD:08
+
+ValidationDevice	= DWORD:01

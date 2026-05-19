@@ -4,8 +4,11 @@
   "description": "Tillaroo POS — Electron + SQLite + Supabase",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
-    "dev": "electron . --dev",
+    "start": "electron . --register",
+    "register": "electron . --register",
+    "admin": "electron . --admin",
+    "dev": "electron . --register --dev",
+    "dev:admin": "electron . --admin --dev",
     "import": "node import-data.js",
     "build": "electron-builder --win",
     "build:portable": "electron-builder --win portable",
@@ -27,7 +30,7 @@
     "appId": "com.tillaroo.pos",
     "productName": "Tillaroo",
     "directories": {
-      "output": "dist"
+      "output": "dist2"
     },
     "npmRebuild": false,
     "files": [

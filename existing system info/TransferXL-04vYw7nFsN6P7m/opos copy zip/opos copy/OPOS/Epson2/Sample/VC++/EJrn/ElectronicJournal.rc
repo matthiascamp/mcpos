@@ -1,0 +1,284 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif\r\n"
+    "#include ""res\\ElectronicJournal.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#endif\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\ElectronicJournal.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_XMLVIEW_DIALOG DIALOG DISCARDABLE  0, 0, 257, 192
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Dialog"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "",IDC_EXPLORER_WMLVIEW,
+                    "{8856F961-340A-11D0-A96B-00C04FD705A2}",WS_TABSTOP,0,0,
+                    256,191
+END
+
+IDD_ELECTRONICJOURNAL_DIALOG DIALOGEX 0, 0, 413, 342
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "ElectronicJournal"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "Close",IDC_CLOSE,341,304,50,16
+    GROUPBOX        "Receipt Printer",IDC_STATIC_PTR,15,14,375,57
+    GROUPBOX        "Electronic Journal",IDC_STATIC_EJ,15,86,375,208
+    PUSHBUTTON      "Print Receipt",IDC_BUTTON_PRINT_RECEIPT,56,40,103,16
+    PUSHBUTTON      "Retrieve Statistics",IDC_BUTTON_STATS_PTR,243,27,103,16
+    EDITTEXT        IDC_EDIT_STATS_PTR,225,46,140,14,ES_AUTOHSCROLL
+    GROUPBOX        "",IDC_EJ_ADDMARKER,32,98,162,53
+    GROUPBOX        "",IDC_EJ_PRINTFILE,32,156,162,53
+    GROUPBOX        "",IDC_EJ_STATS,32,212,162,53
+    CONTROL         "Storage Enabled",IDC_CHECK_STORAGE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,239,107,138,8
+    CONTROL         "DataEvent Enabled",IDC_CHECK_DATAEVENT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,239,120,138,8
+    CONTROL         "Async Mode",IDC_CHECK_ASYNC,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,239,135,138,8
+    GROUPBOX        "",IDC_EJ_QUERY,201,156,181,109
+    PUSHBUTTON      "Suspend Print",IDC_BUTTON_SUSPEND,33,271,103,16
+    PUSHBUTTON      "Resume Print",IDC_BUTTON_RESUME,156,271,103,16
+    PUSHBUTTON      "Cancel Print",IDC_BUTTON_CANCEL,279,271,103,16
+    PUSHBUTTON      "QueryContent",IDC_BUTTON_QUERY,243,165,103,16
+    PUSHBUTTON      "Add Marker",IDC_BUTTON_ADDMARKER,57,108,103,16
+    PUSHBUTTON      "Print File",IDC_BUTTON_PRINTFILE,56,166,103,16
+    PUSHBUTTON      "Retrieve Statistics",IDC_BUTTON_STATS_EJ,57,221,103,16
+    PUSHBUTTON      "...",IDC_BUTTON_FILECHOOSE,163,186,12,14
+    EDITTEXT        IDC_EDIT_ADDMARKER,55,128,107,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_PRINT_FILENAME,54,186,107,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_STATS_EJ,55,242,107,14,ES_AUTOHSCROLL
+    LTEXT           "File Name",IDC_STATIC,206,194,31,8
+    LTEXT           "Start Marker",IDC_STATIC,204,220,40,8
+    LTEXT           "End Marker",IDC_STATIC,206,243,36,8
+    EDITTEXT        IDC_EDIT_QUERY_FILENAME,253,190,107,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_QUERY_SMARKER,253,216,107,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_QUERY_EMARKER,253,241,107,14,ES_AUTOHSCROLL
+    CONTROL         "",IDC_ELECTRONICJOURNAL1,
+                    "{CCB90272-B81E-11D2-AB74-0040054C3719}",WS_TABSTOP,21,
+                    302,60,25
+    CONTROL         "",IDC_POSPRINTER1,
+                    "{CCB90152-B81E-11D2-AB74-0040054C3719}",WS_TABSTOP,92,
+                    302,60,25
+END
+
+IDD_ERROR_DIALOG DIALOG DISCARDABLE  0, 0, 211, 89
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "An Error has Occured."
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "Suspend Process",IDC_BUTTON_ERROR_SUSPEND,7,68,63,14
+    PUSHBUTTON      "Retry Process",IDC_BUTTON_ERROR_RETRY,74,68,63,14
+    PUSHBUTTON      "Cancel Process",IDC_BUTTON_ERROR_CANCEL,141,68,63,14
+    LTEXT           "ErrorMessage",IDC_LABEL_ERROR,16,13,159,33
+END
+
+IDD_OUTPUTCOMPLETE DIALOG DISCARDABLE  0, 0, 149, 57
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "OutputComplete"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,47,36,50,14
+    LTEXT           "Static",IDC_MESSAGE,7,17,135,8
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_XMLVIEW_DIALOG DLGINIT
+BEGIN
+    IDC_EXPLORER_WMLVIEW, 0x376, 160, 0
+0x0000, 0x0000, 0x004c, 0x0000, 0x2e4d, 0x0000, 0x1daa, 0x0000, 0x0000, 
+0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+0x0000, 0x0000, 0x004c, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0001, 
+0x0000, 0xd0e0, 0x0057, 0x3573, 0x11cf, 0x69ae, 0x0008, 0x2e2b, 0x6212, 
+0x0008, 0x0000, 0x0000, 0x0000, 0x004c, 0x0000, 0x1401, 0x0002, 0x0000, 
+0x0000, 0x00c0, 0x0000, 0x0000, 0x4600, 0x0080, 0x0000, 0x0000, 0x0000, 
+0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0001, 0x0000, 
+0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+    0
+END
+
+IDD_ELECTRONICJOURNAL_DIALOG DLGINIT
+BEGIN
+    IDC_ELECTRONICJOURNAL1, 0x376, 16, 0
+0x0000, 0x0000, 0x0900, 0x0000, 0x094d, 0x0000, 0x043d, 0x0000, 
+    IDC_POSPRINTER1, 0x376, 16, 0
+0x0000, 0x0000, 0x0900, 0x0000, 0x094d, 0x0000, 0x043d, 0x0000, 
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_ELECTRONICJOURNAL_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 406
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 335
+    END
+
+    IDD_ERROR_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 204
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 82
+    END
+
+    IDD_OUTPUTCOMPLETE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 142
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 50
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName", "\0"
+            VALUE "FileDescription", "ElectronicJournal MFC Application\0"
+            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "InternalName", "ElectronicJournal\0"
+            VALUE "LegalCopyright", "Copyright (C) 2007 SEIKO EPSON CORP.\0"
+            VALUE "OriginalFilename", "ElectronicJournal.EXE\0"
+            VALUE "ProductName", "ElectronicJournal Application\0"
+            VALUE "ProductVersion", "1, 0, 0, 1\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // !_MAC
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif
+#include "res\ElectronicJournal.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#endif
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

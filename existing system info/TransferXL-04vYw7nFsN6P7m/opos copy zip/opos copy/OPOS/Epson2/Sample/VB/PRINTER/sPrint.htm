@@ -1,0 +1,602 @@
+<html>
+
+<head>
+<title>Sample Program [POSPrinter]</title>
+<style type="text/css">
+<!--
+a:link       { color: #003399 }
+a:visited    { color: #003399 }
+a:hover      { color: red }
+-->
+</style>
+</head>
+
+<body bgcolor="#FFFFD8">
+
+<h1><font size="4">EPSON OPOS ADK Sample Program</font></h1>
+<h2>Device:<strong>&nbsp;&nbsp; POS Printer</strong></h2>  
+<table border="0" cellpadding="3" cellspacing="3" width="100%">
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step1/sPrint1.vbp">Step 1  Print "Hello OPOS".</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Normal printing without any errors.</dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">Open, ClaimDevice, PrintNormal, ReleaseDevice, Close</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0">DeviceEnabled</td>
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step2/sPrint2.vbp">Step 2  Print various types of characters.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Here is an example of receipt.<br>
+     <FONT COLOR=#FF0000><FONT SIZE="2">
+      This sample program is not available for the following devices.
+      <LI>TM-L90 (with Peeler model)</LI>
+      <LI>TM-P60PEELER</LI>
+     </FONT>
+    </dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step3/sPrint3.vbp">Step 3  Print bitmaps.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Before printing bitmaps on receipts, send the bitmap image to the printer using the new method, SetBitmap.<BR>
+     <FONT COLOR=#FF0000><FONT SIZE="2">
+      This sample program is not available for the following devices.
+      <LI>TM-L90 (with Peeler model)</LI>
+      <LI>TM-P60PEELER</LI>
+     </FONT>
+    </dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">SetBitmap</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0">RecLetterQuality</td>
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step4/sPrint4.vbp">Step 4  Print barcodes.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>To print barcodes, follow the sample program provided.<br>
+     <FONT COLOR=#FF0000><FONT SIZE="2">
+      This sample program is not available for the following devices.
+      <LI>TM-L90 (with Peeler model)</LI>
+      <LI>TM-P60PEELER</LI>
+     </FONT>
+    </dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">PrintBarCode</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0">RecLetterQuality</td>
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step5/sPrint5.vbp">Step 5  Writing a module that is independent of device types.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Using OPOS enables to make a device-independent applicaition easier.<br>
+    This step shows how to change the Step 4 application to a device independent application.<br><br>
+     <ul>
+      <li>Regardless of a printer model, a bitmap is printed as half size of the paper width.</li>
+      <li>Regardless of a printer model, goods and the prices are printed along the edge of the paper.</li>
+      <li>Regardless of a printer model, spaces between the lines of text are fixed.</li>
+      <li>Regardless of a printer model, the barcode is printed with a height of 1cm.</li>
+     </ul>
+     <FONT COLOR=#FF0000><FONT SIZE="2">
+      This sample program is not available for the following devices.
+      <LI>TM-L90 (with Peeler model)</LI>
+      <LI>TM-P60PEELER</LI>
+     </FONT>
+    </dt>
+    </dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0">CapRecPapercut, CapRecPresent, CapRecBitmap, CapRecBarCode, MapMode, RecLineChars, RecLineWidth, RecLinesToPaperCut</td>
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step6/sPrint6.vbp">Step 6  Use the TransactionPrint.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>The advantages of using TransactionPrint are as follows.<br><br>
+     <ul>
+      <li>Performace improvement by outputting multiple methods at once.</li>
+      <li>Error handling can be performed in one location.</li>
+     </ul>
+    <br>
+     <FONT COLOR=#FF0000><FONT SIZE="2">
+      This sample program is not available for the following devices.
+      <LI>TM-L90 (with Peeler model)</LI>
+      <LI>TM-P60PEELER</LI>
+     </FONT>
+    </dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">TransactionPrint</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step7/sPrint7.vbp">Step 7  Use the asynchronous outputting.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Asynchronous print enables the operation of a mouse or keyboard while printing.<br>
+    The EPSON OPOS enables to asynchronous output by changing the value of the AsyncMode property.<br>
+     <FONT COLOR=#FF0000><FONT SIZE="2">
+      This sample program is not available for the following devices.
+      <LI>TM-L90 (with Peeler model)</LI>
+      <LI>TM-P60PEELER</LI>
+     </FONT>
+    </dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0">AsyncMode</td>
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step8/sPrint8.vbp">Step 8  Rotate printing.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Prints on a receipt using Rotated Printing mode.<br>
+     <FONT COLOR=#FF0000><FONT SIZE="2">
+      This sample program is not available for the following devices.
+      <LI>TM-L90 (with Peeler model)</LI>
+      <LI>TM-P60PEELER</LI>
+     </FONT>
+    </dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">RotatePrint</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0">CapRecLeft90, RecSidewaysMaxLines, RecSidewaysMaxChars, RecLineSpacing, RecLineHeight</td>
+ </tr>
+
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step9/sPrint9.vbp">Step 9  Print on slips.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Include handling for insertion and removal.<br>
+     <FONT COLOR=#FF0000><FONT SIZE="2">
+      This sample program is not available for the following devices.
+      <LI>TM-L90 (with Peeler model)</LI>
+      <LI>TM-P60PEELER</LI>
+     </FONT>
+    </dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">BeginInsertion, EndInsertion, Beginremoval, Endremoval</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0">CapSlpPresent, CapSlpLineChars, CapSlpLineWidth</td>
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step10/sPrint10.vbp">Step 10  Adding errors.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Adding error handling for Step 7,8,and 9.<br>
+     <FONT COLOR=#FF0000><FONT SIZE="2">
+      This sample program is not available for the following devices.
+      <LI>TM-L90 (with Peeler model)</LI>
+      <LI>TM-P60PEELER</LI>
+     </FONT>
+    </dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step11/sPrint11.vbp">Step 11  Use the EPSON original methods.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>The EPSON original methods (DirectIO, ESC, etc.) provide various useful functions.<br>
+     <FONT COLOR=#FF0000><FONT SIZE="2">
+      This sample program is not available for the following devices.
+      <LI>TM-L90 (with Peeler model)</LI>
+      <LI>TM-P60PEELER</LI>
+     </FONT>
+    </dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">DirectIO</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step12/sPrint12.vbp">Step 12  Rotated-Prints Bitmaps and Barcodes.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Prints Bitmaps and Barcodes on receipts using the Rotated Printing mode of Bitmap and Barcode. <FONT SIZE="2">(UPOS 1.7)</FONT><br>
+     <FONT COLOR=#FF0000><FONT SIZE="2">
+      This sample program is not available for the following devices.
+      <LI>TM-L90 (with Peeler model)</LI>
+      <LI>TM-P60PEELER</LI>
+     </FONT>
+    </dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0">RecBitmapRotationList, RecBarcodeRotationList</td>
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step13/sPrint13.vbp">Step 13  Obtains the statistics of the device.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Obtains the statistics of the device. <FONT SIZE="2">(UPOS 1.8)</FONT><br>
+     <FONT COLOR=#FF0000><FONT SIZE="2">
+      This sample program is not available for the following devices.
+      <LI>TM-L90 (with Peeler model)</LI>
+      <LI>TM-P60PEELER</LI>
+     </FONT>
+    </dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">RetrieveStatistics</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0">CapStatisticsReporting</td>
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step14/sPrint14.vbp">Step 14  TM-L90 (with Peeler model) sample program.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>This step was created based on the step 13.<br>Some functions between 
+      Step 2 and Step 13 have been made usable with TM-L90 (with Peeler model).<br>Please 
+      refer to the source code of each step for the unused functions.<br>
+    <FONT COLOR=#FF0000><FONT SIZE="2">This sample program only supports TM-L90 with Peeler.</h4></FONT></dt>
+   </dl>
+   </font>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step15/sPrint15.vbp">Step 15  PageMode-Prints.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Prints coupon ticket on receipts using the PageMode Printing mode. <FONT SIZE="2">(UPOS  
+      1.9)</FONT><br>
+     <FONT COLOR=#FF0000><FONT SIZE="2">
+      This sample program is not available for the following devices.
+      <LI>TM-L90 (with Peeler model)</LI>
+      <LI>TM-P60PEELER</LI>
+     </FONT>
+    </dt>
+   </dl>
+   </font>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">PageModePrint</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0">CapRecPageMode, PageModeArea, PageModeDescriptor, PageModeHorizontalPosition, PageModePrintArea, PageModePrintDirection, PageModeStation, PageModeVerticalPosition</td> 
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step16/sPrint16.vbp">Step 16  TM-P60PEELER sample program.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>This step was created based on the step 14.<br>
+    Using the DirectIO method , print the merchandise label that consist of a line and a rectangle.<br>
+    The available type and size of paper:<br>
+    <table border = 0>
+		<tr><td width="20%"></td><td>Roll paper</td><td width="10%"></td><td>(width) 60.0 mm</td></tr>
+		<tr><td width="20%"></td><td>Label paper</td><td width="10%"></td><td>25.4 mm by 56.0 mm</td></tr>
+    </table>
+    <br>
+    Please refer to the source code of each step for the unused functions.<br>
+    <FONT COLOR=#FF0000><FONT SIZE="2">This sample program only supports TM-P60PEELER.</h4></FONT></dt>
+   </dl>
+   </font>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><FONT COLOR=#003399>Step 17 </FONT></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt><FONT COLOR=#FF0000>This step is not supported in English edition.</FONT></dt>
+   </dl>
+  </td>
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step18/sPrint18.vbp">Step 18  Prints bitmap that registered with memory.</a></h4>
+  </td>
+ </tr>
+ <tr>
+
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>This step was created based on the step 15.<br>
+Prints bitmaps on receipts using the PrintMemoryBitmap method.<FONT SIZE="2"> (UPOS 1.11)</FONT><br>
+     <FONT COLOR=#FF0000><FONT SIZE="2">
+      This sample program is not available for the following devices.
+      <LI>TM-L90 (with Peeler model)</LI>
+      <LI>TM-P60PEELER</LI>
+     </FONT>
+    </dt>
+   </dl>
+   </font>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">PrintMemoryBitmap</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step19/sPrint19.vbp">Step 19  Multi-tone Prints.</a></h4>
+  </td>
+ </tr>
+ <tr>
+
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>This step was created based on the step 18.<br>
+The coupon will be printed using the Multi-tone print function. <br>
+     <FONT COLOR=#FF0000><FONT SIZE="2">
+      This sample program only supports devices with Multi-tone Function.
+      <br>For details of support devices, please refer to the "EPSON OPOS ADK MANUAL APPLICATION DEVELOPMENT GUIDE POSPrinter (TM Series)" manual.
+     </FONT>
+    </dt>
+   </dl>
+   </font>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+
+
+
+
+</table>
+
+</body>
+
+</html>

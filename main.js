@@ -14,6 +14,8 @@ let dailyBackupTimer = null
 let hardwareCleanup = null  // set by setupIPC, called on shutdown
 let appShuttingDown = false
 
+const runtimeAppMode = process.argv.includes('--admin') ? 'admin' : 'register'
+const isRegisterApp = runtimeAppMode === 'register'
 const DB_PATH = path.join(app.getPath('userData'), 'crisp-pos.sqlite')
 const BUNDLED_DB_PATH = path.join(__dirname, 'db', 'crisp-pos.sqlite')
 const SCHEMA_PATH = path.join(__dirname, 'db', 'schema.sql')
@@ -33,6 +35,10 @@ const appHealth = {
   logDir: LOG_DIR,
   startedAt: new Date().toISOString()
 }
+
+let lastKnownDbMtimeMs = 0
+let localChangePending = false
+let dbReloadingFromDisk = false
 
 function appLog (level, source, message, detail) {
   const ts = new Date().toISOString()
@@ -214,6 +220,7 @@ async function initDatabase() {
     "CREATE INDEX IF NOT EXISTS idx_transactions_status ON transactions(status)",
     "CREATE INDEX IF NOT EXISTS idx_cash_drawer_created ON cash_drawer(created_at)",
     "INSERT OR IGNORE INTO settings (key, value) VALUES ('next_receipt_number', '1')",
+    "ALTER TABLE products ADD COLUMN open_price INTEGER DEFAULT 0",
   ]
   for (const m of migrations) {
     try { db.run(m) } catch (_) {}
@@ -768,6 +775,10 @@ async function initDatabase() {
       }
     }
     if (relinked) appLog('info', 'startup', `Re-linked ${relinked} keyboard buttons to products (${newProducts} new products created)`)
+    // Fix legacy open_price buttons: if linked to a product that isn't open_price, change to product type
+    dbRun(`UPDATE keyboard_buttons SET type = 'product'
+      WHERE type = 'open_price' AND product_id IS NOT NULL
+      AND product_id IN (SELECT id FROM products WHERE open_price = 0 OR open_price IS NULL)`)
   } catch (e) { appLog('error', 'startup', 'Keyboard re-link failed', e.message) }
 
   // ── Intentional color coding for function buttons ──
@@ -1039,7 +1050,7 @@ async function initDatabase() {
         ['pexels.com%8775044%', 'images/products/pexels-deli.jpg'],
         ['pexels.com%4109938%', 'images/products/pexels-cheese.jpg'],
         ['pexels.com%529632%', 'images/products/pexels-nuts.jpg'],
-        ['pexels.com%1366594%', 'images/products/pexels-grocery.jpg'],
+        ['pexels.com%1366594%', 'images/products/grocery-pantry-goods.png'],
         // GitHub bread
         ['F_R_CIABATTA_LOAF', 'images/products/github-ciabatta.jpg'],
         // Gas
@@ -1233,6 +1244,41 @@ async function initDatabase() {
     }
   } catch (e) { appLog('error', 'migration', 'Section buttons migration failed', e.message) }
 
+  // Restore Profit Track-style custom pages for sections that now have photo references.
+  try {
+    const ptSections = dbAll("SELECT value FROM settings WHERE key = 'profit_track_sections_v1'")
+    if (!ptSections.length || !ptSections[0].value) {
+      const pageLinks = [
+        ['pg4-broccoli', '24'],
+        ['pg4-chillies', '27'],
+        ['pg5-tomatoes', '35'],
+        ['btn-grocery', '6'],
+        ['btn-nuts', '37'],
+        ['btn-bread', '38'],
+        ['btn-gas', '39'],
+        ['btn-gas-dept', '39'],
+      ]
+      for (const [btnId, pageId] of pageLinks) {
+        db.run("UPDATE keyboard_buttons SET type = 'page_link', parent_id = ?1, category_filter = NULL, alpha_range = 'image:cover' WHERE id = ?2",
+          [pageId, btnId])
+      }
+      db.run("UPDATE keyboard_buttons SET label = 'BREAD &\nCROISSAN' WHERE id = 'btn-bread'")
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('profit_track_sections_v1', '1')")
+      appLog('info', 'migration', 'Restored Profit Track-style custom section pages')
+    }
+  } catch (e) { appLog('error', 'migration', 'Profit Track section pages migration failed', e.message) }
+
+  // Use a pantry/packaged-goods image for grocery instead of a produce-heavy supermarket shot.
+  try {
+    const groceryImgDone = dbAll("SELECT value FROM settings WHERE key = 'grocery_pantry_image_v1'")
+    if (!groceryImgDone.length || !groceryImgDone[0].value) {
+      db.run("UPDATE keyboard_buttons SET image = 'images/products/grocery-pantry-goods.png' WHERE id = 'btn-grocery'")
+      db.run("UPDATE keyboard_buttons SET image = 'images/products/grocery-pantry-goods.png' WHERE image = 'images/products/pexels-grocery.jpg'")
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('grocery_pantry_image_v1', '1')")
+      appLog('info', 'migration', 'Updated grocery keyboard image to pantry goods')
+    }
+  } catch (e) { appLog('error', 'migration', 'Grocery pantry image migration failed', e.message) }
+
   saveDBSync()
   appLog('info', 'database', 'Database initialized', `Path: ${DB_PATH}`)
 
@@ -1255,7 +1301,11 @@ function saveDB() {
     fs.writeFile(DB_PATH, buf, (err) => {
       saveInProgress = false
       if (err) appLog('error', 'database', 'Failed to save database to disk', err.message)
-      else appHealth.lastDbSave = new Date().toISOString()
+      else {
+        appHealth.lastDbSave = new Date().toISOString()
+        updateKnownDbMtime()
+        notifyDataChanged('local-save')
+      }
     })
   } catch (e) {
     saveInProgress = false
@@ -1268,9 +1318,60 @@ function saveDBSync() {
     const data = db.export()
     fs.writeFileSync(DB_PATH, Buffer.from(data))
     appHealth.lastDbSave = new Date().toISOString()
+    updateKnownDbMtime()
+    notifyDataChanged('local-save')
   } catch (e) {
     appLog('error', 'database', 'Failed to save database to disk', e.message)
   }
+}
+
+function updateKnownDbMtime() {
+  try { lastKnownDbMtimeMs = fs.statSync(DB_PATH).mtimeMs } catch (_) {}
+}
+
+function notifyDataChanged(source = 'local') {
+  if (dbReloadingFromDisk) return
+  for (const win of [mainWindow, customerWindow]) {
+    if (win && !win.isDestroyed()) win.webContents.send('lan:data-changed', { source, at: new Date().toISOString() })
+  }
+}
+
+function reloadDatabaseFromDisk() {
+  if (!fs.existsSync(DB_PATH) || saveInProgress) return false
+  try {
+    dbReloadingFromDisk = true
+    const buf = fs.readFileSync(DB_PATH)
+    const nextDb = new db.constructor(buf)
+    try { db.close() } catch (_) {}
+    db = nextDb
+    localChangePending = false
+    updateKnownDbMtime()
+    appLog('info', 'database', 'Reloaded shared database from disk')
+    return true
+  } catch (e) {
+    appLog('error', 'database', 'Failed to reload shared database from disk', e.message)
+    return false
+  } finally {
+    dbReloadingFromDisk = false
+  }
+}
+
+function startSharedDatabaseWatcher() {
+  updateKnownDbMtime()
+  fs.watchFile(DB_PATH, { interval: 400 }, (_curr, prev) => {
+    if (appShuttingDown || saveInProgress) return
+    const currentMtime = (() => { try { return fs.statSync(DB_PATH).mtimeMs } catch (_) { return 0 } })()
+    if (!currentMtime || currentMtime === lastKnownDbMtimeMs || currentMtime === prev.mtimeMs) return
+
+    if (saveTimer) {
+      clearTimeout(saveTimer)
+      saveTimer = null
+      saveDBSync()
+      return
+    }
+
+    if (reloadDatabaseFromDisk()) notifyDataChanged('shared-db')
+  })
 }
 
 function createBackup(prefix = 'auto') {
@@ -1300,7 +1401,11 @@ function createBackup(prefix = 'auto') {
 
 function scheduleSave() {
   if (saveTimer) clearTimeout(saveTimer)
-  saveTimer = setTimeout(saveDB, 3000)
+  localChangePending = true
+  saveTimer = setTimeout(() => {
+    saveTimer = null
+    saveDB()
+  }, 150)
 }
 
 // sql.js helpers — wraps the slightly different API to match what we need
@@ -1354,7 +1459,7 @@ const KB_IMAGE_MAP = {
   'btn-bags':    { base: 'direct', file: 'https://cdn0.woolworths.media/content/wowproductimages/large/674216.jpg' },
   'btn-deli':    { base: 'direct', file: PX(8775044) },
   'btn-nuts':    { base: 'direct', file: PX(529632) },
-  'btn-grocery': { base: 'direct', file: PX(1366594) },
+  'btn-grocery': { base: 'direct', file: 'images/products/grocery-pantry-goods.png' },
   'btn-gas':     { base: 'direct', file: 'https://ubgeneralstore.com.au/cdn/shop/files/swapgo9kggasbottle.jpg?v=1702524703&width=1946' },
   // Page 2: Fruit A-M (Coles white-background product photos)
   'pg2-apples':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/1/1/5111654-zm.jpg' },
@@ -1561,9 +1666,8 @@ function createWindow() {
     }
   })
 
-  const appMode = (() => { try { const r = db.exec("SELECT value FROM settings WHERE key = 'app_mode'"); return r.length && r[0].values.length ? r[0].values[0][0] : 'admin' } catch (_) { return 'admin' } })()
-  appLog('info', 'startup', `app_mode = '${appMode}'`)
-  const startPage = appMode === 'register' ? 'index.html' : 'admin.html'
+  appLog('info', 'startup', `runtime_app_mode = '${runtimeAppMode}'`)
+  const startPage = isRegisterApp ? 'index.html' : 'admin.html'
   mainWindow.loadFile(path.join(__dirname, 'pos', startPage))
 
   if (isDevMode) {
@@ -1645,7 +1749,8 @@ function createCustomerWindow () {
 }
 
 // Single instance lock — focus existing window if already running
-const gotTheLock = app.requestSingleInstanceLock()
+const useSingleInstanceLock = process.argv.includes('--single-instance')
+const gotTheLock = useSingleInstanceLock ? app.requestSingleInstanceLock({ mode: runtimeAppMode }) : true
 if (!gotTheLock) {
   app.quit()
 } else {
@@ -1718,6 +1823,7 @@ app.whenReady().then(async () => {
   try {
     splashSend('splash:status', 'Initialising database...', 10)
     await initDatabase()
+    startSharedDatabaseWatcher()
 
     splashSend('splash:status', 'Setting up handlers...', 20)
     const { initHardware, initScanner } = setupIPC()
@@ -1726,7 +1832,9 @@ app.whenReady().then(async () => {
     try {
       const lanMode = dbGet("SELECT value FROM settings WHERE key = 'lan_mode'")?.value
       const lanPort = parseInt(dbGet("SELECT value FROM settings WHERE key = 'lan_port'")?.value || '5555')
-      if (lanMode === 'server') {
+      if (lanMode === 'server' && !isRegisterApp) {
+        appLog('warn', 'lan-sync', 'Admin app cannot run the LAN server; leaving LAN server off in this process')
+      } else if (lanMode === 'server') {
         lanSync.startServer(lanPort, { dbAll, dbGet, dbRun, saveDB, uuid })
         appLog('info', 'lan-sync', 'Auto-started LAN server on port ' + lanPort)
       } else if (lanMode === 'client') {
@@ -1754,11 +1862,16 @@ app.whenReady().then(async () => {
       }
     } catch (e) { appLog('error', 'supabase', 'Supabase config check failed', e.message) }
 
-    splashSend('splash:status', 'Detecting hardware...', 60)
-    await initHardware()
+    if (isRegisterApp) {
+      splashSend('splash:status', 'Detecting hardware...', 60)
+      await initHardware()
 
-    splashSend('splash:status', 'Starting scanner...', 75)
-    initScanner()
+      splashSend('splash:status', 'Starting scanner...', 75)
+      initScanner()
+    } else {
+      splashSend('splash:status', 'Skipping register hardware...', 75)
+      appLog('info', 'hardware', 'Admin app startup skipped hardware polling')
+    }
 
     splashSend('splash:status', 'Preparing interface...', 85)
     createWindow()
@@ -1794,6 +1907,7 @@ app.whenReady().then(async () => {
 
 app.on('before-quit', () => {
   appShuttingDown = true
+  try { fs.unwatchFile(DB_PATH) } catch (_) {}
   if (saveTimer) { clearTimeout(saveTimer); saveTimer = null }
   saveDBSync()
 })
@@ -2205,14 +2319,16 @@ function setupIPC() {
     }
 
     dbRun(`
-      INSERT OR REPLACE INTO products (id, barcode, plu, name, category_id, price, cost_price, unit, tax_rate, track_stock, stock_qty, active, image_url, updated_at)
-      VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, datetime('now'))
+      INSERT OR REPLACE INTO products (id, barcode, plu, name, category_id, price, cost_price, unit, tax_rate, track_stock, stock_qty, active, image_url, open_price, updated_at)
+      VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, datetime('now'))
     `, [id, product.barcode || null, product.plu || null, product.name, product.category_id || null,
         product.price, product.cost_price || 0, product.unit || 'each',
         product.tax_rate ?? 0.10, product.track_stock ? 1 : 0,
-        product.stock_qty || 0, product.active !== false ? 1 : 0, product.image_url || null])
+        product.stock_qty || 0, product.active !== false ? 1 : 0, product.image_url || null,
+        product.open_price ? 1 : 0])
 
     queueSync('products', id, product.id ? 'update' : 'insert')
+    lanSync.bumpVersion()
     return { id, barcode_warning }
   })
 
@@ -2993,6 +3109,7 @@ function setupIPC() {
 
   ipcMain.handle('db:keyboard:getAll', () => {
     return dbAll(`SELECT kb.*, p.image_url AS product_image_url, p.plu AS product_plu, p.unit AS product_unit,
+      p.open_price AS product_open_price,
       COALESCE(s.special_price, p.price) AS active_price
       FROM keyboard_buttons kb
       LEFT JOIN products p ON kb.product_id = p.id
@@ -3004,6 +3121,7 @@ function setupIPC() {
 
   ipcMain.handle('db:keyboard:getByPage', (_e, page) => {
     return dbAll(`SELECT kb.*, p.image_url AS product_image_url, p.plu AS product_plu, p.unit AS product_unit,
+      p.open_price AS product_open_price,
       COALESCE(s.special_price, p.price) AS active_price
       FROM keyboard_buttons kb
       LEFT JOIN products p ON kb.product_id = p.id
@@ -3057,8 +3175,17 @@ function setupIPC() {
         btn.page || 1, btn.grid_row || 0, btn.grid_col || 0,
         btn.col_span || 1, btn.row_span || 1, btn.product_id || null,
         btn.active !== false ? 1 : 0])
+    // If button has a linked product and price changed, update the product too
+    if (btn.product_id && btn.price) {
+      const existing = dbGet("SELECT price FROM products WHERE id = ?1", [btn.product_id])
+      if (existing && Math.abs((existing.price || 0) - btn.price) > 0.001) {
+        dbRun("UPDATE products SET price = ?1, updated_at = datetime('now') WHERE id = ?2", [btn.price, btn.product_id])
+        queueSync('products', btn.product_id, 'update')
+      }
+    }
     queueSync('keyboard_buttons', id, btn.id ? 'update' : 'insert')
     saveDBSync()
+    lanSync.bumpVersion()
     return { id }
   })
 
@@ -3082,6 +3209,7 @@ function setupIPC() {
 
   ipcMain.handle('db:keyboard:getAllIncludingInactive', () => {
     return dbAll(`SELECT kb.*, p.image_url AS product_image_url, p.plu AS product_plu, p.unit AS product_unit,
+      p.open_price AS product_open_price,
       COALESCE(s.special_price, p.price) AS active_price
       FROM keyboard_buttons kb
       LEFT JOIN products p ON kb.product_id = p.id
@@ -5161,8 +5289,7 @@ function setupIPC() {
 
   // ── Load saved config and auto-probe on startup ────────────────────────────
   // Only run hardware probing/polling in register mode — admin mode doesn't need it
-  const hwAppMode = (() => { try { const r = dbGet("SELECT value FROM settings WHERE key = 'app_mode'"); return r?.value || 'admin' } catch (_) { return 'admin' } })()
-  const isRegisterMode = hwAppMode === 'register'
+  const isRegisterMode = isRegisterApp
 
   loadSavedHardwareConfig()
 
@@ -5981,11 +6108,21 @@ function setupIPC() {
 
   ipcMain.handle('lan:testConnection', (_e, ip, port) => lanSync.testConnection(ip, port))
 
+  ipcMain.handle('lan:pushToRegisters', () => {
+    saveDBSync()
+    lanSync.bumpVersion()
+    const status = lanSync.getStatus()
+    return { pushed: true, clients: (status.clients || []).length }
+  })
+
   ipcMain.handle('lan:restart', async () => {
     lanSync.stopAll()
     const lanMode = dbGet("SELECT value FROM settings WHERE key = 'lan_mode'")?.value
     const lanPort = parseInt(dbGet("SELECT value FROM settings WHERE key = 'lan_port'")?.value || '5555')
-    if (lanMode === 'server') {
+    if (lanMode === 'server' && !isRegisterApp) {
+      appLog('warn', 'lan-sync', 'Admin app cannot start the LAN server; only the register app may be the server')
+      return { ...lanSync.getStatus(), error: 'Only the register app can run the LAN server' }
+    } else if (lanMode === 'server') {
       lanSync.startServer(lanPort, { dbAll, dbGet, dbRun, saveDB, uuid })
       await new Promise(resolve => setTimeout(resolve, 500))
     } else if (lanMode === 'client') {

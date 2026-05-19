@@ -1,0 +1,42 @@
+BEGIN:VCALENDAR
+PRODID:-//Google Inc//Google Calendar 70.9054//EN
+VERSION:2.0
+CALSCALE:GREGORIAN
+METHOD:REQUEST
+BEGIN:VTIMEZONE
+TZID:Australia/Brisbane
+X-LIC-LOCATION:Australia/Brisbane
+BEGIN:STANDARD
+TZOFFSETFROM:+1000
+TZOFFSETTO:+1000
+TZNAME:GMT+10
+DTSTART:19700101T000000
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+DTSTART;TZID=Australia/Brisbane:20260512T174500
+DTEND;TZID=Australia/Brisbane:20260512T181500
+DTSTAMP:20260512T021651Z
+ORGANIZER;CN=Edin Read:mailto:edin@greyology.com.au
+UID:cintd3iqr7526epb7f7b3j70k8@google.com
+ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;RSVP=TRUE
+ ;CN=Edin Read;X-NUM-GUESTS=0:mailto:edin@greyology.com.au
+ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=
+ TRUE;CN=matthiasc567@gmail.com;X-NUM-GUESTS=0:mailto:matthiasc567@gmail.com
+X-MICROSOFT-CDO-OWNERAPPTID:-955235081
+CREATED:20260512T021637Z
+DESCRIPTION:Event Name\nGreyology Technician Role Interview\n\nLet's meet s
+ o we can get to know each other. I'll explain a bit about the role and ask 
+ you some questions to get an understanding of who you are\, and where your 
+ skills lay. I look forward to meeting you. Edin.\n\nNeed to make changes to
+  this event?\nCancel: https://calendly.com/cancellations/d8a9963a-50b6-40d7
+ -be34-79365c5ae333\nReschedule: https://calendly.com/reschedulings/d8a9963a
+ -50b6-40d7-be34-79365c5ae333\n\nPowered by Calendly.com\n
+LAST-MODIFIED:20260512T021650Z
+LOCATION:
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Matthias Campbell and Edin Read
+TRANSP:OPAQUE
+END:VEVENT
+END:VCALENDAR

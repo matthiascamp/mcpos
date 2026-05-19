@@ -1,0 +1,282 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; File Name		: LdDMD110.INF
+;; Function Outline	: OPOS Machine Dependent Data File of DM-D110
+;; Copyright (C) SEIKO EPSON CORP. 1995-2016
+;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;/
+
+[MAIN]
+DeviceClass		= LineDisplay			; Device Class
+DeviceName		= DM-D110			; Device Name
+SOName			= SOEPSON.LineDisplay.1		; Service Object Name
+RegFormatType		= EPSON
+RegFormatVersion	= 2
+NumberOfDevice		= 8
+SupportCoreVersion	= STRING:			; Support CoreModuleGroup Version
+UseESDPRT		= INT:2				; EPSON SD Printer Port(Enable:1 Disable:0)
+
+[MULTICOREINFO]
+SupportCoreNumber	= INT:2					; Support CoreModuleGroup Number
+SOName01		= STRING:SOEPSON.LineDisplay.140	; SO Name
+SOName01CoreVersion	= STRING:1.14.0.0			; CoreModuleGroup Version
+SOName02		= STRING:SOEPSON.LineDisplay.200	; SO Name
+SOName02CoreVersion	= STRING:1.14.1.0			; CoreModuleGroup Version
+
+[DEVINFO]
+InternalVersion = 1			; INF file Version
+
+CapBlinkRate	= int:1			; TRUE
+CapCursorType	= int:0			; DISP_CT_NONE
+CapCustomGlyph	= int:1			; TRUE
+CapReadBack	= int:1			; DISP_CRB_SINGLE
+CapReverse	= int:2			; DISP_CR_REVERSEEACH
+GlyphHeight	= int:7			; GlyphHeight = 7
+GlyphWidth	= int:5			; GlyphWidth = 5
+CustomGlyphList	= STRING:20-7E		; 
+
+MaxDefCnt	= int:95		; MAX Define count
+
+CapStatisticsReporting	= int:1		; TRUE
+CapUpdateStatistics	= int:1		; TRUE
+
+StatsUnifiedPOSVersion		= DWORD:101
+StatsDeviceCategory		= DWORD:101
+StatsManufacturerName		= DWORD:101
+StatsModelName			= DWORD:101
+StatsSerialNumber		= DWORD:101
+StatsManufactureDate		= DWORD:101
+StatsMechanicalRevision		= DWORD:101
+StatsFirmwareRevision		= DWORD:101
+StatsInterface			= DWORD:101
+StatsInstallationDate		= DWORD:101
+
+StatsHoursPoweredCount		= DWORD:107
+StatsCommunicationErrorCount	= DWORD:107
+
+StatsOnlineTransitionCount	= DWORD:107
+
+[Setting]
+Timeout		= 500			; Output timeout time
+
+IdleSleep	= int:20		; sleep time(msec) in idle loop
+
+
+CapBlink	= int:1			; DISP_CB_BLINKALL
+CapBrightness	= int:1			; TRUE
+CapCharacterSet	= int:10		; DISP_CCS_KANA
+CapDescriptors	= int:0			; FALSE
+CapHMarquee	= int:1			; TRUE
+CapICharWait	= int:1			; TRUE
+CapVMarquee	= int:0			; FALSE
+
+DeviceWindows	= int:4
+DeviceRows	= int:2
+DeviceColumns	= int:20
+DeviceDescriptors= int:0
+CharacterSetList= ""437,850,852,858,860,863,865,866,932,998,999,1252,254,255""
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Serial(Path)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+[MAIN_1]
+DeviceName	= DM-D110				; Device Name
+DeviceDesc	= EPSON DM-D110(PATH) Line Display	; Device Description
+GroupID 	= Disps					; Device Group
+
+[PORT_1]
+BaudrateSel	= 4,5,6,7,8,10,11	; 2400, 4800, 9600, 19200, 38400,57600,115200
+BitLengthSel	= 0,1			; 7 bit, 8 bit
+ParitySel	= 0,1,2			; NONE, EVEN, ODD
+StopSel		= 1			; 1 bit only
+XonXoffSel	= 0			; Disabled only
+HandShakeSel	= 2			; DTR/DSR
+OutputCOM	= 1			; OutputToSerialPort(PathThrough only)
+
+[SETTING_1]
+Port		= COM1			; Default COM Port
+Baudrate	= 6			; 9600
+BitLength	= 1			; 8 bit
+Parity		= 0			; NONE
+Stop		= 1			; 1 bit
+XonXoff		= 0			; Disabled
+HandShake	= 2			; DTR/DSR
+OutputBuf	= 1024
+
+PortPipe	= "DM"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Serial(Y)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+[MAIN_2]
+DeviceName	= DM-D110			; Device Name
+DeviceDesc	= EPSON DM-D110(Y) Line Display	; Device Description
+GroupID 	= Disps				; Device Group
+
+[PORT_2]
+BaudrateSel	= 4,5,6,7,8,10,11	; 2400, 4800, 9600, 19200, 38400,57600,115200
+BitLengthSel	= 0,1			; 7 bit, 8 bit
+ParitySel	= 0,1,2			; NONE, EVEN, ODD
+StopSel		= 1			; 1 bit only
+XonXoffSel	= 0			; Disabled only
+HandShakeSel	= 2			; DTR/DSR
+
+[SETTING_2]
+Port		= COM1			; Default COM Port
+Baudrate	= 6			; 9600
+BitLength	= 1			; 8 bit
+Parity		= 0			; NONE
+Stop		= 1			; 1 bit
+XonXoff		= 0			; Disabled
+HandShake	= 2			; DTR/DSR
+OutputBuf	= 1024
+
+PortPipe	= "DM"
+
+[DEVINFO_2]
+Master		= "POSPrinter,CashDrawer"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; USB
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+[MAIN_3]
+DeviceName	= DM-D110U			; Device Name
+DeviceDesc	= EPSON DM-D110U Line Display	; Device Description
+GroupID 	= Disps_U				; Device Group
+
+[SETTING_3]
+Port		= USB1			; Default USB Port
+PortEx		= "DM"
+PortPipe	= "DM"
+
+[DEVINFO_3]
+Master		= "POSPrinter,CashDrawer"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Serial (TM USB Connection)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+[MAIN_4]
+DeviceName	= DM-D110						; Device Name
+DeviceDesc	= EPSON DM-D110 (TM USB Connection) Line Display		; Device Description
+GroupID 	= Disp_S						; Device Group
+DMModelID		= INT:4
+StandAloneConnection	= 2
+
+[MULTICOREINFO_4]
+SOName02		= STRING:SoEPSON.LiquidCrystalDisplay.200	; SO Name
+SOName02CoreVersion	= STRING:1.14.1.0				; CoreModuleGroup Version
+
+[PORT_4]
+BaudrateSel	= 4,5,6,7,8,10,11	; 2400, 4800, 9600, 19200, 38400,57600,115200
+BitLengthSel	= 1			; 8 bit
+ParitySel	= 0,1,2			; NONE, EVEN, ODD
+StopSel		= 1			; 1 bit only
+XonXoffSel	= 0			; Disabled only
+HandShakeSel	= 2			; DTR/DSR
+
+Baudrate	= 6			; 9600
+BitLength	= 1			; 8 bit
+Parity		= 0			; NONE
+Stop		= 1			; 1 bit
+XonXoff		= 0			; Disabled
+HandShake	= 2			; DTR/DSR
+
+[SETTING_4]
+Port		= TMPORT1		; Default Port
+CharacterSetListE= ""437,850,852,858,860,863,865,866,932,998,999,1252,254,255""
+PortPipe	= "DM"
+
+[DEVINFO_4]
+Master		= "POSPrinter"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Parallel (TM USB Connection)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+[MAIN_5]
+DeviceName	= DM-D110P						; Device Name
+DeviceDesc	= EPSON DM-D110P (TM USB Connection) Line Display 	; Device Description
+GroupID 	= Disp_P						; Device Group
+DMModelID		= INT:4
+StandAloneConnection	= 2
+
+[MULTICOREINFO_5]
+SOName02		= STRING:SoEPSON.LiquidCrystalDisplay.200	; SO Name
+SOName02CoreVersion	= STRING:1.14.1.0				; CoreModuleGroup Version
+
+[SETTING_5]
+Port		= TMPORT1						; Default Port
+CharacterSetListE= ""437,850,852,858,860,863,865,866,932,998,999,1252,254,255""
+PortPipe	= "DM"
+
+[DEVINFO_5]
+Master		= "POSPrinter"
+
+;;;;;;;;;;;;;;;;;;;;;;;
+;; USB (TM USB Connection)
+;;;;;;;;;;;;;;;;;;;;;;;
+
+[MAIN_6]
+DeviceName	= DM-D110U						; Device Name
+DeviceDesc	= EPSON DM-D110U (TM USB Connection) Line Display 	; Device Description
+GroupID 	= Disp_U						; Device Group
+DMModelID		= INT:4
+StandAloneConnection	= 2
+
+[MULTICOREINFO_6]
+SOName02		= STRING:SoEPSON.LiquidCrystalDisplay.200	; SO Name
+SOName02CoreVersion	= STRING:1.14.1.0				; CoreModuleGroup Version
+
+[SETTING_6]
+Port		= TMPORT1						; Default Port
+CharacterSetListE= ""437,850,852,858,860,863,865,866,932,998,999,1252,254,255""
+PortPipe	= "DM"
+
+[DEVINFO_6]
+Master		= "POSPrinter"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; EtherNet (TM USB Connection)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+[MAIN_7]
+DeviceName	= DM-D110E						; Device Name
+DeviceDesc	= EPSON DM-D110E (TM USB Connection) Line Display 	; Device Description
+GroupID 	= Disp_E						; Device Group
+DMModelID		= INT:4
+StandAloneConnection	= 2
+
+[MULTICOREINFO_7]
+SOName02		= STRING:SoEPSON.LiquidCrystalDisplay.200	; SO Name
+SOName02CoreVersion	= STRING:1.14.1.0				; CoreModuleGroup Version
+
+[SETTING_7]
+Port		= TMPORT1						; Default Port
+CharacterSetListE= ""437,850,852,858,860,863,865,866,932,998,999,1252,254,255""
+PortPipe	= "DM"
+
+[DEVINFO_7]
+Master		= "POSPrinter"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Bluetooth (TM USB Connection)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+[MAIN_8]
+DeviceName	= DM-D110B						; Device Name
+DeviceDesc	= EPSON DM-D110B (TM USB Connection) Line Display 	; Device Description
+GroupID 	= Disp_B						; Device Group
+DMModelID		= INT:4
+StandAloneConnection	= 2
+
+[MULTICOREINFO_8]
+SOName02		= STRING:SoEPSON.LiquidCrystalDisplay.200	; SO Name
+SOName02CoreVersion	= STRING:1.14.1.0				; CoreModuleGroup Version
+
+[SETTING_8]
+Port		= TMPORT1						; Default Port
+CharacterSetListE= ""437,850,852,858,860,863,865,866,932,998,999,1252,254,255""
+PortPipe	= "DM"
+
+[DEVINFO_8]
+Master		= "POSPrinter"

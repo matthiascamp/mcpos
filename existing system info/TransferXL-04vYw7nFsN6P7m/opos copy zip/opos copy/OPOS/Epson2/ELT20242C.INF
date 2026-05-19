@@ -1,0 +1,120 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; File Name		: ELT20242C.inf
+;; Function Outline	: OPOS Machine Dependent Data File of ElectronicJournal
+;; Copyright (C) SEIKO EPSON CORP. 2013-2015
+;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;/
+
+[MAIN]
+DeviceClass		= ElectronicJournal				; Device Class
+DeviceName		= TM-T20II-42C					; Device Name
+DeviceDesc		= EPSON TM-T20II ElectronicJournal 42 Column Mode		; Device Description
+SOName			= SOEPSON.ElectronicJournal.140			; Service Object Name
+NumberOfDevice		= 3
+GroupID			= Ejrn_U					; Device Group
+RegFormatType		= EPSON						; RegFormat Type
+RegFormatVersion	= 2						; RegFormat Version
+SupportCoreVersion	= STRING:1.14.0.0				; Support CoreModuleGroup Version
+UseESDPRT		= INT:1						; EPSON SD Printer Port(Enable:1 Disable:0)
+
+[MAIN_1]
+DeviceName		= TM-T20II-42CU					; Device Name
+DeviceDesc		= EPSON TM-T20IIU ElectronicJournal 42 Columns Mode		; Device Description
+GroupID			= Ejrn_U					; Device Group
+
+[MAIN_2]
+DeviceName		= TM-T20II-42C					; Device Name
+DeviceDesc		= EPSON TM-T20II ElectronicJournal 42 Column Mode		; Device Description
+GroupID			= Ejrn_S					; Device Group
+
+[MAIN_3]
+DeviceName		= TM-T20II-42CE				; Device Name
+DeviceDesc		= EPSON TM-T20IIE ElectronicJournal 42 Columns Mode		; Device Description
+GroupID			= Ejrn_E					; Device Group
+
+
+[PORT_1]
+
+[PORT_2]
+BaudrateSel		= 4,5,6,7,8,10,11				; 2400, 4800, 9600, 19200, 38400, 57600, 115200
+BitLengthSel		= 0,1					; 7bit, 8 bit
+ParitySel			= 0,1,2					; NONE, EVEN, ODD
+StopSel			= 1					; 1 bit only
+XonXoffSel		= 0					; Disabled only
+HandShakeSel		= 2					; DTR/DSR only
+
+Baudrate		= 8					; 38400
+BitLength		= INT:1					; 8 bit
+Parity			= INT:0					; None
+Stop			= INT:1					; 1 bit
+XonXoff			= INT:0					; Disabled
+HandShake		= INT:2					; DTR/DSR
+
+[PORT_3]
+
+
+[DEVINFO]
+Master				= "POSPrinter"
+InternalVersion			= 200
+PrinterDllName			= STRING:PtrT202140.Dll		; DLL File Name
+
+StatsUnifiedPOSVersion		= DWORD:101
+StatsDeviceCategory		= DWORD:101
+StatsManufacturerName		= DWORD:1420109
+StatsModelName			= DWORD:1430109
+StatsSerialNumber			= DWORD:1440109
+StatsManufactureDate		= DWORD:101
+StatsMechanicalRevision		= DWORD:101
+StatsFirmwareRevision		= DWORD:101
+StatsInterface			= DWORD:101
+StatsInstallationDate		= DWORD:101
+
+StatsHoursPoweredCount		= DWORD:2C6010B
+StatsCommunicationErrorCount	= DWORD:107
+
+StatsWriteCount			= DWORD:107
+StatsFailedWriteCount		= DWORD:107
+StatsEraseCount			= DWORD:107
+StatsMediumRemovedCount		= DWORD:101
+StatsMediumSize			= DWORD:101
+StatsMediumFreeSpace		= DWORD:101
+
+CapASB				= DWORD:1101			; ASB Type(Normal, Ink, Extend, Custom)
+
+
+[DEVINFO_1]
+Master				= "TM-T20II-42CU"
+
+[DEVINFO_2]
+Master				= "TM-T20II-42C"
+
+[DEVINFO_3]
+Master				= "TM-T20II-42CE"
+
+[SETTING]
+IdleSleep				= int:20				; sleep time(msec) in idle loop
+Timeout				= INT:2500			; Output timeout time
+MediumNearFullSize		= INT:1048576
+StoredDataMaxFileSize		= INT:4294967295
+FileSystemMaxFileSize		= INT:4294967295
+
+
+[SETTING_1]
+Port			= TMPORT1					; Default Port
+
+[SETTING_2]
+Port			= TMPORT1					; Default Port
+Baudrate			= 8					; 38400
+BitLength			= INT:1					; 8 bit
+Parity			= INT:0					; None
+Stop			= INT:1					; 1 bit
+XonXoff			= INT:0					; Disabled
+HandShake		= INT:2					; DTR/DSR
+InputBuf			= 1024
+OutputBuf			= 1024
+
+[SETTING_3]
+Port			= TMPORT1		; Default Port
+OutputBuf			= 1024
+

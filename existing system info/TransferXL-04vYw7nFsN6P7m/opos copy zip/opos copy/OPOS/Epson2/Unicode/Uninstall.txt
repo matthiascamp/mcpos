@@ -1,0 +1,3 @@
+C:\PROGRA~2\OPOS\Epson2\EpsUCCvt.dll
+C:\PROGRA~2\OPOS\Epson2\EpsUCSet.txt
+C:\PROGRA~2\OPOS\Epson2\Unicode\EpucUnsL.exe

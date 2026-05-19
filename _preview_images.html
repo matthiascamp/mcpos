@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Image Preview - Coles CDN</title>
+<style>
+body { font-family: Arial, sans-serif; background: #1a1a2e; color: #fff; padding: 20px; }
+h1 { color: #4fbd77; }
+h2 { color: #8892a8; margin-top: 40px; border-bottom: 1px solid #333; padding-bottom: 8px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
+.card { background: #242833; border-radius: 8px; padding: 12px; text-align: center; }
+.card img { width: 140px; height: 140px; object-fit: contain; background: #fff; border-radius: 6px; }
+.card .name { margin-top: 8px; font-size: 13px; font-weight: bold; }
+.card .status { font-size: 11px; color: #888; }
+.card img.error { display: none; }
+.card .fail { display: none; width: 140px; height: 140px; line-height: 140px; background: #3a1a1a; border-radius: 6px; color: #f66; font-size: 12px; margin: 0 auto; }
+</style>
+</head><body>
+<h1>Product Image Preview</h1>
+<p>These are from the Coles Australia CDN. Check if they load and look good.</p>
+
+<h2>Fruits A-G (pngimg.com - transparent PNGs)</h2>
+<div class="grid" id="fruits-ag"></div>
+
+<h2>Fruits K-Z (Coles CDN - white background)</h2>
+<div class="grid" id="fruits-kz"></div>
+
+<h2>Vegetables</h2>
+<div class="grid" id="vegetables"></div>
+
+<script>
+const fruitsKZ = [
+  ["Kiwi Fruit", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/4/2/4425883-zm.jpg"],
+  ["Lemons", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/3/1/5318302-zm.jpg"],
+  ["Limes", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/9/7/197594-zm.jpg"],
+  ["Longan", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/4/0/4409923-zm.jpg"],
+  ["Lychee", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/5/6/156542-zm.jpg"],
+  ["Mandarins", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/8/2/2/8223825-zm.jpg"],
+  ["Mangoes", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/8/9/2/8925050-zm.jpg"],
+  ["Rockmelon", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/2/8/428915-zm.jpg"],
+  ["Nectarines", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/9/409808-zm.jpg"],
+  ["Navel Orange", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/2/5/4255717-zm.jpg"],
+  ["Papaya", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/6/9/5/6950578-zm.jpg"],
+  ["Passion Fruit", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/4/1/5415852-zm.jpg"],
+  ["Pawpaw", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/8/8/7/8875214-zm.jpg"],
+  ["Peaches", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/5/6/156713-zm.jpg"],
+  ["Pears", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/5/6/156258-zm.jpg"],
+  ["Persimmons", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/1/0/410035-zm.jpg"],
+  ["Pineapple", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/1/0/410046-zm.jpg"],
+  ["Plums", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/5/6/156382-zm.jpg"],
+  ["Pomegranate", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/1/4519320-zm.jpg"],
+  ["Pomelo", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/9/0/5907370-zm.jpg"],
+  ["Quince", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/1/0/410115-zm.jpg"],
+  ["Tangelo", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/6/8/0/6803198-zm.jpg"],
+  ["Afourer Mandarin", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/7/1/7/7174994-zm.jpg"],
+  ["Imperial Mandarin", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/9/409750-zm.jpg"],
+  ["Honey Murcott", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/2/0/4/204893-zm.jpg"],
+  ["Calypso Mango", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/8/9/2/8925050-zm.jpg"],
+  ["KP Mango", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/9/409772-zm.jpg"],
+  ["R2E2 Mango", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/6/0/5604356-zm.jpg"],
+  ["Pearl Mango", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/2/4524932-zm.jpg"],
+  ["Keitt Mango", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/2/4526847-zm.jpg"],
+  ["Honeydew Melon", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/9/4/5945620-zm.jpg"],
+  ["Watermelon", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/4/2/4424610-zm.jpg"],
+  ["Valencia Orange", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/9/409830-zm.jpg"],
+  ["Blood Orange", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/9/6/5967167-zm.jpg"],
+  ["Cara Cara Orange", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/9/5/9/9599134-zm.jpg"],
+  ["White Nectarine", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/5/9/5595663-zm.jpg"],
+  ["Donut Peach", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/9/2/4/9241593-zm.jpg"],
+  ["White Peach", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/5/4552326-zm.jpg"],
+  ["Packham Pear", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/5/6/156258-zm.jpg"],
+  ["Nashi Pear", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/3/9/8/398010-zm.jpg"],
+  ["Bosc Pear", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/9/409987-zm.jpg"],
+  ["Williams Pear", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/9/409998-zm.jpg"],
+  ["Red Plum", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/5/6/156382-zm.jpg"],
+  ["Black Plum", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/4/2/5424026-zm.jpg"],
+  ["Sugar Plum", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/7/4/3/7435690-zm.jpg"],
+];
+
+function renderGrid(containerId, items) {
+  const grid = document.getElementById(containerId);
+  for (const [name, url] of items) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <img src="${url}" onerror="this.classList.add('error'); this.nextElementSibling.style.display='block'">
+      <div class="fail">FAILED</div>
+      <div class="name">${name}</div>
+      <div class="status">${url.split('/').pop()}</div>
+    `;
+    grid.appendChild(card);
+  }
+}
+
+const vegetables = [
+  ["Bok Choy", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/6/4565907-zm.jpg"],
+  ["Asparagus", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/8/3/4838737-zm.jpg"],
+  ["Green Beans", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/7/407675-zm.jpg"],
+  ["Beetroot", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/2/8/5288711-zm.jpg"],
+  ["Bottle Gourd", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/6/6/3/6630216-zm.jpg"],
+  ["Broccoli", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/7/407755-zm.jpg"],
+  ["Brussels Sprouts", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/9/9/8/9989810-zm.jpg"],
+  ["Cabbage", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/7/2/3/7233448-zm.jpg"],
+  ["Capsicum", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/8/4580208-zm.jpg"],
+  ["Carrots", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/2/2/4223335-zm.jpg"],
+  ["Cauliflower", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/6/0/4601603-zm.jpg"],
+  ["Celeriac", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/8/9/4894352-zm.jpg"],
+  ["Celery", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/8/4/4845732-zm.jpg"],
+  ["Chillies", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/6/5/4657244-zm.jpg"],
+  ["Chokos", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/2/2/5229814-zm.jpg"],
+  ["Corn", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/6/4562603-zm.jpg"],
+  ["Cucumber", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/7/4575208-zm.jpg"],
+  ["Eggplant", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/8/4583206-zm.jpg"],
+  ["Leb Eggplant", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/8/4583261-zm.jpg"],
+  ["Fennel", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/9/1/4910980-zm.jpg"],
+  ["Garlic", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/6/1/0/6105715-zm.jpg"],
+  ["Ginger", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/0/3/5034484-zm.jpg"],
+  ["Herbs", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/7/4575569-zm.jpg"],
+  ["Kale", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/8/6/9/8696598-zm.jpg"],
+  ["Leeks", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/9/4595930-zm.jpg"],
+  ["Lettuce Bags", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/6/8/8/6885716-zm.jpg"],
+  ["Iceberg Lettuce", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/8/4584071-zm.jpg"],
+  ["Cos Lettuce", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/6/4/4646485-zm.jpg"],
+  ["Fancy Lettuce", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/9/4595952-zm.jpg"],
+  ["Daikon/Lobok", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/6/6/1/6614720-zm.jpg"],
+  ["Button Mushrooms", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/8/2/4829420-zm.jpg"],
+  ["Flat Mushroom", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/8/3/4835466-zm.jpg"],
+  ["Swiss Brown Mushrooms", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/8/2/4829703-zm.jpg"],
+  ["Olives", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/7/5/7/7572738-zm.jpg"],
+  ["Brown Onion", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/8/0/4803991-zm.jpg"],
+  ["Red Onion", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/2/1/4218459-zm.jpg"],
+  ["White Onion", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/1/0/410443-zm.jpg"],
+  ["Spring Onion", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/8/408419-zm.jpg"],
+  ["Parsnip", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/1/0/5108183-zm.jpg"],
+  ["Peas", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/3/8/438409-zm.jpg"],
+  ["Snow Peas", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/2/3/123328-zm.jpg"],
+  ["Sugar Snap Peas", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/6/1/4619289-zm.jpg"],
+  ["Potatoes", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/2/1/4217241-zm.jpg"],
+  ["Kipfler Potatoes", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/0/2/1022610-zm.jpg"],
+  ["Dutch Cream Potatoes", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/7/1/4/7141758-zm.jpg"],
+  ["Butternut Pumpkin", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/1/8/4183423-zm.jpg"],
+  ["Jap Pumpkin", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/1/8/4183558-zm.jpg"],
+  ["Jarrahdale Pumpkin", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/2/0/4202540-zm.jpg"],
+  ["Radish", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/9/1/4911870-zm.jpg"],
+  ["Rhubarb", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/8/408372-zm.jpg"],
+  ["Shallots", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/1/3/5134809-zm.jpg"],
+  ["Silverbeet", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/8/408383-zm.jpg"],
+  ["Swede", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/9/6/4966930-zm.jpg"],
+  ["Sweet Potato Gold", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/1/9/4199503-zm.jpg"],
+  ["Sweet Potato Red", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/3/6/1/3616751-zm.jpg"],
+  ["Sweet Potato White", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/0/4/5045470-zm.jpg"],
+  ["Tomatoes", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/8/3/4835171-zm.jpg"],
+  ["Turnip", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/9/6/4966737-zm.jpg"],
+  ["Zucchini", "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/9/1/4910506-zm.jpg"],
+];
+
+const fruitsAG = [
+  ["Apples", "https://pngimg.com/uploads/apple/apple_PNG12405.png"],
+  ["Apricots", "https://pngimg.com/uploads/apricot/apricot_PNG12647.png"],
+  ["Avocados", "https://pngimg.com/uploads/avocado/avocado_PNG15486.png"],
+  ["Bananas", "https://pngimg.com/uploads/banana/banana_PNG835.png"],
+  ["Cherries", "https://pngimg.com/uploads/cherry/cherry_PNG3078.png"],
+  ["Coconut", "https://pngimg.com/uploads/coconut/coconut_PNG108882.png"],
+  ["Custard Apple", "https://toppng.b-cdn.net/uploads/preview/custard-apple-11528341289gx6ahtdkcn.png"],
+  ["Dragon Fruit", "https://pngimg.com/uploads/pitaya/pitaya_PNG38.png"],
+  ["Figs", "https://pngfre.com/wp-content/uploads/Fig-1.png"],
+  ["Grapefruit", "https://pngimg.com/uploads/grapefruit/grapefruit_PNG15263.png"],
+  ["Grapes", "https://pngimg.com/uploads/grape/grape_PNG2983.png"],
+  ["Guava", "https://pngimg.com/uploads/guava/guava_PNG56.png"],
+  ["Bravo Apple", "https://pngimg.com/d/apple_PNG12462.png"],
+  ["Fuji Apple", "https://pngimg.com/d/apple_PNG12489.png"],
+  ["Granny Smith", "https://pngimg.com/uploads/apple/apple_PNG12507.png"],
+  ["Jazz Apple", "https://pngimg.com/d/apple_PNG12432.png"],
+  ["Kanzi Apple", "https://pngimg.com/d/apple_PNG12406.png"],
+  ["Pink Lady", "https://pngimg.com/uploads/apple/apple_PNG12405.png"],
+  ["Royal Gala", "https://pngimg.com/uploads/apple/apple_PNG12509.png"],
+  ["Red Delicious", "https://pngimg.com/uploads/apple/apple_PNG12441.png"],
+  ["Hass Avocado", "https://pngimg.com/uploads/avocado/avocado_PNG15486.png"],
+  ["Reed Avocado", "https://pngimg.com/uploads/avocado/avocado_PNG15488.png"],
+  ["Shepard Avocado", "https://pngimg.com/uploads/avocado/avocado_PNG15472.png"],
+  ["Cavendish Banana", "https://pngimg.com/uploads/banana/banana_PNG835.png"],
+  ["Lady Finger Banana", "https://pngimg.com/uploads/banana/banana_PNG842.png"],
+  ["Black Muscat", "https://pngimg.com/uploads/grape/grape_PNG2955.png"],
+  ["Red Seedless", "https://pngimg.com/uploads/grape/grape_PNG2987.png"],
+  ["White Seedless", "https://pngimg.com/uploads/grape/grape_PNG2996.png"],
+  ["Gold Kiwi", "https://pngimg.com/uploads/kiwi/kiwi_PNG4028.png"],
+  ["Regular Kiwi", "https://pngimg.com/uploads/kiwi/kiwi_PNG4010.png"],
+];
+
+renderGrid('fruits-ag', fruitsAG);
+renderGrid('fruits-kz', fruitsKZ);
+renderGrid('vegetables', vegetables);
+</script>
+</body></html>

@@ -1,0 +1,165 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; File Name		: LdDMD30.INF
+;; Function Outline	: OPOS Machine Dependent Data File of DM-D30
+;; Copyright (C) Seiko Epson Corp. 2015-2016
+;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;/
+
+[MAIN]
+DeviceClass		= LineDisplay				; Device Class
+DeviceName		= DM-D30				; Device Name
+DeviceDesc		= EPSON DM-D30 Line Display		; Device Description
+SOName			= SoEPSON.LiquidCrystalDisplay.200	; Service Object Name
+RegFormatType		= EPSON
+RegFormatVersion	= 2
+NumberOfDevice		= 5
+SupportCoreVersion	= STRING:1.14.1.0		; Support CoreModuleGroup Version
+UseESDPRT		= INT:2				; EPSON SD Printer Port(Enable:1 Disable:0)
+DMModelID		= INT:2
+StandAloneConnection	= 2
+
+[DEVINFO]
+InternalVersion = 1			; INF file Version
+
+CapBlinkRate	= int:1			; TRUE
+CapCursorType	= int:0			; DISP_CT_NONE
+CapCustomGlyph	= int:1			; TRUE
+CapReadBack	= int:1			; DISP_CRB_SINGLE
+CapReverse	= int:2			; DISP_CR_REVERSEEACH
+GlyphHeight	= int:16			; GlyphHeight = 16
+GlyphWidth	= int:8			; GlyphWidth = 8
+CustomGlyphList	= STRING:20-7E		; 
+
+MaxDefCnt	= int:95		; MAX Define count
+
+CapStatisticsReporting	= int:1		; TRUE
+CapUpdateStatistics	= int:1		; TRUE
+
+StatsUnifiedPOSVersion		= DWORD:101
+StatsDeviceCategory		= DWORD:101
+StatsManufacturerName		= DWORD:101
+StatsModelName			= DWORD:101
+StatsSerialNumber		= DWORD:101
+StatsManufactureDate		= DWORD:101
+StatsMechanicalRevision		= DWORD:101
+StatsFirmwareRevision		= DWORD:101
+StatsInterface			= DWORD:101
+StatsInstallationDate		= DWORD:101
+
+StatsHoursPoweredCount		= DWORD:107
+StatsCommunicationErrorCount	= DWORD:107
+
+StatsOnlineTransitionCount	= DWORD:107
+
+[SETTING]
+Timeout		= 500			; Output timeout time
+IdleSleep	= int:20		; sleep time(msec) in idle loop
+
+CapBlink	= int:1			; DISP_CB_BLINKALL
+CapBrightness	= int:1			; TRUE
+CapCharacterSet	= int:10		; DISP_CCS_KANA
+CapDescriptors	= int:0			; FALSE
+CapHMarquee	= int:1			; TRUE
+CapICharWait	= int:1			; TRUE
+CapVMarquee	= int:0			; FALSE
+
+DeviceWindows	= int:4
+DeviceRows	= int:2
+DeviceColumns	= int:20
+DeviceDescriptors= int:0
+CharacterSetListJ= ""130,131,150,151,152,153,154,155,437,720,737,775,850,851,852,853,855,857,858,860,861,862,863,864,865,866,869,932,998,999,1098,1125,1250,1251,1252,1253,1254,1255,1256,1257,1258,254,255""
+CharacterSetListE= ""130,131,150,151,152,153,154,155,437,720,737,775,850,851,852,853,855,857,858,860,861,862,863,864,865,866,869,998,999,1098,1125,1250,1251,1252,1253,1254,1255,1256,1257,1258,254,255""
+CharacterSetListSC= ""130,131,150,151,152,153,154,155,437,720,737,775,850,851,852,853,855,857,858,860,861,862,863,864,865,866,869,998,999,1098,1125,1250,1251,1252,1253,1254,1255,1256,1257,1258,254,255""
+
+PortPipe	= "DM"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Serial (TM USB Connection)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+[MAIN_1]
+DeviceName	= DM-D30						; Device Name
+DeviceDesc	= EPSON DM-D30 (TM USB Connection) Line Display		; Device Description
+GroupID 	= Disp_S						; Device Group
+
+[PORT_1]
+BaudrateSel	= 4,5,6,7,8,10,11	; 2400, 4800, 9600, 19200, 38400,57600,115200
+BitLengthSel	= 1			; 8 bit
+ParitySel	= 0,1,2			; NONE, EVEN, ODD
+StopSel		= 1			; 1 bit only
+XonXoffSel	= 0			; Disabled only
+HandShakeSel	= 2			; DTR/DSR
+
+Baudrate	= 6			; 9600
+BitLength	= 1			; 8 bit
+Parity		= 0			; NONE
+Stop		= 1			; 1 bit
+XonXoff		= 0			; Disabled
+HandShake	= 2			; DTR/DSR
+
+[SETTING_1]
+Port		= TMPORT1		; Default Port
+
+[DEVINFO_1]
+Master		= "POSPrinter"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Parallel(TM USB Connection)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+[MAIN_2]
+DeviceName	= DM-D30P						; Device Name
+DeviceDesc	= EPSON DM-D30P (TM USB Connection) Line Display	; Device Description
+GroupID 	= Disp_P						; Device Group
+
+[SETTING_2]
+Port		= TMPORT1				; Default Port
+
+[DEVINFO_2]
+Master		= "POSPrinter"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; USB(TM USB Connection)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+[MAIN_3]
+DeviceName	= DM-D30U						; Device Name
+DeviceDesc	= EPSON DM-D30U (TM USB Connection) Line Display	; Device Description
+GroupID 	= Disp_U						; Device Group
+StandAloneConnection = 1
+
+[SETTING_3]
+Port		= TMPORT1				; Default Port
+
+[DEVINFO_3]
+Master		= "POSPrinter"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; EtherNet(TM USB Connection)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+[MAIN_4]
+DeviceName	= DM-D30E						; Device Name
+DeviceDesc	= EPSON DM-D30E (TM USB Connection) Line Display	; Device Description
+GroupID 	= Disp_E						; Device Group
+
+[SETTING_4]
+Port		= TMPORT1				; Default Port
+
+[DEVINFO_4]
+Master		= "POSPrinter"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Bluetooth(TM USB Connection)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+[MAIN_5]
+DeviceName	= DM-D30B						; Device Name
+DeviceDesc	= EPSON DM-D30B (TM USB Connection) Line Display	; Device Description
+GroupID 	= Disp_B						; Device Group
+
+[SETTING_5]
+Port		= TMPORT1				; Default Port
+
+[DEVINFO_5]
+Master		= "POSPrinter"

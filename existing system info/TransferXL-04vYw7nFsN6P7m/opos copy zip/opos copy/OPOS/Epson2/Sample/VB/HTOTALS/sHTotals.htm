@@ -1,0 +1,164 @@
+<html>
+
+<head>
+<title>Sample Program [HardTotals]</title>
+<style type="text/css">
+<!--
+a:link       { color: #003399 }
+a:visited    { color: #003399 }
+a:hover      { color: red }
+-->
+</style>
+</head>
+
+<body bgcolor="#FFFFD8">
+
+<h1><font size="4">EPSON OPOS ADK Sample Program</font></h1>
+<h2>Device:<strong>&nbsp;&nbsp; Hard Totals</strong></h2>
+<table border="0" cellpadding="3" cellspacing="3" width="100%">
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step1/sTotals1.vbp">Step 1  Create a file for data access (read/write).</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Crate a file for data processing.</dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">Open, ClaimDevice, ReleaseDevice, Close, Create, Write</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0">DeviceEnabled</td>
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step2/sTotals2.vbp">Step 2 Read the data from the file created earlier.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Read the data from the created file from Step 1.</dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">Find, Read</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step3/sTotals3.vbp">Step 3  Display all file names.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Adding a function to display all file names in a totals device.</dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">FindByIndex</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step4/sTotals4.vbp">Step 4 Process files.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Modify voluntary file names in a totals device.  Also, delete unused files.</dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">Rename, Delete</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step5/sTotals5.vbp">Step 5 Adding error handlers.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Adding error handlers to Step 4.</dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0"></td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0">FreeData, NumberOfFiles</td>
+ </tr>
+ <tr>
+  <td width="20%"><br></td>
+ </tr>
+ <tr>
+  <td colspan="2">
+   <h4><a href="Step6/sTotals6.vbp">Step 6  Obtains the statistics of the device.</a></h4>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top" colspan="2">
+   <dl>
+    <dt>Obtains the statistics of the device. <FONT SIZE="2">(UPOS 1.8)</FONT></dt>
+   </dl>
+  </td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Method</td>
+  <td bgcolor="#C8FFC0">RetrieveStatistics</td>
+ </tr>
+ <tr>
+  <td bgcolor="#C8FFC0">New Property</td>
+  <td bgcolor="#C8FFC0">CapStatisticsReporting</td>
+ </tr>
+</table>
+
+</body>
+
+</html>

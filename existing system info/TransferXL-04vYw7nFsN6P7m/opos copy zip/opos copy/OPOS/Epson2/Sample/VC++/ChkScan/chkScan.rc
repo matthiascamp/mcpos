@@ -1,0 +1,248 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif\r\n"
+    "#include ""res\\chkScan.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#endif\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\chkScan.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_CHKSCAN_DIALOG DIALOGEX 0, 0, 322, 230
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "VC++ Sample[CheckScanner]"
+FONT 8, "MS Sans Serif"
+BEGIN
+    PUSHBUTTON      "Read",IDC_BTN_READ,20,41,115,21
+    PUSHBUTTON      "Attached MICR data",IDC_BTN_MICRATTACH,20,65,115,21
+    PUSHBUTTON      "Store",IDC_BTN_STORE,20,89,115,21
+    PUSHBUTTON      "CreateFile",IDC_BTN_CREATEF,20,114,115,21
+    RTEXT           "DataSize : ",IDC_STC_DS,102,4,44,14
+    LTEXT           "",IDC_STC_IMBYTE,154,3,157,14,0,WS_EX_CLIENTEDGE
+    RTEXT           "Rest number of ""Store"" : ",IDC_STC_RESTESTI,46,22,100,
+                    14
+    LTEXT           "",IDC_STC_ESTI,154,21,157,14,0,WS_EX_CLIENTEDGE
+    GROUPBOX        "Cropping area",IDC_STC_CA,151,38,161,72
+    CONTROL         "All area (0,0,5984,2756)",IDC_RDO_CROP1,"Button",
+                    BS_AUTORADIOBUTTON,163,52,139,14
+    CONTROL         "Part of code (3500.2244,2000,456)",IDC_RDO_CROP2,"Button",
+                    BS_AUTORADIOBUTTON,163,70,139,14
+    CONTROL         "Part of number (5100,236,490,214)",IDC_RDO_CROP3,"Button",
+                    BS_AUTORADIOBUTTON,163,89,139,14
+    PUSHBUTTON      "Read memory data",IDC_BTN_READMEMORY,151,114,79,21
+    RTEXT           "Current Mode : ",IDC_STC_CM,69,143,77,13
+    COMBOBOX        IDC_CMB_CM,150,140,103,36,CBS_DROPDOWNLIST | 
+                    CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "Device Statistics",IDC_STC_DST,11,161,135,63
+    EDITTEXT        IDC_EDIT_RETRIEVST,23,184,112,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Retrieve Statistics",IDC_BTN_RETRIEVST,23,198,112,21
+    PUSHBUTTON      "Exit",IDCANCEL,260,140,52,16
+    LTEXT           "RetrieveStatistics Parameter",IDC_STATIC,23,173,112,8
+    CONTROL         "",IDC_CHECKSCANNER1,
+                    "{CCB90232-B81E-11D2-AB74-0040054C3719}",WS_TABSTOP,169,
+                    177,60,25
+    CONTROL         "",IDC_MICR1,"{CCB90112-B81E-11D2-AB74-0040054C3719}",
+                    WS_TABSTOP,239,177,60,25
+END
+
+IDD_XMLVIEW_DIALOG DIALOG DISCARDABLE  0, 0, 348, 214
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "XML file view."
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "",IDC_EXPLORER_WMLVIEW,
+                    "{8856F961-340A-11D0-A96B-00C04FD705A2}",WS_TABSTOP,3,3,
+                    342,208
+END
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName", "\0"
+            VALUE "FileDescription", "chkScan MFC Application\0"
+            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "InternalName", "chkScan\0"
+            VALUE "LegalCopyright", "Copyright (C) 1901\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "chkScan.EXE\0"
+            VALUE "ProductName", "chkScan Application\0"
+            VALUE "ProductVersion", "1, 0, 0, 1\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_CHKSCAN_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 317
+        TOPMARGIN, 3
+        BOTTOMMARGIN, 225
+    END
+
+    IDD_XMLVIEW_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 3
+        RIGHTMARGIN, 345
+        TOPMARGIN, 3
+        BOTTOMMARGIN, 211
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_XMLVIEW_DIALOG DLGINIT
+BEGIN
+    IDC_EXPLORER_WMLVIEW, 0x376, 160, 0
+0x0000, 0x0000, 0x004c, 0x0000, 0x3505, 0x0000, 0x22ef, 0x0000, 0x0000, 
+0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+0x0000, 0x0000, 0x004c, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0001, 
+0x0000, 0xd0e0, 0x0057, 0x3573, 0x11cf, 0x69ae, 0x0008, 0x2e2b, 0x6212, 
+0x0008, 0x0000, 0x0000, 0x0000, 0x004c, 0x0000, 0x1401, 0x0002, 0x0000, 
+0x0000, 0x00c0, 0x0000, 0x0000, 0x4600, 0x0080, 0x0000, 0x0000, 0x0000, 
+0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0001, 0x0000, 
+0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+    0
+END
+
+IDD_CHKSCAN_DIALOG DLGINIT
+BEGIN
+    IDC_CHECKSCANNER1, 0x376, 16, 0
+0x0000, 0x0000, 0x0900, 0x0000, 0x094d, 0x0000, 0x043d, 0x0000, 
+    IDC_MICR1, 0x376, 16, 0
+0x0000, 0x0000, 0x0900, 0x0000, 0x094d, 0x0000, 0x043d, 0x0000, 
+    0
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif
+#include "res\chkScan.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#endif
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

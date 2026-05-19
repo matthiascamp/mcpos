@@ -526,15 +526,14 @@
     body.register-mode [data-tab="dashboard"],
     body.register-mode [data-tab="cashdrawer"],
     body.register-mode [data-tab="zreport"],
-    body.register-mode [data-tab="audit"],
+    body.register-mode [data-tab="receipt"],
     body.register-mode [data-tab="logs"],
     body.register-mode [data-tab="settings"],
     body.register-mode [data-tab="staff"],
     body.register-mode [data-tab="keyboard"],
     body.register-mode [data-tab="labels"],
     body.register-mode [data-tab="stock"],
-    body.register-mode [data-tab="insights"],
-    body.register-mode [data-tab="diagnostics"] { display: none !important; }
+    body.register-mode [data-tab="insights"] { display: none !important; }
     body.register-mode .sidebar-group-label { display: none; }
     body.register-mode .sidebar-group { padding-top: 6px; }
 
@@ -548,17 +547,27 @@
       <span id="sidebarStoreName">Tillaroo</span>
       <small id="modeBadge">Admin</small>
     </div>
-    <div style="padding:8px 12px;border-bottom:1px solid var(--border)">
-      <button id="modeToggleBtn" style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text-dim);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:8px;transition:all .2s">
-        <span id="modeIcon" style="font-size:14px">&#128274;</span>
-        <span id="modeLabel">Switch to Register Mode</span>
-      </button>
-    </div>
     <script>
     (function() {
       var pinBuf = '';
       var btn = document.getElementById('modeToggleBtn');
-      if (!btn) return;
+      if (!btn) {
+        var params = new URLSearchParams(window.location.search);
+        if (params.get('mode') === 'register') {
+          document.body.classList.add('register-mode');
+          document.getElementById('modeBadge').textContent = 'Register Tools';
+          window.addEventListener('DOMContentLoaded', function() {
+            var current = document.querySelector('.sidebar a.active');
+            var tx = document.querySelector('.sidebar a[data-tab="transactions"]');
+            if (current) current.classList.remove('active');
+            if (tx) tx.click();
+          });
+        } else {
+          document.getElementById('modeBadge').textContent = 'Admin';
+        }
+        window.__fromRegisterApp = params.get('from') === 'register';
+        return;
+      }
 
       function closePin() {
         var modal = document.getElementById('modePinModal');
@@ -757,7 +766,7 @@
     </div>
 
     <div class="sidebar-footer">
-      <a href="index.html" id="backToRegisterBtn">
+      <a href="index.html" id="backToRegisterBtn" style="display:none">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
         Back to Register
       </a>
@@ -1633,6 +1642,9 @@
               <div class="kb-pos-info">
                 <div style="font-size:10px;margin-bottom:2px">Image (optional)</div>
                 <input type="file" id="kbImageFile" accept="image/*" style="font-size:10px;width:100%">
+                <label id="kbImageZoomRow" style="display:flex;align-items:center;gap:5px;margin-top:5px;font-size:10px;color:var(--text);cursor:pointer">
+                  <input type="checkbox" id="kbImageZoom" style="width:14px;height:14px;accent-color:#2563eb;cursor:pointer"> Zoom image to fill
+                </label>
                 <div id="kbImagePreview" style="margin-top:3px"></div>
               </div>
             </div>
@@ -5567,6 +5579,7 @@
       $('#kbColSpan').value = 1
       $('#kbRowSpan').value = 1
       $('#kbImageData').value = ''
+      $('#kbImageZoom').checked = false
       $('#kbImagePreview').innerHTML = ''
       clearProductPicker()
       $('#kbDeleteBtn').style.display = 'none'
@@ -5594,6 +5607,7 @@
       $('#kbColSpan').value = btn.col_span || 1
       $('#kbRowSpan').value = btn.row_span || 1
       $('#kbImageData').value = btn.image || ''
+      $('#kbImageZoom').checked = btn.alpha_range === 'image:cover' || (!btn.alpha_range && (btn.type === 'page_link' || btn.type === 'section'))
       $('#kbImagePreview').innerHTML = btn.image ? `<img src="${btn.image}" style="width:36px;height:36px;border-radius:6px;object-fit:cover">` : ''
       // Product picker state
       clearProductPicker()
@@ -5666,9 +5680,11 @@
     function updateTypeFields () {
       const type = $('#kbType').value
       const isProduct = type === 'product' || type === 'open_price' || type === 'fixed_price'
+      const supportsImageFit = isProduct || type === 'page_link' || type === 'section'
       $('#kbPageLinkRow').style.display = type === 'page_link' ? 'flex' : 'none'
       $('#kbProductRow').style.display = isProduct ? 'flex' : 'none'
       $('#kbCatRow').style.display = (type === 'section' || type === 'nav') ? 'flex' : 'none'
+      $('#kbImageZoomRow').style.display = supportsImageFit ? 'flex' : 'none'
       // Hide standalone price when product row has its own price field
       $('#kbPriceField').style.display = isProduct ? 'none' : ''
       if (type === 'page_link') {
@@ -5678,7 +5694,14 @@
         }).join('')
       }
     }
-    $('#kbType').addEventListener('change', () => { updateTypeFields(); updateLivePreview() })
+    $('#kbType').addEventListener('change', () => {
+      if (!$('#kbEditId').value) {
+        const type = $('#kbType').value
+        $('#kbImageZoom').checked = type === 'page_link' || type === 'section'
+      }
+      updateTypeFields(); updateLivePreview()
+    })
+    $('#kbImageZoom').addEventListener('change', updateLivePreview)
 
     // Product picker for product-type buttons
     $('#kbProductSearch').addEventListener('input', debounce(async () => {
@@ -5788,13 +5811,15 @@
       if (btnType === 'product' && isOpenPrice) btnType = 'open_price'
       const linkedProduct = $('#kbProductId').value || null
       const catFilter = (btnType === 'product' || btnType === 'open_price') ? linkedProduct : ($('#kbCatFilter').value.trim() || null)
+      const imageFitTypes = new Set(['product', 'open_price', 'fixed_price', 'page_link', 'section'])
+      const imageFitMode = $('#kbImageZoom').checked ? 'image:cover' : 'image:contain'
       const btn = {
         id: editId || undefined,
         label,
         type: btnType,
         price: parseFloat($('#kbPrice').value) || 0,
         category_filter: catFilter,
-        alpha_range: (btnType === 'nav') ? ($('#kbAlphaRange').value.trim() || null) : null,
+        alpha_range: (btnType === 'nav') ? ($('#kbAlphaRange').value.trim() || null) : (imageFitTypes.has(btnType) ? imageFitMode : null),
         color: $('#kbColor').value,
         bg_color: $('#kbBgColor').value,
         col_span: colSpan,
@@ -6976,6 +7001,10 @@
 
     setDashDate(dashboardDate)
     window.pos.getVersion().then(v => { const el = $('#adminVersion'); if (el) el.textContent = v }).catch(() => {})
+    if (window.__fromRegisterApp) {
+      const back = $('#backToRegisterBtn')
+      if (back) back.style.display = ''
+    }
 
     window.pos.onDataChanged(() => {
       const active = $('.sidebar a.active')?.dataset.tab

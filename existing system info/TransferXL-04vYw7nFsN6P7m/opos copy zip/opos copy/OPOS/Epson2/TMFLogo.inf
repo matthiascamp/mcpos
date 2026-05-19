@@ -1,0 +1,636 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; File Name		: TMFLOGO.INF
+;; Function Outline	: OPOS Machine Dependent Data File of "TmfLogo Utility"
+;; Copyright (C) SEIKO EPSON CORP. 2001-2014
+;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; POSPrinter
+
+[TM-H3000R]
+SupportCTS/RTS		= INT:1
+
+[TM-H6000]
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+
+[TM-H6000E]
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+
+[TM-H6000II]
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+SupportKeyCode		= INT:2
+SupportColor		= INT:1
+
+[TM-H6000IIE]
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+SupportKeyCode		= INT:2
+SupportColor		= INT:1
+
+[TM-H6000III]
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+SupportKeyCode		= INT:2
+SupportColor		= INT:1
+
+[TM-H6000IIIE]
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+SupportKeyCode		= INT:2
+SupportColor		= INT:1
+
+[TM-H6000IIIP]
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+SupportKeyCode		= INT:2
+SupportColor		= INT:1
+
+[TM-H6000IIIU]
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+SupportKeyCode		= INT:2
+SupportColor		= INT:1
+
+[TM-H6000IIIM]
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+SupportKeyCode		= INT:2
+SupportColor		= INT:1
+
+[TM-H6000IIIME]
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+SupportKeyCode		= INT:2
+SupportColor		= INT:1
+
+[TM-H6000IIIPM]
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+SupportKeyCode		= INT:2
+SupportColor		= INT:1
+
+[TM-H6000IIIMU]
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+SupportKeyCode		= INT:2
+SupportColor		= INT:1
+
+[TM-H6000IIM]
+MemoryCapacity		= Hex:1,2,3,4
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+SupportKeyCode		= INT:2
+SupportColor		= INT:1
+
+[TM-H6000IIME]
+MemoryCapacity		= Hex:1,2,3,4
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+SupportKeyCode		= INT:2
+SupportColor		= INT:1
+
+[TM-H6000IIMU]
+MemoryCapacity		= Hex:1,2,3,4
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+SupportKeyCode		= INT:2
+SupportColor		= INT:1
+
+[TM-H6000IIP]
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+SupportKeyCode		= INT:2
+SupportColor		= INT:1
+
+[TM-H6000IIPM]
+MemoryCapacity		= Hex:1,2,3,4
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+SupportKeyCode		= INT:2
+SupportColor		= INT:1
+
+[TM-H6000IIU]
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+SupportKeyCode		= INT:2
+SupportColor		= INT:1
+
+[TM-H6000M]
+MemoryCapacity		= Hex:1,2,3,4,5
+
+[TM-H6000ME]
+MemoryCapacity		= Hex:1,2,3,4,5
+
+[TM-H6000MU]
+MemoryCapacity		= Hex:1,2,3,4,5
+
+[TM-H6000P]
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+
+[TM-H6000PM]
+MemoryCapacity		= Hex:1,2,3,4,5
+
+[TM-H6000U]
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+
+[TM-J2000]
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:2
+
+[TM-J2000E]
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:2
+
+[TM-J2000M]
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:2
+
+[TM-J2000ME]
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:2
+
+[TM-J2000MU]
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:2
+
+[TM-J2000P]
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:2
+
+[TM-J2000PM]
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:2
+
+[TM-J2000U]
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:2
+
+[TM-J2100]
+SupportColor		= INT:1
+PrimaryInkKind		= INT:15
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:2
+
+[TM-J2100E]
+SupportColor		= INT:1
+PrimaryInkKind		= INT:15
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:2
+
+[TM-J2100M]
+SupportColor		= INT:1
+PrimaryInkKind		= INT:15
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:2
+
+[TM-J2100ME]
+SupportColor		= INT:1
+PrimaryInkKind		= INT:15
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:2
+
+[TM-J2100MU]
+SupportColor		= INT:1
+PrimaryInkKind		= INT:15
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:2
+
+[TM-J2100P]
+SupportColor		= INT:1
+PrimaryInkKind		= INT:15
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:2
+
+[TM-J2100PM]
+SupportColor		= INT:1
+PrimaryInkKind		= INT:15
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:2
+
+[TM-J2100U]
+SupportColor		= INT:1
+PrimaryInkKind		= INT:15
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:2
+
+[TM-J7000]
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:1
+
+[TM-J7000E]
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:1
+
+[TM-J7000P]
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:1
+
+[TM-J7000U]
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:1
+
+[TM-J7100]
+SupportColor		= INT:1
+PrimaryInkKind		= INT:15
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:1
+
+[TM-J7100E]
+SupportColor		= INT:1
+PrimaryInkKind		= INT:15
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:1
+
+[TM-J7100P]
+SupportColor		= INT:1
+PrimaryInkKind		= INT:15
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:1
+
+[TM-J7100U]
+SupportColor		= INT:1
+PrimaryInkKind		= INT:15
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:1
+
+[TM-J7500]
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:1
+
+[TM-J7500E]
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:1
+
+[TM-J7500P]
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:1
+
+[TM-J7500U]
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:1
+
+[TM-J7600]
+SupportColor		= INT:1
+PrimaryInkKind		= INT:15
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:1
+
+[TM-J7600E]
+SupportColor		= INT:1
+PrimaryInkKind		= INT:15
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:1
+
+[TM-J7600P]
+SupportColor		= INT:1
+PrimaryInkKind		= INT:15
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:1
+
+[TM-J7600U]
+SupportColor		= INT:1
+PrimaryInkKind		= INT:15
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:18
+SupportKeyCode		= INT:1
+
+[TM-L90]
+SupportColor		= INT:1
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-L90E]
+SupportColor		= INT:1
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-L90M]
+SupportColor		= INT:1
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-L90ME]
+SupportColor		= INT:1
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-L90MU]
+SupportColor		= INT:1
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-L90P]
+SupportColor		= INT:1
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-L90PM]
+SupportColor		= INT:1
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-L90U]
+SupportColor		= INT:1
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-T88IIIX]
+SupportCTS/RTS		= INT:1
+
+[TM-T88IIIXM]
+SupportCTS/RTS		= INT:1
+
+[TM-T88IIR]
+SupportCTS/RTS		= INT:1
+
+[TM-T88IIRM]
+SupportCTS/RTS		= INT:1
+
+[TM-T88IIRM-051]
+SupportCTS/RTS		= INT:1
+
+[TM-T88IV]
+SupportColor		= INT:1
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-T88IVE]
+SupportColor		= INT:1
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-T88IVM]
+SupportColor		= INT:1
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-T88IVME]
+SupportColor		= INT:1
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-T88IVMU]
+SupportColor		= INT:1
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-T88IVP]
+SupportColor		= INT:1
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-T88IVPM]
+SupportColor		= INT:1
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-T88IVU]
+SupportColor		= INT:1
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-T88IVReStick]
+SupportColor		= INT:0
+PrimaryInkKind		= INT:1
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-T88IVReStickE]
+SupportColor		= INT:0
+PrimaryInkKind		= INT:1
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-T88IVReStickP]
+SupportColor		= INT:0
+PrimaryInkKind		= INT:1
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-T88IVReStickU]
+SupportColor		= INT:0
+PrimaryInkKind		= INT:1
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-T90]
+SupportColor		= INT:1
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-T90E]
+SupportColor		= INT:1
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-T90M]
+SupportColor		= INT:1
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-T90ME]
+SupportColor		= INT:1
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-T90MU]
+SupportColor		= INT:1
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-T90P]
+SupportColor		= INT:1
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-T90PM]
+SupportColor		= INT:1
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-T90U]
+SupportColor		= INT:1
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+PrimaryInkKind		= INT:1
+SecondaryInkKind	= INT:15
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-U675]
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+
+[TM-U675E]
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+
+[TM-U675M]
+MemoryCapacity		= Hex:1,2,3,4,5
+
+[TM-U675ME]
+MemoryCapacity		= Hex:1,2,3,4,5
+
+[TM-U675MU]
+MemoryCapacity		= Hex:1,2,3,4,5
+
+[TM-U675P]
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+
+[TM-U675PM]
+MemoryCapacity		= Hex:1,2,3,4,5
+
+[TM-U675U]
+MemoryCapacity		= Hex:1,2,3,4,5,6,7
+
+[TM-T70]
+SupportKeyCode		= INT:1
+
+[TM-T70E]
+SupportKeyCode		= INT:1
+
+[TM-T70P]
+SupportKeyCode		= INT:1
+
+[TM-T70U]
+SupportKeyCode		= INT:1
+
+[TM-T70M]
+SupportKeyCode		= INT:1
+
+[TM-T70ME]
+SupportKeyCode		= INT:1
+
+[TM-T70PM]
+SupportKeyCode		= INT:1
+
+[TM-T70MU]
+SupportKeyCode		= INT:1
+
+[TM-P60]
+SupportKeyCode		= INT:1
+
+[TM-P60W]
+SupportKeyCode		= INT:1
+
+[TM-P60PEELER]
+SupportKeyCode		= INT:1
+
+[TM-P60PEELERW]
+SupportKeyCode		= INT:1
+
+[TM-T81]
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-T81U]
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-T81M]
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-T81PM]
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-T81MU]
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+[TM-T81ME]
+MonochroAddMem		= INT:16
+SupportKeyCode		= INT:2
+
+; LineDisplay
+
+[DM-D500]
+SupportCTS/RTS		= INT:1

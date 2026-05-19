@@ -1,0 +1,32 @@
+swtich to register mode button still doesn't work- it should prompt for an admin password before going back to the keyboard- and from this keyboard, going into admin should only have limited options like products, deals, transaction search, network
+
+in transaction search, typing an item name or a code should bring up some top candidates
+
+get rid of parked sales, they are called on hold at my fruit shop
+
+cash drawer page should account for multiple tills with multiple drawers
+
+print pdf on reports doesn't work
+
+low stock alerts should be in a different tab called stock- products is purely for managing the product info
+
+entering products from register mode should bring up an on screen qwerty keyboard with big buttons for typing on a register
+product page should allow for creating and editing categories and families
+
+price tag editor needs to be fully tested and work properly
+
+deals from register mode should bring up a big keyboard on the screen
+
+make sure staff page has all features that it needs
+
+network page should be able to show multiple registers connected in the diagram if connected to multiple. (2 forks)
+
+make sure insights page has all functionality it needs and that its easy to use
+
+make sure data flow saves properly and that the server works- and that supabase would integrate properly
+
+please desk check all algorithms and test all edge cases- if you make fixes then desk check them as well
+make sure you record your changes so they can be undone
+
+
+DONT MESS WITH KEYBOARD EDITOR OR KEYBOARD LAYOUT AT ALL

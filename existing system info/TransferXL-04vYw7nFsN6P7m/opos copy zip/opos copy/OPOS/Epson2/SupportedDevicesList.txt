@@ -1,0 +1,553 @@
+                           EPSON OPOS ADK Version 2.80E R5
+               Supported Devices, Reference Versions of Firmware
+
+                                                       SEIKO EPSON CORPORATION
+                                                                 14. Oct, 2016
+
+   The reference versions of firmware is described regarding Line Displays,
+     MICRs and POS Printers.
+   Use the indicated firmware version or newer.
+   Although it will work with an earlier version, use the indicated version 
+   (or newer) if you experience any difficulties.
+
+   If the printer name includes "M", which means that the printer is either 
+   Simplified Chinese or Traditional Chinese.
+
+
+POS Printers                                    Reference versions of firmware
+   [Newly supported devices]
+     -
+
+   [Currently supported devices]
+     EPSON RP-U420                                             Ver 2.10
+     EPSON RP-U420P                                            Ver 2.10
+     EPSON TM-295               See below [1]                  Ver 1.08
+     EPSON TM-295M              See below [1]                  Ver 1.00
+     EPSON TM-295P              See below [1]                  Ver 1.08
+     EPSON TM-295PM             See below [1]                  Ver 1.00
+     EPSON TM-H5000II                                          Ver 5.05
+     EPSON TM-H5000IIE (Ethernet)                              Ver 5.05
+     EPSON TM-H5000IIM                                         Ver 3.42
+     EPSON TM-H5000IIME (Ethernet)                             Ver 3.42
+     EPSON TM-H5000IIMU (USB)                                  Ver 3.42
+     EPSON TM-H5000IIP                                         Ver 5.05
+     EPSON TM-H5000IIPM                                        Ver 3.42
+     EPSON TM-H5000IIU (USB)                                   Ver 5.05
+     EPSON TM-H5200                                            Ver 1.04
+     EPSON TM-H5200E (Ethernet)                                Ver 1.04
+     EPSON TM-H5200U (USB)                                     Ver 1.04
+     EPSON TM-H5200P                                           Ver 1.04
+     EPSON TM-H6000II                                          Ver 3.01
+     EPSON TM-H6000II (with Scanner Model)                     Ver 7.01
+     EPSON TM-H6000IIE (Ethernet)                              Ver 3.01
+     EPSON TM-H6000IIE (Ethernet) (with Scanner Model)         Ver 7.01
+     EPSON TM-H6000III                                         Ver 10.00
+     EPSON TM-H6000III (with Scanner Model)                    Ver 12.01
+     EPSON TM-H6000IIIE (Ethernet)                             Ver 10.00
+     EPSON TM-H6000IIIE (Ethernet) (with Scanner Model)        Ver 12.01
+     EPSON TM-H6000IIIM                                        Ver 10.01
+     EPSON TM-H6000IIIME (Ethernet)                            Ver 10.01
+     EPSON TM-H6000IIIMU (USB)                                 Ver 10.01
+     EPSON TM-H6000IIIP                                        Ver 10.00
+     EPSON TM-H6000IIIP (with Scanner Model)                   Ver 12.01
+     EPSON TM-H6000IIIPM                                       Ver 10.01
+     EPSON TM-H6000IIIU (USB)                                  Ver 10.00
+     EPSON TM-H6000IIIU (USB) (with Scanner Model)             Ver 12.01
+     EPSON TM-H6000IIM                                         Ver 3.90
+     EPSON TM-H6000IIME (Ethernet)                             Ver 3.90
+     EPSON TM-H6000IIMU (USB)                                  Ver 3.90
+     EPSON TM-H6000IIP                                         Ver 3.01
+     EPSON TM-H6000IIP (with Scanner Model)                    Ver 7.01
+     EPSON TM-H6000IIPM                                        Ver 3.90
+     EPSON TM-H6000IIU (USB)                                   Ver 3.01
+     EPSON TM-H6000IIU (USB) (with Scanner Model)              Ver 7.01
+     EPSON TM-H6000IV                        See below [3]     Ver 20.00
+     EPSON TM-H6000IVM                       See below [3]     Ver 20.00
+     EPSON TM-H6000IVE (Ethernet)            See below [3]     Ver 20.00
+     EPSON TM-H6000IVME (Ethernet)           See below [3]     Ver 20.00
+     EPSON TM-H6000IVU (USB)                 See below [3]     Ver 20.00
+     EPSON TM-H6000IVMU (USB)                See below [3]     Ver 20.00
+     EPSON TM-H6000IVP                       See below [3]     Ver 20.00
+     EPSON TM-H6000IVPM                      See below [3]     Ver 20.00
+     EPSON TM-H2000                          See below [3]     Ver 1.00
+     EPSON TM-H2000E (Ethernet)              See below [3]     Ver 1.00
+     EPSON TM-H2000U (USB)                   See below [3]     Ver 1.00
+     EPSON TM-H2000P                         See below [3]     Ver 1.00
+     EPSON TM-J2000/J2100                                      Ver 2.02
+     EPSON TM-J2000E/J2100E (Ethernet)                         Ver 2.02
+     EPSON TM-J2000M/J2100M                                    Ver 2.10
+     EPSON TM-J2000ME/J2100ME (Ethernet)                       Ver 2.10
+     EPSON TM-J2000MU/J2100MU (USB)                            Ver 2.10
+     EPSON TM-J2000P/J2100P                                    Ver 2.02
+     EPSON TM-J2000PM/J2100PM                                  Ver 2.10
+     EPSON TM-J2000U/J2100U (USB)                              Ver 2.02
+     EPSON TM-J7000/J7100                                      Ver 1.00
+     EPSON TM-J7000E/J7100E (Ethernet)                         Ver 1.00
+     EPSON TM-J7000U/J7100U (USB)                              Ver 1.00
+     EPSON TM-J7000P/J7100P                                    Ver 1.00
+     EPSON TM-J7500/J7600                                      Ver 1.00
+     EPSON TM-J7500E/J7600E (Ethernet)                         Ver 1.00
+     EPSON TM-J7500U/J7600U (USB)                              Ver 1.00
+     EPSON TM-J7500P/J7600P                                    Ver 1.00
+     EPSON TM-L60II                                            Ver 1.02
+     EPSON TM-L60IIP                                           Ver 1.04
+     EPSON TM-L90                                              Ver 1.03
+                                                               Ver 3.00
+     EPSON TM-L90 (with Peeler Model)                          Ver 1.00
+     EPSON TM-L90E (Ethernet)                                  Ver 1.03
+                                                               Ver 3.00
+     EPSON TM-L90E (Ethernet) (with Peeler Model)              Ver 1.00
+     EPSON TM-L90M                                             Ver 1.02
+                                                               Ver 3.00
+     EPSON TM-L90ME (Ethernet)                                 Ver 1.02
+                                                               Ver 3.00
+     EPSON TM-L90MU (USB)                                      Ver 1.02
+                                                               Ver 3.00
+     EPSON TM-L90P                                             Ver 1.03
+                                                               Ver 3.00
+     EPSON TM-L90P (with Peeler Model)                         Ver 1.00
+     EPSON TM-L90PM                                            Ver 1.02
+                                                               Ver 3.00
+     EPSON TM-L90U (USB)                                       Ver 1.03
+                                                               Ver 3.00
+     EPSON TM-L90U (USB) (with Peeler Model)                   Ver 1.00
+     EPSON TM-L90LinerFree                                     Ver 1.00
+     EPSON TM-L90LinerFreeE (Ethernet)                         Ver 1.00
+     EPSON TM-L90LinerFreeP                                    Ver 1.00
+     EPSON TM-L90LinerFreeU (USB)                              Ver 1.00
+     EPSON TM-L90LinerFree (with 58mm Model)                   Ver 3.02
+     EPSON TM-L90LinerFreeE (Ethernet) (with 58mm Model)       Ver 3.02
+     EPSON TM-L90LinerFreeP (with 58mm Model)                  Ver 3.02
+     EPSON TM-L90LinerFreeU (USB) (with 58mm Model)            Ver 3.02
+     EPSON TM-m10 (USB)                                        Ver 1.00
+     EPSON TM-m10 (Ethernet)                                   Ver 1.30
+     EPSON TM-m10 (Bluetooth)                                  Ver 1.20
+     EPSON TM-m30 (USB)                                        Ver 1.00
+     EPSON TM-m30 (Ethernet)                                   Ver 1.00
+     EPSON TM-m30 (Bluetooth)                                  Ver 1.00
+     EPSON TM-P20U  (USB)                                      Ver 1.00
+     EPSON TM-P20W  (IEEE802.11b/g/n)                          Ver 1.00
+     EPSON TM-P20B  (Bluetooth)                                Ver 1.00
+     EPSON TM-P20MU (USB)                                      Ver 1.00
+     EPSON TM-P20MW (IEEE802.11b/g/n)                          Ver 1.00
+     EPSON TM-P20MB (Bluetooth)                                Ver 1.00
+     EPSON TM-P60                                              Ver 1.00
+     EPSON TM-P60PEELER                                        Ver 2.00
+     EPSON TM-P60PEELERW (IEEE802.11b)                         Ver 2.00
+     EPSON TM-P60W (IEEE802.11b)                               Ver 1.00
+     EPSON TM-P60IIU (USB)                                     Ver 1.00
+     EPSON TM-P60IIW (IEEE802.11b/g/n)                         Ver 1.00
+     EPSON TM-P60IIB (Bluetooth)                               Ver 1.00
+     EPSON TM-P60IIMU (USB)                                    Ver 5.12
+     EPSON TM-P60IIMW (IEEE802.11b/g/n)                        Ver 5.12
+     EPSON TM-P60IIMB (Bluetooth)                              Ver 5.12
+     EPSON TM-P60IIPEEELRU (USB)                               Ver 1.00
+     EPSON TM-P60IIPEELERW (IEEE802.11b/g/n)                   Ver 1.00
+     EPSON TM-P60IIPEELERB (Bluetooth)                         Ver 1.00
+     EPSON TM-P80U (USB)                                       Ver 1.00
+     EPSON TM-P80W (IEEE802.11b/g/n)                           Ver 1.00
+     EPSON TM-P80B (Bluetooth)                                 Ver 1.00
+     EPSON TM-P80-42CU (USB)                                   Ver 1.00
+     EPSON TM-P80-42CW (IEEE802.11b/g/n)                       Ver 1.00
+     EPSON TM-P80-42CB (Bluetooth)                             Ver 1.00
+     EPSON TM-P80MU (USB)                                      Ver 1.01
+     EPSON TM-P80MW (IEEE802.11b/g/n)                          Ver 1.01
+     EPSON TM-P80MB (Bluetooth)                                Ver 1.01
+     EPSON TM-P80M-42CU (USB)                                  Ver 1.01
+     EPSON TM-P80M-42CW (IEEE802.11b/g/n)                      Ver 1.01
+     EPSON TM-P80M-42CB (Bluetooth)                            Ver 1.01
+     EPSON TM-T20                                              Ver 1.01
+     EPSON TM-T20E (Ethernet)                                  Ver 2.00
+     EPSON TM-T20U (USB)                                       Ver 1.00
+     EPSON TM-T20-42C                                          Ver 1.01
+     EPSON TM-T20-42CE (Ethernet)                              Ver 2.00
+     EPSON TM-T20-42CU (USB)                                   Ver 1.00
+     EPSON TM-T20II                                            Ver 5.00
+     EPSON TM-T20IIB (Bluetooth)                               Ver 5.00
+     EPSON TM-T20IIE (Ethernet)                                Ver 5.00
+                                                               Ver 6.00
+     EPSON TM-T20IIU (USB)                                     Ver 5.00
+                                                               Ver 6.00
+     EPSON TM-T20II-42C                                        Ver 5.00
+     EPSON TM-T20II-42CB (Bluetooth)                           Ver 5.00
+     EPSON TM-T20II-42CE (Ethernet)                            Ver 5.00
+                                                               Ver 6.00
+     EPSON TM-T20II-42CU (USB)                                 Ver 5.00
+                                                               Ver 6.00
+     EPSON TM-T70                                              Ver 1.00
+     EPSON TM-T70E (Ethernet)                                  Ver 1.00
+     EPSON TM-T70U (USB)                                       Ver 1.00
+     EPSON TM-T70P                                             Ver 1.00
+     EPSON TM-T70M                                             Ver 1.00
+     EPSON TM-T70ME (Ethernet)                                 Ver 1.00
+     EPSON TM-T70MU (USB)                                      Ver 1.00
+     EPSON TM-T70PM                                            Ver 1.00
+     EPSON TM-T70II                                            Ver 5.00
+     EPSON TM-T70IIP (Parallel)                                Ver 5.00
+     EPSON TM-T70IIE (Ethernet)                                Ver 5.00
+     EPSON TM-T70IIU (USB)                                     Ver 5.00
+     EPSON TM-T70IIB (Bluetooth)                               Ver 5.00
+     EPSON TM-T70IIM                                           Ver 5.00
+     EPSON TM-T70IIPM (Parallel)                               Ver 5.00
+     EPSON TM-T70IIME (Ethernet)                               Ver 5.00
+     EPSON TM-T70IIMU (USB)                                    Ver 5.00
+     EPSON TM-T81M                                             Ver 2.00
+     EPSON TM-T81ME (Ethernet)                                 Ver 2.00
+     EPSON TM-T81MU (USB)                                      Ver 2.00
+     EPSON TM-T81PM                                            Ver 2.00
+     EPSON TM-T81IIM                                           Ver 6.00
+     EPSON TM-T81IIME (Ethernet)                               Ver 6.04
+     EPSON TM-T81IIME (Ethernet)                               Ver 7.00
+     EPSON TM-T81IIMU (USB)                                    Ver 6.00
+     EPSON TM-T81IIMU (USB)                                    Ver 7.02
+     EPSON TM-T82M                                             Ver 1.00
+     EPSON TM-T82ME (Ethernet)                                 Ver 2.02
+     EPSON TM-T82MU (USB)                                      Ver 1.00
+     EPSON TM-T82PM (Parallel)                                 Ver 6.00
+     EPSON TM-T82M-42C                                         Ver 1.00
+     EPSON TM-T82M-42CE (Ethernet)                             Ver 2.02
+     EPSON TM-T82M-42CU (USB)                                  Ver 1.00
+     EPSON TM-T82M-42CP (Parallel)                             Ver 6.00
+     EPSON TM-T82II                                            Ver 5.00
+     EPSON TM-T82IIP (Parallel)                                Ver 5.00
+     EPSON TM-T82IIE (Ethernet)                                Ver 5.00
+                                                               Ver 6.00
+     EPSON TM-T82IIU (USB)                                     Ver 5.00
+                                                               Ver 6.00
+     EPSON TM-T82II-42C                                        Ver 5.00
+     EPSON TM-T82II-42CP (Parallel)                            Ver 5.00
+     EPSON TM-T82II-42CE (Ethernet)                            Ver 5.00
+                                                               Ver 6.00
+     EPSON TM-T82II-42CU (USB)                                 Ver 5.00
+                                                               Ver 6.00
+     EPSON TM-T82IIM                                           Ver 5.00
+     EPSON TM-T82IIPM (Parallel)                               Ver 5.00
+     EPSON TM-T82IIME (Ethernet)                               Ver 5.00
+                                                               Ver 6.00
+     EPSON TM-T82IIMU (USB)                                    Ver 5.00
+                                                               Ver 6.00
+     EPSON TM-T82IIM-42C                                       Ver 5.00
+     EPSON TM-T82IIM-42CP (Parallel)                           Ver 5.00
+     EPSON TM-T82IIM-42CE (Ethernet)                           Ver 5.00
+                                                               Ver 6.00
+     EPSON TM-T82IIM-42CU (USB)                                Ver 5.00
+                                                               Ver 6.00
+     EPSON TM-T88III                                           Ver 7.00
+     EPSON TM-T88IIIE (Ethernet)                               Ver 7.00
+     EPSON TM-T88IIIU (USB)                                    Ver 7.00
+     EPSON TM-T88IIIP                                          Ver 7.00
+     EPSON TM-T88IIIM                                          Ver 7.05
+     EPSON TM-T88IIIME (Ethernet)                              Ver 7.05
+     EPSON TM-T88IIIMU (USB)                                   Ver 7.05
+     EPSON TM-T88IIIPM                                         Ver 7.05
+     EPSON TM-T88IIIX (For ARCX(IM-700))     See below [2]     Ver 7.05
+     EPSON TM-T88IIIXM (For ARCX IM-700))    See below [2]     Ver 8.01
+     EPSON TM-T88IV                                            Ver 10.00
+     EPSON TM-T88IVE (Ethernet)                                Ver 10.00
+     EPSON TM-T88IVU (USB)                                     Ver 10.00
+     EPSON TM-T88IVP                                           Ver 10.00
+     EPSON TM-T88IVM                                           Ver 10.00
+     EPSON TM-T88IVME (Ethernet)                               Ver 10.00
+     EPSON TM-T88IVMU (USB)                                    Ver 10.00
+     EPSON TM-T88IVPM                                          Ver 10.00
+     EPSON TM-T88IVReStick                                     Ver 25.00
+     EPSON TM-T88IVReStickE (Ethernet)                         Ver 25.00
+     EPSON TM-T88IVReStickU (USB)                              Ver 25.00
+     EPSON TM-T88IVReStickP                                    Ver 25.00
+     EPSON TM-T88V                                             Ver 30.12
+     EPSON TM-T88VB (Bluetooth)                                Ver 30.12
+     EPSON TM-T88VE (Ethernet)                                 Ver 30.12
+     EPSON TM-T88VU (USB)                                      Ver 30.12
+     EPSON TM-T88VP                                            Ver 30.12
+     EPSON TM-T88VM                                            Ver 30.12
+     EPSON TM-T88VME (Ethernet)                                Ver 30.12
+     EPSON TM-T88VMU (USB)                                     Ver 30.12
+     EPSON TM-T88VPM                                           Ver 30.12
+     EPSON TM-T88VI                                            Ver 40.00
+     EPSON TM-T88VIB (Bluetooth)                               Ver 40.00
+     EPSON TM-T88VIE (Ethernet)                                Ver 40.00
+     EPSON TM-T88VIU (USB)                                     Ver 40.00
+     EPSON TM-T88VIP                                           Ver 40.00
+     EPSON TM-T88VIM                                           Ver 40.00
+     EPSON TM-T88VIME (Ethernet)                               Ver 40.00
+     EPSON TM-T88VIMU (USB)                                    Ver 40.00
+     EPSON TM-T88VIPM                                          Ver 40.00
+     EPSON TM-T90                                              Ver 1.05
+     EPSON TM-T90E (Ethernet)                                  Ver 1.05
+     EPSON TM-T90U (USB)                                       Ver 1.05
+     EPSON TM-T90P                                             Ver 1.05
+     EPSON TM-T90M                                             Ver 1.02
+     EPSON TM-T90ME (Ethernet)                                 Ver 1.02
+     EPSON TM-T90MU (USB)                                      Ver 1.02
+     EPSON TM-T90PM                                            Ver 1.02
+     EPSON TM-U120IIM                                          Ver 2.00
+     EPSON TM-U120IIPM                                         Ver 2.00
+     EPSON TM-U120M                                            Ver 1.00
+     EPSON TM-U120PM                                           Ver 1.00
+     EPSON TM-U120IIM-58                                       Ver 3.00
+     EPSON TM-U120IIPM-58                                      Ver 3.00
+     EPSON TM-U220A                                            Ver 3.00
+     EPSON TM-U220AE (Ethernet)                                Ver 3.00
+     EPSON TM-U220AU (USB)                                     Ver 3.00
+     EPSON TM-U220AP                                           Ver 3.00
+     EPSON TM-U220AM                                           Ver 3.03
+     EPSON TM-U220AME (Ethernet)                               Ver 3.03
+     EPSON TM-U220AMU (USB)                                    Ver 3.03
+     EPSON TM-U220APM                                          Ver 3.03
+     EPSON TM-U220AM_BM                                        Ver 3.10
+     EPSON TM-U220AM_BME (Ethernet)                            Ver 3.10
+     EPSON TM-U220AM_BMU (USB)                                 Ver 3.10
+     EPSON TM-U220APM_BM                                       Ver 3.10
+     EPSON TM-U220B                                            Ver 3.00
+     EPSON TM-U220BE (Ethernet)                                Ver 3.00
+     EPSON TM-U220BU (USB)                                     Ver 3.00
+     EPSON TM-U220BP                                           Ver 3.00
+     EPSON TM-U220BM                                           Ver 3.03
+     EPSON TM-U220BME (Ethernet)                               Ver 3.03
+     EPSON TM-U220BMU (USB)                                    Ver 3.03
+     EPSON TM-U220BPM                                          Ver 3.03
+     EPSON TM-U220BM_BM                                        Ver 3.10
+     EPSON TM-U220BM_BME (Ethernet)                            Ver 3.10
+     EPSON TM-U220BM_BMU (USB)                                 Ver 3.10
+     EPSON TM-U220BPM_BM                                       Ver 3.10
+     EPSON TM-U220D                                            Ver 3.00
+     EPSON TM-U220DE (Ethernet)                                Ver 3.00
+     EPSON TM-U220DU (USB)                                     Ver 3.00
+     EPSON TM-U220DP                                           Ver 3.00
+     EPSON TM-U220DM                                           Ver 3.03
+     EPSON TM-U220DME (Ethernet)                               Ver 3.03
+     EPSON TM-U220DMU (USB)                                    Ver 3.03
+     EPSON TM-U220DPM                                          Ver 3.03
+     EPSON TM-U220DM_BM                                        Ver 3.10
+     EPSON TM-U220DM_BME (Ethernet)                            Ver 3.10
+     EPSON TM-U220DM_BMU (USB)                                 Ver 3.10
+     EPSON TM-U220DPM_BM                                       Ver 3.10
+     EPSON TM-U330BM                                           Ver 1.00
+     EPSON TM-U330BME (Ethernet)                               Ver 1.00
+     EPSON TM-U330BMU (USB)                                    Ver 1.00
+     EPSON TM-U330BPM                                          Ver 1.00
+     EPSON TM-U330BM_BM                                        Ver 1.00
+     EPSON TM-U330BM_BME (Ethernet)                            Ver 1.00
+     EPSON TM-U330BM_BMU (USB)                                 Ver 1.00
+     EPSON TM-U330BPM_BM                                       Ver 1.00
+     EPSON TM-U330DM                                           Ver 1.00
+     EPSON TM-U330DME (Ethernet)                               Ver 1.00
+     EPSON TM-U330DMU (USB)                                    Ver 1.00
+     EPSON TM-U330DPM                                          Ver 1.00
+     EPSON TM-U330DM_BM                                        Ver 1.00
+     EPSON TM-U330DM_BME (Ethernet)                            Ver 1.00
+     EPSON TM-U330DM_BMU (USB)                                 Ver 1.00
+     EPSON TM-U330DPM_BM                                       Ver 1.00
+     EPSON TM-U230                                             Ver 1.02
+     EPSON TM-U230E (Ethernet)                                 Ver 1.02
+     EPSON TM-U230U (USB)                                      Ver 1.02
+     EPSON TM-U230P                                            Ver 1.02
+     EPSON TM-U230M                                            Ver 1.02
+     EPSON TM-U230ME (Ethernet)                                Ver 1.02
+     EPSON TM-U230MU (USB)                                     Ver 1.02
+     EPSON TM-U230PM                                           Ver 1.02
+     EPSON TM-U325                                             Ver 1.03
+     EPSON TM-U325E (Ethernet)                                 Ver 1.03
+     EPSON TM-U325U (USB)                                      Ver 1.03
+     EPSON TM-U325P                                            Ver 1.03
+     EPSON TM-U375                                             Ver 3.04
+     EPSON TM-U375P                                            Ver 3.04
+     EPSON TM-U590                                             Ver 5.05
+     EPSON TM-U590E (Ethernet)                                 Ver 5.05
+     EPSON TM-U590U (USB)                                      Ver 5.05
+     EPSON TM-U590P                                            Ver 5.05
+     EPSON TM-U590M                                            Ver 3.42
+     EPSON TM-U590ME (Ethernet)                                Ver 3.42
+     EPSON TM-U590MU (USB)                                     Ver 3.42
+     EPSON TM-U590PM                                           Ver 3.42
+     EPSON TM-U675                                             Ver 1.35
+     EPSON TM-U675E (Ethernet)                                 Ver 1.35
+     EPSON TM-U675U (USB)                                      Ver 1.35
+     EPSON TM-U675P                                            Ver 1.35
+     EPSON TM-U675M                                            Ver 1.35
+     EPSON TM-U675ME (Ethernet)                                Ver 1.35
+     EPSON TM-U675MU (USB)                                     Ver 1.35
+     EPSON TM-U675PM                                           Ver 1.35
+     EPSON TM-U950                                             Ver 1.08
+     EPSON TM-U950P                                            Ver 1.08
+     EPSON TM-U950 (USB)                                       Ver 1.02
+     EPSON TM-U950M (EPROM)                                    Ver 1.00
+     EPSON TM-U950PM (EPROM)                                   Ver 1.00
+     EPSON TM-U950M (FlashROM)                                 Ver 3.00
+     EPSON TM-U950PM (FlashROM)                                Ver 3.00
+
+
+ Line Displays                                  Reference versions of firmware
+   [Newly supported devices]
+     -
+   [Currently supported devices]
+     EPSON DM-D110                                             Ver 1.01
+     EPSON DM-D110U (USB)                                      Ver 1.01
+     EPSON DM-D110(TM USB Connection)                          ROM-T1586A79
+     EPSON DM-D120 (For ARCX(IM-700))     See below [2]        Ver 1.00
+     EPSON DM-D210                                             Ver 1.01
+     EPSON DM-D210U (USB)                                      Ver 1.01
+     EPSON DM-D210(TM USB Connection)                          ROM-T1586A72
+     EPSON DM-D500                                             Ver 1.10
+     EPSON DM-D500U(USB)                                       Ver 1.10
+     EPSON DM-D30                                              ROM-T1659A70
+     EPSON DM-D30(Standalone Connection)                       ROM-T1659A70
+
+ Cash Drawer                                    Reference versions of firmware
+
+     Standard Cash Drawer for TM series(Serial,Parallel,USB,Ethernet,Bluetooth)
+     Multi_A Cash Drawer (2 Drawer)(Serial,Parallel,USB,Ethernet,Bluetooth)
+     Multi_B Cash Drawer (2 Drawer)(Serial,Parallel,USB,Ethernet,Bluetooth)
+
+
+ ElectronicJournal                              Reference versions of firmware
+   [Newly supported devices]
+     -
+   [Currently supported devices]
+     EPSON TM-H6000III                                         Ver 10.00
+     EPSON TM-H6000IIIE (Ethernet)                             Ver 10.00
+     EPSON TM-H6000IIIU (USB)                                  Ver 10.00
+     EPSON TM-H6000IIIP                                        Ver 10.00
+     EPSON TM-H6000III (with Scanner Model)                    Ver 12.01
+     EPSON TM-H6000IIIE (Ethernet) (with Scanner Model)        Ver 12.01
+     EPSON TM-H6000IIIU (USB) (with Scanner Model)             Ver 12.01
+     EPSON TM-H6000IIIP (with Scanner Model)                   Ver 12.01
+     EPSON TM-H6000IIIM                                        Ver 10.01
+     EPSON TM-H6000IIIME (Ethernet)                            Ver 10.01
+     EPSON TM-H6000IIIMU (USB)                                 Ver 10.01
+     EPSON TM-H6000IIIPM                                       Ver 10.01
+     EPSON TM-H6000IV                      See below [3]       Ver 20.00
+     EPSON TM-H6000IVM                     See below [3]       Ver 20.00
+     EPSON TM-H6000IVE (Ethernet)          See below [3]       Ver 20.00
+     EPSON TM-H6000IVME (Ethernet)         See below [3]       Ver 20.00
+     EPSON TM-H6000IVU (USB)               See below [3]       Ver 20.00
+     EPSON TM-H6000IVMU (USB)              See below [3]       Ver 20.00
+     EPSON TM-H6000IVP                     See below [3]       Ver 20.00
+     EPSON TM-H6000IVPM                    See below [3]       Ver 20.00
+     EPSON TM-T20                                              Ver 1.01
+     EPSON TM-T20U (USB)                                       Ver 1.00
+     EPSON TM-T20E (Ethernet)                                  Ver 2.00
+     EPSON TM-T20-42C                                          Ver 1.01
+     EPSON TM-T20-42CU (USB)                                   Ver 1.00
+     EPSON TM-T20-42CE (Ethernet)                              Ver 2.00
+     EPSON TM-T20II                                            Ver 5.00
+     EPSON TM-T20IIE (Ethernet)                                Ver 5.00
+                                                               Ver 6.00
+     EPSON TM-T20IIU (USB)                                     Ver 5.00
+                                                               Ver 6.00
+     EPSON TM-T20II-42C                                        Ver 5.00
+     EPSON TM-T20II-42CE (Ethernet)                            Ver 5.00
+                                                               Ver 6.00
+     EPSON TM-T20II-42CU (USB)                                 Ver 5.00
+                                                               Ver 6.00
+     EPSON TM-T88IV                                            Ver 10.00
+     EPSON TM-T88IVE (Ethernet)                                Ver 10.00
+     EPSON TM-T88IVU (USB)                                     Ver 10.00
+     EPSON TM-T88IVP                                           Ver 10.00
+     EPSON TM-T88IVM                                           Ver 10.00
+     EPSON TM-T88IVME (Ethernet)                               Ver 10.00
+     EPSON TM-T88IVMU (USB)                                    Ver 10.00
+     EPSON TM-T88IVPM                                          Ver 10.00
+     EPSON TM-T88V                                             Ver 30.12
+     EPSON TM-T88VE (Ethernet)                                 Ver 30.12
+     EPSON TM-T88VU (USB)                                      Ver 30.12
+     EPSON TM-T88VP                                            Ver 30.12
+     EPSON TM-T88VM                                            Ver 30.12
+     EPSON TM-T88VME (Ethernet)                                Ver 30.12
+     EPSON TM-T88VMU (USB)                                     Ver 30.12
+     EPSON TM-T88VPM                                           Ver 30.12
+     EPSON TM-T88VI                                            Ver 40.00
+     EPSON TM-T88VIE (Ethernet)                                Ver 40.00
+     EPSON TM-T88VIU (USB)                                     Ver 40.00
+     EPSON TM-T88VIP                                           Ver 40.00
+     EPSON TM-T88VIM                                           Ver 40.00
+     EPSON TM-T88VIME (Ethernet)                               Ver 40.00
+     EPSON TM-T88VIMU (USB)                                    Ver 40.00
+     EPSON TM-T88VIPM                                          Ver 40.00
+
+ MICR                                           Reference versions of firmware
+
+     EPSON TM-H5000II with MICR                                Ver 5.05
+     EPSON TM-H5000IIE with MICR (Ethernet)                    Ver 5.05
+     EPSON TM-H5000IIU with MICR (USB)                         Ver 5.05
+     EPSON TM-H5000IIP with MICR                               Ver 5.05
+     EPSON TM-H5200 with MICR                                  Ver 1.04
+     EPSON TM-H5200E with MICR (Ethernet)                      Ver 1.04
+     EPSON TM-H5200U with MICR (USB)                           Ver 1.04
+     EPSON TM-H5200P with MICR                                 Ver 1.04
+     EPSON TM-H6000II with MICR                                Ver 3.01
+     EPSON TM-H6000IIE with MICR (Ethernet)                    Ver 3.01
+     EPSON TM-H6000IIU with MICR (USB)                         Ver 3.01
+     EPSON TM-H6000IIP with MICR                               Ver 3.01
+     EPSON TM-H6000II with MICR (with Scanner Model)           Ver 7.01
+     EPSON TM-H6000IIE with MICR (Ethernet) (with Scanner Model)  Ver 7.01
+     EPSON TM-H6000IIU with MICR (USB) (with Scanner Model)    Ver 7.01
+     EPSON TM-H6000IIP with MICR (with Scanner Model)          Ver 7.01
+     EPSON TM-H6000III with MICR                               Ver 10.00
+     EPSON TM-H6000IIIE with MICR (Ethernet)                   Ver 10.00
+     EPSON TM-H6000IIIU with MICR (USB)                        Ver 10.00
+     EPSON TM-H6000IIIP with MICR                              Ver 10.00
+     EPSON TM-H6000III with MICR (with Scanner Model)          Ver 12.01
+     EPSON TM-H6000IIIE with MICR (Ethernet) (with Scanner Model) Ver 12.01
+     EPSON TM-H6000IIIU with MICR (USB) (with Scanner Model)   Ver 12.01
+     EPSON TM-H6000IIIP with MICR (with Scanner Model)         Ver 12.01
+     EPSON TM-H6000IV                      See below [3]       Ver 20.00
+     EPSON TM-H6000IVE (Ethernet)          See below [3]       Ver 20.00
+     EPSON TM-H6000IVU (USB)               See below [3]       Ver 20.00
+     EPSON TM-H6000IVP                     See below [3]       Ver 20.00
+     EPSON TM-H2000                        See below [3]       Ver 1.00
+     EPSON TM-H2000E (Ethernet)            See below [3]       Ver 1.00
+     EPSON TM-H2000U (USB)                 See below [3]       Ver 1.00
+     EPSON TM-H2000P                       See below [3]       Ver 1.00
+     EPSON TM-J7000/J7100 with MICR                            Ver 1.00
+     EPSON TM-J7000E/J7100E with MICR (Ethernet)               Ver 1.00
+     EPSON TM-J7000U/J7100U with MICR (USB)                    Ver 1.00
+     EPSON TM-J7000P/J7100P with MICR                          Ver 1.00
+     EPSON TM-U675 with MICR                                   Ver 1.35
+     EPSON TM-U675E with MICR (Ethernet)                       Ver 1.35
+     EPSON TM-U675U with MICR (USB)                            Ver 1.35
+     EPSON TM-U675P with MICR                                  Ver 1.35
+     EPSON TM-U950 with MICR                                   Ver 1.08
+
+
+ CheckScanner                                   Reference versions of firmware
+
+     EPSON TM-H6000II with Scanner                             Ver 7.01
+     EPSON TM-H6000IIE with Scanner (EtherNet)                 Ver 7.01
+     EPSON TM-H6000IIU with Scanner (USB)                      Ver 7.01
+     EPSON TM-H6000IIP with Scanner                            Ver 7.01
+     EPSON TM-H6000III with Scanner                            Ver 12.01
+     EPSON TM-H6000IIIE with Scanner (Ethernet)                Ver 12.01
+     EPSON TM-H6000IIIU with Scanner (USB)                     Ver 12.01
+     EPSON TM-H6000IIIP with Scanner                           Ver 12.01
+
+
+ MSR
+
+     EPSON DM-MS123 (For URBANII(SR-610))         See below [2]
+     EPSON DM-M820 (For MR(IM-800))               See below [2]
+     EPSON DM-MX112/DM-MX123 (For ARCX(IM-700))   See below [2]
+
+
+ Keylock
+
+     EPSON DM-KX060 (For ARCX(IM-700), URBANII(SR-610))   See below [2]
+
+
+ Hard Totals
+
+     EPSON IM-700 CompactFlash (For ARCX(IM-700))         See below [2]
+     EPSON SR-610 CompactFlash (For URBANII(SR-610))      See below [2]
+
+
+ [1]: TM-295 is the same model as TM-U295.
+ [2]: The supported OS are limited to the following:
+      Windows 2000/XP, Windows Embedded for Point Of Service,
+      Windows Embedded POSReady 2009
+ [3]: The operation of this model is not supported in Windows 2000 environment.
+
+Note
+   When you use a "CheckScanner" device with the Ethernet Interface (UB-E01), 
+   you have to use UB-E01 firmware Ver1.20 or later. Please contact your 
+   dealer for details.
+

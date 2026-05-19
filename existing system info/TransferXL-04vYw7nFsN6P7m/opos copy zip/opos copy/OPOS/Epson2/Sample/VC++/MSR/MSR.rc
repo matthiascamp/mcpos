@@ -1,0 +1,251 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif\r\n"
+    "#include ""res\\MSR.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#endif\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\MSR.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_MSR_DIALOG DIALOGEX 0, 0, 210, 257
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "VC++ Sample [MSR]"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Please swipe a card.",IDC_LBL_TITLE,12,9,152,11,
+                    SS_CENTERIMAGE
+    RTEXT           "Account number",IDC_LBL_ACCOUNT,8,27,74,11,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_ACCOUNT,88,26,112,12,ES_AUTOHSCROLL | 
+                    ES_READONLY
+    RTEXT           "Expiration date",IDC_LBL_DATE,8,42,74,11,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_DATE,88,42,112,12,ES_AUTOHSCROLL | ES_READONLY
+    RTEXT           "First Name",IDC_LBL_FIRST,8,58,74,11,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_FIRST,88,58,112,12,ES_AUTOHSCROLL | ES_READONLY
+    RTEXT           "Surname",IDC_LBL_SUR,8,74,74,11,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_SUR,88,74,112,12,ES_AUTOHSCROLL | ES_READONLY
+    RTEXT           "Middle initials",IDC_LBL_MIDDLE,8,90,74,11,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_MIDDLE,88,90,112,12,ES_AUTOHSCROLL | 
+                    ES_READONLY
+    RTEXT           "Track1",IDC_LBL_TRACK1,7,106,41,11,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_TRACK1,56,106,144,12,ES_AUTOHSCROLL | 
+                    ES_READONLY
+    RTEXT           "Track2",IDC_LBL_TRACK2,7,122,41,11,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_TRACK2,56,122,144,12,ES_AUTOHSCROLL | 
+                    ES_READONLY
+    RTEXT           "Track3",IDC_LBL_TRACK3,7,138,41,11,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_TRACK3,56,138,144,12,ES_AUTOHSCROLL | 
+                    ES_READONLY
+    RTEXT           "Track4",IDC_LBL_TRACK4,7,154,41,11,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_TRACK4,56,154,144,12,ES_AUTOHSCROLL | 
+                    ES_READONLY
+    GROUPBOX        "Device Statistics",IDC_STC_DST,56,171,144,61
+    EDITTEXT        IDC_EDIT_RETRIEVST,72,191,112,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Retrieve Statistics",IDC_BTN_RETRIEVST,72,206,112,21
+    PUSHBUTTON      "Close",IDCANCEL,150,236,50,14
+    LTEXT           "RetrieveStatistics Parameter",IDC_STATIC,72,181,112,8
+    CONTROL         "",IDC_MSR1,"{CCB90122-B81E-11D2-AB74-0040054C3719}",
+                    WS_TABSTOP,7,225,60,25
+END
+
+IDD_XMLVIEW_DIALOG DIALOG DISCARDABLE  0, 0, 348, 214
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "XML file view."
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "",IDC_EXPLORER_WMLVIEW,
+                    "{8856F961-340A-11D0-A96B-00C04FD705A2}",WS_TABSTOP,3,3,
+                    342,208
+END
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName", "\0"
+            VALUE "FileDescription", "MSR MFC Application\0"
+            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "InternalName", "MSR\0"
+            VALUE "LegalCopyright", "Copyright (C) 2000 SEIKO EPSON CORP.\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "MSR.EXE\0"
+            VALUE "ProductName", "MSR Application\0"
+            VALUE "ProductVersion", "1, 0, 0, 1\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_MSR_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 203
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 250
+    END
+
+    IDD_XMLVIEW_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 3
+        RIGHTMARGIN, 345
+        TOPMARGIN, 3
+        BOTTOMMARGIN, 211
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_XMLVIEW_DIALOG DLGINIT
+BEGIN
+    IDC_EXPLORER_WMLVIEW, 0x376, 160, 0
+0x0000, 0x0000, 0x004c, 0x0000, 0x3505, 0x0000, 0x22ef, 0x0000, 0x0000, 
+0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+0x0000, 0x0000, 0x004c, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0001, 
+0x0000, 0xd0e0, 0x0057, 0x3573, 0x11cf, 0x69ae, 0x0008, 0x2e2b, 0x6212, 
+0x0008, 0x0000, 0x0000, 0x0000, 0x004c, 0x0000, 0x1401, 0x0002, 0x0000, 
+0x0000, 0x00c0, 0x0000, 0x0000, 0x4600, 0x0080, 0x0000, 0x0000, 0x0000, 
+0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0001, 0x0000, 
+0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+    0
+END
+
+IDD_MSR_DIALOG DLGINIT
+BEGIN
+    IDC_MSR1, 0x376, 16, 0
+0x0000, 0x0000, 0x0900, 0x0000, 0x094d, 0x0000, 0x043d, 0x0000, 
+    0
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif
+#include "res\MSR.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#endif
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

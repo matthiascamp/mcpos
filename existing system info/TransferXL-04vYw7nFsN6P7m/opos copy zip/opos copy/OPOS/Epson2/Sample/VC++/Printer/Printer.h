@@ -1,0 +1,49 @@
+// Printer.h : main header file for the PRINTER application
+//
+
+#if !defined(AFX_PRINTER_H__20B34806_A121_11D4_81DE_00402641B7F4__INCLUDED_)
+#define AFX_PRINTER_H__20B34806_A121_11D4_81DE_00402641B7F4__INCLUDED_
+
+#if _MSC_VER >= 1000
+#pragma once
+#endif // _MSC_VER >= 1000
+
+#ifndef __AFXWIN_H__
+	#error include 'stdafx.h' before including this file for PCH
+#endif
+
+#include "resource.h"		// main symbols
+
+/////////////////////////////////////////////////////////////////////////////
+// CPrinterApp:
+// See Printer.cpp for the implementation of this class
+//
+
+class CPrinterApp : public CWinApp
+{
+public:
+	CPrinterApp();
+
+// Overrides
+	// ClassWizard generated virtual function overrides
+	//{{AFX_VIRTUAL(CPrinterApp)
+	public:
+	virtual BOOL InitInstance();
+	//}}AFX_VIRTUAL
+
+// Implementation
+
+	//{{AFX_MSG(CPrinterApp)
+		// NOTE - the ClassWizard will add and remove member functions here.
+		//    DO NOT EDIT what you see in these blocks of generated code !
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+};
+
+
+/////////////////////////////////////////////////////////////////////////////
+
+//{{AFX_INSERT_LOCATION}}
+// Microsoft Developer Studio will insert additional declarations immediately before the previous line.
+
+#endif // !defined(AFX_PRINTER_H__20B34806_A121_11D4_81DE_00402641B7F4__INCLUDED_)

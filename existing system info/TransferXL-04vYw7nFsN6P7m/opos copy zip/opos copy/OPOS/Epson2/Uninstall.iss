@@ -1,0 +1,17 @@
+[InstallShield Silent]
+Version=v7.00
+File=Response File
+[File Transfer]
+OverwrittenReadOnly=NoToAll
+[{0EEDEE2B-7C9D-4584-B2B5-C28C93678BC1}-DlgOrder]
+Dlg0={0EEDEE2B-7C9D-4584-B2B5-C28C93678BC1}-MessageBox-0
+Count=3
+Dlg1={0EEDEE2B-7C9D-4584-B2B5-C28C93678BC1}-SprintfBox-0
+Dlg2={0EEDEE2B-7C9D-4584-B2B5-C28C93678BC1}-SdFinishReboot-0
+[{0EEDEE2B-7C9D-4584-B2B5-C28C93678BC1}-MessageBox-0]
+Result=6
+[{0EEDEE2B-7C9D-4584-B2B5-C28C93678BC1}-SprintfBox-0]
+Result=1
+[{0EEDEE2B-7C9D-4584-B2B5-C28C93678BC1}-SdFinishReboot-0]
+Result=1
+BootOption=0

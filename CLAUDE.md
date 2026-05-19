@@ -1,6 +1,6 @@
-# Crisp POS
+# Tillaroo POS
 
-Electron-based point-of-sale system for **Crisp on Creek** (fruit & veg shop, 1832 Logan Rd, Mt Gravatt QLD 4122). Mirrors and replaces the existing Profit Track register.
+Electron-based point-of-sale system. Originally built for **Crisp on Creek** (fruit & veg shop, 1832 Logan Rd, Mt Gravatt QLD 4122) as a replacement for Profit Track, now evolving into a white-label SaaS product.
 
 ## Tech Stack
 
@@ -10,20 +10,29 @@ Electron-based point-of-sale system for **Crisp on Creek** (fruit & veg shop, 18
 - **IPC bridge** -- `preload.js` exposes `window.pos.*` methods via `contextBridge`/`ipcRenderer`
 - **uuid v11** -- UUID generation for all record IDs
 - **Supabase** -- cloud sync target (edge functions in `/supabase`)
+- **Linkly Cloud** -- EFTPOS payment terminal integration
+- **LAN Sync** -- multi-register sync via HTTP + UDP broadcast
 
 ## Project Structure
 
 ```
 main.js              -- Electron main process, DB init, all IPC handlers, hardware probing
 preload.js           -- contextBridge API (window.pos.*)
+lan-sync.js          -- LAN sync server/client (HTTP port 5555, UDP broadcast port 5556)
+linkly.js            -- Linkly Cloud EFTPOS integration (pairing, purchase, refund, settlement)
+import-data.js       -- First-launch data import (products, keyboard, prices, deals)
 db/schema.sql        -- SQLite schema + seed data (categories, products, keyboard layout, settings)
 pos/index.html       -- POS register screen (cashier-facing, full transaction flow)
-pos/admin.html       -- Admin panel (8 tabs: dashboard, products, staff, deals, keyboard, hardware, import, settings)
+pos/admin.html       -- Admin panel (18 tabs — see Admin Panel section)
 pos/js/ui.js         -- Shared UI helpers (esc, $, $$, money, showToast, debounce, formatTime, formatDate)
 pos/js/cart.js       -- Shopping cart class (items, totals, tax calc, toTransaction)
 pos/js/sync.js       -- Supabase cloud sync engine (push/pull, realtime subscriptions)
 migrate-from-pt.js   -- One-shot migration from Profit Track (products.json import)
 supabase/            -- Supabase edge functions + Postgres schema for cloud sync
+rawprint.ps1         -- PowerShell ESC/POS raw printing helper
+opos-bridge.ps1      -- Windows OPOS (POS for .NET) COM bridge
+scale_reader.py      -- Scale serial reader
+scanner-bridge.exe   -- Barcode scanner bridge (compiled)
 ```
 
 ## Running
@@ -35,6 +44,16 @@ npx electron .         # same as npm start
 npx electron . --dev   # same as npm run dev
 ```
 
+## Building
+
+```bash
+npm run build          # electron-builder --win (default portable)
+npm run build:portable # portable EXE (no install)
+npm run build:installer # NSIS installer EXE
+```
+
+Output goes to `dist2/`. Portable artifact: `Tillaroo-1.0.0.exe`.
+
 **Keyboard shortcuts:**
 - **F11** -- toggle fullscreen/kiosk mode
 - **Escape** -- exit kiosk mode (when in kiosk)
@@ -42,16 +61,32 @@ npx electron . --dev   # same as npm run dev
 
 ---
 
+## App Modes
+
+The app runs in one of two modes, controlled by the `app_mode` setting:
+- **`register`** -- Full POS register with hardware polling, scale/scanner integration, receipt printing
+- **`admin`** -- Admin panel only, skips hardware probe and polling
+
+Switching modes triggers an app restart.
+
+---
+
 ## Database
 
-SQLite stored at `~/Library/Application Support/crisp-pos/crisp-pos.sqlite`. Schema in `db/schema.sql`.
+SQLite stored at:
+- **Windows:** `%APPDATA%\tillaroo\crisp-pos.sqlite`
+- **Linux/macOS:** `~/.config/tillaroo/crisp-pos.sqlite`
+
+Schema in `db/schema.sql`.
 
 ### Initialization Flow (main.js)
 
 1. Check if DB file exists on disk; if yes, load bytes into sql.js WASM database; if not, create empty in-memory DB
 2. Read `db/schema.sql`, split by `;`, execute each statement (try-catch for idempotency with `CREATE IF NOT EXISTS` / `INSERT OR IGNORE`)
 3. Run migration array (ALTER TABLE statements) for existing DBs that lack new columns
-4. Call `saveDB()` to persist to disk
+4. Re-link keyboard buttons to products, apply image data
+5. Call `saveDB()` to persist to disk
+6. Create timestamped backup on startup
 
 ### Write Path
 
@@ -161,9 +196,9 @@ Indexes: `barcode`, `plu`, `category_id`, `name`
 |---|---|---|
 | id | TEXT PK | |
 | transaction_id | TEXT FK | |
-| method | TEXT | `cash` / `card` / `eftpos` / `account` |
+| method | TEXT | `cash` / `card` / `eftpos` |
 | amount | REAL | |
-| reference | TEXT | Tyro txn ref, card last 4, etc. |
+| reference | TEXT | Linkly txn ref, card last 4, etc. |
 
 **cash_drawer**
 | Column | Type | Notes |
@@ -174,26 +209,6 @@ Indexes: `barcode`, `plu`, `category_id`, `name`
 | action | TEXT | `open` / `close` / `float` / `pickup` / `drop` |
 | amount | REAL | For float/pickup/drop |
 | note | TEXT | |
-
-**sync_queue** (offline-first)
-| Column | Type | Notes |
-|---|---|---|
-| id | INTEGER PK | AUTOINCREMENT |
-| table_name | TEXT | Which table |
-| record_id | TEXT | Row ID |
-| action | TEXT | `insert` / `update` / `delete` |
-| payload | TEXT | Full row as JSON |
-| synced | INTEGER | 0 = pending, 1 = pushed |
-
-Index: `idx_sync_pending` on (synced) WHERE synced = 0
-
-**settings** (key-value store)
-| Column | Type |
-|---|---|
-| key | TEXT PK |
-| value | TEXT |
-
-Default settings: `store_name`, `store_address`, `store_phone`, `store_abn`, `receipt_header`, `receipt_footer`, `register_id`, `tax_name`, `tax_rate`
 
 **keyboard_buttons** (POS grid layout)
 | Column | Type | Notes |
@@ -217,18 +232,35 @@ Default settings: `store_name`, `store_address`, `store_phone`, `store_abn`, `re
 | row_span | INTEGER | Cells tall (1-5) |
 | active | INTEGER | |
 
-### Seed Data
+**keyboard_pages** (page metadata)
+| Column | Type | Notes |
+|---|---|---|
+| page | INTEGER PK | 1-based page number |
+| name | TEXT | Display name |
+| columns | INTEGER | Grid columns for this page |
+| rows | INTEGER | Grid rows for this page |
 
-Schema seeds 12 categories, ~35 products (fruit, veg, meat, dairy, bread, coffee, cheese, flowers, nuts, grocery), and 46 keyboard buttons matching the Profit Track register layout:
+**sync_queue** (offline-first)
+| Column | Type | Notes |
+|---|---|---|
+| id | INTEGER PK | AUTOINCREMENT |
+| table_name | TEXT | Which table |
+| record_id | TEXT | Row ID |
+| action | TEXT | `insert` / `update` / `delete` |
+| payload | TEXT | Full row as JSON |
+| synced | INTEGER | 0 = pending, 1 = pushed |
 
-- **Rows 0-1:** Function buttons (lock, supervisor, return, void[2-col], hold, nosale, viewor, pricecheck[2x2], reprint, %discount, %one item, movedrawer, errcorrect, recall, ubereats)
-- **Rows 2-5 cols 0-2:** Department buttons (meat, coffee, fruit&veg, cheese, flowers, bread, fruit&veg/kg, bags, deli)
-- **Rows 2-5 cols 4-7:** Numpad (7-8-9-QTYX, 4-5-6-CLEAR, 1-2-3, 0-00-CODE ENTER)
-- **Row 6:** Bottom nav (grocery[2-col], nuts, gas, fruit A-M, fruit N-Z, veg A-G, vege H-Z, subtotal[2-col])
+**settings** (key-value store)
+| Column | Type |
+|---|---|
+| key | TEXT PK |
+| value | TEXT |
+
+Default settings: `store_name`, `store_address`, `store_phone`, `store_abn`, `receipt_header`, `receipt_footer`, `register_id`, `tax_name`, `tax_rate`
 
 ### Button Types
 
-**Product:** `open_price` (cashier enters $), `fixed_price` (set amount), `section` (opens category grid), `nav` (filtered navigation with optional alpha_range)
+**Product:** `product` (linked to DB product), `open_price` (cashier enters $), `fixed_price` (set amount), `section` (opens category grid), `nav` (filtered navigation with optional alpha_range)
 
 **Register Functions:** `void`, `return`, `hold`, `nosale` (open drawer), `supervisor`, `lock`, `reprint`, `pricecheck`, `errcorrect`, `recall`, `pctdiscount` (% whole sale), `pctone` (% one item), `movedrawer`, `ubereats`, `viewor`
 
@@ -238,11 +270,13 @@ Schema seeds 12 categories, ~35 products (fruit, veg, meat, dairy, bread, coffee
 
 **Navigation:** `page_link` (go to page), `back_home`
 
+**Layout:** `cart_display` (cart / receipt area), `num_display` (LCD display)
+
 ---
 
 ## IPC Channels (preload.js / main.js)
 
-All channels follow `domain:table:action` naming.
+All channels follow `domain:table:action` naming. 120+ channels total. Key categories:
 
 ### Products
 | Channel | Method | Description |
@@ -270,6 +304,10 @@ All channels follow `domain:table:action` naming.
 |---|---|---|
 | `db:transaction:save` | `saveTransaction(txn)` | Insert transaction + items + payments, decrement stock, queue sync |
 | `db:transaction:void` | `voidTransaction(id)` | Set status='voided' |
+| `db:transaction:search` | `searchTransactions(query)` | Search by ID, staff, date range |
+| `db:transaction:get` | `getTransaction(id)` | Full transaction with items and payments |
+| `db:transaction:refund` | `refundTransaction(id)` | Create refund transaction |
+| `db:transaction:delete` | `deleteTransaction(id)` | Hard delete |
 
 ### Staff
 | Channel | Method | Description |
@@ -285,46 +323,106 @@ All channels follow `domain:table:action` naming.
 | `db:settings:getAll` | `getAllSettings()` | All as object |
 | `db:settings:set` | `setSetting(k, v)` | Upsert key-value |
 
-### Sync
-| Channel | Method | Description |
-|---|---|---|
-| `db:sync:getPending` | `getSyncPending()` | Where synced=0 |
-| `db:sync:markSynced` | `markSynced(ids)` | Set synced=1 |
-
 ### Reports
 | Channel | Method | Description |
 |---|---|---|
 | `db:reports:dailySummary` | `dailySummary(date)` | txn_count, total_sales, total_tax, total_discounts |
 | `db:reports:topProducts` | `topProducts(date)` | Top 20 products by qty |
+| `db:reports:salesByHour` | `salesByHour(date)` | Hourly breakdown |
+| `db:reports:salesByMethod` | `salesByMethod(date)` | By payment method |
+| `db:reports:salesByCategory` | `salesByCategory(date)` | By product category |
+| `db:reports:weeklySummary` | `weeklySummary(date)` | 7-day summary |
+| `db:reports:voidRefundCount` | `voidRefundCount(date)` | Void/refund stats |
+| `db:reports:zReport` | `zReport(date)` | End-of-day Z-report |
+
+### Insights
+| Channel | Method | Description |
+|---|---|---|
+| `db:insights:salesHeatmap` | `salesHeatmap(range)` | Sales heatmap by hour/day |
+| `db:insights:demandForecast` | `demandForecast()` | Demand prediction |
+| `db:insights:boughtTogether` | `boughtTogether()` | Frequently bought together |
+| `db:insights:salesTrend` | `salesTrend(range)` | Sales trend over time |
+| `db:insights:xeroExport` | `xeroExport(range)` | Xero accounting export |
 
 ### Keyboard Layout
 | Channel | Method | Description |
 |---|---|---|
 | `db:keyboard:getAll` | `getKeyboardButtons()` | All active buttons, ordered by page + sort_order |
 | `db:keyboard:getByPage` | `getButtonsByPage(page)` | Page-specific, ordered by grid_row + grid_col |
-| `db:keyboard:getPages` | `getPages()` | SELECT DISTINCT page |
+| `db:keyboard:getPages` | `getPages()` | All pages with metadata |
 | `db:keyboard:getAllIncludingInactive` | `getAllButtons()` | All buttons including inactive |
-| `db:keyboard:upsert` | `upsertButton(btn)` | Saves all grid fields (page, grid_row, grid_col, col_span, row_span) |
-| `db:keyboard:delete` | `deleteButton(id)` | Delete button + children (by parent_id) |
+| `db:keyboard:upsert` | `upsertButton(btn)` | Saves all grid fields |
+| `db:keyboard:delete` | `deleteButton(id)` | Delete button + children |
 | `db:keyboard:deletePage` | `deletePage(page)` | Delete all buttons on page |
+| `db:keyboard:createPage` | `createPage(name)` | Create new keyboard page |
+| `db:keyboard:renamePage` | `renamePage(page, name)` | Rename page |
+| `db:keyboard:updatePageSize` | `updatePageSize(page, cols, rows)` | Set grid dimensions |
+| `db:keyboard:copyPage` | `copyPage(srcPage)` | Duplicate a page |
+| `db:keyboard:export` | `exportKeyboard()` | Export full layout as JSON |
+| `db:keyboard:import` | `importKeyboard(data)` | Import layout from JSON |
 
-### Import
+### Stock
 | Channel | Method | Description |
 |---|---|---|
-| `db:import:products` | `importProducts(data)` | Bulk upsert products + categories from array |
+| `db:stock:lowStock` | `getLowStock()` | Products below threshold |
+| `db:stock:adjust` | `adjustStock(id, qty)` | Manual stock adjustment |
+
+### Cash Drawer
+| Channel | Method | Description |
+|---|---|---|
+| `db:cash_drawer:log` | `logCashDrawer(action)` | Log drawer open/close/float/pickup/drop |
+| `db:cash_drawer:getLog` | `getCashDrawerLog(date)` | Get log for date |
+| `db:cash_drawer:summary` | `getCashDrawerSummary(date)` | Daily summary |
+
+### Audit
+| Channel | Method | Description |
+|---|---|---|
+| `db:audit:log` | `auditLog(action)` | Write audit entry |
+| `db:audit:search` | `searchAudit(query)` | Search audit log |
+
+### Backup
+| Channel | Method | Description |
+|---|---|---|
+| `db:backup:create` | `createBackup()` | Manual backup |
+| `db:backup:list` | `listBackups()` | List available backups |
+| `db:backup:restore` | `restoreBackup(name)` | Restore from backup |
 
 ### Hardware
 | Channel | Method | Description |
 |---|---|---|
-| `hardware:printReceipt` | `printReceipt(data)` | ESC/POS receipt printing (graceful fail) |
-| `hardware:openDrawer` | `openDrawer()` | ESC/POS drawer pulse |
-| `hardware:probe` | `probeDevices()` | Scan USB + serial, return device status |
+| `hardware:printReceipt` | `printReceipt(data)` | ESC/POS or OPOS receipt printing |
+| `hardware:openDrawer` | `openDrawer()` | ESC/POS or OPOS drawer pulse |
+| `hardware:probe` | `probeDevices()` | Scan USB + serial, OPOS, return device status |
+| `hardware:scaleRead` | `readScale()` | Get current scale weight |
+| `hardware:scaleZero` | `zeroScale()` | Zero/tare the scale |
 
-### Window
+### LAN Sync
+| Channel | Method | Description |
+|---|---|---|
+| `lan:getStatus` | `getLanStatus()` | Server/client status |
+| `lan:getPeers` | `getLanPeers()` | Connected registers |
+| `lan:pushToRegisters` | `pushToRegisters()` | Push keyboard/products to all registers |
+| `lan:discover` | `discoverPeers()` | UDP broadcast discovery |
+| `lan:networkDiagnostic` | `networkDiagnostic()` | Network connectivity check |
+
+### Linkly EFTPOS
+| Channel | Method | Description |
+|---|---|---|
+| `linkly:getStatus` | `getLinklyStatus()` | Terminal connection status |
+| `linkly:configure` | `configureLinkly(config)` | Set merchant credentials |
+| `linkly:pair` | `pairTerminal()` | OAuth pairing flow |
+| `linkly:purchase` | `purchase(amount)` | Initiate card payment |
+| `linkly:refund` | `refund(amount)` | Initiate refund |
+| `linkly:settlement` | `settlement()` | End-of-day settlement |
+
+### Window / App
 | Channel | Method | Description |
 |---|---|---|
 | `window:exitFullscreen` | `exitFullscreen()` | Exit kiosk + fullscreen |
 | `window:quit` | `quit()` | Close app |
+| `app:health` | `getHealth()` | App health check |
+| `app:version` | `getVersion()` | App version |
+| `app:logs:get` | `getLogs()` | Get app log entries |
 
 ---
 
@@ -335,7 +433,7 @@ All channels follow `domain:table:action` naming.
 ```
 body
   login-overlay          -- PIN login (full-screen, visible until auth)
-    login-logo           -- "C" in green circle, Playfair serif
+    login-logo           -- "T" logo, Playfair serif
     pinDisplay           -- Dots showing PIN length
     pinPad               -- 3x4 grid (1-9, C, 0, OK)
     loginError           -- Red error text
@@ -361,10 +459,10 @@ body
   pos-footer (22px)      -- Lane ID + clerk name
 
   Modals (fixed overlays):
-    cashModal            -- Cash payment (tendered amount, change calc, quick buttons)
+    cashModal            -- Cash payment (numpad always visible, change calc, quick buttons)
     openPriceModal       -- Cashier enters $ for open-price items
     priceChangeModal     -- Change price of last item
-    weightModal          -- Enter weight for kg/100g products
+    weightModal          -- Enter weight for kg/100g products (skipped if scale has reading)
     saleComplete         -- Completion animation
 ```
 
@@ -385,10 +483,11 @@ body
 - On `Enter`: calls `getProductByBarcode(value)`, if found adds directly to cart
 
 **2. Adding to Cart:**
-- If product unit is `kg` or `100g`: show weight modal, store in `pendingWeightProduct`
+- If product unit is `kg` or `100g`: auto-use scale weight if available, otherwise show weight modal
 - Otherwise: `cart.addProduct(product, qtyMultiplier)`
 - If product is `each` and already in cart: increments qty instead of adding new line
-- Reset: `numBuf=''`, `qtyMultiplier=1`, clear search, refocus input
+- Confirmation dialog shown when minus button removes last item
+- Reset: `numBuf=''`, `qtyMultiplier=1`, qty badge reset, return to main keyboard, clear search, refocus input
 
 **3. Cart Display:**
 - Each item shows: name, qty x unit_price, line_total
@@ -411,15 +510,18 @@ body
 
 **6. Weight Entry:**
 - Triggered when scanning kg/100g products
-- Shows `weightModal` with numpad + decimal point
+- If scale has an active reading, weight is auto-applied (modal skipped)
+- Otherwise shows `weightModal` with numpad + decimal point
 - Confirm multiplies product price by weight
 
 **7. Payment:**
 - `SUB TOTAL` button or "Pay Cash" from cart actions opens `cashModal`
+- Numpad always visible in payment modal
 - Quick buttons: Exact, $5, $10, $20, $50, $100
 - Change display: green if overpaid (shows change), red if short
 - Confirm: saves transaction via `window.pos.saveTransaction()`, triggers receipt print, opens cash drawer, clears cart, shows completion animation
-- Card/EFTPOS: payment with method='card', amount=total
+- Card/EFTPOS: payment with method='card', amount=total; includes manual "EFTPOS Accepted" button for offline terminals
+- Linkly integration: if configured, initiates terminal payment via `linkly:purchase`
 
 **8. Totals Calculation (Cart class):**
 - Tax-inclusive pricing (standard in Australia)
@@ -487,108 +589,98 @@ body
 
 ## Admin Panel (pos/admin.html)
 
-8 tabs: Dashboard, Products, Staff, Deals, Keyboard, Hardware, Import, Settings
+18 tabs: Dashboard, Products, Staff, Deals, Keyboard, Hardware, Receipt, Settings, Audit, Cash Drawer, Diagnostics, Insights, Labels, Logs, Network, Stock, Transactions, Z-Report
 
 Dark theme with CSS variables: `--bg: #0f1117`, `--surface: #1a1d27`, `--surface2: #242833`, `--text: #f1f5f9`, `--text-dim: #8892a8`
 
 ### Dashboard Tab
-
 - Calls `dailySummary(today)` and `topProducts(today)` on load
 - 4 stat cards: Total Sales, Transactions, Tax Collected, Discounts
 - Top products table: name, qty sold, revenue
 
 ### Products Tab
-
 - Search input (debounced 300ms) calls `searchProducts(query)`
 - Table: Name, Barcode, Category, Price, Unit, Stock, Edit button
 - "+ Add Product" button
-- **Edit panel** (shown on edit/add):
-  - 3-column grid: Name, Barcode, PLU, Category (dropdown from DB), Sell Price, Cost Price, Unit (each/kg/100g/litre), Tax Rate, Track Stock (Y/N), Stock Qty, Image URL
-  - Save: `upsertProduct()` -- auto-generates UUID for new products
-  - Delete: soft-delete (sets active=0)
-  - Cancel: hides panel
+- **Edit panel:** Name, Barcode, PLU, Category, Sell Price, Cost Price, Unit, Tax Rate, Track Stock, Stock Qty, Image URL
+- Save: `upsertProduct()`, Delete: soft-delete (active=0)
 
 ### Staff Tab
-
 - Table: Name, Role, Status badge (green Active / red Inactive)
 - Add form: Name, PIN (max 6 chars), Role dropdown (cashier/manager/admin)
-- Save calls `upsertStaff()`, reloads table
 
 ### Deals Tab
-
-- Table: Name, Type, Details (human-readable config), Products (View link), Status, Edit button
-- "+ New Deal" button
-- **Edit panel:**
-  - Deal Name (text), Deal Type (dropdown)
-  - **Dynamic config fields per type:**
-    - `multi_buy` / `combo`: Buy Qty + For Price ($)
-    - `buy_x_get_y`: Buy Qty + Get Free Qty
-    - `discount_pct`: Discount %
-    - `discount_amt`: Discount $
-  - Date range: Start Date, End Date (optional)
-  - **Product picker:** Search box (debounced, needs 2+ chars), results dropdown, click to add as badge with x to remove
-  - Save: `upsertDeal()` then `setDealProducts()` with product IDs
-  - Delete: hard delete via `deleteDeal()`
+- Table: Name, Type, Details, Products, Status, Edit button
+- **Dynamic config fields per type:** multi_buy/combo (qty + price), buy_x_get_y (buy + free), discount_pct (%), discount_amt ($)
+- Multi-tier pricing support (multiple qty/price tiers per deal)
+- Product picker with search, date range
 
 ### Keyboard Layout Editor Tab
-
-- **Page management:** Tab buttons per page, "+ Page" to create, "Delete Page" to remove (disabled if only 1)
-- **Grid settings:** Dropdowns for columns (6/8/10/12) and rows (5/7/8/10)
-- **Grid rendering (`renderGrid()`):**
-  - CSS Grid with `gap:4px`, cells 60px tall
-  - Occupied cells: colored div with type badge, label, price, optional image
-  - Empty cells: dashed border with "+" indicator
-  - Occupied cell tracking: builds `Set` of occupied coordinates and `cellMap` of button origins to skip cells covered by multi-span buttons
-
-- **Interactions:**
-  - **Click existing button:** Opens edit panel with all fields populated
-  - **Click empty cell:** If a product is selected in sidebar, auto-creates button with product name/price/type=fixed_price. Otherwise opens blank new button form.
-  - **Drag across empty cells (drag-select):** Mousedown starts selection, mousemove highlights cells in blue, mouseup checks all cells are free, opens new button form with col_span/row_span pre-filled. Shows error toast if selection overlaps existing button.
-  - **Drag existing button:** HTML5 drag-and-drop to swap with another button or move to empty cell
-
-- **Product sidebar (right panel, 240px):**
-  - Search input (debounced)
-  - Scrollable product list (up to 100 items) showing name + price
-  - Click product to select (blue highlight), click again to deselect
-  - Selected product auto-fills next empty cell click
-  - Instruction text: "Click a product, then click an empty cell to place it"
-
-- **Edit panel fields:**
-  - Label, Function type (select with optgroups), Category/Value (datalist with DB categories + `__all__`)
-  - Alpha Range, Price, BG Color (picker), Text Color (picker), Col Span, Row Span
-  - Image upload: file input, resized to 128px max via canvas, stored as JPEG data URL (0.8 quality)
-  - Live preview: 100x60px colored box updates in real-time
-  - Save/Delete/Cancel buttons
-
-- **State variables:** `kbButtons`, `currentPage`, `gridCols`, `gridRows`, `selectedBtnId`, `kbSelectedProduct`, `isDragSelecting`, `dragSelStart`, `dragSelCurrent`
+- **Page tree sidebar (left, 180px):** Page list with create/rename/duplicate/delete, "Send to Registers" button for LAN push
+- **Grid:** CSS Grid, cells 56px tall, drag-select for multi-cell buttons, drag to move/swap
+- **Edit sidebar (right, 380px):** Label, Type, Price ($18px font with $ prefix), Product search/link, Category, Alpha Range, Colors, Image upload, Col/Row span, Live preview
+- **Product sidebar:** Search + click-to-place product buttons
+- Keyboard export/import as JSON with versioning
 
 ### Hardware Tab
+- Probe button: scans USB + serial ports + OPOS devices
+- 4 device status cards: Receipt Printer, Cash Drawer, Barcode Scanner, Scale
+- USB device table, Scanner test input
+- OPOS integration for Windows POS for .NET devices
+- Fallback chain: OPOS -> ESC/POS -> manual
 
-- **Probe button:** Calls `probeDevices()`, scans USB + serial ports
-- **4 device status cards** with colored dots:
-  - Receipt Printer (green=connected, red=not found)
-  - Cash Drawer (green=available, amber=assumed via printer DK port, red=no printer)
-  - Barcode Scanner (green=detected, amber=HID keyboard mode)
-  - Scale (green=detected, red=not found)
-- **USB device table:** Vendor ID (hex), Product ID (hex), Manufacturer, Product, Class
-- **Scanner test input:** Type/scan barcode, press Enter to verify
+### Insights Tab
+- Sales heatmap (hour x day grid)
+- Demand forecast
+- Frequently bought together analysis
+- Sales trends over time
+- Xero accounting export
 
-**Hardcoded vendor IDs for detection:**
-- Printers: 0x04b8 (Epson), 0x0519 (Seiko), 0x0416 (Star), 0x0dd4, 0x20d1, 0x0fe6, 0x1fc9, 0x0483
-- Scales: 0x0b67 (CAS), 0x0922 (Ohaus), 0x1446, 0x0eb8 (Mettler-Toledo)
-- Scanners: 0x05e0 (Honeywell), 0x05f9, 0x0c2e, 0x1eab, 0x2dd6, 0x1a86 (Zebex)
+### Labels Tab
+- Price tag editor with fixed 3x10 A4 sheet layout
+- Product search, drag to arrange
+- Print-ready output
 
-### Import Tab
+### Transactions Tab
+- Transaction history search and lookup
+- View/reprint completed sales (Find Sale)
+- Refund processing
 
-- **JSON import:** Textarea for paste or URL. Expected format: `{category: [{name, price, barcode, unit}], ...}`
-- **CSV import:** Drag-drop zone. Flexible header matching (name/description, price/sell price, category/department)
-- Shows result: "Imported X products across Y categories"
+### Cash Drawer Tab
+- Cash drawer event log (open/close/float/pickup/drop)
+- Daily and shift summaries
+
+### Stock Tab
+- Low stock alerts (products below threshold)
+- Manual stock adjustments
+
+### Z-Report Tab
+- End-of-day settlement report
+- Sales totals by payment method, category
+
+### Audit Tab
+- Searchable audit log of all system actions
+
+### Logs Tab
+- App log viewer with level filtering
+- Log export
+
+### Network Tab
+- LAN sync configuration
+- Network diagnostics (ping, interface listing)
+- Peer discovery and connection status
+
+### Diagnostics Tab
+- Hardware diagnostics and OPOS device testing
+- Serial port enumeration
+
+### Receipt Tab
+- Receipt header/footer text editing
 
 ### Settings Tab
-
-- **Store Details:** Store Name, ABN, Address, Phone, Register ID -- each saves via `setSetting()`
-- **Receipt:** Header text (textarea), Footer text (textarea)
-- **Supabase Cloud Sync:** URL + Anon Key inputs, "Save & Connect" button
+- Store Details: Store Name, ABN, Address, Phone, Register ID
+- Supabase Cloud Sync: URL + Anon Key
+- App mode: Register / Admin
 
 ---
 
@@ -629,7 +721,36 @@ class Cart {
 
 ---
 
+## LAN Sync (lan-sync.js)
+
+Multi-register sync without requiring Supabase/internet:
+
+- **Server** (port 5555 HTTP, port 5556 UDP): runs on the "main" register
+- **Client**: other registers discover server via UDP broadcast, sync via HTTP
+- **Sync model**: version-based change detection, 3-second poll interval
+- **Data synced**: products, categories, deals, keyboard layout, settings
+- **Transactions**: pushed from client registers to server
+- **Session tracking**: concurrent staff logins across registers
+- **"Send to Registers"**: push keyboard layout changes from admin to all connected registers
+- Auto-started on app launch
+
+---
+
+## Linkly EFTPOS (linkly.js)
+
+Integration with Linkly Cloud for payment terminal communication:
+
+- Sandbox and production environment support
+- OAuth pairing flow with terminal
+- Purchase, refund, settlement via Linkly Cloud REST API
+- Real-time status polling during transactions
+- Manual "EFTPOS Accepted" fallback button for offline terminals
+
+---
+
 ## Sync Engine (pos/js/sync.js)
+
+Supabase cloud sync (separate from LAN sync):
 
 - `initSync(url, key)` -- Dynamically imports Supabase JS SDK from CDN, creates client
 - `isOnline()` -- Returns true if supabase initialized AND navigator.onLine
@@ -638,21 +759,6 @@ class Cart {
 - `subscribeToChanges(callback)` -- Realtime channel on products/categories/specials
 - `startAutoSync(intervalMs=30000)` -- Poll every 30s
 - `stopAutoSync()` -- Clear interval + unsubscribe
-
----
-
-## Migration (migrate-from-pt.js)
-
-One-shot script to import from Profit Track:
-
-```bash
-node migrate-from-pt.js [path-to-products.json]
-```
-
-- If path provided: reads file. Otherwise: fetches from `https://matthiascamp.github.io/crisponcreek/products.json`
-- Expected format: `{category: [{name, price, barcode, unit}], ...}`
-- Uses better-sqlite3 (not sql.js) for direct DB write
-- Inserts categories with sort order, then products
 
 ---
 
@@ -665,6 +771,23 @@ Cloud Postgres schema mirrors local SQLite with:
 - Row-level security (RLS) policies
 - Reporting views: `daily_sales`, `product_sales`
 - Realtime enabled on: products, categories, specials, deals
+
+---
+
+## Hardware Integration
+
+**Receipt Printer:** OPOS (Windows POS for .NET) or ESC/POS via USB/network. Graceful fallback.
+
+**Cash Drawer:** OPOS or ESC/POS DK port pulse. Logged to cash_drawer table.
+
+**Barcode Scanner:** OPOS or HID keyboard mode. Scanner bridge exe for non-HID devices. Auto-restart on disconnect.
+
+**Scale:** Serial port reading with continuous polling. Weight events sent to renderer. Auto-use weight for kg/100g products (skip weight modal). Zero/tare support.
+
+**Hardcoded vendor IDs for USB detection:**
+- Printers: 0x04b8 (Epson), 0x0519 (Seiko), 0x0416 (Star), 0x0dd4, 0x20d1, 0x0fe6, 0x1fc9, 0x0483
+- Scales: 0x0b67 (CAS), 0x0922 (Ohaus), 0x1446, 0x0eb8 (Mettler-Toledo)
+- Scanners: 0x05e0 (Honeywell), 0x05f9, 0x0c2e, 0x1eab, 0x2dd6, 0x1a86 (Zebex)
 
 ---
 

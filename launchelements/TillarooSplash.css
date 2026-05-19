@@ -1,0 +1,88 @@
+:root {
+  --tillaroo-green: #4fbd77;
+  --glow-small: 12px;
+  --glow-big: 46px;
+  --glow-opacity: 0.65;
+}
+
+.tillarooSplash {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  position: relative;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(79, 189, 119, 0.15), transparent 28%),
+    radial-gradient(circle at 30% 10%, rgba(79, 189, 119, 0.08), transparent 25%),
+    linear-gradient(180deg, #07150d, #050806 55%, #020302);
+}
+
+.tillarooAura {
+  position: absolute;
+  width: min(70vw, 520px);
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(79, 189, 119, 0.28), transparent 64%);
+  filter: blur(36px);
+  animation: tillarooAuraPulse 2.6s ease-in-out infinite;
+}
+
+.tillarooRoo {
+  width: min(62vw, 420px);
+  aspect-ratio: 590 / 504;
+  overflow: visible;
+  z-index: 1;
+  animation: tillarooFloat 4.8s ease-in-out infinite;
+}
+
+.tillarooRoo path {
+  fill: var(--tillaroo-green);
+  filter:
+    drop-shadow(0 0 var(--glow-small) rgba(79, 189, 119, var(--glow-opacity)))
+    drop-shadow(0 0 var(--glow-big) rgba(79, 189, 119, 0.38));
+  animation: tillarooGlow 2.6s ease-in-out infinite;
+}
+
+.tillarooWordmark {
+  position: absolute;
+  bottom: 8vh;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: clamp(32px, 7vw, 72px);
+  font-weight: 800;
+  letter-spacing: -0.06em;
+  opacity: 0;
+  transform: translateY(12px);
+  animation: tillarooBrandIn 1.2s ease forwards 0.55s;
+}
+
+.tillarooWordmark span {
+  color: var(--tillaroo-green);
+}
+
+@keyframes tillarooGlow {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 8px rgba(79, 189, 119, 0.50))
+      drop-shadow(0 0 28px rgba(79, 189, 119, 0.30));
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 18px rgba(79, 189, 119, 0.95))
+      drop-shadow(0 0 64px rgba(79, 189, 119, 0.55));
+  }
+}
+
+@keyframes tillarooAuraPulse {
+  0%, 100% { opacity: 0.42; transform: scale(0.92); }
+  50% { opacity: 0.90; transform: scale(1.08); }
+}
+
+@keyframes tillarooFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-8px) scale(1.015); }
+}
+
+@keyframes tillarooBrandIn {
+  to { opacity: 1; transform: translateY(0); }
+}

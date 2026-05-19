@@ -1,0 +1,158 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; File Name		: PpT886M.INF
+;; Function Outline	: OPOS Machine Dependent Data File of TM-T88VIM Series
+;; Comment		: POSPrinter
+;; Copyright (C) SEIKO EPSON CORP. 2016
+;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;
+;; Common
+;;;;;;;;;;;;;;;;;;;
+
+[MAIN]
+DeviceClass 		= STRING:POSPrinter				; Device Class
+DeviceName		= STRING:TM-T88VIM_MltIF			; Device Name
+DeviceDesc		= STRING:EPSON TM-T88VIM_MltIF POS Printer	; Device Description
+ModelName		= STRING:TM-T88VI				; Device Model Name
+SOName 			= STRING:SOEPSON.POSPrinterU.140		; SO Program ID
+NumberOfDevice		= INT:4						; Number of Device
+RegFormatType		= STRING:EPSON					; Registry Format
+RegFormatVersion	= INT:2						; Registry Version
+SupportCoreVersion	= STRING:1.14.1.0				; Support CoreModuleGroup Version
+UseESDPRT		= INT:1						; EPSON SD Printer Port(Enable:1 Disable:0)
+
+[PORT]
+OutputLD		= INT:0				; Output to LineDisplay
+OutputDK		= INT:0				; Output to Drawer
+OutputMICR		= INT:0				; Enable MICR Device
+OutputMin		= INT:32			; Minimum Bytes for Output
+OutputMax		= INT:1024			; Maximum Bytes for Output
+OutputEJ		= INT:0				; ElectronicJournal
+
+[DEVINFO]
+ConnectedSOName		= STRING:SOEPSON.POSPrinter.200	; SO Program ID
+PrinterDllName		= STRING:PtrT886.Dll		; DLL File Name
+InternalVersion		= INT:002000000			; INF File Version
+CapRealtimeKick		= INT:01			; Real Time Kick Command for Drawer
+PulseUNITTime		= INT:02			; Drawer Pulse UNIT (msec)
+CapASB				= DWORD:01			; ASB Type(Normal, Ink, Extend, Custom)
+DeviceID			= DWORD:20
+BmpFMemSize			= INT:262144
+
+StatsUnifiedPOSVersion		= DWORD:101
+StatsDeviceCategory		= DWORD:101
+StatsManufacturerName		= DWORD:1420109
+StatsModelName			= DWORD:1430109
+StatsSerialNumber		= DWORD:1440109
+StatsManufactureDate		= DWORD:101
+StatsMechanicalRevision		= DWORD:101
+StatsFirmwareRevision		= DWORD:1410109
+StatsInterface			= DWORD:101
+StatsInstallationDate		= DWORD:101
+StatsHoursPoweredCount		= DWORD:2C6010B
+StatsCommunicationErrorCount	= DWORD:107
+StatsBarcodePrintedCount	= DWORD:107
+StatsFormInsertionCount		= DWORD:111
+StatsHomeErrorCount		= DWORD:111
+StatsJournalCharacterPrintedCount	= DWORD:111
+StatsJournalLinePrintedCount	= DWORD:111
+StatsMaximumTempReachedCount	= DWORD:107
+StatsNVRAMWriteCount		= DWORD:107
+StatsPaperCutCount		= DWORD:2B2010B
+StatsFailedPaperCutCount	= DWORD:107
+StatsPrinterFaultCount		= DWORD:107
+StatsPrintSideChangeCount	= DWORD:111
+StatsFailedPrintSideChangeCount	= DWORD:111
+StatsReceiptCharacterPrintedCount	= DWORD:107
+StatsReceiptCoverOpenCount	= DWORD:107
+StatsReceiptLineFeedCount	= DWORD:294010B
+StatsReceiptLinePrintedCount	= DWORD:107
+StatsSlipCharacterPrintedCount	= DWORD:111
+StatsSlipCoverOpenCount		= DWORD:111
+StatsSlipLineFeedCount		= DWORD:111
+StatsSlipLinePrintedCount	= DWORD:111
+StatsStampFiredCount		= DWORD:111
+
+[SETTING]
+InputBuf		= INT:1024			; Input Buffer
+OutputBuf		= INT:1024			; Output Buffer
+Timeout			= INT:2500			; Output Interval Time
+IdleSleep		= INT:20			; Sleep Time(msec) in Idle Loop
+InputSleep		= INT:10			; Sleep Time(msec) in Input Loop
+OptionFirmVersion 	= DWORD:1			; Firm Version Check OFF
+OptionPaperInvariable	= DWORD:0			; Invariable Paper Setting
+OptionBmpRaster		= DWORD:1			; Raster Bitimage Setting
+OptionBmpNvram 		= DWORD:0			; NVRAM Setting  ON:1	OFF:0
+OptionSoundMelody	= DWORD:1			; Sound Melody Setting
+OptionSoundPatternCount	= DWORD:7			; Sound Melody Pattern Count
+OptionBitmapGradation	= DWORD:1			; Gradation Setting  Grayscale:1
+LogoToolPath	= STRING:\EPSON\TM-T88VI Software\TMT88VIUTL\TM88VIUTL.exe	; UTL Tool Install Path
+OptionSoundPatternLengthList	= STRING:1200,1200,1500,800,1200,600,600	; Sound Melody Pattern Length List
+OptionSoundPatternIDList	= STRING:1,2,3,4,5,100,101			; Sound Melody Pattern ID List
+OptionThai1PassDevice	= DWORD:1			; Thai1Pass Device
+
+OptionEnableMltIF = DWORD:1				; MultiInterFaceFunction TRUE:1	FALSE:0
+;;;;;;;;;;;;;;;;;;;
+;; Serial
+;;;;;;;;;;;;;;;;;;;
+
+[MAIN_1]
+DeviceName		= STRING:TM-T88VIM_MltIF			; Device Name
+DeviceDesc		= STRING:EPSON TM-T88VIM_MltIF POS Printer	; Device Description
+GroupID			= STRING:Ptrs_S					; Device Group
+
+[PORT_1]
+BaudrateSel		= STRING:4,5,6,7,8,10,11	; 2400, 4800, 9600, 19200, 38400, 57600, 115200
+BitLengthSel		= STRING:1			; 8 bit
+ParitySel		= STRING:0,1,2			; NONE, EVEN, ODD
+StopSel			= STRING:1			; 1 bit only
+XonXoffSel		= STRING:0			; Disabled only
+HandShakeSel		= STRING:2			; DTR/DSR only
+
+Baudrate		= INT:8				; 38400
+BitLength		= INT:1				; 8 bit
+Parity			= INT:0				; None
+Stop			= INT:1				; 1 bit
+XonXoff			= INT:0				; Disabled
+HandShake		= INT:2				; DTR/DSR
+
+[SETTING_1]
+Port			= STRING:TMPORT1		; Default Port
+
+;;;;;;;;;;;;;;;;;;;
+;; USB
+;;;;;;;;;;;;;;;;;;;
+
+[MAIN_2]
+DeviceName		= STRING:TM-T88VIMU_MltIF			; Device Name
+DeviceDesc		= STRING:EPSON TM-T88VIMU_MltIF POS Printer	; Device Description
+GroupID			= STRING:Ptrs_U					; Device Group
+
+[SETTING_2]
+Port			= STRING:TMPORT1		; Default Port
+
+;;;;;;;;;;;;;;;;;;;
+;; EtherNet
+;;;;;;;;;;;;;;;;;;;
+
+[MAIN_3]
+DeviceName		= STRING:TM-T88VIME_MltIF			; Device Name
+DeviceDesc		= STRING:EPSON TM-T88VIME_MltIF POS Printer	; Device Description
+GroupID			= STRING:Ptrs_E					; Device Group
+
+[SETTING_3]
+Port			= STRING:TMPORT1		; Default Port
+
+;;;;;;;;;;;;;;;;;;;
+;; Bluetooth
+;;;;;;;;;;;;;;;;;;;
+
+[MAIN_4]
+DeviceName		= STRING:TM-T88VIMB_MltIF			; Device Name
+DeviceDesc		= STRING:EPSON TM-T88VIMB_MltIF POS Printer	; Device Description
+GroupID			= STRING:Ptrs_B					; Device Group
+
+[SETTING_4]
+Port			= STRING:TMPORT1		; Default Port

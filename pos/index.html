@@ -103,7 +103,13 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .pos-grid-btn img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit}
 .pos-grid-btn.has-img{position:relative}
 .pos-grid-btn.has-img::after{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(to top,rgba(0,0,0,.8) 0%,rgba(0,0,0,.35) 30%,rgba(0,0,0,.08) 55%,transparent 100%);pointer-events:none}
-.pos-grid-btn.has-img span{position:relative;z-index:2;font-size:clamp(10px,1.1vw,13px);font-weight:700;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.9),0 0 16px rgba(0,0,0,.5);margin-top:auto;padding-bottom:clamp(3px,0.5vh,6px);letter-spacing:-.2px;text-align:center}
+.pos-grid-btn.has-img > span:not(.btn-price-badge):not(.btn-plu-badge){position:relative;z-index:2;font-size:clamp(10px,1.1vw,13px);font-weight:700;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.9),0 0 16px rgba(0,0,0,.5);margin-top:auto;padding-bottom:clamp(3px,0.5vh,6px);letter-spacing:-.2px;text-align:center}
+.pos-grid-btn.img-cover img{inset:0;width:100%;height:100%;max-width:none;max-height:none;object-fit:cover;padding:0}
+.pos-grid-btn.img-contain.has-img{background:#fff!important;color:#111!important;border-radius:2px;border:1px solid #d6d6d6;padding:0;box-shadow:0 2px 6px rgba(0,0,0,.28);align-items:stretch;justify-content:flex-end}
+.pos-grid-btn.img-contain.has-img::after{display:none}
+.pos-grid-btn.img-contain.has-img img{inset:4px 4px 28px 4px;width:auto;height:auto;max-width:calc(100% - 8px);max-height:calc(100% - 32px);margin:auto;object-fit:contain;border-radius:0}
+.pos-grid-btn.img-contain.has-img > span:not(.btn-price-badge):not(.btn-plu-badge){width:100%;min-height:26px;margin-top:auto;padding:2px 4px 4px;background:rgba(255,255,255,.96);color:#111;text-shadow:none;font-size:clamp(8px,0.95vw,12px);font-weight:800;line-height:1.1;letter-spacing:0;text-align:center}
+.pos-grid-btn.open-price-key .btn-plu-badge{top:0;left:0;border-radius:0 0 3px 0;background:rgba(255,255,255,.92);color:#111;font-size:clamp(9px,0.9vw,13px);font-weight:800}
 
 /* ─── Function buttons (utility keys) ────────────────────────────── */
 .pos-grid-btn.func-key{font-size:clamp(8px,0.9vw,11px);font-weight:700;letter-spacing:.3px;text-transform:uppercase;border:1px solid rgba(255,255,255,.1);box-shadow:0 3px 8px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.12)}
@@ -119,9 +125,12 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 /* Category color accent on image buttons — subtle glow + bottom tint */
 .pos-grid-btn.dept-key.has-img{border-bottom:3px solid var(--cat-color,transparent);box-shadow:0 4px 16px rgba(0,0,0,.5),0 0 20px var(--cat-glow,transparent)}
 .pos-grid-btn.dept-key.has-img::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,var(--cat-glow,transparent) 0%,transparent 40%);z-index:1;pointer-events:none;opacity:.5}
+.pos-grid-btn.dept-key.img-contain.has-img{border-bottom:1px solid #d6d6d6}
+.pos-grid-btn.dept-key.img-contain.has-img::before{display:none}
 
-/* ─── Price badge (bottom-right corner) ─────────────────────────── */
-.btn-price-badge{position:absolute;bottom:3px;right:4px;z-index:3;font-size:clamp(9px,0.85vw,12px);font-weight:700;color:#4ade80;background:rgba(0,0,0,.55);padding:1px 5px;border-radius:4px;letter-spacing:-.3px;pointer-events:none}
+/* ─── Price badge (top-right corner) ────────────────────────────── */
+.btn-price-badge{position:absolute;top:2px;right:3px;z-index:3;font-size:clamp(9px,0.85vw,12px);font-weight:700;color:#4ade80;background:rgba(0,0,0,.62);padding:1px 5px;border-radius:4px;letter-spacing:-.3px;pointer-events:none}
+.pos-grid-btn.open-price-key .btn-price-badge{color:#111;background:rgba(255,255,255,.92);font-weight:800}
 /* ─── PLU badge (top-left corner) ───────────────────────────────── */
 .btn-plu-badge{position:absolute;top:2px;left:3px;z-index:3;font-size:clamp(7px,0.65vw,9px);font-weight:600;color:rgba(255,255,255,.6);background:rgba(0,0,0,.4);padding:1px 3px;border-radius:3px;letter-spacing:-.2px;pointer-events:none;font-family:'JetBrains Mono','Courier New',monospace}
 
@@ -409,7 +418,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
       <input type="text" id="searchInput" class="scan-input" placeholder="" autofocus style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden">
     </div>
     <span class="staff-info" id="staffBadge">Not logged in</span>
-    <a href="#" class="admin-link" id="adminSwitchBtn">Admin</a>
+    <a href="#" class="admin-link" id="adminSwitchBtn">Management</a>
     <button onclick="window.pos.exitFullscreen()" style="background:none;border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 10px;border-radius:4px;font-size:11px;cursor:pointer;min-height:32px" title="Exit fullscreen (F11)">Exit FS</button>
     <div class="sync-info"><span class="sync-dot" id="syncDot"></span><span id="syncLabel">Online</span></div>
   </div>
@@ -1429,14 +1438,18 @@ function renderPosGrid () {
 
 function renderPosButton (btn, gridStyle) {
   const type = btn.type
+  const productOpenPrice = Number(btn.product_open_price || 0) === 1
+  const keyboardPrice = Number(btn.active_price || btn.price || 0)
+  const effectiveType = (type === 'open_price' && ((btn.product_id && !productOpenPrice) || (!btn.product_id && keyboardPrice > 0))) ? 'product' : type
   const bg = esc(btn.bg_color || '#ddd')
   const color = esc(btn.color || '#000')
   const label = esc(btn.label || '')
   const imgSrc = btn.image || btn.product_image_url || ''
-  const cs = btn.col_span || 1, rs = btn.row_span || 1
-  const containFit = imgSrc && cs === 1 && rs === 1
-  const imgHtml = imgSrc ? `<img src="${esc(imgSrc)}" alt=""${containFit ? ' style="object-fit:contain;padding:4px"' : ''}>` : ''
-  const imgClass = imgSrc ? ' has-img' : ''
+  const explicitImageFit = btn.alpha_range === 'image:cover' ? 'cover' : btn.alpha_range === 'image:contain' ? 'contain' : ''
+  const defaultImageFit = (effectiveType === 'fixed_price' || effectiveType === 'open_price' || effectiveType === 'product') ? 'contain' : 'cover'
+  const imageFit = imgSrc ? (explicitImageFit || defaultImageFit) : ''
+  const imgHtml = imgSrc ? `<img src="${esc(imgSrc)}" alt="">` : ''
+  const imgClass = imgSrc ? ` has-img img-${imageFit}` : ''
 
   // Numpad display — not a button but an indicator cell
   if (type === 'num_display') {
@@ -1478,26 +1491,28 @@ function renderPosButton (btn, gridStyle) {
   // Page link buttons
   if (type === 'page_link' && btn.parent_id) {
     let dispLabel = label.replace(/\\n/g,'<br>')
-    // Extract embedded price from label (e.g. "MANGOES<br>$3.50 ea")
-    let priceBadge = ''
-    const priceMatch = dispLabel.match(/<br>(\$[\d.]+.*)$/)
-    if (priceMatch) { priceBadge = `<span class="btn-price-badge">${priceMatch[1]}</span>`; dispLabel = dispLabel.replace(/<br>\$[\d.]+.*$/, '') }
-    else if (btn.price > 0) { priceBadge = `<span class="btn-price-badge">${money(btn.price)}</span>` }
+    dispLabel = dispLabel.replace(/<br>\$[\d.]+.*$/, '')
     const pluBadge2 = btn.product_plu ? `<span class="btn-plu-badge">${esc(btn.product_plu)}</span>` : ''
     return `<div class="pos-grid-btn dept-key${imgClass}" data-type="${esc(type)}" data-page-link="${btn.parent_id}"
-      style="${gridStyle};background:${bg};color:${color}${catColorStyle}">${imgHtml}<span>${dispLabel}</span>${priceBadge}${pluBadge2}</div>`
+      style="${gridStyle};background:${bg};color:${color}${catColorStyle}">${imgHtml}<span>${dispLabel}</span>${pluBadge2}</div>`
   }
 
   // Department / product / nav — everything else
-  const isItem = type === 'fixed_price' || type === 'open_price' || type === 'product'
+  const isItem = effectiveType === 'fixed_price' || effectiveType === 'open_price' || effectiveType === 'product'
   const priceVal = btn.active_price || btn.price || 0
-  const priceBadge = isItem && priceVal > 0 ? `<span class="btn-price-badge">${money(priceVal)}</span>` : ''
-  const pluBadge = btn.product_plu ? `<span class="btn-plu-badge">${esc(btn.product_plu)}</span>` : ''
-  // Strip embedded price line from label when we have a proper price tag
+  const showPriceBadge = isItem && effectiveType !== 'open_price' && priceVal > 0
+  const priceBadge = effectiveType === 'open_price'
+    ? '<span class="btn-price-badge">O/P</span>'
+    : (showPriceBadge ? `<span class="btn-price-badge">${money(priceVal)}</span>` : '')
+  const btnPlu = btn.product_plu || (effectiveType === 'open_price' && /^\d{3,6}$/.test(btn.category_filter || '') ? btn.category_filter : '')
+  const pluBadge = btnPlu ? `<span class="btn-plu-badge">${esc(btnPlu)}</span>` : ''
+  // Strip embedded price lines from open-price labels; fixed/product buttons show them as badges.
   let displayLabel = label.replace(/\\n/g,'<br>')
-  if (priceBadge) displayLabel = displayLabel.replace(/<br>\$[\d.]+.*$/, '')
+  if (priceBadge || effectiveType === 'open_price') displayLabel = displayLabel.replace(/<br>\$[\d.]+.*$/, '')
   const labelHtml = `<span>${displayLabel}</span>${priceBadge}${pluBadge}`
-  return `<div class="pos-grid-btn dept-key${imgClass}" data-type="${esc(type)}" data-cat="${esc(btn.category_filter || '')}"
+  const itemClass = effectiveType === 'open_price' ? ' open-price-key' : ''
+  const productRef = btn.category_filter || ''
+  return `<div class="pos-grid-btn dept-key${imgClass}${itemClass}" data-type="${esc(type)}" data-cat="${esc(productRef)}"
     data-alpha="${esc(btn.alpha_range || '')}" data-label2="${label}" data-price="${priceVal}"
     data-action="${esc(type)}" data-page-link="${btn.parent_id || ''}" data-product-id="${esc(btn.product_id || '')}"
     style="${gridStyle};background:${bg};color:${color}${catColorStyle}">${imgHtml}${labelHtml}</div>`
@@ -1598,7 +1613,20 @@ $('#posGrid').addEventListener('click', async e => {
     }
     if (prod) {
       // Product found — behavior determined by product data
-      if (type === 'open_price' && numBuf) {
+      const isOpenPrice = Number(prod.open_price || 0) === 1
+      const isWeightBased = prod.unit === 'kg' || prod.unit === '100g'
+      if (isWeightBased) {
+        const sw = getScaleKg()
+        if (sw > 0) {
+          const qty = returnMode ? -sw : sw
+          const p = prod.active_price || prod.price || 0
+          cart.addProduct(prod, qty, true); applyDeals()
+          showToast(`${prod.name} ${sw.toFixed(3)} kg × ${money(p)} = ${money(sw * p)}`, 'success')
+          qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); updateQtyBadge()
+          returnToMainKeyboard(); refocus()
+        } else { pendingWeightProduct = prod; showWeightModal(prod) }
+        return
+      } else if (isOpenPrice && numBuf) {
         // Open-price button with numpad entry: use entered cents as price
         const cents = parseInt(numBuf); const customPrice = cents / 100
         if (customPrice > 0) {
@@ -1619,6 +1647,8 @@ $('#posGrid').addEventListener('click', async e => {
           qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); updateQtyBadge()
           returnToMainKeyboard(); refocus()
         } else { pendingWeightProduct = prod; showWeightModal(prod) }
+      } else if (isOpenPrice && !numBuf) {
+        showOpenPriceModal(prod.name, 0, prod)
       } else { addToCart(prod) }
     } else if (btnPrice > 0) {
       // No linked product but has a price — detect unit from label
@@ -1667,7 +1697,11 @@ $('#posGrid').addEventListener('click', async e => {
   }
 
   // Payment buttons
-  if (type === 'pay_cash') { if (cart.isEmpty) { showToast('Cart is empty', 'info'); return }; showCashModal(); return }
+  if (type === 'pay_cash') {
+    if (cart.isEmpty) { showToast('Cart is empty', 'info'); return }
+    completeCashPayment(cart.total)
+    return
+  }
   if (type === 'pay_card') { if (cart.isEmpty) { showToast('Cart is empty', 'info'); return }; completeCardPayment(); return }
   if (type === 'park') {
     if (cart.isEmpty) { showToast('Nothing to hold', 'info'); return }
@@ -2073,11 +2107,13 @@ function showNotFoundAlert(code) {
 
 // ═══ Open Price Modal ═════════════════════════════════════════════
 let openPriceBuf = '', openPriceLabel = ''
-function showOpenPriceModal (label, defaultPrice) {
-  openPriceLabel = label; openPriceBuf = defaultPrice > 0 ? Math.round(defaultPrice * 100).toString() : ''
+let openPriceProduct = null
+function showOpenPriceModal (label, defaultPrice, product) {
+  openPriceLabel = label; openPriceBuf = ''
+  openPriceProduct = product || null
   updateOpenPriceDisplay()
   $('#openPriceTitle').textContent = label
-  $('#openPriceSub').textContent = defaultPrice > 0 ? 'Default price shown — type to change' : 'Type amount in cents (e.g. 150 = $1.50)'
+  $('#openPriceSub').textContent = 'Type amount in cents (e.g. 150 = $1.50)'
   $('#openPriceModal').classList.add('show')
 }
 function updateOpenPriceDisplay () { $('#openPriceDisplay').textContent = money(parseInt(openPriceBuf || '0') / 100) }
@@ -2089,10 +2125,14 @@ $('#openPricePad').addEventListener('click', e => {
 $('#openPriceConfirm').addEventListener('click', () => {
   const cents = parseInt(openPriceBuf || '0'); if (cents <= 0) return
   const price = cents / 100
-  cart.addProduct({ id: 'OPEN_' + Date.now(), name: openPriceLabel, price, active_price: price, unit: 'each', tax_rate: 0.10, is_special: false }, returnMode ? -qtyMultiplier : qtyMultiplier)
-  qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); applyDeals()
+  const prod = openPriceProduct
+    ? { ...openPriceProduct, price, active_price: price }
+    : { id: 'OPEN_' + Date.now(), name: openPriceLabel, price, active_price: price, unit: 'each', tax_rate: 0.10, is_special: false }
+  cart.addProduct(prod, returnMode ? -qtyMultiplier : qtyMultiplier, true)
+  qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); updateQtyBadge(); applyDeals()
   showToast(`${openPriceLabel} $${price.toFixed(2)} added`, 'success')
-  $('#openPriceModal').classList.remove('show'); refocus()
+  $('#openPriceModal').classList.remove('show'); returnToMainKeyboard(); refocus()
+  openPriceProduct = null
 })
 $('#openPriceCancel').addEventListener('click', () => { $('#openPriceModal').classList.remove('show'); refocus() })
 
@@ -2186,10 +2226,23 @@ $('#priceChangePad').addEventListener('click', e => {
   if (b.dataset.val === 'C') priceChangeBuf = ''; else priceChangeBuf += b.dataset.val
   updatePriceChangeDisplay()
 })
-$('#priceChangeConfirm').addEventListener('click', () => {
+$('#priceChangeConfirm').addEventListener('click', async () => {
   const cents = parseInt(priceChangeBuf || '0')
   if (cents <= 0 || priceChangeIndex < 0) return
-  cart.updatePrice(priceChangeIndex, cents / 100)
+  const newPrice = cents / 100
+  const item = cart.items[priceChangeIndex]
+  cart.updatePrice(priceChangeIndex, newPrice)
+  // Persist price change to the product DB so it propagates to all registers
+  if (item.product_id) {
+    try {
+      const p = await window.pos.getProductById(item.product_id)
+      if (p) {
+        p.price = newPrice
+        await window.pos.upsertProduct(p)
+        await renderPosKeyboard()
+      }
+    } catch (e) { console.warn('Failed to persist price change:', e) }
+  }
   showToast('Price updated', 'success'); $('#priceChangeModal').classList.remove('show'); refocus()
 })
 $('#priceChangeCancel').addEventListener('click', () => { $('#priceChangeModal').classList.remove('show'); refocus() })
@@ -3284,6 +3337,15 @@ function showCashModal () {
   $('#cashModal').classList.add('show')
 }
 
+function completeCashPayment (amount) {
+  showCashModal()
+  const rounded = getRemainingCashRounded()
+  cashNumBuf = rounded.toFixed(2)
+  updateCashDisplay()
+  $('#cashConfirm').disabled = false
+  $('#cashConfirm').click()
+}
+
 if ($('#btnPay')) $('#btnPay').addEventListener('click', showCashModal)
 
 $('#splitPayments').addEventListener('click', e => {
@@ -3363,8 +3425,9 @@ function changeBreakdown (amount) {
 }
 
 function updateCashDisplay () {
-  const t = parseFloat(cashNumBuf) || 0
-  $('#cashTendered').textContent = cashNumBuf ? '$' + cashNumBuf : '$0.00'
+  const cents = parseInt(cashNumBuf) || 0
+  const t = cents / 100
+  $('#cashTendered').textContent = money(t)
   const remaining = getRemainingCashRounded()
   const d = $('#changeDisplay')
   if (cart.total < 0) {
@@ -3378,7 +3441,7 @@ function updateCashDisplay () {
     $('#cashConfirm').disabled = false
   } else {
     const ch = t - remaining
-    if (!t) { d.textContent = ''; d.className = 'change-display'; changeBreakdown(0) }
+    if (!cents) { d.textContent = ''; d.className = 'change-display'; changeBreakdown(0) }
     else if (ch >= 0) { d.textContent = `Change: ${money(ch)}`; d.className = 'change-display positive'; changeBreakdown(ch) }
     else { d.textContent = `Short: ${money(Math.abs(ch))}`; d.className = 'change-display short'; changeBreakdown(0) }
     $('#cashConfirm').disabled = t < remaining
@@ -3396,9 +3459,12 @@ $('#quickCash').addEventListener('click', e => {
   }
   const remaining = getRemainingCashRounded()
   const amt = parseFloat(b.dataset.amt)
-  cashNumBuf = b.dataset.amt
+  cashNumBuf = (amt * 100).toFixed(0)
   updateCashDisplay()
-  if (amt >= remaining) $('#cashConfirm').click()
+  if (amt >= remaining) {
+    cashNumBuf = amt.toFixed(2)
+    $('#cashConfirm').click()
+  }
 })
 
 $('#cashConfirm').addEventListener('click', async () => {
@@ -3406,7 +3472,7 @@ $('#cashConfirm').addEventListener('click', async () => {
   try {
     const remaining = getRemaining()
     const roundedRemaining = getRemainingCashRounded()
-    const tendered = parseFloat(cashNumBuf) || 0
+    const tendered = cashNumBuf.includes('.') ? (parseFloat(cashNumBuf) || 0) : (parseInt(cashNumBuf) || 0) / 100
     const ch = roundedRemaining > 0 ? Math.max(0, tendered - roundedRemaining) : 0
 
     // Build final payments list — cash uses rounded amount
@@ -3474,24 +3540,20 @@ $('#reprintList').addEventListener('click', async e => {
 })
 $('#reprintClose').addEventListener('click', () => { $('#reprintModal').classList.remove('show'); refocus() })
 
-// ═══ Cash Modal Numpad ═══════════════════════════════════════════
+// ═══ Cash Modal Numpad (cents-based: 100 = $1.00) ════════════════
 $('#cashNumpad').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return
   const v = b.dataset.cv
   if (v === 'C') cashNumBuf = ''
   else if (v === 'back') cashNumBuf = cashNumBuf.slice(0, -1)
   else if (v === 'OK') {
-    const tendered = parseFloat(cashNumBuf) || 0
-    if (tendered >= getRemainingCashRounded()) { updateCashDisplay(); $('#cashConfirm').click(); return }
-  }
-  else if (v === '.') { if (!cashNumBuf.includes('.')) cashNumBuf += '.' }
-  else if (v === '00') {
-    if (!cashNumBuf.includes('.')) cashNumBuf += '.00'
-    else {
-      const decimals = cashNumBuf.split('.')[1]?.length || 0
-      if (decimals < 2) cashNumBuf += '00'.substring(0, 2 - decimals)
+    const tendered = (parseInt(cashNumBuf) || 0) / 100
+    if (tendered >= getRemainingCashRounded()) {
+      cashNumBuf = tendered.toFixed(2)
+      updateCashDisplay(); $('#cashConfirm').click(); return
     }
   }
+  else if (v === '.' || v === '00') cashNumBuf += '00'
   else cashNumBuf += v
   updateCashDisplay()
 })
@@ -4210,8 +4272,7 @@ window.pos.onScaleWeight((data) => {
   if (!btn) return
   btn.addEventListener('click', e => {
     e.preventDefault()
-    const role = currentStaff?.role || 'cashier'
-    window.pos.setMode('admin', role)
+    window.pos.navigate('admin.html?mode=register&from=register')
   })
 })()
 </script>

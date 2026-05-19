@@ -1,0 +1,135 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; File Name		: MITMH52.INF
+;; Function Outline	: OPOS Machine Dependent Data File of MICR
+;; Copyright (C) SEIKO EPSON CORP. 1998
+;; Copyright (C) EPSON Software Development Laboratory, Inc. 1999-2000
+;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+[MAIN]
+DeviceClass		= MICR				; Device Class
+DeviceName		= TM-H5000II			; Device Name
+DeviceDesc		= EPSON TM-H5000II MICR		; Device Description
+SOName			= SOEPSON.MICR.1		; Service Object Name
+NumberOfDevice		= 4			; Number of Device
+RegFormatType		= EPSON			; RegFormat Type
+RegFormatVersion	= 2			; RegFormat Version
+
+[PORT]
+PortShare	= 4			; must be slave hydra-device
+
+[DEVINFO]
+INFVersion	= INT:001008000
+InternalVersion	= 200			; INF Version
+
+ReadCommand	= DWORD:30
+DataWaitTime	= INT:35000	; 29s + a
+DeleteChar	= DWORD:03
+
+SpecificSetting	= DWORD:01
+RomIDBorder	= DWORD:44	
+
+CapASB		= DWORD:01		; ASB Type(Normal, Ink, Extend, Custom)
+
+DllName		= MiH5k11.dll
+
+StatsUnifiedPOSVersion		= DWORD:101
+StatsDeviceCategory		= DWORD:101
+StatsManufacturerName		= DWORD:1420109
+StatsModelName			= DWORD:1430109
+StatsSerialNumber		= DWORD:1440109
+StatsManufactureDate		= DWORD:101
+StatsMechanicalRevision		= DWORD:101
+StatsFirmwareRevision		= DWORD:1410109
+StatsInterface			= DWORD:101
+StatsInstallationDate		= DWORD:101
+
+StatsHoursPoweredCount		= DWORD:2C6010B
+StatsCommunicationErrorCount	= DWORD:107
+
+StatsGoodReadCount		= DWORD:107
+StatsFailedReadCount		= DWORD:107
+StatsFailedDataParseCount	= DWORD:107
+
+[SETTING]
+OutputBuf	= INT:1024			; Output Buffer
+Timeout		= INT:2500			; Output Interval Time
+IdleSleep	= INT:20			; Sleep Time(msec) in Idle Loop
+Settings	= DWORD:08
+
+ValidationDevice	= DWORD:01
+
+;;;;;;;;;;;;;;;;;;;
+;; Serial
+;;;;;;;;;;;;;;;;;;;
+
+[MAIN_1]
+DeviceName		= TM-H5000II		; Device Name
+DeviceDesc		= EPSON TM-H5000II MICR	; Device Description
+GroupID 		= Micrs			; Device Group
+
+[PORT_1]
+BaudrateSel		= 4,5,6,7		; 2400, 4800, 9600, 19200
+BitLengthSel		= 0,1			; 7 bit, 8 bit
+ParitySel		= 0,1,2			; NONE, EVEN, ODD
+StopSel			= 1			; 1 bit only
+XonXoffSel		= 0			; Disabled only
+HandShakeSel		= 2			; DTR/DSR only
+
+[SETTING_1]
+Port			= COM1		; Default COM Port
+Baudrate		= 6		; 9600
+BitLength		= 1		; 8 bit
+Parity			= 0		; None
+Stop			= 1		; 1 bit
+XonXoff			= 0		; Disabled
+HandShake		= 2		; DTR/DSR
+
+[DEVINFO_1]
+Master			= "TM-H5000II"	; attachable Master device
+
+;;;;;;;;;;;;;;;;;;;
+;; Parallel
+;;;;;;;;;;;;;;;;;;;
+
+[MAIN_2]
+DeviceName		= TM-H5000IIP		; Device Name
+DeviceDesc		= EPSON TM-H5000IIP MICR	; Device Description
+GroupID			= Micrs_P		; Device Group
+
+[SETTING_2]
+Port			= LPT1			; Default LPT Port
+
+[DEVINFO_2]
+Master			= "TM-H5000IIP"	; attachable Master device
+
+;;;;;;;;;;;;;;;;;;;
+;; USB
+;;;;;;;;;;;;;;;;;;;
+
+[MAIN_3]
+DeviceName		= TM-H5000IIU			; Device Name
+DeviceDesc		= EPSON TM-H5000IIU MICR	; Device Description
+GroupID			= Micrs_U			; Device Group
+
+[SETTING_3]
+Port			= USB1			; Default USB Port
+
+[DEVINFO_3]
+Master			= "TM-H5000IIU"		; attachable Master device
+
+;;;;;;;;;;;;;;;;;;;
+;; EtherNet
+;;;;;;;;;;;;;;;;;;;
+
+[MAIN_4]
+DeviceName		= TM-H5000IIE			; Device Name
+DeviceDesc		= EPSON TM-H5000IIE MICR	; Device Description
+GroupID			= Micrs_E			; Device Group
+
+[SETTING_4]
+Port			= NET0.0.0.0			; Default IP Address
+
+[DEVINFO_4]
+Master			= "TM-H5000IIE"			; attachable Master device

@@ -1,0 +1,144 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; File Name		: MIJ7100.INF
+;; Function Outline	: OPOS Machine Dependent Data File of MICR
+;; Copyright (C) SEIKO EPSON CORP. 1999-2002
+;; Copyright (C) EPSON Software Development Laboratory, Inc. 1999-2002
+;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+[MAIN]
+DeviceClass		= MICR				; Device Class
+DeviceName		= TM-J7100			; Device Name
+DeviceDesc		= EPSON TM-J7100 MICR		; Device Description
+SOName			= SoEPSON.MICR.1		; Service Object Name
+NumberOfDevice		= 4				; Number of Device
+GroupID 		= Micrs				; Device Group
+RegFormatType		= EPSON				; RegFormat Type
+RegFormatVersion	= 2				; RegFormat Version
+
+[DEVINFO]
+INFVersion		= INT:001008000
+InternalVersion		= int:200			; INF Version
+
+ReadCommand		= DWORD:30
+ReadResultNewCmd	= DWORD:01			; Use New Command
+
+DataWaitTime		= INT:35000
+DeleteChar		= DWORD:03
+
+SpecificSetting		= DWORD:01			; U675,H6000
+RomIDBorder		= DWORD:FF	
+
+CapASB			= DWORD:1131			; ASB Type(Normal, Ink, Extend, Custom)
+
+DllName			= MiJ7k11.dll
+
+StatsUnifiedPOSVersion		= DWORD:101
+StatsDeviceCategory		= DWORD:101
+StatsManufacturerName		= DWORD:1420109
+StatsModelName			= DWORD:1430109
+StatsSerialNumber		= DWORD:1440109
+StatsManufactureDate		= DWORD:101
+StatsMechanicalRevision		= DWORD:101
+StatsFirmwareRevision		= DWORD:1410109
+StatsInterface			= DWORD:101
+StatsInstallationDate		= DWORD:101
+
+StatsHoursPoweredCount		= DWORD:2C6010B
+StatsCommunicationErrorCount	= DWORD:107
+
+StatsGoodReadCount		= DWORD:107
+StatsFailedReadCount		= DWORD:107
+StatsFailedDataParseCount	= DWORD:107
+
+[SETTING]
+INFVersion		= INT:001008000
+
+IdleSleep		= INT:20			; sleep time(msec) in idle loop
+Timeout			= INT:2500			; Output timeout time
+
+ReadCommand		= DWORD:30
+DataWaitTime		= INT:35000
+DeleteChar		= DWORD:03
+
+Settings		= DWORD:08
+
+ValidationDevice	= DWORD:01
+
+;;;;;;;;;;;;;;;;;;;
+;; Serial
+;;;;;;;;;;;;;;;;;;;
+
+[MAIN_1]
+DeviceName		= TM-J7100			; Device Name
+DeviceDesc		= EPSON TM-J7100 MICR		; Device Description
+GroupID 		= Micrs				; Device Group
+
+[PORT_1]
+BaudrateSel		= 4,5,6,7,8,10,11		; 2400, 4800, 9600, 19200, 38400, 57600, 115200
+BitLengthSel		= 0,1				; 7 bit, 8 bit
+ParitySel		= 0,1,2				; NONE, EVEN, ODD
+StopSel			= 1				; 1 bit only
+XonXoffSel		= 0				; Disabled only
+HandShakeSel		= 2				; DTR/DSR only
+
+[SETTING_1]
+Port			= COM1				; Default COM Port
+Baudrate		= 7				; 19200
+BitLength		= 1				; 8 bit
+Parity			= 0				; None
+Stop			= 1				; 1 bit
+XonXoff			= 0				; Disabled
+HandShake		= 2				; DTR/DSR
+OutputBuf		= 1024
+
+[DEVINFO_1]
+Master			= "TM-J7100"			; attachable Master device
+
+;;;;;;;;;;;;;;;;;;;
+;; Parallel
+;;;;;;;;;;;;;;;;;;;
+
+[MAIN_2]
+DeviceName		= TM-J7100P			; Device Name
+DeviceDesc		= EPSON TM-J7100P MICR		; Device Description
+GroupID			= Micrs_P			; Device Group
+
+[SETTING_2]
+Port			= LPT1				; Default LPT Port
+OutputBuf		= 1024
+
+[DEVINFO_2]
+Master			= "TM-J7100P"			; attachable Master device
+
+;;;;;;;;;;;;;;;;;;;
+;; USB
+;;;;;;;;;;;;;;;;;;;
+
+[MAIN_3]
+DeviceName		= TM-J7100U			; Device Name
+DeviceDesc		= EPSON TM-J7100U MICR		; Device Description
+GroupID			= Micrs_U			; Device Group
+
+[SETTING_3]
+Port			= USB1				; Default USB Port
+
+[DEVINFO_3]
+Master			= "TM-J7100U"			; attachable Master device
+
+;;;;;;;;;;;;;;;;;;;
+;; EtherNet
+;;;;;;;;;;;;;;;;;;;
+
+[MAIN_4]
+DeviceName		= TM-J7100E			; Device Name
+DeviceDesc		= EPSON TM-J7100E MICR		; Device Description
+GroupID			= Micrs_E			; Device Group
+
+[SETTING_4]
+Port			= NET0.0.0.0			; Default IP Address
+OutputBuf		= 1024
+
+[DEVINFO_4]
+Master			= "TM-J7100E"			; attachable Master device

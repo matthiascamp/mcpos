@@ -1,5 +1,5 @@
 // Auto-generated keyboard data, do not edit manually
-const VERSION = "2026-05-18-p"
+const VERSION = "2026-05-19-profit-track-sections-a"
 
 const pages = [
   {
@@ -953,17 +953,17 @@ const buttons = [
     "product_id": null,
     "active": 1
   },
-  {
+{
     "id": "pg4-broccoli",
     "label": "BROCCOLI",
-    "type": "open_price",
-    "price": 4.59,
-    "image": "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/7/407755-zm.jpg",
+    "type": "page_link",
+    "price": 0,
+    "image": "images/products/github-broccoli.jpg",
     "color": "#fff",
     "bg_color": "#1e3328",
-    "parent_id": null,
+    "parent_id": "24",
     "category_filter": null,
-    "alpha_range": null,
+    "alpha_range": "image:cover",
     "sort_order": 5,
     "position": "grid",
     "page": 4,
@@ -1121,17 +1121,17 @@ const buttons = [
     "product_id": null,
     "active": 1
   },
-  {
+{
     "id": "pg4-chillies",
     "label": "CHILLIES",
-    "type": "open_price",
-    "price": 12.9,
+    "type": "page_link",
+    "price": 0,
     "image": "https://shop.coles.com.au/wcsstore/Coles-CAS/images/8/7/6/8760314-zm.jpg",
     "color": "#fff",
     "bg_color": "#1e3328",
-    "parent_id": null,
+    "parent_id": "27",
     "category_filter": null,
-    "alpha_range": null,
+    "alpha_range": "image:cover",
     "sort_order": 13,
     "position": "grid",
     "page": 4,
@@ -1793,17 +1793,17 @@ const buttons = [
     "product_id": null,
     "active": 1
   },
-  {
+{
     "id": "pg5-tomatoes",
     "label": "TOMATOES",
-    "type": "open_price",
-    "price": 6.89,
-    "image": "https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/8/3/4835171-zm.jpg",
+    "type": "page_link",
+    "price": 0,
+    "image": "images/products/github-tomato.jpg",
     "color": "#fff",
     "bg_color": "#1e3328",
-    "parent_id": null,
+    "parent_id": "35",
     "category_filter": null,
-    "alpha_range": null,
+    "alpha_range": "image:cover",
     "sort_order": 22,
     "position": "grid",
     "page": 5,

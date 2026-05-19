@@ -172,6 +172,7 @@ contextBridge.exposeInMainWorld('pos', {
   restartLan:         ()           => ipcRenderer.invoke('lan:restart'),
   discoverServer:     ()           => ipcRenderer.invoke('lan:discover'),
   networkDiagnostic:  ()           => ipcRenderer.invoke('lan:networkDiagnostic'),
+  pushToRegisters:    ()           => ipcRenderer.invoke('lan:pushToRegisters'),
 
   // Customer Display
   customerUpdate:     (data)       => ipcRenderer.invoke('customer:update', data),
