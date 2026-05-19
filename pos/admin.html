@@ -4681,8 +4681,14 @@
     $('#pageTree').addEventListener('click', e => {
       const node = e.target.closest('[data-tree-page]')
       if (!node) return
-      currentPage = parseInt(node.dataset.treePage)
-      applyPageSize(); renderPageTree(); renderGrid(); closeEditPanel()
+      e.stopPropagation()
+      const pg = parseInt(node.dataset.treePage)
+      if (pg === currentPage) return
+      currentPage = pg
+      try { applyPageSize() } catch (err) { console.error('applyPageSize', err) }
+      try { renderPageTree() } catch (err) { console.error('renderPageTree', err) }
+      try { renderGrid() } catch (err) { console.error('renderGrid', err) }
+      try { closeEditPanel() } catch (err) { console.error('closeEditPanel', err) }
     })
 
     $('#pageTree').addEventListener('dblclick', async e => {
