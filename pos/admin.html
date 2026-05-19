@@ -388,7 +388,7 @@
     /* ── Keyboard Layout Editor ───────────────────────────────── */
     .kb-editor { display: flex; gap: 12px; align-items: start; }
     .kb-editor .kb-grid-wrap { flex: 1; min-width: 0; }
-    .kb-editor .kb-sidebar { width: 300px; min-width: 300px; }
+    .kb-editor .kb-sidebar { width: 380px; min-width: 380px; }
     .kb-page-tree .kb-tree-node:hover { background: var(--surface2); }
     .kb-page-tree .kb-tree-node.active { background: var(--green); color: #000; }
     .kb-grid-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; overflow-x: auto; }
@@ -415,7 +415,7 @@
       position: absolute; top: 2px; right: 3px;
       font-size: 7px; font-weight: 600; opacity: .6; text-transform: uppercase; letter-spacing: .3px;
     }
-    .kb-cell .kb-cell-price { font-size: 9px; font-weight: 400; opacity: .75; margin-top: 1px; }
+    .kb-cell .kb-cell-price { display: block; font-size: 12px; font-weight: 600; opacity: .9; margin-top: 3px; }
 
     .kb-cell.empty-cell {
       border: 1px dashed var(--border); background: rgba(255,255,255,.02);
@@ -461,6 +461,10 @@
     .kb-preview-bar .kb-pos-info { font-size: 11px; color: var(--text-dim); flex: 1; }
     .kb-edit-actions { display: flex; gap: 6px; margin-top: 12px; }
     .kb-edit-actions .btn { font-size: 12px; padding: 8px 16px; }
+    .kb-product-linked { display:none; padding:5px 8px; background:var(--surface2); border:1px solid var(--border); border-radius:6px; font-size:12px; color:var(--text); align-items:center; gap:6px; min-height:30px; }
+    .kb-product-linked span { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .kb-product-linked button { background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:14px; padding:0 2px; flex-shrink:0; }
+    .kb-product-linked button:hover { color:var(--red); }
 
     .kb-product-sidebar {
       background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
@@ -985,6 +989,10 @@
             <select id="pTrackStock"><option value="0">No</option><option value="1">Yes</option></select>
           </div>
           <div class="form-field"><label>Stock Qty</label><input type="number" id="pStockQty" step="0.01" value="0"></div>
+          <div class="form-field">
+            <label>Open Price</label>
+            <select id="pOpenPrice"><option value="0">No</option><option value="1">Yes</option></select>
+          </div>
           <div class="form-field"><label>Image URL</label><input type="text" id="pImageUrl" placeholder="optional"></div>
         </div>
         <div style="display:flex;gap:8px;margin-top:14px">
@@ -1497,7 +1505,8 @@
           </div>
           <div style="margin-top:8px;border-top:1px solid var(--border);padding-top:8px">
             <button class="btn btn-outline" style="width:100%;padding:4px;font-size:10px;margin-bottom:4px" id="copyPageBtn">Duplicate</button>
-            <button class="btn" style="width:100%;padding:4px;font-size:10px;background:var(--red);color:#fff" id="deletePageBtn">Delete Page</button>
+            <button class="btn" style="width:100%;padding:4px;font-size:10px;background:var(--red);color:#fff;margin-bottom:4px" id="deletePageBtn">Delete Page</button>
+            <button class="btn" style="width:100%;padding:6px;font-size:11px;background:#3b82f6;color:#fff;font-weight:600" id="sendToRegistersBtn">Send to Registers</button>
           </div>
         </div>
         <div class="kb-grid-wrap">
@@ -1568,16 +1577,31 @@
                   </optgroup>
                 </select>
               </div>
-              <div class="kb-field"><label>Price</label><input type="number" id="kbPrice" step="0.01" min="0" value="0"></div>
             </div>
+            <div class="kb-field" id="kbPriceField"><label>Price</label><div style="display:flex;align-items:center;gap:6px"><span style="font-size:18px;font-weight:700;color:var(--green)">$</span><input type="number" id="kbPrice" step="0.01" min="0" value="0" style="flex:1;font-size:18px;font-weight:600;padding:8px 10px"></div></div>
 
-            <div class="kb-edit-row" id="kbProductRow" style="display:none">
-              <div class="kb-field" style="flex:1;position:relative">
-                <label>Linked Product</label>
+            <div id="kbProductRow" style="display:none;position:relative">
+              <div class="kb-field" style="margin-bottom:8px">
+                <label>Product</label>
+                <div id="kbProductLinked" class="kb-product-linked">
+                  <span id="kbProductName"></span>
+                  <button type="button" id="kbProductClear" title="Change product">&times;</button>
+                </div>
                 <input type="text" id="kbProductSearch" placeholder="Search products..." autocomplete="off">
                 <input type="hidden" id="kbProductId">
-                <div id="kbProductName" style="font-size:11px;color:#4ade80;margin-top:2px;display:none"></div>
                 <div id="kbProductResults" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:50;max-height:160px;overflow-y:auto;background:var(--surface2);border:1px solid var(--border);border-radius:6px;margin-top:2px"></div>
+              </div>
+              <div class="kb-field" style="margin-bottom:8px">
+                <label>Price</label>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <span style="font-size:18px;font-weight:700;color:var(--green)">$</span>
+                  <input type="number" id="kbProductPrice" step="0.01" min="0" value="0" style="flex:1;font-size:18px;font-weight:600;padding:8px 10px">
+                </div>
+              </div>
+              <div style="margin-bottom:8px">
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text)">
+                  <input type="checkbox" id="kbOpenPrice" style="width:16px;height:16px;accent-color:#f59e0b;cursor:pointer"> Open Price (cashier enters price)
+                </label>
               </div>
             </div>
 
@@ -2615,6 +2639,7 @@
         $('#pTax').value = p.tax_rate ?? 0.10
         $('#pTrackStock').value = p.track_stock ? '1' : '0'
         $('#pStockQty').value = p.stock_qty || 0
+        $('#pOpenPrice').value = p.open_price ? '1' : '0'
         $('#pImageUrl').value = p.image_url || ''
         $('#pDeleteBtn').style.display = 'inline-block'
         $('#pDuplicateBtn').style.display = 'inline-block'
@@ -2631,6 +2656,7 @@
         $('#pTax').value = '0.10'
         $('#pTrackStock').value = '0'
         $('#pStockQty').value = '0'
+        $('#pOpenPrice').value = '0'
         $('#pImageUrl').value = ''
         $('#pDeleteBtn').style.display = 'none'
         $('#pDuplicateBtn').style.display = 'none'
@@ -2654,6 +2680,7 @@
         tax_rate: parseFloat($('#pTax').value) || 0.10,
         track_stock: $('#pTrackStock').value === '1',
         stock_qty: parseFloat($('#pStockQty').value) || 0,
+        open_price: $('#pOpenPrice').value === '1',
         image_url: $('#pImageUrl').value.trim() || null,
       }
       const result = await window.pos.upsertProduct(product)
@@ -4722,6 +4749,14 @@
       if (e.key === 'Escape') $('#addPageCancelBtn').click()
     })
 
+    $('#sendToRegistersBtn').addEventListener('click', async () => {
+      try {
+        const result = await window.pos.pushToRegisters()
+        const n = result.clients || 0
+        showToast(n > 0 ? `Pushed to ${n} register${n !== 1 ? 's' : ''}` : 'Pushed — no registers connected', n > 0 ? 'success' : 'info')
+      } catch (e) { showToast('Failed to push: ' + e.message, 'error') }
+    })
+
     $('#deletePageBtn').addEventListener('click', async () => {
       if (allPages.length <= 1) { showToast('Cannot delete the only page', 'error'); return }
       const info = getPageInfo(currentPage)
@@ -5166,7 +5201,10 @@
           $('#kbLabel').value = kbSelectedProduct.name
           $('#kbType').value = 'product'
           $('#kbPrice').value = kbSelectedProduct.price
+          $('#kbProductPrice').value = kbSelectedProduct.price
           $('#kbProductId').value = kbSelectedProduct.id
+          const unitTag = kbSelectedProduct.unit === 'kg' ? ' /kg' : kbSelectedProduct.unit === '100g' ? ' /100g' : ''
+          showLinkedProduct(`${kbSelectedProduct.name}${unitTag}`)
           updateTypeFields()
           updateLivePreview()
           kbSelectedProduct = null
@@ -5501,11 +5539,18 @@
     function labelFromDb (s) { return (s || '').replace(/\\n/g, '\n') }
     function labelToDb (s) { return (s || '').replace(/\n/g, '\\n') }
 
+    function showLinkedProduct (name) {
+      $('#kbProductName').textContent = name
+      $('#kbProductLinked').style.display = 'flex'
+      $('#kbProductSearch').style.display = 'none'
+    }
     function clearProductPicker () {
       $('#kbProductId').value = ''
       $('#kbProductSearch').value = ''
-      $('#kbProductName').style.display = 'none'
+      $('#kbProductSearch').style.display = ''
+      $('#kbProductLinked').style.display = 'none'
       $('#kbProductResults').style.display = 'none'
+      $('#kbProductPrice').value = 0
     }
 
     function openNewButton (row, col) {
@@ -5513,6 +5558,7 @@
       $('#kbEditId').value = ''
       $('#kbLabel').value = ''
       $('#kbType').value = 'product'
+      $('#kbOpenPrice').checked = false
       $('#kbPrice').value = 0
       $('#kbCatFilter').value = ''
       $('#kbAlphaRange').value = ''
@@ -5539,6 +5585,7 @@
       // Map legacy types to unified product type
       const editType = (btn.type === 'open_price' || btn.type === 'fixed_price') ? 'product' : btn.type
       $('#kbType').value = editType
+      $('#kbOpenPrice').checked = false
       $('#kbPrice').value = btn.price || 0
       $('#kbCatFilter').value = btn.category_filter || ''
       $('#kbAlphaRange').value = btn.alpha_range || ''
@@ -5551,13 +5598,17 @@
       // Product picker state
       clearProductPicker()
       const linkedProductId = btn.product_id || (editType === 'product' && btn.category_filter) || null
+      $('#kbProductPrice').value = 0
       if (linkedProductId) {
         $('#kbProductId').value = linkedProductId
         window.pos.getProductById(linkedProductId).then(p => {
           if (p) {
             const unitTag = p.unit === 'kg' ? ' /kg' : p.unit === '100g' ? ' /100g' : ''
-            $('#kbProductName').textContent = `${p.name} — $${(p.active_price||p.price||0).toFixed(2)}${unitTag}`
-            $('#kbProductName').style.display = 'block'
+            showLinkedProduct(`${p.plu ? p.plu + ' — ' : ''}${p.name}${unitTag}`)
+            const dbPrice = p.active_price || p.price || btn.price || 0
+            $('#kbProductPrice').value = dbPrice
+            $('#kbPrice').value = dbPrice
+            if (p.open_price) $('#kbOpenPrice').checked = true
           }
         }).catch(() => {})
       }
@@ -5614,9 +5665,12 @@
     // Show/hide fields based on type
     function updateTypeFields () {
       const type = $('#kbType').value
+      const isProduct = type === 'product' || type === 'open_price' || type === 'fixed_price'
       $('#kbPageLinkRow').style.display = type === 'page_link' ? 'flex' : 'none'
-      $('#kbProductRow').style.display = (type === 'product' || type === 'open_price' || type === 'fixed_price') ? 'flex' : 'none'
+      $('#kbProductRow').style.display = isProduct ? 'flex' : 'none'
       $('#kbCatRow').style.display = (type === 'section' || type === 'nav') ? 'flex' : 'none'
+      // Hide standalone price when product row has its own price field
+      $('#kbPriceField').style.display = isProduct ? 'none' : ''
       if (type === 'page_link') {
         const sel = $('#kbTargetPage')
         sel.innerHTML = allPages.map(p => {
@@ -5646,20 +5700,29 @@
       const price = parseFloat(item.dataset.price) || 0
       const unit = item.dataset.unit
       $('#kbProductId').value = id
-      $('#kbProductSearch').value = ''
       $('#kbProductResults').style.display = 'none'
       const unitTag = unit === 'kg' ? ' /kg' : unit === '100g' ? ' /100g' : ''
-      $('#kbProductName').textContent = `${name} — $${price.toFixed(2)}${unitTag}`
-      $('#kbProductName').style.display = 'block'
-      // Auto-fill label and price if empty
+      showLinkedProduct(`${name}${unitTag}`)
       if (!$('#kbLabel').value.trim()) $('#kbLabel').value = name
+      $('#kbProductPrice').value = price
       $('#kbPrice').value = price
+      updateLivePreview()
+    })
+
+    // Keep kbPrice in sync when product price is edited
+    $('#kbProductPrice').addEventListener('input', () => {
+      $('#kbPrice').value = $('#kbProductPrice').value
       updateLivePreview()
     })
 
     // Close product results when clicking outside
     document.addEventListener('click', e => {
       if (!e.target.closest('#kbProductRow')) $('#kbProductResults').style.display = 'none'
+    })
+
+    $('#kbProductClear').addEventListener('click', () => {
+      clearProductPicker()
+      $('#kbPrice').value = 0
     })
 
     $('#kbCloseEdit').addEventListener('click', closeEditPanel)
@@ -5719,9 +5782,12 @@
         }
       }
 
-      const btnType = $('#kbType').value
+      let btnType = $('#kbType').value
+      const isOpenPrice = $('#kbOpenPrice').checked
+      // Save as open_price type when checkbox is checked
+      if (btnType === 'product' && isOpenPrice) btnType = 'open_price'
       const linkedProduct = $('#kbProductId').value || null
-      const catFilter = btnType === 'product' ? linkedProduct : ($('#kbCatFilter').value.trim() || null)
+      const catFilter = (btnType === 'product' || btnType === 'open_price') ? linkedProduct : ($('#kbCatFilter').value.trim() || null)
       const btn = {
         id: editId || undefined,
         label,
@@ -5744,6 +5810,16 @@
       }
       pushUndo()
       await window.pos.upsertButton(btn)
+      // Update the linked product's open_price flag in the DB
+      if (linkedProduct) {
+        try {
+          const p = await window.pos.getProductById(linkedProduct)
+          if (p) {
+            p.open_price = isOpenPrice
+            await window.pos.upsertProduct(p)
+          }
+        } catch (_) {}
+      }
       showToast('Button saved', 'success')
       kbButtons = await window.pos.getAllButtons()
       renderGrid(); closeEditPanel()
