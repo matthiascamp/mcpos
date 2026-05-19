@@ -159,7 +159,7 @@ async function handleRoute (req, res, url, path) {
   if (req.method === 'GET') {
     switch (path) {
       case '/api/heartbeat':
-        return jsonReply(res, { ok: true, time: new Date().toISOString(), ip: getLocalIp(), port: state.port, version: dataVersion })
+        return jsonReply(res, { ok: true, time: new Date().toISOString(), ip: getLocalIp(), port: state.port, version: dataVersion, secret: state.secret })
 
       case '/api/peers': {
         const regRow = db.dbGet("SELECT value FROM settings WHERE key = 'register_id'")
@@ -366,7 +366,8 @@ function startUdpBroadcast (port) {
         service: 'crisp-pos',
         ip: getLocalIp(),
         port,
-        register_id: regRow?.value || 'LANE01'
+        register_id: regRow?.value || 'LANE01',
+        secret: state.secret
       })
       const buf = Buffer.from(msg)
 
@@ -378,7 +379,8 @@ function startUdpBroadcast (port) {
             service: 'crisp-pos',
             ip: currentIp,
             port,
-            register_id: regRow?.value || 'LANE01'
+            register_id: regRow?.value || 'LANE01',
+            secret: state.secret
           })
           const freshBuf = Buffer.from(freshMsg)
           state.serverIp = currentIp
