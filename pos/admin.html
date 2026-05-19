@@ -5760,6 +5760,8 @@
 
 
     // -- Hardware Probing ---------------------------------------------------
+    // Guard: hardware tab elements may not exist if the tab HTML was removed/rewritten
+    if ($('#probeBtn')) {
 
     const TYPE_BADGES = { printer: 'badge-green', scale: 'badge-blue', scanner: 'badge-amber', serial: 'badge-blue', unknown: '' }
 
@@ -6168,6 +6170,8 @@
         }
       }
     })
+
+    } // end hardware guard
 
     // -- Linkly Payment Terminal ------------------------------------------
 
