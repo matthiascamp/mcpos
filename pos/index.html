@@ -1573,15 +1573,27 @@ $('#posGrid').addEventListener('click', async e => {
           return
         }
       }
-      if (prod.unit === 'kg' || prod.unit === '100g') { pendingWeightProduct = prod; showWeightModal(prod) }
-      else { addToCart(prod) }
+      if (prod.unit === 'kg' || prod.unit === '100g') {
+        const sw = getScaleKg()
+        if (sw > 0) {
+          const qty = returnMode ? -sw : sw
+          const p = prod.active_price || prod.price
+          cart.addProduct(prod, qty, true); applyDeals()
+          showToast(`${prod.name} ${sw.toFixed(3)} kg × ${money(p)} = ${money(sw * p)}`, 'success')
+        } else { pendingWeightProduct = prod; showWeightModal(prod) }
+      } else { addToCart(prod) }
     } else if (btnPrice > 0) {
       // No linked product but has a price — detect unit from label
       const isKg = /\bKG\b/i.test(rawLabel) || /\/kg/i.test(rawLabel)
       const unit = isKg ? 'kg' : 'each'
       if (isKg) {
-        pendingWeightProduct = { id: 'KB_' + Date.now(), name, price: btnPrice, active_price: btnPrice, unit: 'kg', tax_rate: 0.10, is_special: false }
-        showWeightModal(pendingWeightProduct)
+        const kbProd = { id: 'KB_' + Date.now(), name, price: btnPrice, active_price: btnPrice, unit: 'kg', tax_rate: 0.10, is_special: false }
+        const sw = getScaleKg()
+        if (sw > 0) {
+          const qty = returnMode ? -sw : sw
+          cart.addProduct(kbProd, qty, true); applyDeals()
+          showToast(`${name} ${sw.toFixed(3)} kg × ${money(btnPrice)} = ${money(sw * btnPrice)}`, 'success')
+        } else { pendingWeightProduct = kbProd; showWeightModal(kbProd) }
       } else {
         addToCart({ id: 'KB_' + Date.now(), name, price: btnPrice, active_price: btnPrice, unit: 'each', tax_rate: 0.10, is_special: false })
       }
@@ -1933,6 +1945,15 @@ function updateQtyBadge () {
 
 function addToCart (product) {
   if (product.unit === 'kg' || product.unit === '100g') {
+    const sw = getScaleKg()
+    if (sw > 0) {
+      const qty = returnMode ? -sw : sw
+      const p = product.active_price || product.price
+      cart.addProduct(product, qty, true); applyDeals()
+      showToast(`${product.name} ${sw.toFixed(3)} kg × ${money(p)} = ${money(sw * p)}`, 'success')
+      qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); updateQtyBadge()
+      return
+    }
     pendingWeightProduct = product; showWeightModal(product); return
   }
   const qty = returnMode ? -qtyMultiplier : qtyMultiplier
