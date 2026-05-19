@@ -1454,7 +1454,7 @@ function renderPosButton (btn, gridStyle) {
 
   // Department / product / nav — everything else
   const isItem = type === 'fixed_price' || type === 'open_price' || type === 'product'
-  const priceVal = btn.price || 0
+  const priceVal = btn.active_price || btn.price || 0
   const priceBadge = isItem && priceVal > 0 ? `<span class="btn-price-badge">${money(priceVal)}</span>` : ''
   const pluBadge = btn.product_plu ? `<span class="btn-plu-badge">${esc(btn.product_plu)}</span>` : ''
   // Strip embedded price line from label when we have a proper price tag
@@ -1522,6 +1522,15 @@ $('#posGrid').addEventListener('click', async e => {
     if (!prod && productRef) {
       prod = await window.pos.getProductById(productRef) || await window.pos.getProductByBarcode(productRef)
     }
+    // Last resort: search by the button label name
+    if (!prod && name) {
+      const results = await window.pos.searchProducts(name)
+      if (results && results.length === 1) prod = results[0]
+      else if (results && results.length > 1) {
+        const exact = results.find(r => r.name.toLowerCase() === name.toLowerCase().replace(/\s+kg$/i,'').replace(/\s+ea$/i,'').trim())
+        if (exact) prod = exact
+      }
+    }
 
     // Weighed-open button — labelled product like "BANANAS $3.99/kg" or
     // generic "/KG". If the label contains a price, parse it and (if the
@@ -1567,8 +1576,15 @@ $('#posGrid').addEventListener('click', async e => {
       if (prod.unit === 'kg' || prod.unit === '100g') { pendingWeightProduct = prod; showWeightModal(prod) }
       else { addToCart(prod) }
     } else if (btnPrice > 0) {
-      // No linked product but has a price — add as fixed-price item
-      addToCart({ id: 'KB_' + Date.now(), name, price: btnPrice, active_price: btnPrice, unit: 'each', tax_rate: 0.10, is_special: false })
+      // No linked product but has a price — detect unit from label
+      const isKg = /\bKG\b/i.test(rawLabel) || /\/kg/i.test(rawLabel)
+      const unit = isKg ? 'kg' : 'each'
+      if (isKg) {
+        pendingWeightProduct = { id: 'KB_' + Date.now(), name, price: btnPrice, active_price: btnPrice, unit: 'kg', tax_rate: 0.10, is_special: false }
+        showWeightModal(pendingWeightProduct)
+      } else {
+        addToCart({ id: 'KB_' + Date.now(), name, price: btnPrice, active_price: btnPrice, unit: 'each', tax_rate: 0.10, is_special: false })
+      }
     } else if (numBuf) {
       // Numpad has a value — use it as cents (e.g. 500 = $5.00)
       const cents = parseInt(numBuf); const price = cents / 100

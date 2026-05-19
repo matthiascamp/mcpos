@@ -714,6 +714,62 @@ async function initDatabase() {
     }
   } catch (e) { appLog('error', 'migration', 'Keyboard-product link migration failed', e.message) }
 
+  // ── Re-link unlinked keyboard buttons on every startup ──
+  // Catches buttons added after v1 migration, or buttons whose product_id was cleared.
+  try {
+    const unlinked = dbAll(`
+      SELECT id, label, type, price, page, category_filter
+      FROM keyboard_buttons
+      WHERE active = 1
+        AND product_id IS NULL
+        AND type IN ('open_price', 'fixed_price', 'product')
+    `)
+    let relinked = 0, newProducts = 0
+    const maxPluRow = dbGet("SELECT MAX(CAST(plu AS INTEGER)) as m FROM products WHERE plu IS NOT NULL AND plu != ''")
+    let nextPlu = (maxPluRow && maxPluRow.m) ? maxPluRow.m + 1 : 5000
+
+    for (const btn of unlinked) {
+      let rawLabel = (btn.label || '').replace(/\\n/g, '\n')
+      let nameLine = rawLabel.split('\n')[0].trim()
+      nameLine = nameLine.replace(/\s*\$[\d.]+.*$/i, '').trim()
+      if (!nameLine) continue
+
+      let unit = 'each'
+      if (/\bKG\b/i.test(rawLabel) || /\/kg/i.test(rawLabel)) unit = 'kg'
+      else if (/\b100g\b/i.test(rawLabel)) unit = '100g'
+
+      let cleanName = nameLine
+        .replace(/\s+KG$/i, '').replace(/\s+EA$/i, '').replace(/\s+100G$/i, '').trim()
+
+      // Try exact match first, then fuzzy
+      let match = dbGet("SELECT id FROM products WHERE active = 1 AND LOWER(name) = LOWER(?1) LIMIT 1", [cleanName])
+      if (!match) match = dbGet("SELECT id FROM products WHERE active = 1 AND LOWER(name) LIKE '%' || LOWER(?1) || '%' LIMIT 1", [cleanName])
+      if (!match && cleanName.length > 4) match = dbGet("SELECT id FROM products WHERE active = 1 AND LOWER(?1) LIKE '%' || LOWER(name) || '%' LIMIT 1", [cleanName])
+
+      if (match) {
+        db.run("UPDATE keyboard_buttons SET product_id = ?1 WHERE id = ?2", [match.id, btn.id])
+        relinked++
+      } else if (btn.price > 0) {
+        // Create product record
+        const titleName = cleanName.split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
+        let categoryId = 'cat-fruit'
+        if (btn.page === 4 || btn.page === 5) categoryId = 'cat-veg'
+        else if (btn.page === 6) categoryId = 'cat-grocery'
+        if (btn.category_filter) {
+          const mc = dbGet("SELECT id FROM categories WHERE LOWER(name) = LOWER(?1)", [btn.category_filter])
+          if (mc) categoryId = mc.id
+        }
+        const pid = 'p-kb-' + btn.id
+        const plu = String(nextPlu++)
+        db.run("INSERT OR IGNORE INTO products (id, plu, name, category_id, price, unit, tax_rate, active) VALUES (?1, ?2, ?3, ?4, ?5, ?6, 0.00, 1)",
+          [pid, plu, titleName, categoryId, btn.price, unit])
+        db.run("UPDATE keyboard_buttons SET product_id = ?1 WHERE id = ?2", [pid, btn.id])
+        relinked++; newProducts++
+      }
+    }
+    if (relinked) appLog('info', 'startup', `Re-linked ${relinked} keyboard buttons to products (${newProducts} new products created)`)
+  } catch (e) { appLog('error', 'startup', 'Keyboard re-link failed', e.message) }
+
   // ── Intentional color coding for function buttons ──
   // Red = destructive (logout, return), Blue = navigation (hold, find sale),
   // Amber = caution (discount, open drawer), Teal = search, Purple = admin,
@@ -2931,11 +2987,25 @@ function setupIPC() {
   // ── Keyboard Layout ─────────────────────────────────────────────────────
 
   ipcMain.handle('db:keyboard:getAll', () => {
-    return dbAll("SELECT kb.*, p.image_url AS product_image_url, p.plu AS product_plu FROM keyboard_buttons kb LEFT JOIN products p ON kb.product_id = p.id WHERE kb.active = 1 ORDER BY kb.page, kb.sort_order")
+    return dbAll(`SELECT kb.*, p.image_url AS product_image_url, p.plu AS product_plu, p.unit AS product_unit,
+      COALESCE(s.special_price, p.price) AS active_price
+      FROM keyboard_buttons kb
+      LEFT JOIN products p ON kb.product_id = p.id
+      LEFT JOIN specials s ON s.product_id = p.id AND s.active = 1
+        AND (s.start_date IS NULL OR s.start_date <= date('now'))
+        AND (s.end_date IS NULL OR s.end_date >= date('now'))
+      WHERE kb.active = 1 ORDER BY kb.page, kb.sort_order`)
   })
 
   ipcMain.handle('db:keyboard:getByPage', (_e, page) => {
-    return dbAll("SELECT kb.*, p.image_url AS product_image_url, p.plu AS product_plu FROM keyboard_buttons kb LEFT JOIN products p ON kb.product_id = p.id WHERE kb.active = 1 AND kb.page = ?1 ORDER BY kb.grid_row, kb.grid_col", [page])
+    return dbAll(`SELECT kb.*, p.image_url AS product_image_url, p.plu AS product_plu, p.unit AS product_unit,
+      COALESCE(s.special_price, p.price) AS active_price
+      FROM keyboard_buttons kb
+      LEFT JOIN products p ON kb.product_id = p.id
+      LEFT JOIN specials s ON s.product_id = p.id AND s.active = 1
+        AND (s.start_date IS NULL OR s.start_date <= date('now'))
+        AND (s.end_date IS NULL OR s.end_date >= date('now'))
+      WHERE kb.active = 1 AND kb.page = ?1 ORDER BY kb.grid_row, kb.grid_col`, [page])
   })
 
   ipcMain.handle('db:keyboard:getPages', () => {
@@ -3006,7 +3076,14 @@ function setupIPC() {
   })
 
   ipcMain.handle('db:keyboard:getAllIncludingInactive', () => {
-    return dbAll("SELECT kb.*, p.image_url AS product_image_url FROM keyboard_buttons kb LEFT JOIN products p ON kb.product_id = p.id ORDER BY kb.page, kb.sort_order")
+    return dbAll(`SELECT kb.*, p.image_url AS product_image_url, p.plu AS product_plu, p.unit AS product_unit,
+      COALESCE(s.special_price, p.price) AS active_price
+      FROM keyboard_buttons kb
+      LEFT JOIN products p ON kb.product_id = p.id
+      LEFT JOIN specials s ON s.product_id = p.id AND s.active = 1
+        AND (s.start_date IS NULL OR s.start_date <= date('now'))
+        AND (s.end_date IS NULL OR s.end_date >= date('now'))
+      ORDER BY kb.page, kb.sort_order`)
   })
 
   ipcMain.handle('db:keyboard:bulkUpsert', (_e, buttons) => {
@@ -4529,17 +4606,22 @@ function setupIPC() {
     cmd(Buffer.from([ESC, 0x74, 0x00]))
     cmd(ESCPOS.ALIGN_CENTER)
 
-    // Header block
-    text('WELCOME TO')
-    cmd(ESCPOS.BOLD_ON); cmd(ESCPOS.DOUBLE_SIZE)
-    text(receiptData.storeName || 'Tillaroo')
-    cmd(ESCPOS.NORMAL_SIZE); cmd(ESCPOS.BOLD_OFF)
-
+    // Header block — receipt_header is the primary source of store info
     if (receiptData.header) {
-      for (const line of receiptData.header.split('\n')) if (line.trim()) text(line.trim())
+      const lines = receiptData.header.split('\n').filter(l => l.trim())
+      if (lines.length > 0) {
+        cmd(ESCPOS.BOLD_ON); cmd(ESCPOS.DOUBLE_SIZE)
+        text(lines[0].trim())
+        cmd(ESCPOS.NORMAL_SIZE); cmd(ESCPOS.BOLD_OFF)
+        for (let i = 1; i < lines.length; i++) text(lines[i].trim())
+      }
+    } else {
+      cmd(ESCPOS.BOLD_ON); cmd(ESCPOS.DOUBLE_SIZE)
+      text(receiptData.storeName || 'Tillaroo')
+      cmd(ESCPOS.NORMAL_SIZE); cmd(ESCPOS.BOLD_OFF)
+      if (receiptData.storeAddress) text(receiptData.storeAddress)
     }
     if (receiptData.storePhone) text(`PH# ${receiptData.storePhone}`)
-    if (receiptData.storeAddress) text(receiptData.storeAddress)
     if (receiptData.storeAbn) text(`ABN# ${receiptData.storeAbn}`)
     text('Thank you for shopping with us')
     text('Please retain receipt for refunds')
