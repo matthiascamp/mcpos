@@ -492,62 +492,64 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
     <div id="cashRoundingLine" style="display:none;font-size:11px;color:rgba(255,255,255,.6);margin-top:4px"></div>
   </div>
 
-  <div style="padding:20px 24px">
+  <div style="padding:16px 20px">
     <!-- Split payments display -->
-    <div id="splitPayments" style="margin-bottom:10px"></div>
-    <div id="splitRemaining" style="text-align:center;font-size:13px;color:#888;margin-bottom:8px"></div>
+    <div id="splitPayments" style="margin-bottom:6px"></div>
+    <div id="splitRemaining" style="text-align:center;font-size:13px;color:#888;margin-bottom:6px"></div>
 
-    <!-- Quick payment buttons — top row: Card, EFTPOS Accepted, Exact -->
-    <div style="display:flex;gap:10px;margin-bottom:10px">
-      <button id="payOptCard" style="flex:1;padding:18px;border-radius:12px;border:none;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;font-size:18px;font-weight:800;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:10px">
-        <span style="font-size:22px">&#x2B21;</span> Card / EFTPOS
-      </button>
-      <button id="payOptEftposManual" style="flex:1;padding:18px;border-radius:12px;border:none;background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff;font-size:18px;font-weight:800;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:10px">
-        <span style="font-size:22px">&#x2713;</span> EFTPOS Accepted
-      </button>
-      <button data-amt="exact" id="payExact" style="flex:1;padding:18px;border-radius:12px;border:none;background:linear-gradient(135deg,#4fbd77,#3a9c5e);color:#fff;font-size:18px;font-weight:800;cursor:pointer;font-family:inherit;transition:all .15s">
-        Exact Cash
-      </button>
+    <!-- Payment method buttons -->
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button id="payOptCard" style="flex:1;padding:14px 8px;border-radius:10px;border:none;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;transition:all .15s">Card / EFTPOS</button>
+      <button id="payOptEftposManual" style="flex:1;padding:14px 8px;border-radius:10px;border:none;background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;transition:all .15s">EFTPOS Accepted</button>
+      <button id="splitCardBtn" style="flex:1;padding:14px 8px;border-radius:10px;border:none;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;transition:all .15s">Split Card</button>
+    </div>
+
+    <!-- Cash amount display -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <div style="flex:1;background:#f8f9fa;border:2px solid #e2e4e8;border-radius:10px;padding:12px 16px;font-size:28px;font-weight:800;text-align:right;font-family:'JetBrains Mono',monospace;color:#1a1a2e;min-height:52px;display:flex;align-items:center;justify-content:flex-end" id="cashTendered">$0.00</div>
     </div>
 
     <!-- Quick cash denominations -->
-    <div class="quick-cash" id="quickCash" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px">
-      <button data-amt="5" style="padding:14px 0;border-radius:10px;border:2px solid #e2e4e8;background:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit">$5</button>
-      <button data-amt="10" style="padding:14px 0;border-radius:10px;border:2px solid #e2e4e8;background:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit">$10</button>
-      <button data-amt="20" style="padding:14px 0;border-radius:10px;border:2px solid #e2e4e8;background:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit">$20</button>
-      <button data-amt="50" style="padding:14px 0;border-radius:10px;border:2px solid #e2e4e8;background:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit">$50</button>
-      <button data-amt="100" style="padding:14px 0;border-radius:10px;border:2px solid #e2e4e8;background:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit">$100</button>
+    <div class="quick-cash" id="quickCash" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px">
+      <button data-amt="exact" id="payExact" style="padding:12px 0;border-radius:10px;border:none;background:linear-gradient(135deg,#4fbd77,#3a9c5e);color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">Exact</button>
+      <button data-amt="5" style="padding:12px 0;border-radius:10px;border:2px solid #e2e4e8;background:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">$5</button>
+      <button data-amt="10" style="padding:12px 0;border-radius:10px;border:2px solid #e2e4e8;background:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">$10</button>
+      <button data-amt="20" style="padding:12px 0;border-radius:10px;border:2px solid #e2e4e8;background:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">$20</button>
+      <button data-amt="50" style="padding:12px 0;border-radius:10px;border:2px solid #e2e4e8;background:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">$50</button>
     </div>
 
-    <!-- Custom amount (collapsed by default) -->
-    <details id="customAmountSection" style="margin-bottom:10px">
-      <summary style="cursor:pointer;font-size:13px;color:#888;text-align:center;padding:4px;user-select:none">Custom amount or split payment</summary>
-      <div style="margin-top:10px">
-        <div class="tendered-row"><label>Cash Tendered</label><input type="text" id="cashTendered" inputmode="none" readonly placeholder="Tap below"></div>
-        <div class="cash-numpad" id="cashNumpad">
-          <button data-cv="7">7</button><button data-cv="8">8</button><button data-cv="9">9</button><button data-cv="C" class="cash-np-clear">C</button>
-          <button data-cv="4">4</button><button data-cv="5">5</button><button data-cv="6">6</button><button data-cv="00">00</button>
-          <button data-cv="1">1</button><button data-cv="2">2</button><button data-cv="3">3</button><button data-cv="0">0</button>
-          <button data-cv=".">.</button><button data-cv="back" style="font-size:14px">&larr;</button><button data-cv="OK" class="cash-np-enter" style="grid-column:span 2">PAY CASH</button>
-        </div>
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button class="modal-confirm" style="background:#3b82f6;flex:1;padding:10px" id="splitCardBtn">Split: Card Portion</button>
-          <button class="modal-confirm" style="background:#f59e0b;color:#000;flex:1;padding:10px" id="payOptAccount">Account</button>
-        </div>
-      </div>
-    </details>
+    <!-- Numpad — always visible, matches register numpad layout -->
+    <div class="cash-numpad" id="cashNumpad" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px">
+      <button data-cv="7" style="padding:16px 0;border-radius:10px;border:1px solid #ddd;background:#fff;font-size:22px;font-weight:700;cursor:pointer;font-family:inherit">7</button>
+      <button data-cv="8" style="padding:16px 0;border-radius:10px;border:1px solid #ddd;background:#fff;font-size:22px;font-weight:700;cursor:pointer;font-family:inherit">8</button>
+      <button data-cv="9" style="padding:16px 0;border-radius:10px;border:1px solid #ddd;background:#fff;font-size:22px;font-weight:700;cursor:pointer;font-family:inherit">9</button>
+      <button data-cv="C" style="padding:16px 0;border-radius:10px;border:none;background:#ef4444;color:#fff;font-size:18px;font-weight:800;cursor:pointer;font-family:inherit">CLR</button>
+      <button data-cv="4" style="padding:16px 0;border-radius:10px;border:1px solid #ddd;background:#fff;font-size:22px;font-weight:700;cursor:pointer;font-family:inherit">4</button>
+      <button data-cv="5" style="padding:16px 0;border-radius:10px;border:1px solid #ddd;background:#fff;font-size:22px;font-weight:700;cursor:pointer;font-family:inherit">5</button>
+      <button data-cv="6" style="padding:16px 0;border-radius:10px;border:1px solid #ddd;background:#fff;font-size:22px;font-weight:700;cursor:pointer;font-family:inherit">6</button>
+      <button data-cv="00" style="padding:16px 0;border-radius:10px;border:1px solid #ddd;background:#f0f1f3;font-size:20px;font-weight:700;cursor:pointer;font-family:inherit">00</button>
+      <button data-cv="1" style="padding:16px 0;border-radius:10px;border:1px solid #ddd;background:#fff;font-size:22px;font-weight:700;cursor:pointer;font-family:inherit">1</button>
+      <button data-cv="2" style="padding:16px 0;border-radius:10px;border:1px solid #ddd;background:#fff;font-size:22px;font-weight:700;cursor:pointer;font-family:inherit">2</button>
+      <button data-cv="3" style="padding:16px 0;border-radius:10px;border:1px solid #ddd;background:#fff;font-size:22px;font-weight:700;cursor:pointer;font-family:inherit">3</button>
+      <button data-cv="back" style="padding:16px 0;border-radius:10px;border:1px solid #ddd;background:#f0f1f3;font-size:18px;font-weight:700;cursor:pointer;font-family:inherit">&larr;</button>
+      <button data-cv="0" style="padding:16px 0;border-radius:10px;border:1px solid #ddd;background:#fff;font-size:22px;font-weight:700;cursor:pointer;font-family:inherit">0</button>
+      <button data-cv="." style="padding:16px 0;border-radius:10px;border:1px solid #ddd;background:#fff;font-size:22px;font-weight:700;cursor:pointer;font-family:inherit">.</button>
+      <button data-cv="OK" style="padding:16px 0;border-radius:10px;border:none;background:linear-gradient(135deg,#4fbd77,#3a9c5e);color:#fff;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;grid-column:span 2">PAY CASH</button>
+    </div>
 
     <!-- Change display -->
     <div class="change-display" id="changeDisplay"></div>
-    <div id="changeBreakdown" style="display:none;text-align:center;margin-bottom:10px;font-size:11px;color:#666"></div>
+    <div id="changeBreakdown" style="display:none;text-align:center;margin-bottom:8px;font-size:11px;color:#666"></div>
 
     <!-- Cancel -->
-    <div style="text-align:center;margin-top:6px">
+    <div style="text-align:center;margin-top:4px">
       <button id="cashCancel" style="padding:10px 32px;border-radius:10px;border:1px solid #ddd;background:#fff;font-size:14px;cursor:pointer;font-family:inherit;color:#666">Cancel</button>
     </div>
   </div>
-  <!-- Hidden confirm button for programmatic use -->
+  <!-- Hidden elements for programmatic use -->
   <button id="cashConfirm" style="display:none"></button>
+  <div id="customAmountSection" style="display:none"></div>
+  <button id="payOptAccount" style="display:none"></button>
 </div></div>
 
 <!-- ═══ Open Price Modal ═══════════════════════════════════════════ -->
@@ -3188,12 +3190,9 @@ function showCashModal () {
     if (rounding !== 0) { roundEl.style.display = ''; roundEl.textContent = `Cash rounding: ${rounding > 0 ? '+' : ''}${money(rounding)}` }
     else roundEl.style.display = 'none'
   }
-  cashNumBuf = ''; $('#cashTendered').value = ''; $('#changeDisplay').textContent = ''; $('#changeBreakdown').style.display = 'none'; $('#cashConfirm').disabled = true
+  cashNumBuf = ''; updateCashDisplay(); $('#changeDisplay').textContent = ''; $('#changeBreakdown').style.display = 'none'; $('#cashConfirm').disabled = true
   $('#splitCardBtn').style.display = isRefund ? 'none' : ''
   $('#payOptEftposManual').style.display = isRefund ? 'none' : ''
-  $('#payOptAccount').style.display = isRefund ? 'none' : ''
-  // Collapse custom amount section
-  $('#customAmountSection').removeAttribute('open')
   renderSplitPayments()
   $('#cashModal').classList.add('show')
 }
@@ -3205,7 +3204,7 @@ $('#splitPayments').addEventListener('click', e => {
   if (!rm) return
   pendingPayments.splice(parseInt(rm.dataset.splitRemove), 1)
   renderSplitPayments()
-  $('#cashTendered').dispatchEvent(new Event('input'))
+  updateCashDisplay()
 })
 
 $('#splitCardBtn').addEventListener('click', async () => {
@@ -3237,8 +3236,8 @@ $('#splitCardBtn').addEventListener('click', async () => {
         lastEftposSurcharge = result.raw?.surcharge || 0
         $('#cashModal').classList.add('show')
         renderSplitPayments()
-        $('#cashTendered').value = ''
-        $('#cashTendered').dispatchEvent(new Event('input'))
+        cashNumBuf = ''
+        updateCashDisplay()
         showToast('Card approved', 'success')
       } else {
         $('#cashModal').classList.add('show')
@@ -3252,8 +3251,8 @@ $('#splitCardBtn').addEventListener('click', async () => {
   } else {
     pendingPayments.push({ method: 'card', amount: remaining, reference: 'EFTPOS' })
     renderSplitPayments()
-    $('#cashTendered').value = ''
-    $('#cashTendered').dispatchEvent(new Event('input'))
+    cashNumBuf = ''
+    updateCashDisplay()
   }
 })
 
@@ -3276,8 +3275,9 @@ function changeBreakdown (amount) {
   else el.style.display = 'none'
 }
 
-$('#cashTendered').addEventListener('input', () => {
-  const t = parseFloat($('#cashTendered').value) || 0
+function updateCashDisplay () {
+  const t = parseFloat(cashNumBuf) || 0
+  $('#cashTendered').textContent = cashNumBuf ? '$' + cashNumBuf : '$0.00'
   const remaining = getRemainingCashRounded()
   const d = $('#changeDisplay')
   if (cart.total < 0) {
@@ -3296,31 +3296,22 @@ $('#cashTendered').addEventListener('input', () => {
     else { d.textContent = `Short: ${money(Math.abs(ch))}`; d.className = 'change-display short'; changeBreakdown(0) }
     $('#cashConfirm').disabled = t < remaining
   }
-})
+}
 
 $('#quickCash').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b || !b.dataset.amt) return
+  if (b.dataset.amt === 'exact') {
+    const remaining = getRemainingCashRounded()
+    cashNumBuf = remaining.toFixed(2)
+    updateCashDisplay()
+    $('#cashConfirm').click()
+    return
+  }
   const remaining = getRemainingCashRounded()
   const amt = parseFloat(b.dataset.amt)
-  if (amt >= remaining) {
-    cashNumBuf = b.dataset.amt
-    $('#cashTendered').value = cashNumBuf
-    $('#cashTendered').dispatchEvent(new Event('input'))
-    $('#cashConfirm').click()
-  } else {
-    cashNumBuf = b.dataset.amt
-    $('#cashTendered').value = cashNumBuf
-    $('#cashTendered').dispatchEvent(new Event('input'))
-    $('#customAmountSection').setAttribute('open', '')
-  }
-})
-
-$('#payExact').addEventListener('click', () => {
-  const remaining = getRemainingCashRounded()
-  cashNumBuf = remaining.toFixed(2)
-  $('#cashTendered').value = cashNumBuf
-  $('#cashTendered').dispatchEvent(new Event('input'))
-  $('#cashConfirm').click()
+  cashNumBuf = b.dataset.amt
+  updateCashDisplay()
+  if (amt >= remaining) $('#cashConfirm').click()
 })
 
 $('#cashConfirm').addEventListener('click', async () => {
@@ -3328,7 +3319,7 @@ $('#cashConfirm').addEventListener('click', async () => {
   try {
     const remaining = getRemaining()
     const roundedRemaining = getRemainingCashRounded()
-    const tendered = parseFloat($('#cashTendered').value) || 0
+    const tendered = parseFloat(cashNumBuf) || 0
     const ch = roundedRemaining > 0 ? Math.max(0, tendered - roundedRemaining) : 0
 
     // Build final payments list — cash uses rounded amount
@@ -3400,23 +3391,22 @@ $('#reprintClose').addEventListener('click', () => { $('#reprintModal').classLis
 $('#cashNumpad').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return
   const v = b.dataset.cv
-  const input = $('#cashTendered')
-  if (v === 'C') { cashNumBuf = ''; input.value = '' }
-  else if (v === 'back') { cashNumBuf = cashNumBuf.slice(0, -1); input.value = cashNumBuf }
+  if (v === 'C') cashNumBuf = ''
+  else if (v === 'back') cashNumBuf = cashNumBuf.slice(0, -1)
   else if (v === 'OK') {
     const tendered = parseFloat(cashNumBuf) || 0
-    if (tendered >= getRemainingCashRounded()) { input.dispatchEvent(new Event('input')); $('#cashConfirm').click(); return }
+    if (tendered >= getRemainingCashRounded()) { updateCashDisplay(); $('#cashConfirm').click(); return }
   }
-  else if (v === '.') { if (!cashNumBuf.includes('.')) { cashNumBuf += '.'; input.value = cashNumBuf } }
+  else if (v === '.') { if (!cashNumBuf.includes('.')) cashNumBuf += '.' }
   else if (v === '00') {
-    if (!cashNumBuf.includes('.')) { cashNumBuf += '.00'; input.value = cashNumBuf }
+    if (!cashNumBuf.includes('.')) cashNumBuf += '.00'
     else {
       const decimals = cashNumBuf.split('.')[1]?.length || 0
-      if (decimals < 2) { cashNumBuf += '00'.substring(0, 2 - decimals); input.value = cashNumBuf }
+      if (decimals < 2) cashNumBuf += '00'.substring(0, 2 - decimals)
     }
   }
-  else { cashNumBuf += v; input.value = cashNumBuf }
-  input.dispatchEvent(new Event('input'))
+  else cashNumBuf += v
+  updateCashDisplay()
 })
 
 // ═══ Return Quick Date Buttons ═══════════════════════════════════
