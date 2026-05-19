@@ -1568,9 +1568,9 @@ $('#posGrid').addEventListener('click', async e => {
         if (customPrice > 0) {
           const p2 = { ...prod, price: customPrice, active_price: customPrice }
           cart.addProduct(p2, returnMode ? -qtyMultiplier : qtyMultiplier, true)
-          qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); applyDeals()
+          qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); updateQtyBadge(); applyDeals()
           showToast(`${prod.name} $${customPrice.toFixed(2)} added`, 'success')
-          return
+          returnToMainKeyboard(); refocus(); return
         }
       }
       if (prod.unit === 'kg' || prod.unit === '100g') {
@@ -1580,6 +1580,8 @@ $('#posGrid').addEventListener('click', async e => {
           const p = prod.active_price || prod.price
           cart.addProduct(prod, qty, true); applyDeals()
           showToast(`${prod.name} ${sw.toFixed(3)} kg × ${money(p)} = ${money(sw * p)}`, 'success')
+          qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); updateQtyBadge()
+          returnToMainKeyboard(); refocus()
         } else { pendingWeightProduct = prod; showWeightModal(prod) }
       } else { addToCart(prod) }
     } else if (btnPrice > 0) {
@@ -1593,6 +1595,8 @@ $('#posGrid').addEventListener('click', async e => {
           const qty = returnMode ? -sw : sw
           cart.addProduct(kbProd, qty, true); applyDeals()
           showToast(`${name} ${sw.toFixed(3)} kg × ${money(btnPrice)} = ${money(sw * btnPrice)}`, 'success')
+          qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); updateQtyBadge()
+          returnToMainKeyboard(); refocus()
         } else { pendingWeightProduct = kbProd; showWeightModal(kbProd) }
       } else {
         addToCart({ id: 'KB_' + Date.now(), name, price: btnPrice, active_price: btnPrice, unit: 'each', tax_rate: 0.10, is_special: false })
@@ -1602,8 +1606,9 @@ $('#posGrid').addEventListener('click', async e => {
       const cents = parseInt(numBuf); const price = cents / 100
       if (price > 0) {
         cart.addProduct({ id: 'OPEN_' + Date.now(), name, price, active_price: price, unit: 'each', tax_rate: 0.10, is_special: false }, returnMode ? -qtyMultiplier : qtyMultiplier, true)
-        qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); applyDeals()
+        qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); updateQtyBadge(); applyDeals()
         showToast(`${name} $${price.toFixed(2)} added`, 'success')
+        returnToMainKeyboard(); refocus()
       }
     } else {
       // No product, no price, no numBuf — open price entry
@@ -1943,6 +1948,11 @@ function updateQtyBadge () {
   else badge.classList.remove('show')
 }
 
+function returnToMainKeyboard () {
+  if (posCurrentPage !== 1) { posPageHistory = []; posCurrentPage = 1; renderPosGrid() }
+  if (sectionStack.length) goHome()
+}
+
 function addToCart (product) {
   if (product.unit === 'kg' || product.unit === '100g') {
     const sw = getScaleKg()
@@ -1952,6 +1962,7 @@ function addToCart (product) {
       cart.addProduct(product, qty, true); applyDeals()
       showToast(`${product.name} ${sw.toFixed(3)} kg × ${money(p)} = ${money(sw * p)}`, 'success')
       qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); updateQtyBadge()
+      returnToMainKeyboard(); refocus()
       return
     }
     pendingWeightProduct = product; showWeightModal(product); return
@@ -1961,7 +1972,7 @@ function addToCart (product) {
   applyDeals()
   showToast(`${product.name}${Math.abs(qtyMultiplier) > 1 ? ' ×' + Math.abs(qtyMultiplier) : ''}${returnMode ? ' (return)' : ''} added`, 'success')
   qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); updateQtyBadge()
-  si.value = ''; refocus()
+  returnToMainKeyboard(); si.value = ''; refocus()
 }
 
 // ═══ Search / Barcode ═════════════════════════════════════════════
@@ -2252,7 +2263,8 @@ $('#weightConfirm').addEventListener('click', () => {
   showToast(`${pendingWeightProduct.name} added`, 'success')
   cancelScaleAwait()
   $('#weightModal').classList.remove('show'); pendingWeightProduct = null
-  qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); si.value = ''; refocus()
+  qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); updateQtyBadge()
+  returnToMainKeyboard(); si.value = ''; refocus()
 })
 $('#weightCancel').addEventListener('click', () => { cancelScaleAwait(); $('#weightModal').classList.remove('show'); pendingWeightProduct = null; refocus() })
 $('#weightReadScale').addEventListener('click', async () => {
