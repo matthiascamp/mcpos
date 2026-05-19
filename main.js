@@ -1785,11 +1785,11 @@ function setupIPC() {
 
   ipcMain.handle('window:setMode', async (_e, mode, role) => {
     dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('app_mode', ?)", [mode])
-    scheduleSave()
+    saveDB()
     if (mode === 'register') {
-      if (mainWindow && !mainWindow.isDestroyed()) {
-        await mainWindow.loadFile(path.join(__dirname, 'pos', 'index.html'))
-      }
+      // Restart the app so hardware probing, scanner, and scale init run fresh
+      appLog('info', 'app', 'Switching to register mode — restarting app')
+      setTimeout(() => { app.relaunch(); app.exit(0) }, 500)
     } else {
       const startMode = (role === 'admin' || role === 'manager') ? 'admin' : 'register'
       if (mainWindow && !mainWindow.isDestroyed()) {
@@ -5991,14 +5991,13 @@ function setupIPC() {
 
   // Start the OPOS scanner listener — only in register mode
   if (isRegisterMode) {
-    const scannerDisabled = dbGet("SELECT value FROM settings WHERE key='scanner_opos_unavailable'")?.value
-    if (scannerDisabled) {
-      appLog('info', 'scanner', 'OPOS scanner previously unavailable — skipping (use Hardware tab to retry)')
-    } else {
-      setTimeout(() => {
-        try { startScannerListener() } catch (e) { appLog('warn', 'scanner', `Failed to start listener: ${e.message}`) }
-      }, 10000)
-    }
+    // Always retry scanner on fresh register-mode startup — clear any previous "unavailable" flag
+    try { dbRun("DELETE FROM settings WHERE key='scanner_opos_unavailable'"); scheduleSave() } catch (_) {}
+    scannerFatalStop = false
+    scannerRetryCount = 0
+    setTimeout(() => {
+      try { startScannerListener() } catch (e) { appLog('warn', 'scanner', `Failed to start listener: ${e.message}`) }
+    }, 10000)
   }
 
   // Expose IPC controls for the scanner listener (used by Hardware tab / debug)
