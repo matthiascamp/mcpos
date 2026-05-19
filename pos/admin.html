@@ -574,29 +574,24 @@
       }
 
       function switchToRegister() {
-        document.body.classList.add('register-mode');
-        document.getElementById('modeBadge').textContent = 'Register';
-        document.getElementById('modeLabel').textContent = 'Switch to Admin Mode';
-        document.getElementById('modeIcon').textContent = '\u{1F513}';
-        localStorage.setItem('tillaroo_admin_mode', 'register');
-        if (window.pos) window.pos.setSetting('app_mode', 'register');
-        var active = document.querySelector('.sidebar a.active');
-        var tab = active && active.dataset.tab;
-        var hidden = ['dashboard','cashdrawer','zreport','audit','logs','diagnostics','settings','staff','keyboard','labels','stock','insights'];
-        if (hidden.indexOf(tab) !== -1) {
-          var prodLink = document.querySelector('[data-tab="products"]');
-          if (prodLink) {
-            // Switch active sidebar link
-            var allLinks = document.querySelectorAll('.sidebar a');
-            for (var i = 0; i < allLinks.length; i++) allLinks[i].classList.remove('active');
-            prodLink.classList.add('active');
-            // Switch active tab content
-            var allTabs = document.querySelectorAll('.tab-content');
-            for (var j = 0; j < allTabs.length; j++) allTabs[j].classList.remove('active');
-            var prodTab = document.getElementById('tab-products');
-            if (prodTab) prodTab.classList.add('active');
-          }
-        }
+        var overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99999;display:flex;align-items:center;justify-content:center';
+        var box = document.createElement('div');
+        box.style.cssText = 'background:#1a1d27;border-radius:16px;padding:32px;max-width:420px;text-align:center;color:#f1f5f9;font-family:inherit';
+        box.innerHTML = '<div style="font-size:36px;margin-bottom:12px">&#x1F504;</div>'
+          + '<h2 style="margin:0 0 8px;font-size:20px">Switch to Register Mode?</h2>'
+          + '<p style="color:#8892a8;font-size:14px;margin:0 0 24px">The app will restart to initialise hardware (printer, scanner, scale).</p>'
+          + '<div style="display:flex;gap:10px;justify-content:center">'
+          + '<button id="modeConfirmCancel" style="padding:10px 24px;border-radius:8px;border:1px solid #333;background:transparent;color:#8892a8;cursor:pointer;font-size:14px;font-family:inherit">Cancel</button>'
+          + '<button id="modeConfirmOk" style="padding:10px 24px;border-radius:8px;border:none;background:#3a9c5e;color:#fff;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit">Restart &amp; Switch</button>'
+          + '</div>';
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+        document.getElementById('modeConfirmCancel').addEventListener('click', function() { overlay.remove() });
+        document.getElementById('modeConfirmOk').addEventListener('click', function() {
+          box.innerHTML = '<div style="font-size:36px;margin-bottom:12px">&#x23F3;</div><p style="color:#8892a8;font-size:14px">Restarting...</p>';
+          if (window.pos) window.pos.setMode('register');
+        });
       }
 
       btn.addEventListener('click', function() {
@@ -662,8 +657,14 @@
       var urlMode = new URLSearchParams(window.location.search).get('mode');
       var saved = localStorage.getItem('tillaroo_admin_mode');
       var startMode = urlMode || saved || 'admin';
-      if (startMode === 'register') switchToRegister();
-      else switchToAdmin();
+      if (startMode === 'register') {
+        document.body.classList.add('register-mode');
+        document.getElementById('modeBadge').textContent = 'Register';
+        document.getElementById('modeLabel').textContent = 'Switch to Admin Mode';
+        document.getElementById('modeIcon').textContent = '\u{1F513}';
+      } else {
+        switchToAdmin();
+      }
     })();
     </script>
 

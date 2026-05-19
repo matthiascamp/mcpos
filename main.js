@@ -1662,10 +1662,10 @@ app.whenReady().then(async () => {
     splashSend('splash:status', 'Initialising database...', 10)
     await initDatabase()
 
-    splashSend('splash:status', 'Setting up handlers...', 30)
-    setupIPC()
+    splashSend('splash:status', 'Setting up handlers...', 20)
+    const { initHardware, initScanner } = setupIPC()
 
-    splashSend('splash:status', 'Configuring network...', 50)
+    splashSend('splash:status', 'Configuring network...', 40)
     try {
       const lanMode = dbGet("SELECT value FROM settings WHERE key = 'lan_mode'")?.value
       const lanPort = parseInt(dbGet("SELECT value FROM settings WHERE key = 'lan_port'")?.value || '5555')
@@ -1697,7 +1697,13 @@ app.whenReady().then(async () => {
       }
     } catch (e) { appLog('error', 'supabase', 'Supabase config check failed', e.message) }
 
-    splashSend('splash:status', 'Preparing interface...', 70)
+    splashSend('splash:status', 'Detecting hardware...', 60)
+    await initHardware()
+
+    splashSend('splash:status', 'Starting scanner...', 75)
+    initScanner()
+
+    splashSend('splash:status', 'Preparing interface...', 85)
     createWindow()
 
     // Wait for the page to finish loading
@@ -1706,6 +1712,7 @@ app.whenReady().then(async () => {
     }
 
     splashSend('splash:status', 'Ready!', 100)
+
     const elapsed = Date.now() - splashStart
     if (elapsed < SPLASH_MIN_MS) await wait(SPLASH_MIN_MS - elapsed)
 
@@ -5071,12 +5078,18 @@ function setupIPC() {
   const isRegisterMode = hwAppMode === 'register'
 
   loadSavedHardwareConfig()
-  // Note: printer queue health is verified inside detectPrinter() during probeHardware()
 
-  // Delay hardware probe so the UI is fully interactive before heavy WMI/serial probing
   let initialProbeFoundHardware = false
-  if (isRegisterMode) {
-    setTimeout(() => probeHardware().then(async r => {
+
+  // Returned to caller so the splash sequence can await it
+  async function _initHardwareStartup () {
+    if (!isRegisterMode) {
+      appLog('info', 'hardware', 'Admin mode — skipping hardware probe and polling')
+      return
+    }
+
+    try {
+      await probeHardware()
       if (hwPrinter || hwScale) initialProbeFoundHardware = true
       if (hwPrinter) appLog('info', 'hardware', `Printer: ${hwPrinter.name} (${hwPrinter.interface})`)
       if (hwScale) appLog('info', 'hardware', `Scale: ${hwScale.vendor || hwScale.product}`)
@@ -5085,19 +5098,19 @@ function setupIPC() {
 
       if (!initialProbeFoundHardware) {
         appLog('info', 'hardware', 'No hardware detected — skipping diagnostics')
-        return
+      } else {
+        try {
+          const diag = await diagnoseEnvironment()
+          for (const issue of diag.issues) {
+            appLog('warn', 'hardware', `[DIAG] ${issue.message}${issue.fix ? ' — Fix: ' + issue.fix : ''}`)
+          }
+          const critical = diag.issues.filter(i => i.severity === 'high')
+          if (critical.length > 0 && mainWindow && !mainWindow.isDestroyed()) {
+            mainWindow.webContents.send('hardware:issues', critical)
+          }
+        } catch (e) { appLog('warn', 'hardware', 'Environment diagnostic failed', e.message) }
       }
-      try {
-        const diag = await diagnoseEnvironment()
-        for (const issue of diag.issues) {
-          appLog('warn', 'hardware', `[DIAG] ${issue.message}${issue.fix ? ' — Fix: ' + issue.fix : ''}`)
-        }
-        const critical = diag.issues.filter(i => i.severity === 'high')
-        if (critical.length > 0 && mainWindow && !mainWindow.isDestroyed()) {
-          mainWindow.webContents.send('hardware:issues', critical)
-        }
-      } catch (e) { appLog('warn', 'hardware', 'Environment diagnostic failed', e.message) }
-    }).catch(e => appLog('error', 'hardware', 'Auto-probe failed', e.message)), 8000)
+    } catch (e) { appLog('error', 'hardware', 'Auto-probe failed', e.message) }
 
     // Auto-reprobe every 120s — also checks printer queue health
     setInterval(async () => {
@@ -5127,8 +5140,6 @@ function setupIPC() {
         }
       } catch (_) {}
     }, 120000)
-  } else {
-    appLog('info', 'hardware', 'Admin mode — skipping hardware probe and polling')
   }
 
   // ── Continuous scale weight reading ──────────────────────────────────────
@@ -5989,20 +6000,20 @@ function setupIPC() {
     }
   } catch (_) {}
 
-  // Start the OPOS scanner listener — only in register mode
-  if (isRegisterMode) {
+  function _initScannerStartup () {
+    if (!isRegisterMode) return
     // Always retry scanner on fresh register-mode startup — clear any previous "unavailable" flag
     try { dbRun("DELETE FROM settings WHERE key='scanner_opos_unavailable'"); scheduleSave() } catch (_) {}
     scannerFatalStop = false
     scannerRetryCount = 0
-    setTimeout(() => {
-      try { startScannerListener() } catch (e) { appLog('warn', 'scanner', `Failed to start listener: ${e.message}`) }
-    }, 10000)
+    try { startScannerListener() } catch (e) { appLog('warn', 'scanner', `Failed to start listener: ${e.message}`) }
   }
 
   // Expose IPC controls for the scanner listener (used by Hardware tab / debug)
   ipcMain.handle('hardware:scannerRestart', () => { stopScannerListener(); scannerFatalStop = false; scannerRetryCount = 0; try { dbRun("DELETE FROM settings WHERE key='scanner_opos_unavailable'"); scheduleSave() } catch (_) {}; startScannerListener(); return { ok: true } })
   ipcMain.handle('hardware:scannerTest', () => oposCall('scanner-test', { deviceName: oposScannerName, timeout: 5000 }))
+
+  return { initHardware: _initHardwareStartup, initScanner: _initScannerStartup }
 }
 
 // ─── Sync Queue Helper ───────────���────────────────────────────────────────────
