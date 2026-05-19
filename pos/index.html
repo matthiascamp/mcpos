@@ -1389,6 +1389,7 @@ function renderPosGrid () {
   }
 
   updateNumDisplay()
+  si.focus()
 }
 
 function renderPosButton (btn, gridStyle) {
@@ -2342,9 +2343,15 @@ $('#cartItems').addEventListener('click', e => {
   const b = e.target.closest('.qty-btn'); if (!b) return
   const i = parseInt(b.dataset.index), item = cart.items[i]; if (!item) return
   const step = item.unit === 'each' ? 1 : 0.1
-  if (b.dataset.action === 'plus') cart.updateQty(i, item.qty + step)
-  else cart.updateQty(i, item.qty - step)
-  applyDeals()
+  if (b.dataset.action === 'plus') { cart.updateQty(i, item.qty + step); applyDeals() }
+  else {
+    if (item.qty - step <= 0.001) {
+      pendingDeleteIdx = i
+      $('#removeItemName').textContent = item.name
+      $('#removeItemPrice').textContent = money(item.line_total)
+      $('#removeConfirmModal').classList.add('show')
+    } else { cart.updateQty(i, item.qty - step); applyDeals() }
+  }
 })
 
 function updateTotals () {
