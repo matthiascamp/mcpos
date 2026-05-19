@@ -5142,10 +5142,11 @@
             const cs = btn.col_span || 1, rs = btn.row_span || 1
             const sel = btn.id === selectedBtnId ? ' selected' : ''
             let extra = ''
+            const noPriceTypes = new Set(['section','nav','page_link','back_home','void','return','hold','nosale','supervisor','lock','reprint','pricecheck','errcorrect','recall','pctdiscount','pctone','movedrawer','ubereats','viewor','digit','clear','qtyx','codeenter','subtotal','pay_cash','pay_card','park','num_display','cart_display'])
             if (btn.type === 'page_link' && btn.parent_id) {
               const tgtName = getPageInfo(parseInt(btn.parent_id)).name || `Page ${btn.parent_id}`
               extra = `<div class="kb-cell-price" style="font-size:8px;opacity:.7">&rarr; ${esc(tgtName)}</div>`
-            } else if (btn.price > 0) {
+            } else if (btn.price > 0 && !noPriceTypes.has(btn.type)) {
               extra = `<div class="kb-cell-price">$${btn.price.toFixed(2)}</div>`
             }
             html += `<div class="kb-cell${sel}" data-id="${esc(btn.id)}" data-row="${r}" data-col="${c}" draggable="true"
