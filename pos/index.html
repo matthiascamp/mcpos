@@ -1024,6 +1024,7 @@ let numBuf = '', qtyMultiplier = 1
 let returnMode = false, supervisorMode = false, supervisorTimer = null
 let lastCompletedTxns = [], pcFoundProduct = null
 let payProcessing = false
+let viewingSaleId = null
 let cashNumBuf = ''
 let autoReceipt = localStorage.getItem('tillaroo_auto_receipt') !== '0'
 function updateReceiptToggle () {
@@ -1127,6 +1128,38 @@ function restoreCartLocal () {
   } catch (_) {}
 }
 function clearCartLocal () { localStorage.removeItem('tillaroo_cart') }
+
+function showViewSaleBanner (status, date) {
+  let banner = $('#viewSaleBanner')
+  if (!banner) {
+    banner = document.createElement('div')
+    banner.id = 'viewSaleBanner'
+    banner.style.cssText = 'background:#1e40af;color:#fff;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;font-weight:600'
+    const cartHeader = $('.cart-header')
+    if (cartHeader) cartHeader.after(banner)
+  }
+  const label = (status || 'completed').toUpperCase()
+  banner.innerHTML = `<span>${label} SALE${date ? ' — ' + esc(date) : ''}</span>` +
+    `<span style="display:flex;gap:6px">` +
+    `<button id="viewSaleReprint" style="padding:4px 10px;border-radius:4px;border:none;background:#fff;color:#1e40af;font-weight:700;font-size:11px;cursor:pointer">REPRINT</button>` +
+    `<button id="viewSaleClear" style="padding:4px 10px;border-radius:4px;border:none;background:rgba(255,255,255,.2);color:#fff;font-weight:700;font-size:11px;cursor:pointer">CLEAR</button>` +
+    `</span>`
+  banner.style.display = 'flex'
+  $('#viewSaleReprint').addEventListener('click', async () => {
+    if (lastCompletedTxns.length) {
+      try { await window.pos.printReceipt(lastCompletedTxns[0]) } catch (_) {}
+      showToast('Receipt reprinted', 'info')
+    }
+  })
+  $('#viewSaleClear').addEventListener('click', () => {
+    cart.clear(); viewingSaleId = null; hideViewSaleBanner(); refocus()
+  })
+}
+
+function hideViewSaleBanner () {
+  const banner = $('#viewSaleBanner')
+  if (banner) banner.style.display = 'none'
+}
 
 // ═══ Clock & Sync ══════════════════════════════════════════════════
 function updateClock () {
@@ -2289,6 +2322,7 @@ $('#weightReadScale').addEventListener('click', async () => {
 // ═══ Cart Rendering ═══════════════════════════════════════════════
 cart.onChange = () => {
   renderCart(); updateTotals(); saveCartLocal()
+  if (cart.isEmpty && viewingSaleId) { viewingSaleId = null; hideViewSaleBanner() }
   // Push to customer display
   window.pos.customerUpdate({
     items: cart.items, total: cart.total, tax: cart.tax,
@@ -2545,7 +2579,8 @@ async function loadRecallSales () {
     const staffStr = t.staff_name ? ` — ${esc(t.staff_name)}` : ''
     const itemCount = t.item_count || '?'
     const canRecall = t.status === 'parked'
-    return `<div class="recall-item" data-id="${esc(t.id)}" data-status="${esc(t.status || '')}">
+    const canView = t.status === 'completed' || t.status === 'voided' || t.status === 'refunded'
+    return `<div class="recall-item" data-id="${esc(t.id)}" data-status="${esc(t.status || '')}" style="cursor:pointer">
       <div style="flex:1;min-width:0">
         <div style="display:flex;align-items:center;gap:8px">
           <span style="font-weight:600;font-size:13px">${itemCount} item${itemCount !== 1 ? 's' : ''}${staffStr}</span>
@@ -2556,6 +2591,7 @@ async function loadRecallSales () {
       <div style="display:flex;align-items:center;gap:10px">
         <div class="recall-total">${money(Math.abs(t.total))}</div>
         ${canRecall ? '<button class="recall-action-btn" data-recall="true" style="padding:6px 12px;border-radius:6px;border:1px solid #3a9c5e;background:#f0fdf4;color:#3a9c5e;font-weight:700;font-size:11px;cursor:pointer;white-space:nowrap">RECALL</button>' : ''}
+        ${canView ? '<button class="recall-action-btn" data-view="true" style="padding:6px 12px;border-radius:6px;border:1px solid #3b82f6;background:#eff6ff;color:#3b82f6;font-weight:700;font-size:11px;cursor:pointer;white-space:nowrap">VIEW</button>' : ''}
       </div>
     </div>`
   }).join('')
@@ -2569,12 +2605,62 @@ $('#recallSearchInput').addEventListener('input', debounce(loadRecallSales, 300)
 
 $('#recallList').addEventListener('click', async e => {
   const recallBtn = e.target.closest('[data-recall]')
+  const viewBtn = e.target.closest('[data-view]')
   const item = e.target.closest('.recall-item')
   if (!item) return
   const txnId = item.dataset.id
   const txnStatus = item.dataset.status
 
-  // Only recall parked sales into the cart
+  // View completed/voided sale — load into cart read-only with reprint option
+  if (viewBtn || (txnStatus !== 'parked' && !recallBtn)) {
+    if (txnStatus === 'parked' && !viewBtn) return
+    try {
+      const txn = await window.pos.getTransaction(txnId)
+      const items = await window.pos.getTransactionItems(txnId)
+      const payments = await window.pos.getTransactionPayments(txnId)
+      if (!items.length) { showToast('No items in this sale', 'info'); return }
+
+      cart.clear()
+      for (const ti of items) {
+        let unit = 'each', taxRate = 0.10
+        if (ti.product_id) {
+          const prod = await window.pos.getProductById(ti.product_id)
+          if (prod) { unit = prod.unit || 'each'; taxRate = prod.tax_rate ?? 0.10 }
+        }
+        cart.items.push({
+          product_id: ti.product_id, name: ti.name, qty: ti.qty, unit,
+          unit_price: ti.unit_price, tax_rate: taxRate, discount: ti.discount || 0,
+          line_total: ti.line_total, tax: ti.tax || 0, is_special: false, deal_id: null, deal_name: null
+        })
+      }
+      cart._notify()
+
+      // Build receipt data for reprint
+      const s = await window.pos.getAllSettings()
+      const date = txn?.created_at ? new Date(txn.created_at + (txn.created_at.includes('Z') ? '' : 'Z')).toLocaleString('en-AU') : ''
+      const receiptData = {
+        storeName: s.store_name || 'Tillaroo', storeAddress: s.store_address || '',
+        storePhone: s.store_phone || '', storeAbn: s.store_abn || '',
+        header: s.receipt_header || '', date,
+        txnId, receiptNumber: txn?.receipt_number || null,
+        staffName: txn?.staff_name || currentStaff?.name || '', staffRole: currentStaff?.role || 'cashier',
+        registerId: s.register_id || 'LANE01',
+        items: cart.items, subtotal: cart.subtotal, tax: cart.tax, discount: cart.discount, total: cart.total,
+        payments: payments.map(p => ({ method: p.method, amount: p.amount, reference: p.reference })),
+        change: 0, status: txnStatus || 'completed',
+        footer: s.receipt_footer || 'Thank you!', eftposReceipt: [], eftposSurcharge: 0
+      }
+      lastCompletedTxns.unshift(receiptData); if (lastCompletedTxns.length > 10) lastCompletedTxns.pop()
+
+      // Show banner indicating this is a viewed (not active) sale
+      viewingSaleId = txnId
+      showViewSaleBanner(txnStatus, date)
+      $('#recallModal').classList.remove('show'); refocus()
+    } catch (e2) { showToast('Failed to load sale: ' + e2.message, 'error') }
+    return
+  }
+
+  // Recall parked sales into the cart
   if (recallBtn || txnStatus === 'parked') {
     try {
       const items = await window.pos.getTransactionItems(txnId)
@@ -2593,6 +2679,7 @@ $('#recallList').addEventListener('click', async e => {
       }
       cart._notify()
       await window.pos.deleteTransaction(txnId)
+      viewingSaleId = null; hideViewSaleBanner()
       showToast('Sale recalled into cart', 'success')
       $('#recallModal').classList.remove('show'); refocus()
     } catch (e2) { showToast('Failed to recall sale', 'error') }
