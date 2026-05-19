@@ -1562,6 +1562,7 @@ function createWindow() {
   })
 
   const appMode = (() => { try { const r = db.exec("SELECT value FROM settings WHERE key = 'app_mode'"); return r.length && r[0].values.length ? r[0].values[0][0] : 'admin' } catch (_) { return 'admin' } })()
+  appLog('info', 'startup', `app_mode = '${appMode}'`)
   const startPage = appMode === 'register' ? 'index.html' : 'admin.html'
   mainWindow.loadFile(path.join(__dirname, 'pos', startPage))
 
@@ -1847,12 +1848,16 @@ function setupIPC() {
   })
 
   ipcMain.handle('window:setMode', async (_e, mode, role) => {
-    dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('app_mode', ?)", [mode])
-    saveDBSync()
+    // Write directly to sql.js (skip dbRun's scheduleSave to avoid race)
+    db.run("INSERT OR REPLACE INTO settings (key, value) VALUES (?1, ?2)", ['app_mode', mode])
+    // Flush to disk synchronously
+    const data = db.export()
+    fs.writeFileSync(DB_PATH, Buffer.from(data))
+    const check = dbGet("SELECT value FROM settings WHERE key = 'app_mode'")
+    appLog('info', 'app', `Mode set to '${mode}', verified as '${check?.value}', DB saved to ${DB_PATH}`)
     if (mode === 'register') {
-      appLog('info', 'app', 'Switching to register mode — restarting app')
-      app.relaunch()
-      app.exit(0)
+      appLog('info', 'app', 'Restarting app for register mode')
+      setTimeout(() => { app.relaunch(); app.exit(0) }, 1000)
     } else {
       const startMode = (role === 'admin' || role === 'manager') ? 'admin' : 'register'
       if (mainWindow && !mainWindow.isDestroyed()) {
