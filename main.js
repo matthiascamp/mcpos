@@ -1848,11 +1848,11 @@ function setupIPC() {
 
   ipcMain.handle('window:setMode', async (_e, mode, role) => {
     dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('app_mode', ?)", [mode])
-    saveDB()
+    saveDBSync()
     if (mode === 'register') {
-      // Restart the app so hardware probing, scanner, and scale init run fresh
       appLog('info', 'app', 'Switching to register mode — restarting app')
-      setTimeout(() => { app.relaunch(); app.exit(0) }, 500)
+      app.relaunch()
+      app.exit(0)
     } else {
       const startMode = (role === 'admin' || role === 'manager') ? 'admin' : 'register'
       if (mainWindow && !mainWindow.isDestroyed()) {
