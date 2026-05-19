@@ -1105,7 +1105,7 @@ async function initDatabase() {
 
   // ── Migration: Import keyboard layout from keyboard-layout.json ──────
   try {
-    const kbDone = dbAll("SELECT value FROM settings WHERE key = 'migration_import_keyboard_v1'")
+    const kbDone = dbAll("SELECT value FROM settings WHERE key = 'migration_import_keyboard_v2'")
     if (!kbDone.length || !kbDone[0].value) {
       const kbPath = path.join(__dirname, 'keyboard-layout.json')
       if (fs.existsSync(kbPath)) {
@@ -1149,7 +1149,7 @@ async function initDatabase() {
         }
 
         db.run("PRAGMA foreign_keys = ON")
-        db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('migration_import_keyboard_v1', '1')")
+        db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('migration_import_keyboard_v2', '1')")
         appLog('info', 'migration', `Imported keyboard layout: ${btnCount} buttons, ${(data.pages || []).length} pages`)
       }
     }
