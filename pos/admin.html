@@ -1488,6 +1488,11 @@
         <input type="number" id="kbGridCols" min="2" max="20" value="13" style="width:42px;padding:2px 4px;font-size:11px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--text);text-align:center" title="Columns">
         <span style="color:var(--text-dim);font-size:11px">×</span>
         <input type="number" id="kbGridRows" min="2" max="20" value="7" style="width:42px;padding:2px 4px;font-size:11px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--text);text-align:center" title="Rows">
+        <button class="btn btn-outline af-size-btn active" data-af-size="1" style="padding:4px 8px;font-size:10px" title="1×1">1×1</button>
+        <button class="btn btn-outline af-size-btn" data-af-size="2" style="padding:4px 8px;font-size:10px" title="2×2">2×2</button>
+        <button class="btn btn-outline af-size-btn" data-af-size="3" style="padding:4px 8px;font-size:10px" title="3×3">3×3</button>
+        <button class="btn btn-outline" style="padding:4px 8px;font-size:10px" id="kbAutoFillBtn" title="Reflow buttons at selected size">Reflow</button>
+        <button class="btn btn-outline" style="padding:4px 8px;font-size:10px" id="kbSortAlphaBtn" title="Sort buttons A-Z">Sort A-Z</button>
         <button class="btn btn-outline" style="padding:4px 8px;font-size:10px" id="selectAllBtn" title="Select all buttons on page">Select All</button>
         <button class="btn btn-outline" style="padding:4px 8px;font-size:10px" id="validateKbBtn" title="Check for issues">Validate</button>
         <button class="btn btn-outline" style="padding:4px 8px;font-size:10px" id="exportKbBtn" title="Export">Export</button>
@@ -4681,14 +4686,8 @@
     $('#pageTree').addEventListener('click', e => {
       const node = e.target.closest('[data-tree-page]')
       if (!node) return
-      e.stopPropagation()
-      const pg = parseInt(node.dataset.treePage)
-      if (pg === currentPage) return
-      currentPage = pg
-      try { applyPageSize() } catch (err) { console.error('applyPageSize', err) }
-      try { renderPageTree() } catch (err) { console.error('renderPageTree', err) }
-      try { renderGrid() } catch (err) { console.error('renderGrid', err) }
-      try { closeEditPanel() } catch (err) { console.error('closeEditPanel', err) }
+      currentPage = parseInt(node.dataset.treePage)
+      applyPageSize(); renderPageTree(); renderGrid(); closeEditPanel()
     })
 
     $('#pageTree').addEventListener('dblclick', async e => {
