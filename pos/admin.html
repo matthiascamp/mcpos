@@ -2155,12 +2155,6 @@
             <button class="btn btn-green" id="saveTaxBtn">Save Tax Settings</button>
           </div>
 
-          <div class="section">
-            <h2>Receipt</h2>
-            <div class="form-field" style="margin-bottom:10px"><label>Header Text <span style="color:var(--text-dim);font-size:11px">(printed at top)</span></label><textarea id="setReceiptHeader" rows="3" placeholder="Store name, address, phone..."></textarea></div>
-            <div class="form-field" style="margin-bottom:10px"><label>Footer Text <span style="color:var(--text-dim);font-size:11px">(printed at bottom)</span></label><textarea id="setReceiptFooter" rows="2" placeholder="Thank you for shopping with us!"></textarea></div>
-            <button class="btn btn-green" id="saveReceiptBtn">Save Receipt Settings</button>
-          </div>
         </div>
 
         <!-- Right column -->
@@ -3527,8 +3521,6 @@
       $('#setRegisterId').value = s.register_id || ''
       $('#setTaxName').value = s.tax_name || 'GST'
       $('#setTaxRate').value = s.tax_rate ? (parseFloat(s.tax_rate) * 100).toFixed(1) : '10'
-      $('#setReceiptHeader').value = s.receipt_header || ''
-      $('#setReceiptFooter').value = s.receipt_footer || ''
       $('#setSupaUrl').value = s.supabase_url || ''
       $('#setSupaKey').value = s.supabase_anon_key || ''
       $('#setFullscreen').value = s.start_fullscreen || '1'
@@ -3591,12 +3583,6 @@
       if (name) $('#sidebarStoreName').textContent = name
       pendingLogoDataUrl = null
       showToast('Settings saved', 'success')
-    })
-
-    $('#saveReceiptBtn').addEventListener('click', async () => {
-      await window.pos.setSetting('receipt_header', $('#setReceiptHeader').value)
-      await window.pos.setSetting('receipt_footer', $('#setReceiptFooter').value)
-      showToast('Receipt settings saved', 'success')
     })
 
     $('#saveTaxBtn').addEventListener('click', async () => {
