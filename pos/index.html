@@ -497,10 +497,13 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
     <div id="splitPayments" style="margin-bottom:10px"></div>
     <div id="splitRemaining" style="text-align:center;font-size:13px;color:#888;margin-bottom:8px"></div>
 
-    <!-- Quick payment buttons — top row: Card & Exact -->
+    <!-- Quick payment buttons — top row: Card, EFTPOS Accepted, Exact -->
     <div style="display:flex;gap:10px;margin-bottom:10px">
       <button id="payOptCard" style="flex:1;padding:18px;border-radius:12px;border:none;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;font-size:18px;font-weight:800;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:10px">
         <span style="font-size:22px">&#x2B21;</span> Card / EFTPOS
+      </button>
+      <button id="payOptEftposManual" style="flex:1;padding:18px;border-radius:12px;border:none;background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff;font-size:18px;font-weight:800;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:10px">
+        <span style="font-size:22px">&#x2713;</span> EFTPOS Accepted
       </button>
       <button data-amt="exact" id="payExact" style="flex:1;padding:18px;border-radius:12px;border:none;background:linear-gradient(135deg,#4fbd77,#3a9c5e);color:#fff;font-size:18px;font-weight:800;cursor:pointer;font-family:inherit;transition:all .15s">
         Exact Cash
@@ -2986,6 +2989,7 @@ function showPaymentModal () {
   showCashModal()
 }
 $('#payOptCard').addEventListener('click', () => { $('#cashModal').classList.remove('show'); completeCardPayment() })
+$('#payOptEftposManual').addEventListener('click', () => { $('#cashModal').classList.remove('show'); completeCardManual(Math.abs(cart.total), returnMode) })
 $('#payOptAccount').addEventListener('click', () => { $('#cashModal').classList.remove('show'); completeAccountPayment() })
 
 async function completeCardPayment () {
@@ -3130,6 +3134,7 @@ function showCashModal () {
   }
   cashNumBuf = ''; $('#cashTendered').value = ''; $('#changeDisplay').textContent = ''; $('#changeBreakdown').style.display = 'none'; $('#cashConfirm').disabled = true
   $('#splitCardBtn').style.display = isRefund ? 'none' : ''
+  $('#payOptEftposManual').style.display = isRefund ? 'none' : ''
   $('#payOptAccount').style.display = isRefund ? 'none' : ''
   // Collapse custom amount section
   $('#customAmountSection').removeAttribute('open')
