@@ -540,8 +540,8 @@
 
   <aside class="sidebar">
     <div class="sidebar-brand">
-      <div class="brand-dot"></div>
-      <span>Tillaroo</span>
+      <img class="company-logo" src="logo-circle.png" style="width:24px;height:24px;border-radius:50%;object-fit:cover;flex-shrink:0">
+      <span id="sidebarStoreName">Tillaroo</span>
       <small id="modeBadge">Admin</small>
     </div>
     <div style="padding:8px 12px;border-bottom:1px solid var(--border)">
@@ -3517,9 +3517,11 @@
       pendingLogoDataUrl = null
       if (s.company_logo) {
         $('#companyLogoImg').src = s.company_logo
+        $$('.company-logo').forEach(img => { img.src = s.company_logo })
       } else {
         $('#companyLogoImg').src = 'logo-circle.png'
       }
+      if (s.store_name) $('#sidebarStoreName').textContent = s.store_name
       if (s.lan_mode === 'client') {
         $('#supabaseDesc').textContent = 'This register is in client mode — product data is synced from the main server via LAN. Supabase settings are managed on the server.'
         $('#setSupaUrl').disabled = true
@@ -3564,6 +3566,11 @@
       } else if (pendingLogoDataUrl) {
         await window.pos.setSetting('company_logo', pendingLogoDataUrl)
       }
+      const savedLogo = pendingLogoDataUrl === '__remove__' ? '' : (pendingLogoDataUrl || await window.pos.getSetting('company_logo') || '')
+      if (savedLogo) $$('.company-logo').forEach(img => { img.src = savedLogo })
+      else $$('.company-logo').forEach(img => { img.src = 'logo-circle.png' })
+      const name = $('#setStoreName').value
+      if (name) $('#sidebarStoreName').textContent = name
       pendingLogoDataUrl = null
       showToast('Settings saved', 'success')
     })
