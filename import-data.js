@@ -86,6 +86,7 @@ async function main () {
   const kbPath = path.join(__dirname, 'keyboard-layout.json')
   if (fs.existsSync(kbPath)) {
     const data = JSON.parse(fs.readFileSync(kbPath, 'utf-8'))
+    db.run("PRAGMA foreign_keys = OFF")
     db.run("DELETE FROM keyboard_buttons")
     db.run("DELETE FROM keyboard_pages")
     if (data.pages && Array.isArray(data.pages)) {
@@ -117,6 +118,7 @@ async function main () {
         prodRestored++
       }
     }
+    db.run("PRAGMA foreign_keys = ON")
     console.log(`Keyboard: imported ${btnCount} buttons, ${(data.pages || []).length} pages, ${prodRestored} linked products`)
   } else {
     console.log('No keyboard-layout.json found, skipping keyboard import')

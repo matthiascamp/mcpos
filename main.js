@@ -1112,6 +1112,7 @@ async function initDatabase() {
         const raw = fs.readFileSync(kbPath, 'utf-8')
         const data = JSON.parse(raw)
 
+        db.run("PRAGMA foreign_keys = OFF")
         dbRun("DELETE FROM keyboard_buttons")
         dbRun("DELETE FROM keyboard_pages")
 
@@ -1147,6 +1148,7 @@ async function initDatabase() {
           }
         }
 
+        db.run("PRAGMA foreign_keys = ON")
         db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('migration_import_keyboard_v1', '1')")
         appLog('info', 'migration', `Imported keyboard layout: ${btnCount} buttons, ${(data.pages || []).length} pages`)
       }
