@@ -689,6 +689,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Reports
       </a>
+      <a href="#" data-tab="receipt">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20l3-2 3 2 3-2 3 2 3-2V2l-3 2-3-2-3 2-3-2-3 2z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>
+        Receipt
+      </a>
     </div>
 
     <div class="sidebar-group">
@@ -892,14 +896,12 @@
         </div>
         <div id="catSection" style="display:none">
           <table>
-            <thead><tr><th>Name</th><th>Family</th><th>Colour</th><th>Sort</th><th>Products</th><th style="width:120px"></th></tr></thead>
+            <thead><tr><th>Name</th><th>Colour</th><th>Sort</th><th>Products</th><th style="width:120px"></th></tr></thead>
             <tbody id="catTable"></tbody>
           </table>
           <div id="catEditArea" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
             <div class="form-row">
               <div class="form-field"><label>Name</label><input type="text" id="catName"></div>
-              <div class="form-field"><label>Family</label><input type="text" id="catFamily" list="familyList" placeholder="e.g. Fresh Produce, Deli, Pantry..."></div>
-              <datalist id="familyList"></datalist>
               <div class="form-field" style="flex:0 0 100px"><label>Colour</label><input type="color" id="catColour" value="#4fbd77"></div>
               <div class="form-field" style="flex:0 0 80px"><label>Sort</label><input type="number" id="catSort" value="0" min="0"></div>
               <button class="btn btn-green" id="saveCatBtn" style="height:42px">Save</button>
@@ -1162,7 +1164,7 @@
           <button class="btn btn-green" id="addStaffBtn">+ Add Staff</button>
         </div>
         <table>
-          <thead><tr><th>Name</th><th>Role</th><th>Status</th><th style="width:160px"></th></tr></thead>
+          <thead><tr><th>Name</th><th>PIN</th><th>Role</th><th>Status</th><th style="width:160px"></th></tr></thead>
           <tbody id="staffTable"></tbody>
         </table>
       </div>
@@ -1659,26 +1661,10 @@
           </div>
 
           <!-- Product picker (always visible) -->
-          <div class="kb-product-sidebar">
+          <div class="kb-product-sidebar" style="display:none">
             <h3>Products</h3>
             <input type="text" id="kbSidebarSearch" placeholder="Search products...">
-            <div class="kb-prod-list" id="kbProductList">
-              <p style="color:var(--text-dim);font-size:11px;padding:6px">Loading...</p>
-            </div>
-            <p style="color:var(--text-dim);font-size:9px;margin-top:4px">Select product, then click empty cell</p>
-            <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
-              <label style="font-size:11px;font-weight:600;color:var(--text-dim);display:block;margin-bottom:6px">Auto Fill Empty Cells</label>
-              <div style="display:flex;gap:4px;margin-bottom:6px">
-                <button class="btn btn-outline af-size-btn active" data-af-size="1" style="flex:1;padding:4px;font-size:10px">1×1</button>
-                <button class="btn btn-outline af-size-btn" data-af-size="2" style="flex:1;padding:4px;font-size:10px">2×2</button>
-                <button class="btn btn-outline af-size-btn" data-af-size="3" style="flex:1;padding:4px;font-size:10px">3×3</button>
-              </div>
-              <div style="display:flex;gap:4px">
-                <button class="btn btn-green" id="kbAutoFillBtn" style="flex:1;padding:6px;font-size:11px">Reflow</button>
-                <button class="btn btn-blue" id="kbSortAlphaBtn" style="flex:1;padding:6px;font-size:11px">A-Z Sort</button>
-              </div>
-              <p style="color:var(--text-dim);font-size:9px;margin-top:4px">Reflow resizes &amp; packs buttons. A-Z sorts alphabetically.</p>
-            </div>
+            <div class="kb-prod-list" id="kbProductList"></div>
           </div>
         </div>
       </div>
@@ -2059,6 +2045,59 @@
       </div>
     </div>
 
+    <!-- ── Receipt Template ─────────────────────────────────────── -->
+    <div class="tab-content" id="tab-receipt">
+      <h1>Receipt Template</h1>
+      <p style="color:var(--text-dim);margin-bottom:16px">Edit your receipt layout. Changes are saved to the database and used when printing receipts.</p>
+
+      <div style="display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start">
+
+        <!-- Left: settings -->
+        <div>
+          <div class="section">
+            <h2>Store Details</h2>
+            <div class="form-row">
+              <div class="form-field"><label>Store Name</label><input type="text" id="rcptStoreName"></div>
+              <div class="form-field"><label>Phone</label><input type="text" id="rcptPhone"></div>
+            </div>
+            <div class="form-field" style="margin-top:8px"><label>Address</label><input type="text" id="rcptAddress"></div>
+            <div class="form-field" style="margin-top:8px"><label>ABN</label><input type="text" id="rcptAbn"></div>
+          </div>
+
+          <div class="section">
+            <h2>Header &amp; Footer</h2>
+            <div class="form-field" style="margin-bottom:10px">
+              <label>Header Text <span style="color:var(--text-dim);font-size:11px">(after store info)</span></label>
+              <textarea id="rcptHeader" rows="3" placeholder="e.g. TAX INVOICE SPECIALIST"></textarea>
+            </div>
+            <div class="form-field">
+              <label>Footer Text <span style="color:var(--text-dim);font-size:11px">(bottom of receipt)</span></label>
+              <textarea id="rcptFooter" rows="2" placeholder="e.g. Thank you!"></textarea>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>Tax</h2>
+            <div class="form-row">
+              <div class="form-field"><label>Tax Name</label><input type="text" id="rcptTaxName" placeholder="GST"></div>
+              <div class="form-field"><label>Tax Rate (%)</label><input type="number" id="rcptTaxRate" step="0.1" placeholder="10"></div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="btn btn-green" id="rcptSaveBtn" style="padding:10px 24px;font-size:14px">Save Receipt Settings</button>
+            <button class="btn btn-outline" id="rcptTestPrintBtn">Test Print</button>
+          </div>
+        </div>
+
+        <!-- Right: live preview -->
+        <div>
+          <div style="background:#fff;color:#000;font-family:'Courier New',monospace;font-size:11.5px;line-height:1.4;padding:24px 16px;border-radius:8px;min-height:400px;white-space:pre;overflow-x:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.3);position:sticky;top:16px" id="rcptPreview">
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="tab-content" id="tab-settings">
       <h1>Settings</h1>
 
@@ -2235,6 +2274,7 @@
         if (a.dataset.tab === 'labels') initLabelsTab()
         if (a.dataset.tab === 'insights') loadInsights()
         if (a.dataset.tab === 'diagnostics') loadDiagnostics()
+        if (a.dataset.tab === 'receipt') loadReceiptTab()
         if (a.dataset.tab === 'settings') { loadSettings(); loadBackups() }
       })
     })
@@ -2653,18 +2693,13 @@
       const countMap = {}
       for (const p of allProds) { countMap[p.category_id] = (countMap[p.category_id] || 0) + 1 }
 
-      // Populate families datalist
-      const families = [...new Set(cats.map(c => c.family).filter(Boolean))]
-      $('#familyList').innerHTML = families.map(f => `<option value="${esc(f)}">`).join('')
-
       $('#catTable').innerHTML = cats.map(c => `<tr>
         <td>${esc(c.name)}</td>
-        <td style="color:${c.family ? 'var(--text)' : 'var(--text-muted)'}; font-size:12px">${esc(c.family || '—')}</td>
         <td><span style="display:inline-block;width:16px;height:16px;border-radius:3px;background:${esc(c.colour || '#4fbd77')};vertical-align:middle"></span></td>
         <td>${c.sort_order || 0}</td>
         <td>${countMap[c.id] || 0}</td>
         <td><button class="btn btn-outline" style="padding:3px 10px;font-size:11px" data-edit-cat="${esc(c.id)}">Edit</button></td>
-      </tr>`).join('') || '<tr><td colspan="6" style="color:var(--text-dim)">No categories</td></tr>'
+      </tr>`).join('') || '<tr><td colspan="5" style="color:var(--text-dim)">No categories</td></tr>'
     }
 
     $('#catTable').addEventListener('click', e => {
@@ -2683,13 +2718,11 @@
       if (cat) {
         $('#catEditId').value = cat.id
         $('#catName').value = cat.name
-        $('#catFamily').value = cat.family || ''
         $('#catColour').value = cat.colour || '#4fbd77'
         $('#catSort').value = cat.sort_order || 0
       } else {
         $('#catEditId').value = ''
         $('#catName').value = ''
-        $('#catFamily').value = ''
         $('#catColour').value = '#4fbd77'
         $('#catSort').value = productCategories.length
       }
@@ -2703,7 +2736,6 @@
       await window.pos.upsertCategory({
         id: $('#catEditId').value || undefined,
         name,
-        family: $('#catFamily').value.trim(),
         colour: $('#catColour').value,
         sort_order: parseInt($('#catSort').value) || 0
       })
@@ -2724,6 +2756,7 @@
       $('#staffTable').innerHTML = staffCache.map(s => `
         <tr>
           <td>${esc(s.name)}</td>
+          <td style="font-family:monospace;letter-spacing:2px">${esc(s.pin || '')}</td>
           <td style="text-transform:capitalize">${esc(s.role)}</td>
           <td><span class="badge ${s.active ? 'badge-green' : 'badge-red'}">${s.active ? 'Active' : 'Inactive'}</span></td>
           <td><button class="btn btn-outline" style="padding:3px 10px;font-size:11px" data-edit-staff="${esc(s.id)}">Edit</button></td>
@@ -2983,9 +3016,6 @@
     let txnCache = []
 
     function initTxnDates () {
-      const today = new Date().toISOString().slice(0, 10)
-      if (!$('#txnDateFrom').value) $('#txnDateFrom').value = today
-      if (!$('#txnDateTo').value) $('#txnDateTo').value = today
     }
 
     async function loadTransactions () {
@@ -3291,6 +3321,152 @@
       loadCashDrawer()
     })
 
+
+    // ── Receipt Template ─────────────────────────────────────────────
+
+    async function loadReceiptTab () {
+      const s = await window.pos.getAllSettings()
+      $('#rcptStoreName').value = s.store_name || ''
+      $('#rcptPhone').value = s.store_phone || ''
+      $('#rcptAddress').value = s.store_address || ''
+      $('#rcptAbn').value = s.store_abn || ''
+      $('#rcptHeader').value = s.receipt_header || ''
+      $('#rcptFooter').value = s.receipt_footer || ''
+      $('#rcptTaxName').value = s.tax_name || 'GST'
+      $('#rcptTaxRate').value = s.tax_rate ? (parseFloat(s.tax_rate) * 100).toFixed(0) : '10'
+      renderReceiptPreview()
+    }
+
+    function renderReceiptPreview () {
+      const W = 42
+      const lr = (l, r) => l + ' '.repeat(Math.max(1, W - l.length - r.length)) + r
+      const center = s => { const pad = Math.max(0, Math.floor((W - s.length) / 2)); return ' '.repeat(pad) + s }
+      const lines = []
+
+      const storeName = $('#rcptStoreName').value || 'Tillaroo'
+      const phone = $('#rcptPhone').value
+      const address = $('#rcptAddress').value
+      const abn = $('#rcptAbn').value
+      const header = $('#rcptHeader').value
+      const footer = $('#rcptFooter').value
+      const taxName = $('#rcptTaxName').value || 'GST'
+      const taxPct = parseFloat($('#rcptTaxRate').value) || 10
+
+      lines.push(center('WELCOME TO'))
+      lines.push(center(storeName.toUpperCase()))
+      lines.push('')
+      if (header) header.split('\n').forEach(l => { if (l.trim()) lines.push(center(l.trim())) })
+      if (phone) lines.push(center('PH# ' + phone))
+      if (address) lines.push(center(address))
+      if (abn) lines.push(center('ABN# ' + abn))
+      lines.push(center('Thank you for shopping with us'))
+      lines.push(center('Please retain receipt for refunds'))
+      lines.push(center('TAX INVOICE'))
+      lines.push('')
+
+      lines.push('(*) denotes items which attract ' + taxName)
+      lines.push('(D) denotes Discounted items')
+
+      const now = new Date()
+      const dateStr = now.toLocaleDateString('en-AU') + ' ' + now.toLocaleTimeString('en-AU', {hour:'2-digit',minute:'2-digit'})
+      lines.push(lr(dateStr, 'Jane'))
+      lines.push('')
+
+      const sampleItems = [
+        { name: 'Coffee Large', price: 5.50, qty: 2, gst: true, disc: false },
+        { name: 'Bananas Cavendish', price: 3.33, qty: 1.2, gst: false, disc: false },
+        { name: 'Carrots Bag 1kg', price: 3.00, qty: 1, gst: false, disc: true, discAmt: 1.00, lineTotal: 2.00 },
+      ]
+
+      for (const it of sampleItems) {
+        const prefix = it.disc ? 'D ' : it.gst ? '* ' : '  '
+        const lineTotal = it.lineTotal ?? (it.qty * it.price)
+        lines.push(lr((prefix + it.name).substring(0, 32), '$' + lineTotal.toFixed(2)))
+        if (it.qty !== 1) lines.push('    ' + it.qty + ' x $' + it.price.toFixed(2))
+        if (it.disc) lines.push('    Discount: -$' + it.discAmt.toFixed(2))
+      }
+      lines.push('')
+
+      const subtotal = 14.96
+      const discount = 1.00
+      const total = 13.96
+      const taxAmt = (5.50 * 2) * (taxPct / 100) / (1 + taxPct / 100)
+
+      lines.push(lr('Subtotal', '$' + subtotal.toFixed(2)))
+      lines.push(lr('Discount', '-$' + discount.toFixed(2)))
+      lines.push(lr('Total (4 Items)', '$' + total.toFixed(2)))
+      lines.push('')
+      lines.push(lr('Cash', '$20.00'))
+      lines.push(lr('Change', '$' + (20 - total).toFixed(2)))
+      lines.push('')
+      lines.push('-'.repeat(W))
+
+      lines.push(lr('Served by Cashier Jane', 'Lane #LANE01'))
+      lines.push(lr('Receipt Number', '00000042'))
+      lines.push('')
+      lines.push(center('Total includes ' + taxName + ' of $' + taxAmt.toFixed(2)))
+      lines.push('')
+      if (footer) footer.split('\n').forEach(l => { if (l.trim()) lines.push(center(l.trim())) })
+      lines.push('')
+      lines.push(center('|||||||||||||||||||||||||||'))
+      lines.push(center('00000042'))
+
+      $('#rcptPreview').textContent = lines.join('\n')
+    }
+
+    // Live update on any input change
+    ;['rcptStoreName','rcptPhone','rcptAddress','rcptAbn','rcptHeader','rcptFooter','rcptTaxName','rcptTaxRate'].forEach(id => {
+      const el = document.getElementById(id)
+      if (el) el.addEventListener('input', renderReceiptPreview)
+    })
+
+    $('#rcptSaveBtn').addEventListener('click', async () => {
+      await window.pos.setSetting('store_name', $('#rcptStoreName').value)
+      await window.pos.setSetting('store_phone', $('#rcptPhone').value)
+      await window.pos.setSetting('store_address', $('#rcptAddress').value)
+      await window.pos.setSetting('store_abn', $('#rcptAbn').value)
+      await window.pos.setSetting('receipt_header', $('#rcptHeader').value)
+      await window.pos.setSetting('receipt_footer', $('#rcptFooter').value)
+      await window.pos.setSetting('tax_name', $('#rcptTaxName').value)
+      const pct = parseFloat($('#rcptTaxRate').value)
+      if (!isNaN(pct) && pct >= 0 && pct <= 100) {
+        await window.pos.setSetting('tax_rate', String(pct / 100))
+      }
+      showToast('Receipt settings saved', 'success')
+    })
+
+    $('#rcptTestPrintBtn').addEventListener('click', async () => {
+      const s = await window.pos.getAllSettings()
+      const testData = {
+        storeName: s.store_name || 'Tillaroo',
+        storePhone: s.store_phone || '',
+        storeAddress: s.store_address || '',
+        storeAbn: s.store_abn || '',
+        header: s.receipt_header || '',
+        footer: s.receipt_footer || '',
+        staffName: 'Test',
+        staffRole: 'admin',
+        registerId: s.register_id || 'LANE01',
+        date: new Date().toLocaleString('en-AU'),
+        receiptNumber: 0,
+        items: [
+          { name: 'Test Item 1', qty: 2, unit_price: 5.50, line_total: 11.00, tax: 1.00, discount: 0 },
+          { name: 'Test Item 2', qty: 1, unit_price: 3.99, line_total: 3.99, tax: 0, discount: 0 },
+        ],
+        subtotal: 14.99,
+        tax: 1.00,
+        discount: 0,
+        total: 14.99,
+        payments: [{ method: 'cash', amount: 20.00 }],
+        change: 5.01,
+      }
+      try {
+        await window.pos.printReceipt(testData)
+        showToast('Test receipt sent to printer', 'success')
+      } catch (e) {
+        showToast('Print failed: ' + e.message, 'error')
+      }
+    })
 
     // ── Settings ────────────────────────────────────────────────────
 

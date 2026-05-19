@@ -216,28 +216,28 @@ body{font-family:'Inter',system-ui,sans-serif;background:linear-gradient(160deg,
 
   async function loadDealsFromDB () {
     try {
-      const specials = await window.pos.getSpecials()
-      const activeSpecials = specials.filter(s => s.active)
-      cachedDeals = activeSpecials.map((s, i) => ({
-        id: s.id,
-        name: s.product_name,
-        normalPrice: s.product_price,
-        specialPrice: s.special_price,
-        unit: '',
-        emoji: '🏷️',
-        badge: 'special',
-        isSpecial: true,
-        displayPriority: i + 1,
-      }))
-      if (!cachedDeals.length) {
-        // Also check deals (multi-buy etc)
-        const deals = await window.pos.getActiveDeals()
-        for (const d of deals) {
-          const cfg = typeof d.config === 'string' ? JSON.parse(d.config) : d.config
-          let text = d.name
-          if (d.type === 'multi_buy' && cfg) text = `${cfg.qty} for $${cfg.price}`
-          cachedDeals.push({ id: d.id, name: d.name, specialText: text, emoji: '🎉', badge: 'today', isSpecial: true, displayPriority: cachedDeals.length + 1 })
-        }
+      cachedDeals = []
+      const specials = await ipcRenderer.invoke('db:specials:getAll')
+      const activeSpecials = (specials || []).filter(s => s.active)
+      for (const s of activeSpecials) {
+        cachedDeals.push({
+          id: s.id,
+          name: s.product_name,
+          normalPrice: s.product_price,
+          specialPrice: s.special_price,
+          unit: '',
+          emoji: '🏷️',
+          badge: 'special',
+          isSpecial: true,
+          displayPriority: cachedDeals.length + 1,
+        })
+      }
+      const deals = await ipcRenderer.invoke('db:deals:getActive')
+      for (const d of (deals || [])) {
+        const cfg = typeof d.config === 'string' ? JSON.parse(d.config) : d.config
+        let text = d.name
+        if (d.type === 'multi_buy' && cfg) text = `${cfg.qty} for $${cfg.price}`
+        cachedDeals.push({ id: d.id, name: d.name, specialText: text, emoji: '🎉', badge: 'today', isSpecial: true, displayPriority: cachedDeals.length + 1 })
       }
     } catch (e) { console.warn('Failed to load deals from DB:', e) }
   }

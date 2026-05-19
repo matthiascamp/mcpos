@@ -810,6 +810,349 @@ async function initDatabase() {
     }
   } catch (e) { appLog('error', 'database', 'Deals migration failed', e.message) }
 
+  // ── Price & unit update (May 2026 price list) ──
+  try {
+    const pricesDone = dbAll("SELECT value FROM settings WHERE key = 'migration_prices_may2026_v1'")
+    if (!pricesDone.length) {
+      const { v4: genuuid } = require('uuid')
+
+      // Price & unit updates for existing products (match by name)
+      const updates = [
+        // Vegetables / Greens
+        ['Herbs', 3.89, 'each'], ['Asian Vege', 2.99, 'each'], ['Shallots', 1.99, 'each'],
+        ['Leeks', 3.49, 'each'], ['Whole Celery', 2.99, 'each'], ['Wombok', 1.99, 'each'],
+        ['Red Cabbage', 3.99, 'each'], ['Jap', 2.49, 'kg'], ['Butternut', 2.49, 'kg'],
+        ['Carrot Bag', 2.69, 'each'], ['Carrots', 3.69, 'kg'], ['Beans', 12.99, 'kg'],
+        ['Red Capsicum', 5.99, 'kg'], ['Yellow Capsicum', 8.99, 'kg'], ['Green Capsicum', 7.99, 'kg'],
+        ['Green Zucchini', 6.99, 'kg'], ['Swiss Brown', 16.90, 'kg'], ['Flat Mushroom', 14.90, 'kg'],
+        ['Button Mush', 14.90, 'kg'], ['Fennel', 2.69, 'each'], ['Corn', 1.49, 'each'],
+        ['Peas', 24.99, 'kg'], ['Red Chilli', 12.90, 'kg'], ['Broccoli', 4.59, 'kg'],
+        ['Chokos', 6.99, 'kg'], ['Parsnip', 12.99, 'kg'], ['Ginger', 34.99, 'kg'],
+        ['Swedes', 5.89, 'kg'], ['Turnip', 5.89, 'kg'],
+        // Potatoes / Onions
+        ['Potato Bag', 5.99, 'each'], ['Garlic', 29.89, 'kg'], ['White Onion', 7.99, 'kg'],
+        ['Brushed', 2.99, 'kg'], ['Chat', 4.89, 'each'], ['Potatoes Washed', 5.59, 'kg'],
+        // Salad / Lettuce / Tomatoes
+        ['Cauliflower', 1.99, 'each'], ['Iceberg Lettuce', 1.99, 'each'], ['Cos', 4.99, 'each'],
+        ['Tomatoes', 6.89, 'kg'], ['Cucumbers', 1.99, 'each'], ['Roma', 7.89, 'kg'],
+        // Apples / Citrus / Pears
+        ['Navel Oranges', 6.99, 'kg'], ['Pink Lady', 8.99, 'kg'], ['Lemons', 5.99, 'kg'],
+        ['Royal Gala Apples', 6.89, 'kg'], ['Granny Smith Apples', 5.99, 'kg'],
+        ['Packham', 5.89, 'kg'], ['Red Delicious', 5.89, 'kg'], ['Imperial', 4.89, 'kg'],
+        ['Jazz', 6.89, 'kg'], ['Avocado Hass', 2.99, 'each'], ['Afourer', 4.99, 'kg'],
+        ['Nashi', 1.99, 'each'], ['Grapefruit', 3.99, 'kg'], ['Lemon Bag', 1.99, 'each'],
+        ['Valencia', 3.89, 'kg'], ['Avo Bag', 1.49, 'kg'], ['Custard Apple', 12.99, 'kg'],
+        ['Persimmons', 12.99, 'kg'], ['Pomegranate', 4.89, 'each'], ['Limes', 1.99, 'each'],
+        ['Passion Fruit', 1.99, 'each'], ['Green Kiwi', 14.89, 'kg'], ['Gold Kiwi', 2.89, 'each'],
+        ['Lady Finger', 6.99, 'kg'], ['Orange Bag', 6.99, 'each'], ['Bananas', 4.99, 'kg'],
+        // Melons / Tropical
+        ['Xl Pineapple', 7.99, 'each'], ['Rockmelon', 5.99, 'each'], ['Honeydew', 5.89, 'each'],
+        ['Coconut', 4.49, 'each'], ['Dragon Fruit', 15.99, 'kg'],
+        // Berries / Grapes
+        ['Strawberries Punnet', 5.99, 'each'], ['Green Grapes', 7.89, 'kg'],
+        ['Red Grapes', 5.99, 'kg'], ['Black Grapes', 5.99, 'kg'],
+        // Bucket
+        ['Watermelon', 0.99, 'kg'],
+      ]
+      let updCount = 0
+      for (const [name, price, unit] of updates) {
+        const row = db.exec("SELECT id FROM products WHERE name = ?1 AND active = 1", [name])
+        if (row.length && row[0].values.length) {
+          db.run("UPDATE products SET price = ?1, unit = ?2, updated_at = datetime('now') WHERE id = ?3",
+            [price, unit, row[0].values[0][0]])
+          updCount++
+        }
+      }
+
+      // Rename Bartlett → William
+      const bartRow = db.exec("SELECT id FROM products WHERE name = 'Bartlett' AND active = 1")
+      if (bartRow.length && bartRow[0].values.length) {
+        db.run("UPDATE products SET name = 'William', price = 5.89, updated_at = datetime('now') WHERE id = ?1", [bartRow[0].values[0][0]])
+      }
+
+      // New categories
+      db.run("INSERT OR IGNORE INTO categories (id, name, sort_order, colour, active) VALUES ('cat-berries', 'Berries', 130, '#8b2252', 1)")
+      db.run("INSERT OR IGNORE INTO categories (id, name, sort_order, colour, active) VALUES ('cat-bucket-specials', 'Bucket Specials', 140, '#d97706', 1)")
+      db.run("INSERT OR IGNORE INTO categories (id, name, sort_order, colour, active) VALUES ('cat-tropical', 'Tropical', 131, '#e87830', 1)")
+
+      // New products: [name, category_id, price, unit, plu]
+      const newProducts = [
+        // Vegetables
+        ['Snacking Carrots', 'cat-veg', 3.99, 'each', '20200'],
+        ['Baby Cucumbers', 'cat-veg', 3.99, 'each', '20201'],
+        ['Lebanese Eggplant', 'cat-veg', 9.99, 'kg', '20202'],
+        ['Broccolini', 'cat-veg', 3.99, 'each', '20203'],
+        ['Thai Eggplant', 'cat-veg', 9.89, 'kg', '20204'],
+        ['Bitter Gourd', 'cat-veg', 5.99, 'kg', '20205'],
+        ['Jap Cut', 'cat-pumpkins', 2.69, 'kg', '20206'],
+        ['Butternut Cut', 'cat-pumpkins', 2.99, 'kg', '20207'],
+        // Potatoes / Onions
+        ['Red Onion Bag', 'cat-onions', 2.99, 'each', '20208'],
+        ['Pickling Onion Bag', 'cat-onions', 3.49, 'each', '20209'],
+        ['Garlic Bag', 'cat-garlic', 5.99, 'each', '20210'],
+        ['Sweet Potato', 'cat-sweet-potatoes', 3.99, 'kg', '20211'],
+        ['White Sweet Potato', 'cat-sweet-potatoes', 6.99, 'kg', '20212'],
+        ['Dutch Cream', 'cat-potatoes', 7.99, 'kg', '20213'],
+        ['Washed Potato Bag', 'cat-potatoes', 2.89, 'each', '20214'],
+        // Salad / Lettuce
+        ['Sugarloaf Cabbage', 'cat-cabbage', 2.99, 'each', '20215'],
+        ['Fancy Lettuce', 'cat-lettuces', 3.99, 'each', '20216'],
+        ['Twin Cos', 'cat-lettuces', 3.99, 'each', '20217'],
+        ['Lebanese Cucumber', 'cat-veg', 5.89, 'kg', '20218'],
+        // Apples / Citrus
+        ['Kanzi', 'cat-apples', 7.99, 'kg', '20219'],
+        ['Sassy', 'cat-apples', 6.49, 'kg', '20220'],
+        ['Cara Cara', 'cat-oranges', 5.89, 'kg', '20221'],
+        ['Missile', 'cat-apples', 4.99, 'kg', '20222'],
+        // Berries
+        ['Blackberries', 'cat-berries', 2.99, 'each', '20223'],
+        ['Blueberries', 'cat-berries', 8.99, 'each', '20224'],
+        ['Farm Strawberries', 'cat-berries', 5.89, 'each', '20225'],
+        ['Raspberries', 'cat-berries', 5.99, 'each', '20226'],
+        // Bucket / Outside specials
+        ['Eggplant Bucket', 'cat-bucket-specials', 2.89, 'kg', '20230'],
+        ['Granny Smith Bucket', 'cat-bucket-specials', 1.99, 'kg', '20231'],
+        ['Leb Cucumber Bucket', 'cat-bucket-specials', 2.89, 'kg', '20232'],
+        ['Bananas Bucket', 'cat-bucket-specials', 1.99, 'kg', '20233'],
+        ['Limes Bucket', 'cat-bucket-specials', 2.99, 'kg', '20234'],
+        ['Lemons Bucket', 'cat-bucket-specials', 1.99, 'kg', '20235'],
+        ['Round Tomatoes Bucket', 'cat-bucket-specials', 1.49, 'kg', '20236'],
+        ['Imperial Bucket', 'cat-bucket-specials', 1.99, 'kg', '20237'],
+        ['Pink Lady Bucket', 'cat-bucket-specials', 2.89, 'kg', '20238'],
+        ['Jap Pumpkin Bucket', 'cat-bucket-specials', 1.99, 'kg', '20239'],
+        ['Cauliflower Outside', 'cat-bucket-specials', 1.99, 'each', '20240'],
+        ['Sweet Potato Outside', 'cat-bucket-specials', 1.49, 'kg', '20241'],
+        ['Red Onion 10kg', 'cat-bucket-specials', 18.00, 'each', '20242'],
+        ['Brown Onion 10kg', 'cat-bucket-specials', 12.90, 'each', '20243'],
+        ['Red Capsicum Bag', 'cat-bucket-specials', 2.49, 'kg', '20244'],
+        ['Twin Cos Bag', 'cat-bucket-specials', 0.79, 'each', '20245'],
+        ['Red Paw Paw Cut', 'cat-tropical', 6.49, 'kg', '20246'],
+        ['Watermelon Cut', 'cat-melons', 1.49, 'kg', '20247'],
+      ]
+      let addCount = 0
+      for (const [name, catId, price, unit, plu] of newProducts) {
+        const exists = db.exec("SELECT 1 FROM products WHERE name = ?1 AND active = 1", [name])
+        if (!exists.length || !exists[0].values.length) {
+          const id = genuuid()
+          db.run("INSERT INTO products (id, name, category_id, price, unit, tax_rate, plu, active, updated_at) VALUES (?1,?2,?3,?4,?5,0,?6,1,datetime('now'))",
+            [id, name, catId, price, unit, plu])
+          addCount++
+        }
+      }
+
+      // Update deals — add Twin Cos Bag deal, update existing deal product links
+      // Link deals to products by finding product IDs
+      const dealDefs = [
+        ['deal-carrot-bags-2for5', 'Carrot Bag'],
+        ['deal-fennel-2for4', 'Fennel'],
+        ['deal-corn-2for2', 'Corn'],
+        ['deal-avocado-2for5', 'Avocado Hass'],
+        ['deal-limes-3for5', 'Limes'],
+        ['deal-kiwi-gold-2for5', 'Gold Kiwi'],
+        ['deal-blackberries-2for5', 'Blackberries'],
+      ]
+      for (const [dealId, prodName] of dealDefs) {
+        const pRow = db.exec("SELECT id FROM products WHERE name = ?1 AND active = 1", [prodName])
+        if (pRow.length && pRow[0].values.length) {
+          db.run("DELETE FROM deal_products WHERE deal_id = ?1", [dealId])
+          db.run("INSERT OR IGNORE INTO deal_products (deal_id, product_id, role) VALUES (?1, ?2, 'trigger')", [dealId, pRow[0].values[0][0]])
+        }
+      }
+      // Add Twin Cos Bag deal
+      const twinCosRow = db.exec("SELECT id FROM products WHERE name = 'Twin Cos Bag' AND active = 1")
+      if (twinCosRow.length && twinCosRow[0].values.length) {
+        db.run("INSERT OR IGNORE INTO deals (id, name, type, config, active) VALUES ('deal-twincos-2for1', 'Twin Cos Bags 2 for $1', 'multi_buy', '{\"qty\":2,\"price\":1}', 1)")
+        db.run("INSERT OR IGNORE INTO deal_products (deal_id, product_id, role) VALUES ('deal-twincos-2for1', ?1, 'trigger')", [twinCosRow[0].values[0][0]])
+      }
+
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('migration_prices_may2026_v1', '1')")
+      appLog('info', 'migration', `Updated ${updCount} product prices/units, added ${addCount} new products`)
+    }
+  } catch (e) { appLog('error', 'migration', 'Price update migration failed', e.message) }
+
+  // --- Migration: replace external image URLs with local paths ---
+  try {
+    const imgDone = dbAll("SELECT value FROM settings WHERE key = 'migration_local_images_v1'")
+    if (!imgDone.length || !imgDone[0].value) {
+      const urlMap = [
+        // Pexels department buttons
+        ['pexels.com%65175%', 'images/products/pexels-meat.jpg'],
+        ['pexels.com%5996678%', 'images/products/pexels-flowers.jpg'],
+        ['pexels.com%264537%', 'images/products/pexels-fruitveg.jpg'],
+        ['pexels.com%302899%', 'images/products/pexels-coffee.jpg'],
+        ['pexels.com%8775044%', 'images/products/pexels-deli.jpg'],
+        ['pexels.com%4109938%', 'images/products/pexels-cheese.jpg'],
+        ['pexels.com%529632%', 'images/products/pexels-nuts.jpg'],
+        ['pexels.com%1366594%', 'images/products/pexels-grocery.jpg'],
+        // GitHub bread
+        ['F_R_CIABATTA_LOAF', 'images/products/github-ciabatta.jpg'],
+        // Gas
+        ['swapgo9kg', 'images/products/gas-bottle.jpg'],
+        // GitHub fruit_veg_images
+        ['Bananas_Cavendish', 'images/products/github-banana.jpg'],
+        ['Apple_Royal_Gala', 'images/products/github-apple-rg.jpg'],
+        ['Apple_Granny_Smith', 'images/products/github-apple-gs.jpg'],
+        ['Navel_Orange', 'images/products/github-orange.jpg'],
+        ['Strawberries_Punnet', 'images/products/github-strawberry.jpg'],
+        ['Avocado_Large_Hass', 'images/products/github-avocado.jpg'],
+        ['Mandarines_Afrourer', 'images/products/github-mango.jpg'],
+        ['Watermelon', 'images/products/github-watermelon.jpg'],
+        ['fruit_veg_images/Tomatoes', 'images/products/github-tomato.jpg'],
+        ['Potatoes_Brushed', 'images/products/github-potato.jpg'],
+        ['Brown_Onion', 'images/products/github-onion.jpg'],
+        ['fruit_veg_images/Carrots', 'images/products/github-carrot.jpg'],
+        ['fruit_veg_images/Broccoli', 'images/products/github-broccoli.jpg'],
+        ['Lettuce_Iceberg', 'images/products/github-lettuce.jpg'],
+        ['Capsicum_Red', 'images/products/github-capsicum.jpg'],
+        ['Mushroom_Cups', 'images/products/github-mushroom.jpg'],
+      ]
+
+      let imgUpdated = 0
+
+      // Coles URLs → local
+      const colesKb = dbAll("SELECT id, image FROM keyboard_buttons WHERE image LIKE '%shop.coles.com.au%'")
+      for (const row of colesKb) {
+        const m = row.image.match(/(\d+-zm\.jpg)/)
+        if (m) { dbRun("UPDATE keyboard_buttons SET image = ? WHERE id = ?", [`images/products/coles-${m[1]}`, row.id]); imgUpdated++ }
+      }
+
+      // Woolworths URLs → local
+      const woolKb = dbAll("SELECT id, image FROM keyboard_buttons WHERE image LIKE '%woolworths.media%'")
+      for (const row of woolKb) {
+        const m = row.image.match(/\/large\/(\d+)\.jpg/)
+        if (m) { dbRun("UPDATE keyboard_buttons SET image = ? WHERE id = ?", [`images/products/woolworths-${m[1]}.jpg`, row.id]); imgUpdated++ }
+      }
+
+      // Pngimg
+      const pngKb = dbAll("SELECT id, image FROM keyboard_buttons WHERE image LIKE '%pngimg.com%'")
+      for (const row of pngKb) {
+        const m = row.image.match(/\/([^/]+\.png)$/)
+        if (m) { dbRun("UPDATE keyboard_buttons SET image = ? WHERE id = ?", [`images/products/pngimg-${m[1]}`, row.id]); imgUpdated++ }
+      }
+
+      // Named URL patterns (Pexels, GitHub, gas) for keyboard_buttons
+      for (const [pattern, local] of urlMap) {
+        const rows = dbAll("SELECT id FROM keyboard_buttons WHERE image LIKE ? AND image NOT LIKE 'images/%'", [`%${pattern}%`])
+        for (const row of rows) { dbRun("UPDATE keyboard_buttons SET image = ? WHERE id = ?", [local, row.id]); imgUpdated++ }
+      }
+
+      // Named URL patterns for products.image_url
+      for (const [pattern, local] of urlMap) {
+        const rows = dbAll("SELECT id FROM products WHERE image_url LIKE ? AND image_url NOT LIKE 'images/%'", [`%${pattern}%`])
+        for (const row of rows) { dbRun("UPDATE products SET image_url = ? WHERE id = ?", [local, row.id]); imgUpdated++ }
+      }
+
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('migration_local_images_v1', '1')")
+      appLog('info', 'migration', `Replaced ${imgUpdated} external image URLs with local paths`)
+    }
+  } catch (e) { appLog('error', 'migration', 'Local images migration failed', e.message) }
+
+  // ── Migration: Fix receipt_footer literal \\n ────────────────────────
+  try {
+    const footer = dbGet("SELECT value FROM settings WHERE key = 'receipt_footer'")
+    if (footer && footer.value && footer.value.includes('\\n')) {
+      const fixed = footer.value.replace(/\\n/g, '\n')
+      db.run("UPDATE settings SET value = ?1 WHERE key = 'receipt_footer'", [fixed])
+      appLog('info', 'migration', 'Fixed receipt_footer literal \\n')
+    }
+    const header = dbGet("SELECT value FROM settings WHERE key = 'receipt_header'")
+    if (header && header.value && header.value.includes('\\n')) {
+      const fixed = header.value.replace(/\\n/g, '\n')
+      db.run("UPDATE settings SET value = ?1 WHERE key = 'receipt_header'", [fixed])
+      appLog('info', 'migration', 'Fixed receipt_header literal \\n')
+    }
+  } catch (e) { appLog('error', 'migration', 'Receipt footer fix failed', e.message) }
+
+  // ── Migration: Import all products from products.json ────────────────
+  try {
+    const importDone = dbAll("SELECT value FROM settings WHERE key = 'migration_import_products_v1'")
+    if (!importDone.length || !importDone[0].value) {
+      const jsonPath = path.join(__dirname, 'products.json')
+      if (fs.existsSync(jsonPath)) {
+        const raw = fs.readFileSync(jsonPath, 'utf-8')
+        const data = JSON.parse(raw)
+        let imported = 0, skipped = 0
+
+        for (const [catName, items] of Object.entries(data)) {
+          let catRow = dbGet("SELECT id FROM categories WHERE name = ?1", [catName])
+          if (!catRow) {
+            const catId = uuid()
+            db.run("INSERT INTO categories (id, name, sort_order, colour, active, updated_at) VALUES (?1, ?2, ?3, '#4fbd77', 1, datetime('now'))",
+              [catId, catName, 100])
+            catRow = { id: catId }
+          }
+
+          for (const p of items) {
+            const barcode = p.barcode || null
+            if (barcode) {
+              const existing = dbGet("SELECT id FROM products WHERE barcode = ?1", [barcode])
+              if (existing) { skipped++; continue }
+            }
+            const plu = barcode && /^\d{3,6}$/.test(barcode) ? barcode : null
+            const unit = p.unit || (p.name && /\bKG\b/i.test(p.name) ? 'kg' : 'each')
+            const id = uuid()
+            db.run("INSERT INTO products (id, barcode, plu, name, category_id, price, unit, tax_rate, active, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, 0.10, 1, datetime('now'))",
+              [id, barcode, plu, p.name, catRow.id, p.price, unit])
+            imported++
+          }
+        }
+
+        db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('migration_import_products_v1', '1')")
+        appLog('info', 'migration', `Imported ${imported} products from products.json (${skipped} skipped as duplicates)`)
+      }
+    }
+  } catch (e) { appLog('error', 'migration', 'Products import migration failed', e.message) }
+
+  // ── Migration: Import keyboard layout from keyboard-layout.json ──────
+  try {
+    const kbDone = dbAll("SELECT value FROM settings WHERE key = 'migration_import_keyboard_v1'")
+    if (!kbDone.length || !kbDone[0].value) {
+      const kbPath = path.join(__dirname, 'keyboard-layout.json')
+      if (fs.existsSync(kbPath)) {
+        const raw = fs.readFileSync(kbPath, 'utf-8')
+        const data = JSON.parse(raw)
+
+        dbRun("DELETE FROM keyboard_buttons")
+        dbRun("DELETE FROM keyboard_pages")
+
+        if (data.pages && Array.isArray(data.pages)) {
+          for (const pg of data.pages) {
+            db.run("INSERT OR REPLACE INTO keyboard_pages (page, name, cols, rows) VALUES (?1, ?2, ?3, ?4)",
+              [pg.page, pg.name || 'Untitled', pg.cols || 13, pg.rows || 7])
+          }
+        }
+
+        let btnCount = 0
+        for (const btn of (data.buttons || [])) {
+          const id = btn.id || uuid()
+          db.run(`INSERT OR REPLACE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, active, product_id, updated_at)
+            VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,datetime('now'))`,
+            [id, btn.label, btn.type, btn.price || 0, btn.image || null, btn.color || '#fff',
+             btn.bg_color || '#1a3d2a', btn.parent_id || null, btn.category_filter || null,
+             btn.alpha_range || null, btn.sort_order || 0, btn.position || 'grid',
+             btn.page || 1, btn.grid_row || 0, btn.grid_col || 0, btn.col_span || 1,
+             btn.row_span || 1, btn.active !== undefined ? btn.active : 1,
+             btn.product_id || null])
+          btnCount++
+        }
+
+        if (data.products && Array.isArray(data.products)) {
+          for (const p of data.products) {
+            if (!p.id) continue
+            db.run(`INSERT OR IGNORE INTO products (id, name, barcode, plu, category_id, price, cost_price, unit, tax_rate, track_stock, stock_qty, active, updated_at)
+              VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,datetime('now'))`,
+              [p.id, p.name, p.barcode || null, p.plu || null, p.category_id || null,
+               p.price || 0, p.cost_price || 0, p.unit || 'each', p.tax_rate ?? 0.1,
+               p.track_stock || 0, p.stock_qty || 0, p.active !== undefined ? p.active : 1])
+          }
+        }
+
+        db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('migration_import_keyboard_v1', '1')")
+        appLog('info', 'migration', `Imported keyboard layout: ${btnCount} buttons, ${(data.pages || []).length} pages`)
+      }
+    }
+  } catch (e) { appLog('error', 'migration', 'Keyboard import migration failed', e.message) }
+
   saveDBSync()
   appLog('info', 'database', 'Database initialized', `Path: ${DB_PATH}`)
 
@@ -1350,11 +1693,16 @@ app.whenReady().then(async () => {
   }
 })
 
+app.on('before-quit', () => {
+  appShuttingDown = true
+  if (saveTimer) { clearTimeout(saveTimer); saveTimer = null }
+  saveDBSync()
+})
+
 app.on('window-all-closed', () => {
   appShuttingDown = true
   if (dailyBackupTimer) clearInterval(dailyBackupTimer)
   appLog('info', 'app', 'App shutting down')
-  // Close scale connections if open
   try { if (hardwareCleanup) hardwareCleanup() } catch (_) {}
   saveDBSync()
   app.quit()
@@ -2332,7 +2680,7 @@ function setupIPC() {
   })
 
   ipcMain.handle('db:staff:getAll', () => {
-    return dbAll("SELECT id, name, role, active FROM staff ORDER BY name")
+    return dbAll("SELECT id, name, pin, role, active FROM staff ORDER BY name")
   })
 
   ipcMain.handle('db:staff:getWithPin', (_e, id) => {
@@ -2557,21 +2905,21 @@ function setupIPC() {
     const nextPage = (existing.length ? existing[0].page : 0) + 1
     dbRun("INSERT INTO keyboard_pages (page, name, cols, rows) VALUES (?1, ?2, ?3, ?4)",
       [nextPage, opts?.name || 'Untitled', opts?.cols || 13, opts?.rows || 7])
-    scheduleSave()
+    saveDBSync()
     lanSync.bumpVersion()
     return { page: nextPage, name: opts?.name || 'Untitled', cols: opts?.cols || 13, rows: opts?.rows || 7 }
   })
 
   ipcMain.handle('db:keyboard:renamePage', (_e, page, name) => {
     dbRun("UPDATE keyboard_pages SET name = ?2 WHERE page = ?1", [page, name])
-    scheduleSave()
+    saveDBSync()
     lanSync.bumpVersion()
     return true
   })
 
   ipcMain.handle('db:keyboard:updatePageSize', (_e, page, cols, rows) => {
     dbRun("INSERT OR REPLACE INTO keyboard_pages (page, name, cols, rows) VALUES (?1, COALESCE((SELECT name FROM keyboard_pages WHERE page = ?1), 'Untitled'), ?2, ?3)", [page, cols, rows])
-    scheduleSave()
+    saveDBSync()
     lanSync.bumpVersion()
     return true
   })
@@ -2593,6 +2941,7 @@ function setupIPC() {
         btn.col_span || 1, btn.row_span || 1, btn.product_id || null,
         btn.active !== false ? 1 : 0])
     queueSync('keyboard_buttons', id, btn.id ? 'update' : 'insert')
+    saveDBSync()
     return { id }
   })
 
@@ -2601,6 +2950,7 @@ function setupIPC() {
     dbRun("INSERT OR IGNORE INTO deleted_records (table_name, record_id) VALUES ('keyboard_buttons', ?1)", [id])
     dbRun("DELETE FROM keyboard_buttons WHERE id = ?1", [id])
     dbRun("DELETE FROM keyboard_buttons WHERE parent_id = ?1", [id])
+    saveDBSync()
     return true
   })
 
@@ -2608,7 +2958,7 @@ function setupIPC() {
     dbRun("DELETE FROM keyboard_buttons WHERE page = ?1", [page])
     dbRun("DELETE FROM keyboard_pages WHERE page = ?1", [page])
     dbRun("UPDATE keyboard_buttons SET active = 0 WHERE type = 'page_link' AND parent_id = ?1", [String(page)])
-    scheduleSave()
+    saveDBSync()
     lanSync.bumpVersion()
     return true
   })
