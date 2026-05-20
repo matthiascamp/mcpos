@@ -84,7 +84,12 @@ function getStatus () {
     const age = now - new Date(c.lastSeen).getTime()
     return age < 5 * 60 * 1000
   })
-  return { ...state }
+  const localIp = getLocalIp()
+  return {
+    ...state,
+    localIp,
+    serverIp: state.serverIp || (state.mode === 'server' ? localIp : state.serverIp)
+  }
 }
 
 // ─── HTTP Helpers ────────────────────────────────────────────────────────────
@@ -180,6 +185,7 @@ function startServer (port, dbHelpers) {
 
   server.listen(port, '0.0.0.0', () => {
     state.serverIp = getLocalIp()
+    db?.dbRun?.("INSERT OR REPLACE INTO settings (key, value) VALUES ('lan_server_ip', ?1)", [state.serverIp])
     console.log(`LAN server started on port ${port} (IP: ${state.serverIp})`)
     state.connected = true
     state.error = null

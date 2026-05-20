@@ -435,7 +435,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
     </div>
     <span class="staff-info" id="staffBadge">Not logged in</span>
     <a href="#" class="admin-link" id="adminSwitchBtn">Management</a>
-    <button onclick="window.pos.exitFullscreen()" style="background:none;border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 10px;border-radius:4px;font-size:11px;cursor:pointer;min-height:32px" title="Exit fullscreen (F11)">Exit FS</button>
+    <button id="fullscreenToggleBtn" data-fullscreen-control onclick="window.pos.toggleFullscreen()" style="background:none;border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 10px;border-radius:4px;font-size:11px;cursor:pointer;min-height:32px" title="Enter full screen (F11)"><span data-fullscreen-label>Full screen</span></button>
     <div class="sync-info"><span class="sync-dot" id="syncDot"></span><span id="syncLabel">Online</span></div>
   </div>
   <div class="status-right">
@@ -1622,25 +1622,26 @@ function renderPosButton (btn, gridStyle) {
   }
 
   // Department / product / nav — everything else
+  const isOpenPriceButton = effectiveType === 'open_price' || Number(btn.product_open_price || 0) === 1
+  const categoryStyleOpenIds = new Set(['btn-meat', 'btn-flowers', 'btn-coffee', 'btn-cheese'])
+  const isCategoryStyleOpen = isOpenPriceButton && categoryStyleOpenIds.has(btn.id)
   const isItem = effectiveType === 'fixed_price' || effectiveType === 'open_price' || effectiveType === 'product'
   const priceVal = btn.active_price || btn.price || 0
-  const showPriceBadge = isItem && effectiveType !== 'open_price' && priceVal > 0
+  const showPriceBadge = isItem && !isOpenPriceButton && priceVal > 0
   const productUnit = String(btn.product_unit || '').toLowerCase()
   const labelUnit = /\/100g|\b100g\b/i.test(rawLabel)
     ? '100g'
     : (/\/kg|\bkg\b/i.test(rawLabel) ? 'kg' : (/\/each|\beach\b|\bea\b/i.test(rawLabel) ? 'each' : ''))
   const priceUnit = productUnit || labelUnit || 'each'
   const priceSuffix = priceUnit === 'kg' ? '/kg' : priceUnit === '100g' ? '/100g' : '/each'
-  const priceBadge = effectiveType === 'open_price'
-    ? '<span class="btn-price-badge">O/P</span>'
-    : (showPriceBadge ? `<span class="btn-price-badge">${money(priceVal)}${priceSuffix}</span>` : '')
-  const btnPlu = btn.product_plu || (effectiveType === 'open_price' && /^\d{3,6}$/.test(btn.category_filter || '') ? btn.category_filter : '')
+  const priceBadge = showPriceBadge ? `<span class="btn-price-badge">${money(priceVal)}${priceSuffix}</span>` : ''
+  const btnPlu = btn.product_plu || (isOpenPriceButton && /^\d{3,6}$/.test(btn.category_filter || '') ? btn.category_filter : '')
   const pluBadge = btnPlu ? `<span class="btn-plu-badge">${esc(btnPlu)}</span>` : ''
   // Strip embedded price lines from open-price labels; fixed/product buttons show them as badges.
   let displayLabel = label.replace(/\\n/g,'<br>')
-  if (priceBadge || effectiveType === 'open_price') displayLabel = displayLabel.replace(/<br>\$[\d.]+.*$/, '')
+  if (priceBadge || isOpenPriceButton) displayLabel = displayLabel.replace(/<br>\$[\d.]+.*$/, '')
   const labelHtml = `<span>${displayLabel}</span>${priceBadge}${pluBadge}`
-  const itemClass = effectiveType === 'open_price' ? ' open-price-key' : (type === 'section' ? ' cat-key' : '')
+  const itemClass = isOpenPriceButton ? ` open-price-key${isCategoryStyleOpen ? ' cat-key' : ''}` : (type === 'section' ? ' cat-key' : '')
   const catBadge = type === 'section' ? '<span class="btn-cat-badge">CAT</span>' : ''
   const productRef = btn.category_filter || ''
   return `<div class="pos-grid-btn dept-key${imgClass}${itemClass}" data-type="${esc(type)}" data-cat="${esc(productRef)}"
@@ -1746,6 +1747,22 @@ $('#posGrid').addEventListener('click', async e => {
       // Product found — behavior determined by product data
       const isOpenPrice = Number(prod.open_price || 0) === 1
       const isWeightBased = prod.unit === 'kg' || prod.unit === '100g'
+      if (isOpenPrice && isWeightBased) {
+        const cents = parseInt(numBuf || '0')
+        const customPrice = cents > 0 ? cents / 100 : 0
+        const sw = getScaleKg()
+        if (customPrice > 0 && sw > 0) {
+          const qty = returnMode ? -sw : sw
+          const p2 = { ...prod, price: customPrice, active_price: customPrice }
+          cart.addProduct(p2, qty, true); applyDeals()
+          showToast(`${prod.name} ${sw.toFixed(3)} kg × ${money(customPrice)}/kg = ${money(sw * customPrice)}`, 'success')
+          qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); updateQtyBadge()
+          returnToMainKeyboard(); refocus()
+        } else {
+          showWeighedOpenModal(prod.name, customPrice)
+        }
+        return
+      }
       if (isWeightBased) {
         const sw = getScaleKg()
         if (sw > 0) {
@@ -1781,6 +1798,19 @@ $('#posGrid').addEventListener('click', async e => {
       } else if (isOpenPrice && !numBuf) {
         showOpenPriceModal(prod.name, 0, prod)
       } else { addToCart(prod) }
+    } else if (type === 'open_price' && (/\bKG\b/i.test(rawLabel) || /\/kg/i.test(rawLabel))) {
+      const cents = parseInt(numBuf || '0')
+      const customPrice = cents > 0 ? cents / 100 : 0
+      const sw = getScaleKg()
+      if (customPrice > 0 && sw > 0) {
+        const qty = returnMode ? -sw : sw
+        cart.addProduct({ id: 'OPEN_KG_' + Date.now(), name, price: customPrice, active_price: customPrice, unit: 'kg', tax_rate: 0.10, is_special: false }, qty, true)
+        qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); updateQtyBadge(); applyDeals()
+        showToast(`${name} ${sw.toFixed(3)} kg × ${money(customPrice)}/kg = ${money(sw * customPrice)}`, 'success')
+        returnToMainKeyboard(); refocus()
+      } else {
+        showWeighedOpenModal(name, customPrice)
+      }
     } else if (btnPrice > 0) {
       // No linked product but has a price — detect unit from label
       const isKg = /\bKG\b/i.test(rawLabel) || /\/kg/i.test(rawLabel)
@@ -2320,7 +2350,8 @@ $('#weighedOpenConfirm').addEventListener('click', () => {
   applyDeals()
   showToast(`${weighedOpenLabel} ${w.toFixed(3)} kg × $${price.toFixed(2)} = $${(w*price).toFixed(2)} added`, 'success')
   $('#weighedOpenModal').classList.remove('show')
-  qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); refocus()
+  qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); updateQtyBadge()
+  returnToMainKeyboard(); refocus()
 })
 $('#weighedOpenCancel').addEventListener('click', () => { $('#weighedOpenModal').classList.remove('show'); refocus() })
 
@@ -4244,7 +4275,26 @@ $('#itemSearchResults').addEventListener('click', async (e) => {
 })
 
 // ═══ Init ══════════════════════════════════════════════════════════
+function setFullscreenControls(isFullScreen) {
+  const full = !!isFullScreen
+  document.querySelectorAll('[data-fullscreen-label]').forEach(el => {
+    el.textContent = full ? 'Exit full screen' : 'Full screen'
+  })
+  document.querySelectorAll('[data-fullscreen-control]').forEach(el => {
+    el.title = full ? 'Exit full screen (F11)' : 'Enter full screen (F11)'
+  })
+}
+
+async function initFullscreenControls() {
+  try {
+    const state = await window.pos.getFullscreenState()
+    setFullscreenControls(state?.isFullScreen)
+    window.pos.onFullscreenChanged?.(next => setFullscreenControls(next?.isFullScreen))
+  } catch (_) {}
+}
+
 async function init () {
+  initFullscreenControls()
   // Restore login session — stay logged in across restarts
   tryRestoreSession()
 

@@ -30,11 +30,14 @@ CREATE TABLE IF NOT EXISTS products (
   stock_qty   REAL DEFAULT 0,
   active      INTEGER DEFAULT 1,
   image_url   TEXT,
+  open_price  INTEGER DEFAULT 0,
   updated_at  TEXT DEFAULT (datetime('now'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_products_barcode ON products(barcode);
 CREATE INDEX IF NOT EXISTS idx_products_plu ON products(plu);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_products_barcode_unique ON products(barcode) WHERE barcode IS NOT NULL AND TRIM(barcode) != '';
+CREATE UNIQUE INDEX IF NOT EXISTS idx_products_plu_unique ON products(plu) WHERE plu IS NOT NULL AND TRIM(plu) != '';
 CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id);
 CREATE INDEX IF NOT EXISTS idx_products_name ON products(name);
 
@@ -168,7 +171,7 @@ INSERT OR IGNORE INTO settings (key, value) VALUES
   ('store_address', '1164 Cavendish Rd, Mt Gravatt East QLD 4122'),
   ('store_phone', ''),
   ('store_abn', ''),
-  ('receipt_header', 'BoundOS\n1164 Cavendish Rd, Mt Gravatt East\nFresh Fruit & Veg'),
+  ('receipt_header', 'Fresh Fruit & Veg'),
   ('receipt_footer', 'Thank you for shopping local!\nOpen 6am - 7pm every day'),
   ('register_id', 'LANE01'),
   ('desired_till_float', '0'),
@@ -328,19 +331,23 @@ INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_o
 
 -- Rows 2-4: Department buttons (cols 3-6) + single items (col 7) + Numpad (cols 8-12)
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, category_filter) VALUES
-  ('btn-meat',    'MEAT',              'section',     0,    '#fff', '#8f2d38', 20, 'grid', 1, 2, 3, 2, 1, 'Meat'),
-  ('btn-flowers', 'FLOWERS',           'section',     0,    '#fff', '#be185d', 21, 'grid', 1, 2, 5, 2, 1, 'Flowers'),
+  ('btn-meat',    'MEAT',              'open_price',  0,    '#fff', '#8f2d38', 20, 'grid', 1, 2, 3, 2, 1, NULL),
+  ('btn-flowers', 'FLOWERS',           'open_price',  0,    '#fff', '#be185d', 21, 'grid', 1, 2, 5, 2, 1, NULL),
   ('btn-fv',      'FRUIT & VEG\nOPEN PRICE', 'open_price',  0,    '#fff', '#166534', 22, 'grid', 1, 2, 7, 1, 1, NULL),
-  ('btn-coffee',  'COFFEE',            'section',     0,    '#fff', '#6b4f3f', 23, 'grid', 1, 3, 3, 2, 1, 'Coffee'),
+  ('btn-coffee',  'COFFEE',            'open_price',  0,    '#fff', '#6b4f3f', 23, 'grid', 1, 3, 3, 2, 1, NULL),
   ('btn-bread',   'BREAD &\nCROISSAN', 'section',     0,    '#fff', '#92400e', 24, 'grid', 1, 3, 5, 2, 1, 'Bread & Croissants'),
   ('btn-fvkg',    'FRUIT & VEG\n/KG',  'weighed_open',0,    '#fff', '#047857', 25, 'grid', 1, 3, 7, 1, 1, NULL),
   ('btn-deli',    'DELI',              'section',     0,    '#fff', '#9f1239', 26, 'grid', 1, 4, 3, 2, 1, 'Deli'),
-  ('btn-cheese',  'CHEESE',            'section',     0,    '#fff', '#a16207', 27, 'grid', 1, 4, 5, 2, 1, 'Cheese'),
+  ('btn-cheese',  'CHEESE',            'open_price',  0,    '#fff', '#a16207', 27, 'grid', 1, 4, 5, 2, 1, NULL),
   ('btn-bags',    'BAG',               'fixed_price', 0.15, '#fff', '#334155', 28, 'grid', 1, 4, 7, 1, 1, NULL);
+UPDATE keyboard_buttons
+SET type = 'product', product_id = 'p-bag-reusable', category_filter = NULL, parent_id = NULL
+WHERE id = 'btn-bags';
 
 -- Row 5: Navigation + misc (cols 3-12)
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, parent_id, category_filter) VALUES
-  ('btn-grocery',  'GROCERY',   'page_link', 0, '#fff', '#2563eb', 30, 'grid', 1, 5, 3, 2, 1, '6',  NULL),
+  ('btn-grocery',  'GROCERY',   'page_link', 0, '#fff', '#2563eb', 30, 'grid', 1, 5, 3, 1, 1, '6',  NULL),
+  ('btn-grocery-open', 'GROCERY\nOPEN PRICE', 'open_price', 0, '#fff', '#334155', 30, 'grid', 1, 5, 4, 1, 1, NULL, NULL),
   ('btn-nuts',     'NUTS',      'nav',       0, '#fff', '#7c2d12', 31, 'grid', 1, 5, 5, 2, 1, NULL, 'Nuts'),
   ('btn-gas',      'GAS',       'section',   0, '#fff', '#475569', 32, 'grid', 1, 5, 7, 1, 1, NULL, 'Gas');
 
@@ -727,18 +734,21 @@ INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, image, color, bg
 
 -- â•â•â• Page 6: Grocery â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, parent_id, category_filter) VALUES
-  ('pg6-grocery',      'GROCERY',                   'section',    0,     NULL, '#fff', '#6699cc', 1,  'grid', 6, 0, 0, 2, 1, NULL, 'Grocery');
+  ('pg6-grocery',      'GROCERY',                   'section',    0,     NULL, '#fff', '#6699cc', 1,  'grid', 6, 0, 0, 1, 1, NULL, 'Grocery'),
+  ('pg6-grocery-open', 'GROCERY OPEN PRICE',        'open_price', 0,     NULL, '#fff', '#334155', 2,  'grid', 6, 0, 1, 1, 1, NULL, NULL);
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, parent_id) VALUES
-  ('pg6-confectionary','CONFECTIONARY\n$0.00',       'open_price', 0,     NULL, '#fff', '#1a3d2a', 2,  'grid', 6, 0, 2, 1, 1, NULL),
-  ('pg6-chips',        'CHIPS\n$3.99 ea',           'open_price', 3.99,  NULL, '#fff', '#1a3d2a', 3,  'grid', 6, 0, 3, 1, 1, NULL),
-  ('pg6-pies',         'SIMPLY PIES\n$5.99 ea',     'open_price', 5.99,  NULL, '#fff', '#1a3d2a', 4,  'grid', 6, 0, 4, 1, 1, NULL),
-  ('pg6-water',        'WATER 12PK\n$6.99 ea',      'open_price', 6.99,  NULL, '#fff', '#1a3d2a', 5,  'grid', 6, 0, 5, 1, 1, NULL),
-  ('pg6-salmon',       'SALMON PIECES\n$7.99 ea',   'open_price', 7.99,  NULL, '#fff', '#1a3d2a', 6,  'grid', 6, 1, 0, 1, 1, NULL),
-  ('pg6-salmon-fillet','SALMON FILLET\n$12.99 ea',  'open_price', 12.99, NULL, '#fff', '#1a3d2a', 7,  'grid', 6, 1, 1, 1, 1, NULL),
-  ('pg6-fresh-juice',  'FRESH JUICE 500ML\n$4.99 ea','open_price',4.99,  NULL, '#fff', '#1a3d2a', 8,  'grid', 6, 1, 2, 1, 1, NULL),
-  ('pg6-juice-1l',     'JUICE 1L\n$6.99 ea',        'open_price', 6.99,  NULL, '#fff', '#1a3d2a', 9,  'grid', 6, 1, 3, 1, 1, NULL),
-  ('pg6-lemon-juice',  'LEMON JUICE 500ML\n$3.99 ea','open_price',3.99,  NULL, '#fff', '#1a3d2a', 10, 'grid', 6, 1, 4, 1, 1, NULL),
-  ('pg6-spices',       'ASSORTED SPICES\n$5.99 ea', 'open_price', 5.99,  NULL, '#fff', '#1a3d2a', 11, 'grid', 6, 2, 0, 1, 1, NULL),
-  ('pg6-pickles',      'MIXED PICKLES\n$6.99 ea',   'open_price', 6.99,  NULL, '#fff', '#1a3d2a', 12, 'grid', 6, 2, 1, 1, 1, NULL),
-  ('pg6-alt-milk',     'ALTERNATIVE MILK\n$4.99 ea','open_price', 4.99,  NULL, '#fff', '#1a3d2a', 13, 'grid', 6, 2, 2, 1, 1, NULL),
+  ('pg6-confectionary','CONFECTIONARY',             'open_price', 0,     NULL, '#fff', '#1a3d2a', 3,  'grid', 6, 0, 2, 1, 1, NULL),
+  ('pg6-chips',        'CHIPS',                     'open_price', 0,     NULL, '#fff', '#1a3d2a', 4,  'grid', 6, 0, 3, 1, 1, NULL),
+  ('pg6-pies',         'SIMPLY PIES',               'open_price', 0,     NULL, '#fff', '#1a3d2a', 5,  'grid', 6, 0, 4, 1, 1, NULL),
+  ('pg6-water',        'WATER 12PK',                'open_price', 0,     NULL, '#fff', '#1a3d2a', 6,  'grid', 6, 0, 5, 1, 1, NULL),
+  ('pg6-salmon',       'SALMON PIECES',             'open_price', 0,     NULL, '#fff', '#1a3d2a', 7,  'grid', 6, 1, 0, 1, 1, NULL),
+  ('pg6-salmon-fillet','SALMON FILLET',             'open_price', 0,     NULL, '#fff', '#1a3d2a', 8,  'grid', 6, 1, 1, 1, 1, NULL),
+  ('pg6-snapper',      'SNAPPER',                   'open_price', 0,     NULL, '#fff', '#1a3d2a', 9,  'grid', 6, 1, 2, 1, 1, NULL),
+  ('pg6-snapper-fillet','SNAPPER FILLET',           'open_price', 0,     NULL, '#fff', '#1a3d2a', 10, 'grid', 6, 1, 3, 1, 1, NULL),
+  ('pg6-fresh-juice',  'FRESH JUICE 500ML',         'open_price', 0,     NULL, '#fff', '#1a3d2a', 11, 'grid', 6, 1, 4, 1, 1, NULL),
+  ('pg6-juice-1l',     'JUICE 1L',                  'open_price', 0,     NULL, '#fff', '#1a3d2a', 12, 'grid', 6, 1, 5, 1, 1, NULL),
+  ('pg6-lemon-juice',  'LEMON JUICE 500ML',         'open_price', 0,     NULL, '#fff', '#1a3d2a', 13, 'grid', 6, 1, 6, 1, 1, NULL),
+  ('pg6-spices',       'ASSORTED SPICES',           'open_price', 0,     NULL, '#fff', '#1a3d2a', 14, 'grid', 6, 2, 0, 1, 1, NULL),
+  ('pg6-pickles',      'MIXED PICKLES',             'open_price', 0,     NULL, '#fff', '#1a3d2a', 15, 'grid', 6, 2, 1, 1, 1, NULL),
+  ('pg6-alt-milk',     'ALTERNATIVE MILK',          'open_price', 0,     NULL, '#fff', '#1a3d2a', 16, 'grid', 6, 2, 2, 1, 1, NULL),
   ('pg6-back',         'BACK',                      'back_home',  0,     NULL, '#000', '#22c55e', 90, 'grid', 6, 0, 7, 3, 1, NULL);

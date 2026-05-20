@@ -64,13 +64,12 @@
       z-index: 50;
       pointer-events: none;
       opacity: 0;
-      background:
-        radial-gradient(circle at 50% 35%, rgba(255, 249, 223, 0.72), rgba(240, 216, 156, 0.34) 26%, rgba(205, 167, 95, 0.12) 48%, transparent 72%);
-      mix-blend-mode: screen;
+      background: #fff8df;
+      will-change: opacity;
     }
 
     .phase-flash .bound-splash-flash {
-      animation: boundFlashBang 620ms cubic-bezier(.16, 1, .3, 1) forwards;
+      animation: boundFlashBang 180ms ease-out forwards;
     }
 
     .phase-flash .bound-splash-card,
@@ -413,9 +412,9 @@
       100% { opacity: 0.45; transform: scale(1.35); }
     }
     @keyframes boundFlashBang {
-      0% { opacity: 0; transform: scale(0.86); filter: blur(18px); }
-      42% { opacity: .72; transform: scale(1.02); filter: blur(0); }
-      100% { opacity: .34; transform: scale(1.08); filter: blur(8px); }
+      0% { opacity: 0; }
+      35% { opacity: .96; }
+      100% { opacity: .82; }
     }
     @keyframes boundWaveBobTop {
       0%, 100% { transform: translateY(0); }
@@ -545,10 +544,10 @@
       statusEl.textContent = 'Ready'
       progressBar.style.width = '100%'
       setPhase('shine')
-      setTimeout(() => setPhase('flash'), 520)
-      setTimeout(() => ipcRenderer.send('splash:handoff'), 780)
-      setTimeout(() => setPhase('exit'), 820)
-      setTimeout(() => ipcRenderer.send('splash:complete'), 1130)
+      setTimeout(() => setPhase('flash'), 260)
+      setTimeout(() => ipcRenderer.send('splash:handoff'), 340)
+      setTimeout(() => setPhase('exit'), 360)
+      setTimeout(() => ipcRenderer.send('splash:complete'), 460)
     }
 
     ipcRenderer.on('splash:status', (_e, msg, pct) => {

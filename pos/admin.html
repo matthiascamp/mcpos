@@ -54,6 +54,18 @@
       min-height: 100vh;
     }
 
+    .receipt-preview-line[data-rcpt-edit] {
+      cursor: text;
+      border-radius: 4px;
+      margin: 0 -3px;
+      padding: 0 3px;
+      transition: background .15s ease, box-shadow .15s ease;
+    }
+    .receipt-preview-line[data-rcpt-edit]:hover {
+      background: rgba(205, 167, 95, .14);
+      box-shadow: inset 0 0 0 1px rgba(205, 167, 95, .34);
+    }
+
     /* ── Sidebar ──────────────────────────────────────────────── */
     .sidebar {
       width: var(--sidebar-w);
@@ -1963,6 +1975,230 @@
       padding: 12px 14px;
     }
 
+    /* Balanced admin layout: calmer density across both Register and Admin apps. */
+    :root {
+      --sidebar-w: 228px;
+      --admin-gap: 14px;
+      --admin-pad: 18px;
+    }
+
+    .main-content {
+      min-width: 0;
+    }
+
+    .container {
+      max-width: 1500px;
+      padding: 22px 28px 38px;
+    }
+
+    .page-header {
+      min-height: 64px;
+      padding: 14px 142px 14px 28px;
+    }
+
+    .page-header h1,
+    h1 {
+      font-size: 23px;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      font-size: 15px;
+      margin-bottom: 12px;
+    }
+
+    .section {
+      padding: var(--admin-pad);
+      margin-bottom: var(--admin-gap);
+      border-radius: 10px;
+    }
+
+    .stats-grid {
+      grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card {
+      padding: 15px 16px;
+      border-radius: 10px;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      line-height: 1.25;
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-size: clamp(20px, 1.8vw, 26px);
+      line-height: 1.08;
+    }
+
+    .form-grid {
+      gap: 14px 16px;
+    }
+
+    .form-field,
+    .kb-edit-card .kb-field {
+      margin-bottom: 13px;
+    }
+
+    .form-field label,
+    .kb-edit-card .kb-field label {
+      margin-bottom: 6px;
+      line-height: 1.2;
+    }
+
+    .form-field input,
+    .form-field select,
+    .form-field textarea,
+    .kb-edit-card .kb-field input,
+    .kb-edit-card .kb-field select,
+    .kb-product-sidebar input {
+      min-height: 38px;
+      padding: 8px 10px;
+      font-size: 13px;
+      line-height: 1.25;
+    }
+
+    textarea {
+      line-height: 1.35;
+    }
+
+    .btn {
+      min-height: 36px;
+      padding: 8px 13px;
+      font-size: 13px;
+      line-height: 1.2;
+    }
+
+    th,
+    td {
+      padding: 8px 10px;
+      line-height: 1.35;
+    }
+
+    table {
+      font-size: 13px;
+    }
+
+    .sidebar {
+      width: var(--sidebar-w);
+    }
+
+    .sidebar-brand {
+      min-height: 66px;
+      padding: 14px 15px;
+    }
+
+    .sidebar-brand span {
+      font-size: 17px;
+    }
+
+    .sidebar-group {
+      padding: 12px 10px 0;
+    }
+
+    .sidebar-group-label {
+      padding: 0 8px 6px;
+      font-size: 9px;
+    }
+
+    .sidebar a {
+      min-height: 36px;
+      padding: 8px 10px;
+      gap: 9px;
+      font-size: 12.5px;
+      line-height: 1.15;
+    }
+
+    .sidebar a svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    .sidebar-footer {
+      padding: 12px 10px;
+    }
+
+    .admin-exit-fullscreen {
+      top: 13px;
+      right: 16px;
+      min-height: 36px;
+      padding: 8px 12px;
+    }
+
+    .modal-panel .modal-body {
+      padding: 18px 22px;
+    }
+
+    .modal-panel .modal-header,
+    .modal-panel .modal-footer {
+      padding: 14px 18px;
+    }
+
+    .kb-editor {
+      gap: 14px;
+    }
+
+    .kb-editor .kb-sidebar {
+      width: 360px;
+      min-width: 360px;
+    }
+
+    .kb-grid-wrap,
+    .kb-edit-card,
+    .kb-product-sidebar {
+      padding: 14px;
+    }
+
+    .kb-edit-row,
+    .kb-edit-row3 {
+      gap: 10px;
+    }
+
+    .kb-product-sidebar {
+      max-height: 320px;
+    }
+
+    .kb-prod-item {
+      padding: 7px 8px;
+      min-height: 34px;
+    }
+
+    .lan-flow {
+      padding: 16px;
+      gap: 9px;
+    }
+
+    .lan-flow-node {
+      padding: 13px 15px;
+    }
+
+    .tab-content > div[style*="gap:20px"],
+    .tab-content > div[style*="gap:24px"] {
+      gap: 16px !important;
+    }
+
+    .tab-content > div[style*="gap:16px"] {
+      gap: 14px !important;
+    }
+
+    .tab-content .section[style*="padding:16px"],
+    .tab-content .section[style*="padding:14px"] {
+      padding: var(--admin-pad) !important;
+    }
+
+    @media (min-width: 1500px) {
+      .container {
+        max-width: none;
+        padding-left: 32px;
+        padding-right: 32px;
+      }
+    }
+
     @media (max-width: 1100px) {
       .lan-map {
         grid-template-columns: 1fr;
@@ -2219,16 +2455,16 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
         Back to Register
       </a>
-      <a href="#" onclick="window.pos.exitFullscreen()" style="color:var(--text-muted);font-size:11px">
+      <a href="#" data-fullscreen-control onclick="window.pos.toggleFullscreen()" style="color:var(--text-muted);font-size:11px" title="Enter full screen (F11)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
-        Exit Fullscreen
+        <span data-fullscreen-label>Full screen</span>
       </a>
       <span id="adminSyncStatus" style="color:var(--text-muted);font-size:9px;opacity:0.65;margin-top:4px">Waiting for updates</span>
       <span id="adminVersion" style="color:var(--text-muted);font-size:9px;opacity:0.4;margin-top:4px"></span>
     </div>
   </aside>
 
-  <button class="admin-exit-fullscreen" type="button" onclick="window.pos.exitFullscreen()" title="Exit fullscreen (F11)">
+  <button class="admin-exit-fullscreen" data-exit-fullscreen-only type="button" onclick="window.pos.exitFullscreen()" title="Exit full screen (F11)" style="display:none">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
     Exit full screen
   </button>
@@ -2417,7 +2653,7 @@
         </div>
         <div id="productFilterInfo" style="font-size:12px;color:var(--text-dim);margin:8px 0 4px"></div>
         <table>
-          <thead><tr><th>Name</th><th>Barcode</th><th>Category</th><th>Price</th><th>Unit</th><th>Stock</th><th style="width:80px"></th></tr></thead>
+          <thead><tr><th>Name</th><th>PLU / Barcode</th><th>Category</th><th>Price</th><th>Unit</th><th>Stock</th><th style="width:80px"></th></tr></thead>
           <tbody id="productsTable"></tbody>
         </table>
       </div>
@@ -2430,8 +2666,8 @@
         <div class="modal-body">
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
           <div class="form-field"><label>Name</label><input type="text" id="pName"></div>
-          <div class="form-field"><label>Barcode</label><input type="text" id="pBarcode"></div>
-          <div class="form-field"><label>PLU</label><input type="text" id="pPlu"></div>
+          <div class="form-field"><label>PLU <span style="color:var(--red)">*</span></label><input type="text" id="pPlu" required></div>
+          <div class="form-field"><label>Barcode (same as PLU)</label><input type="text" id="pBarcode" readonly style="opacity:.72"></div>
           <div class="form-field">
             <label>Category</label>
             <select id="pCategory"><option value="">— None —</option></select>
@@ -2662,7 +2898,7 @@
           <button class="btn btn-green" id="addDealBtn">+ New Deal</button>
         </div>
         <table>
-          <thead><tr><th>Name</th><th>Pricing</th><th>Products</th><th>Dates</th><th>Status</th><th style="width:80px"></th></tr></thead>
+          <thead><tr><th>Name</th><th>Pricing</th><th>Products / Codes</th><th>Dates</th><th>Status</th><th style="width:80px"></th></tr></thead>
           <tbody id="dealsTable"></tbody>
         </table>
       </div>
@@ -3284,6 +3520,20 @@
         </div>
       </div>
 
+      <div class="section" id="supabaseSection" style="margin-top:20px">
+        <h2>Cloud Sync (Supabase)</h2>
+        <p style="color:var(--text-dim);margin-bottom:12px;font-size:13px;" id="supabaseDesc">
+          Connect to Supabase for cloud backup. Register clients sync from the main server over LAN.
+        </p>
+        <div class="form-field" style="margin-bottom:10px"><label>Supabase URL</label><input type="text" id="setSupaUrl" placeholder="https://your-project.supabase.co"></div>
+        <div class="form-field" style="margin-bottom:10px"><label>Anon Key</label><input type="text" id="setSupaKey" placeholder="eyJ..." style="font-family:monospace;font-size:12px;"></div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap">
+          <button class="btn btn-blue" id="saveSupaBtn">Save &amp; Connect</button>
+          <button class="btn btn-outline" id="pullNowBtn" style="display:none">Pull Now</button>
+          <span id="supaStatus" style="font-size:13px;color:var(--text-dim)"></span>
+        </div>
+      </div>
+
       <!-- Network Diagnostic Probe -->
       <div class="section" style="margin-top:20px">
         <h2>Network Diagnostic</h2>
@@ -3662,7 +3912,7 @@
           <div class="section">
             <h2>Database &amp; Backups</h2>
             <p style="color:var(--text-dim);margin-bottom:12px;font-size:13px;">
-              Automatic backups are created on every startup. You can also create manual snapshots and restore from any previous backup.
+              Automatic backups are created at most once per day. You can also create manual snapshots and restore from any previous backup.
             </p>
             <div style="display:flex;gap:8px;margin-bottom:14px">
               <button class="btn btn-blue" id="createBackupBtn">Create Backup Now</button>
@@ -3671,17 +3921,17 @@
             <div id="backupList" style="font-size:13px;color:var(--text-dim)">Loading...</div>
           </div>
 
-          <div class="section" id="supabaseSection">
+          <div class="section" data-retired-supabase-section style="display:none">
             <h2>Cloud Sync (Supabase)</h2>
-            <p style="color:var(--text-dim);margin-bottom:12px;font-size:13px;" id="supabaseDesc">
+            <p style="color:var(--text-dim);margin-bottom:12px;font-size:13px;">
               Connect to Supabase for cloud backup and multi-register sync. Only the main server pulls from Supabase — client registers sync via LAN.
             </p>
-            <div class="form-field" style="margin-bottom:10px"><label>Supabase URL</label><input type="text" id="setSupaUrl" placeholder="https://your-project.supabase.co"></div>
-            <div class="form-field" style="margin-bottom:10px"><label>Anon Key</label><input type="text" id="setSupaKey" placeholder="eyJ..." style="font-family:monospace;font-size:12px;"></div>
+            <div class="form-field" style="margin-bottom:10px"><label>Supabase URL</label><input type="text" placeholder="https://your-project.supabase.co"></div>
+            <div class="form-field" style="margin-bottom:10px"><label>Anon Key</label><input type="text" placeholder="eyJ..." style="font-family:monospace;font-size:12px;"></div>
             <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
-              <button class="btn btn-blue" id="saveSupaBtn">Save &amp; Connect</button>
-              <button class="btn btn-outline" id="pullNowBtn" style="display:none">Pull Now</button>
-              <span id="supaStatus" style="font-size:13px;color:var(--text-dim)"></span>
+              <button class="btn btn-blue">Save &amp; Connect</button>
+              <button class="btn btn-outline" style="display:none">Pull Now</button>
+              <span style="font-size:13px;color:var(--text-dim)"></span>
             </div>
           </div>
 
@@ -3689,21 +3939,21 @@
             <h2>Application</h2>
             <div class="form-row">
               <div class="form-field">
-                <label>Start in Fullscreen</label>
+                <label>Startup window</label>
                 <select id="setFullscreen" style="padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);width:100%">
-                  <option value="1">Yes — Kiosk mode</option>
-                  <option value="0">No — Windowed</option>
+                  <option value="0">Maximised window</option>
+                  <option value="1">True full screen</option>
                 </select>
               </div>
             </div>
-            <p style="color:var(--text-dim);font-size:12px;margin-top:8px;">Press F11 or use the Exit FS button to toggle fullscreen at any time.</p>
+            <p style="color:var(--text-dim);font-size:12px;margin-top:8px;">The app opens as a maximised window by default. Press F11 or use the sidebar control to enter or exit true full screen.</p>
             <button class="btn btn-green" id="saveAppBtn" style="margin-top:8px;">Save App Settings</button>
           </div>
 
           <div class="section">
             <h2>Software Update</h2>
             <p style="color:var(--text-dim);margin-bottom:10px;font-size:13px;">
-              Pull the latest version from GitHub. The app will restart automatically after updating.
+              Download the latest version from GitHub. BoundOS closes first, applies the update, then relaunches so hardware handlers do not block file replacement.
             </p>
             <div style="display:flex;gap:8px;align-items:center">
               <button class="btn btn-blue" id="updateAppBtn" style="padding:10px 20px;font-size:14px">Check for Updates</button>
@@ -4008,11 +4258,12 @@
 
       $('#productsTable').innerHTML = products.map(p => {
         const stockLow = p.track_stock && p.stock_qty <= 5
+        const priceText = p.open_price ? 'O/P' : money(p.active_price ?? p.price)
         return `<tr data-id="${esc(p.id)}" style="cursor:pointer">
           <td>${esc(p.name)}</td>
-          <td>${esc(p.barcode || '-')}</td>
+          <td style="font-family:monospace">${esc(p.plu || p.barcode || '-')}</td>
           <td>${esc(catMap[p.category_id] || '-')}</td>
-          <td>${money(p.active_price ?? p.price)}</td>
+          <td>${priceText}</td>
           <td>${esc(p.unit)}</td>
           <td>${p.track_stock ? `<span style="${stockLow ? 'color:var(--red);font-weight:700' : ''}">${p.stock_qty}</span>` : '-'}</td>
           <td><button class="btn btn-outline" style="padding:3px 10px;font-size:11px" data-edit="${esc(p.id)}">Edit</button></td>
@@ -4175,8 +4426,8 @@
         $('#productEditTitle').textContent = 'Edit Product'
         $('#pEditId').value = p.id
         $('#pName').value = p.name
-        $('#pBarcode').value = p.barcode || ''
-        $('#pPlu').value = p.plu || ''
+        $('#pPlu').value = p.plu || p.barcode || ''
+        $('#pBarcode').value = p.plu || p.barcode || ''
         $('#pCategory').value = p.category_id || ''
         $('#pPrice').value = p.price
         $('#pCost').value = p.cost_price || 0
@@ -4213,13 +4464,15 @@
     $('#pSaveBtn').addEventListener('click', async () => {
       const name = $('#pName').value.trim()
       if (!name) { showToast('Product name is required', 'error'); return }
+      const plu = $('#pPlu').value.trim()
+      if (!plu) { showToast('PLU is required for every product', 'error'); $('#pPlu').focus(); return }
       const product = {
         id: $('#pEditId').value || undefined,
         name,
-        barcode: $('#pBarcode').value.trim() || null,
-        plu: $('#pPlu').value.trim() || null,
+        barcode: plu,
+        plu,
         category_id: $('#pCategory').value || null,
-        price: parseFloat($('#pPrice').value) || 0,
+        price: $('#pOpenPrice').value === '1' ? 0 : (parseFloat($('#pPrice').value) || 0),
         cost_price: parseFloat($('#pCost').value) || 0,
         unit: $('#pUnit').value,
         tax_rate: parseFloat($('#pTax').value) || 0.10,
@@ -4229,6 +4482,7 @@
         image_url: $('#pImageUrl').value.trim() || null,
       }
       const result = await window.pos.upsertProduct(product)
+      if (result.error) { showToast(result.error, 'error'); return }
       if (result.barcode_warning) showToast(result.barcode_warning, 'error')
       showToast(`Product "${name}" saved`, 'success')
       closeModal('productEditPanel')
@@ -4260,6 +4514,10 @@
     })
 
     // ── Categories ─────────────────────────────────────────────────
+
+    $('#pPlu').addEventListener('input', () => {
+      $('#pBarcode').value = $('#pPlu').value.trim()
+    })
 
     let catExpanded = false
 
@@ -4425,6 +4683,17 @@
     let dealProducts = []
     let dealTiers = []
 
+    function productCodeText (p) {
+      const plu = p?.plu ? `PLU ${p.plu}` : ''
+      const barcode = p?.barcode ? `Barcode ${p.barcode}` : ''
+      return [plu, barcode].filter(Boolean).join(' · ')
+    }
+
+    function productCodeHtml (p) {
+      const code = productCodeText(p)
+      return code ? `<span style="font-family:monospace;font-size:10px;color:var(--text-dim)">${esc(code)}</span>` : '<span style="font-size:10px;color:var(--text-muted)">No PLU/barcode</span>'
+    }
+
     function renderDealTiers () {
       $('#dealTiersArea').innerHTML = dealTiers.map((t, i) =>
         `<div style="display:flex;gap:8px;align-items:end;margin-bottom:6px">
@@ -4458,6 +4727,10 @@
 
     async function loadDeals () {
       const deals = await window.pos.getDeals()
+      const productMap = new Map()
+      await Promise.all(deals.map(async d => {
+        try { productMap.set(d.id, await window.pos.getDealProducts(d.id)) } catch (_) { productMap.set(d.id, []) }
+      }))
       $('#dealsTable').innerHTML = deals.length ? deals.map(d => {
         const cfg = JSON.parse(d.config || '{}')
         const tiers = cfg.tiers || [{ qty: cfg.qty || 2, price: cfg.price || 0 }]
@@ -4465,10 +4738,18 @@
         const dates = d.start_date || d.end_date
           ? `${d.start_date || '...'} to ${d.end_date || '...'}`
           : '<span style="color:var(--text-dim)">Always</span>'
+        const products = productMap.get(d.id) || []
+        const productSummary = products.length
+          ? products.slice(0, 3).map(p => `
+              <div style="line-height:1.25;margin-bottom:3px">
+                <div>${esc(p.product_name || p.name || 'Product')}</div>
+                ${productCodeHtml(p)}
+              </div>`).join('') + (products.length > 3 ? `<div style="font-size:10px;color:var(--text-dim)">+${products.length - 3} more</div>` : '')
+          : '<span style="color:var(--text-dim);font-size:12px">No products</span>'
         return `<tr style="cursor:pointer" data-edit-deal="${esc(d.id)}">
           <td><strong>${esc(d.name)}</strong></td>
           <td>${detail}</td>
-          <td><span class="badge badge-green" style="cursor:pointer" data-deal-products="${esc(d.id)}">View</span></td>
+          <td>${productSummary}</td>
           <td style="font-size:11px">${dates}</td>
           <td><span class="badge ${d.active ? 'badge-green' : 'badge-red'}">${d.active ? 'Active' : 'Off'}</span></td>
           <td><button class="btn btn-outline" style="padding:3px 10px;font-size:11px">Edit</button></td>
@@ -4477,7 +4758,6 @@
     }
 
     $('#dealsTable').addEventListener('click', async e => {
-      if (e.target.closest('[data-deal-products]')) return
       const row = e.target.closest('[data-edit-deal]')
       if (!row) return
       const deals = await window.pos.getDeals()
@@ -4503,7 +4783,7 @@
         $('#dStartDate').value = deal.start_date || ''
         $('#dEndDate').value = deal.end_date || ''
         const prods = await window.pos.getDealProducts(deal.id)
-        dealProducts = prods.map(p => ({ id: p.product_id, name: p.product_name, price: p.price }))
+        dealProducts = prods.map(p => ({ id: p.product_id, name: p.product_name, price: p.price, plu: p.plu || '', barcode: p.barcode || '' }))
         $('#dDeleteBtn').style.display = 'inline-block'
       } else {
         $('#dealEditTitle').textContent = 'New Deal'
@@ -4521,7 +4801,13 @@
 
     function renderDealProducts () {
       $('#dealProductList').innerHTML = dealProducts.length
-        ? dealProducts.map(p => `<span class="badge badge-green" style="padding:4px 10px;font-size:12px">${esc(p.name)} <span style="cursor:pointer;margin-left:4px;opacity:.7" data-remove-dp="${esc(p.id)}">&times;</span></span>`).join('')
+        ? dealProducts.map(p => `<span class="badge badge-green" style="padding:6px 10px;font-size:12px;display:inline-flex;align-items:center;gap:8px">
+            <span>
+              <span>${esc(p.name)}</span>
+              <span style="display:block;margin-top:2px">${productCodeHtml(p)}</span>
+            </span>
+            <span style="cursor:pointer;opacity:.7;font-size:14px" data-remove-dp="${esc(p.id)}">&times;</span>
+          </span>`).join('')
         : '<span style="color:var(--text-dim);font-size:12px">No products added yet</span>'
     }
 
@@ -4537,10 +4823,9 @@
       if (q.length < 2) { $('#dealProductResults').innerHTML = ''; return }
       const results = await window.pos.searchProducts(q)
       $('#dealProductResults').innerHTML = results.slice(0, 10).map(p => {
-        const code = p.plu || p.barcode || ''
-        return `<div style="padding:6px 8px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;display:flex;align-items:center;gap:8px" data-add-dp="${esc(p.id)}" data-dp-name="${esc(p.name)}" data-dp-price="${p.price}">
+        return `<div style="padding:6px 8px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;display:flex;align-items:center;gap:8px" data-add-dp="${esc(p.id)}" data-dp-name="${esc(p.name)}" data-dp-price="${p.price}" data-dp-plu="${esc(p.plu || '')}" data-dp-barcode="${esc(p.barcode || '')}">
           <span style="flex:1">${esc(p.name)}</span>
-          ${code ? `<span style="font-size:10px;color:var(--text-dim);font-family:monospace">${esc(code)}</span>` : ''}
+          ${productCodeHtml(p)}
           <span style="color:var(--green);font-weight:600;font-size:12px">${money(p.active_price ?? p.price)}</span>
         </div>`
       }).join('')
@@ -4551,7 +4836,7 @@
       if (!row) return
       const id = row.dataset.addDp
       if (dealProducts.find(p => p.id === id)) return
-      dealProducts.push({ id, name: row.dataset.dpName, price: parseFloat(row.dataset.dpPrice) })
+      dealProducts.push({ id, name: row.dataset.dpName, price: parseFloat(row.dataset.dpPrice), plu: row.dataset.dpPlu || '', barcode: row.dataset.dpBarcode || '' })
       renderDealProducts()
       $('#dealProductSearch').value = ''
       $('#dealProductResults').innerHTML = ''
@@ -4965,6 +5250,34 @@
       const lr = (l, r) => l + ' '.repeat(Math.max(1, W - l.length - r.length)) + r
       const center = s => { const pad = Math.max(0, Math.floor((W - s.length) / 2)); return ' '.repeat(pad) + s }
       const lines = []
+      const normalise = s => String(s || '')
+        .replace(/^ph#\s*/i, '')
+        .replace(/^abn#\s*/i, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase()
+      const headerLines = (header, fields) => {
+        const duplicates = new Set([
+          normalise(fields.storeName),
+          normalise(fields.phone),
+          normalise(fields.address),
+          normalise(fields.abn),
+          normalise('Tillaroo'),
+          normalise('BoundOS'),
+          normalise('WELCOME TO'),
+          normalise('TAX INVOICE'),
+        ].filter(Boolean))
+        const addressNorm = normalise(fields.address)
+        return String(header || '')
+          .split(/\r?\n/)
+          .map(l => l.trim())
+          .filter(l => {
+            const n = normalise(l)
+            if (!l || duplicates.has(n)) return false
+            if (addressNorm && (addressNorm.includes(n) || n.includes(addressNorm))) return false
+            return true
+          })
+      }
 
       const storeName = $('#rcptStoreName').value || 'BoundOS'
       const phone = $('#rcptPhone').value
@@ -4975,25 +5288,25 @@
       const taxName = $('#rcptTaxName').value || 'GST'
       const taxPct = parseFloat($('#rcptTaxRate').value) || 10
 
-      lines.push(center('WELCOME TO'))
-      lines.push(center(storeName.toUpperCase()))
-      lines.push('')
-      if (header) header.split('\n').forEach(l => { if (l.trim()) lines.push(center(l.trim())) })
-      if (phone) lines.push(center('PH# ' + phone))
-      if (address) lines.push(center(address))
-      if (abn) lines.push(center('ABN# ' + abn))
-      lines.push(center('Thank you for shopping with us'))
-      lines.push(center('Please retain receipt for refunds'))
-      lines.push(center('TAX INVOICE'))
-      lines.push('')
+      lines.push({ text: center('WELCOME TO') })
+      lines.push({ text: center(storeName), edit: 'rcptStoreName', title: 'Store name' })
+      lines.push({ text: '' })
+      for (const l of headerLines(header, { storeName, phone, address, abn })) lines.push({ text: center(l), edit: 'rcptHeader', title: 'Receipt header' })
+      if (phone) lines.push({ text: center('PH# ' + phone), edit: 'rcptPhone', title: 'Phone' })
+      if (address) lines.push({ text: center(address), edit: 'rcptAddress', title: 'Address' })
+      if (abn) lines.push({ text: center('ABN# ' + abn), edit: 'rcptAbn', title: 'ABN' })
+      lines.push({ text: center('Thank you for shopping with us') })
+      lines.push({ text: center('Please retain receipt for refunds') })
+      lines.push({ text: center('TAX INVOICE') })
+      lines.push({ text: '' })
 
-      lines.push('(*) denotes items which attract ' + taxName)
-      lines.push('(D) denotes Discounted items')
+      lines.push({ text: '(*) denotes items which attract ' + taxName, edit: 'rcptTaxName', title: 'Tax name' })
+      lines.push({ text: '(D) denotes Discounted items' })
 
       const now = new Date()
       const dateStr = now.toLocaleDateString('en-AU') + ' ' + now.toLocaleTimeString('en-AU', {hour:'2-digit',minute:'2-digit'})
-      lines.push(lr(dateStr, 'Jane'))
-      lines.push('')
+      lines.push({ text: lr(dateStr, 'Jane') })
+      lines.push({ text: '' })
 
       const sampleItems = [
         { name: 'Coffee Large', price: 5.50, qty: 2, gst: true, disc: false },
@@ -5004,43 +5317,56 @@
       for (const it of sampleItems) {
         const prefix = it.disc ? 'D ' : it.gst ? '* ' : '  '
         const lineTotal = it.lineTotal ?? (it.qty * it.price)
-        lines.push(lr((prefix + it.name).substring(0, 32), '$' + lineTotal.toFixed(2)))
-        if (it.qty !== 1) lines.push('    ' + it.qty + ' x $' + it.price.toFixed(2))
-        if (it.disc) lines.push('    Discount: -$' + it.discAmt.toFixed(2))
+        lines.push({ text: lr((prefix + it.name).substring(0, 32), '$' + lineTotal.toFixed(2)) })
+        if (it.qty !== 1) lines.push({ text: '    ' + it.qty + ' x $' + it.price.toFixed(2) })
+        if (it.disc) lines.push({ text: '    Discount: -$' + it.discAmt.toFixed(2) })
       }
-      lines.push('')
+      lines.push({ text: '' })
 
       const subtotal = 14.96
       const discount = 1.00
       const total = 13.96
       const taxAmt = (5.50 * 2) * (taxPct / 100) / (1 + taxPct / 100)
 
-      lines.push(lr('Subtotal', '$' + subtotal.toFixed(2)))
-      lines.push(lr('Discount', '-$' + discount.toFixed(2)))
-      lines.push(lr('Total (4 Items)', '$' + total.toFixed(2)))
-      lines.push('')
-      lines.push(lr('Cash', '$20.00'))
-      lines.push(lr('Change', '$' + (20 - total).toFixed(2)))
-      lines.push('')
-      lines.push('-'.repeat(W))
+      lines.push({ text: lr('Subtotal', '$' + subtotal.toFixed(2)) })
+      lines.push({ text: lr('Discount', '-$' + discount.toFixed(2)) })
+      lines.push({ text: lr('Total (4 Items)', '$' + total.toFixed(2)) })
+      lines.push({ text: '' })
+      lines.push({ text: lr('Payment Cash', '$20.00') })
+      lines.push({ text: lr('Change', '$' + (20 - total).toFixed(2)) })
+      lines.push({ text: '' })
+      lines.push({ text: '-'.repeat(W) })
 
-      lines.push(lr('Served by Cashier Jane', 'Lane #LANE01'))
-      lines.push(lr('Receipt Number', '00000042'))
-      lines.push('')
-      lines.push(center('Total includes ' + taxName + ' of $' + taxAmt.toFixed(2)))
-      lines.push('')
-      if (footer) footer.split('\n').forEach(l => { if (l.trim()) lines.push(center(l.trim())) })
-      lines.push('')
-      lines.push(center('|||||||||||||||||||||||||||'))
-      lines.push(center('00000042'))
+      lines.push({ text: lr('Served by Cashier Jane', 'Lane #LANE01') })
+      lines.push({ text: lr('Receipt Number', '00000042') })
+      lines.push({ text: '' })
+      lines.push({ text: center('Total includes ' + taxName + ' of $' + taxAmt.toFixed(2)), edit: 'rcptTaxRate', title: 'Tax rate' })
+      lines.push({ text: '' })
+      if (footer) footer.split(/\r?\n/).forEach(l => { if (l.trim()) lines.push({ text: center(l.trim()), edit: 'rcptFooter', title: 'Receipt footer' }) })
+      lines.push({ text: '' })
+      lines.push({ text: center('|||||||||||||||||||||||||||') })
+      lines.push({ text: center('00000042') })
 
-      $('#rcptPreview').textContent = lines.join('\n')
+      $('#rcptPreview').innerHTML = lines.map(line => {
+        const attrs = line.edit ? ` data-rcpt-edit="${line.edit}" title="Click to edit ${esc(line.title || 'field')}"` : ''
+        return `<div class="receipt-preview-line"${attrs}>${esc(line.text || '') || '&nbsp;'}</div>`
+      }).join('')
     }
 
     // Live update on any input change
     ;['rcptStoreName','rcptPhone','rcptAddress','rcptAbn','rcptHeader','rcptFooter','rcptTaxName','rcptTaxRate'].forEach(id => {
       const el = document.getElementById(id)
       if (el) el.addEventListener('input', renderReceiptPreview)
+    })
+
+    $('#rcptPreview')?.addEventListener('click', e => {
+      const target = e.target.closest('[data-rcpt-edit]')
+      if (!target) return
+      const field = document.getElementById(target.dataset.rcptEdit)
+      if (!field) return
+      field.focus()
+      if (typeof field.select === 'function') field.select()
+      field.scrollIntoView({ block: 'center', behavior: 'smooth' })
     })
 
     $('#rcptSaveBtn').addEventListener('click', async () => {
@@ -5150,7 +5476,9 @@
       $('#setTaxRate').value = s.tax_rate ? (parseFloat(s.tax_rate) * 100).toFixed(1) : '10'
       $('#setSupaUrl').value = s.supabase_url || ''
       $('#setSupaKey').value = s.supabase_anon_key || ''
-      $('#setFullscreen').value = s.start_fullscreen || '1'
+      $('#setFullscreen').value = s.start_fullscreen || '0'
+      $('#setFullscreen').querySelector('option[value="0"]').textContent = 'Maximised window'
+      $('#setFullscreen').querySelector('option[value="1"]').textContent = 'True full screen'
       $('#setCompanyLogoFit').value = normaliseLogoFit(s.company_logo_fit)
       $('#setCompanyLogoScale').value = Math.round(normaliseLogoScale(s.company_logo_scale) * 100)
       pendingLogoDataUrl = null
@@ -5233,15 +5561,15 @@
       const log = $('#updateLog')
       btn.disabled = true
       btn.textContent = 'Updating...'
-      status.textContent = 'Pulling from GitHub...'
+      status.textContent = 'Downloading update from GitHub...'
       log.style.display = 'block'
       log.textContent = ''
       try {
         const result = await window.pos.updateApp()
         log.textContent = result.log || ''
         if (result.updated) {
-          status.innerHTML = '<span style="color:var(--green)">Updated! Restarting...</span>'
-          showToast('Update installed — restarting app', 'success')
+          status.innerHTML = '<span style="color:var(--green)">Update staged. Closing to apply...</span>'
+          showToast('Update downloaded - BoundOS will restart', 'success')
         } else if (result.upToDate) {
           status.innerHTML = '<span style="color:var(--green)">Already up to date</span>'
           showToast('Already on the latest version', 'info')
@@ -5527,6 +5855,25 @@
     async function loadLanSettings () {
       const s = await window.pos.getAllSettings()
       const mode = s.lan_mode || 'off'
+      if ($('#setSupaUrl')) $('#setSupaUrl').value = s.supabase_url || ''
+      if ($('#setSupaKey')) $('#setSupaKey').value = s.supabase_anon_key || ''
+      if ($('#supabaseDesc')) {
+        $('#supabaseDesc').textContent = mode === 'client'
+          ? 'This app is in client mode. Product data is synced from the main server over LAN, so Supabase is managed on the server.'
+          : 'Connect to Supabase for cloud backup. Register clients sync from the main server over LAN.'
+      }
+      if ($('#setSupaUrl')) $('#setSupaUrl').disabled = mode === 'client'
+      if ($('#setSupaKey')) $('#setSupaKey').disabled = mode === 'client'
+      if ($('#saveSupaBtn')) {
+        $('#saveSupaBtn').disabled = mode === 'client'
+        $('#saveSupaBtn').textContent = mode === 'client' ? 'Managed by Server' : 'Save & Connect'
+      }
+      if ($('#pullNowBtn')) {
+        $('#pullNowBtn').style.display = (s.supabase_url && s.supabase_anon_key && mode !== 'client') ? 'inline-block' : 'none'
+      }
+      if ($('#supaStatus')) {
+        $('#supaStatus').textContent = s.supabase_url && s.supabase_anon_key ? (mode === 'client' ? 'Managed on server' : 'Configured') : 'Not configured'
+      }
       const serverBtn = $('#lanBecomeServer')
       if (serverBtn) {
         serverBtn.disabled = !appModeInfo.isRegisterApp
@@ -5539,7 +5886,7 @@
       const status = await window.pos.getLanStatus()
 
       if (mode === 'server') {
-        $('#lanLocalIp').value = status.serverIp || s.lan_server_ip || ''
+        $('#lanLocalIp').value = status.serverIp || status.localIp || s.lan_server_ip || ''
         $('#lanPort').value = s.lan_port || '5555'
         const clients = status.clients?.length || 0
         $('#lanServerStatus').innerHTML = status.connected
@@ -5619,7 +5966,7 @@
           : 'This PC is configured as the main server. Start the server to allow clients to connect.'
         banner.style.borderColor = 'rgba(79,189,119,0.3)'
         diagramSection.style.display = ''
-        renderLanDiagram('server', status)
+        renderLanDiagram('server', { ...status, serverIp: status?.serverIp || status?.localIp })
       } else if (mode === 'client') {
         icon.textContent = '💻'
         icon.style.borderColor = 'var(--blue)'
@@ -5649,7 +5996,7 @@
     function renderLanDiagram (role, status) {
       const diagram = $('#lanDiagram')
       const clients = status?.clients || []
-      const serverIp = status?.serverIp || '192.168.x.x'
+      const serverIp = status?.serverIp || status?.localIp || '192.168.x.x'
       const clientIp = status?.clientIp || ''
       const isOnline = navigator.onLine
       const supaConnected = !!status?.supabaseConnected || isOnline
@@ -5821,7 +6168,7 @@
       await window.pos.setSetting('lan_port', '5555')
       const status = await window.pos.restartLan()
       if (status.connected) {
-        $('#lanLocalIp').value = status.serverIp || ''
+        $('#lanLocalIp').value = status.serverIp || status.localIp || ''
         $('#lanPort').value = status.port || '5555'
         showToast('Server started! Registers will auto-connect.', 'success')
       } else if (status.error) {
@@ -6835,9 +7182,13 @@
       return `${money(price)}${kbPriceSuffix(btn)}`
     }
 
+    function kbIsOpenPrice (btn) {
+      return btn && (btn.type === 'open_price' || Number(btn.product_open_price || 0) === 1)
+    }
+
     function kbDisplayLabel (btn) {
       let label = labelFromDb(btn.label)
-      if (btn && btn.type === 'open_price') label = label.replace(/\n\$[\d.]+.*$/i, '')
+      if (kbIsOpenPrice(btn)) label = label.replace(/\n\$[\d.]+.*$/i, '')
       return label
     }
 
@@ -6864,8 +7215,9 @@
         const r = b.grid_row || 0, c = b.grid_col || 0, cs = b.col_span || 1, rs = b.row_span || 1
         const img = b.image ? `<img src="${esc(b.image)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:${b.alpha_range === 'image:cover' ? 'cover' : 'contain'};opacity:.72">` : ''
         const isCategory = b.type === 'page_link' || b.type === 'section'
-        const price = (!isCategory && b.type !== 'open_price' && Number(b.active_price || b.price || 0) > 0) ? `<span style="position:absolute;top:3px;right:3px;background:#fff;color:#111;border-radius:3px;padding:1px 4px;font-size:9px;font-weight:800;white-space:nowrap;line-height:1.1">${kbCornerPrice(b)}</span>` : ''
-        const op = b.type === 'open_price' ? '<span style="position:absolute;top:3px;right:3px;background:#fff;color:#111;border-radius:3px;padding:1px 5px;font-size:10px;font-weight:800">O/P</span>' : ''
+        const isOpen = kbIsOpenPrice(b)
+        const price = (!isCategory && !isOpen && Number(b.active_price || b.price || 0) > 0) ? `<span style="position:absolute;top:3px;right:3px;background:#fff;color:#111;border-radius:3px;padding:1px 4px;font-size:9px;font-weight:800;white-space:nowrap;line-height:1.1">${kbCornerPrice(b)}</span>` : ''
+        const op = isOpen ? '<span style="position:absolute;top:3px;right:3px;background:#fff;color:#111;border-radius:3px;padding:1px 5px;font-size:10px;font-weight:800">O/P</span>' : ''
         return `<div style="grid-column:${c+1}/span ${cs};grid-row:${r+1}/span ${rs};position:relative;overflow:hidden;border-radius:6px;background:${esc(b.bg_color || '#1f2937')};color:${esc(b.color || '#fff')};display:flex;align-items:end;justify-content:center;text-align:center;padding:6px;font-weight:800;font-size:12px;line-height:1.05;border:1px solid rgba(255,255,255,.12)">${img}<span style="position:relative;text-shadow:0 1px 5px #000">${esc(kbDisplayLabel(b)).replace(/\n/g, '<br>')}</span>${price}${op}</div>`
       }).join('')
       panel.querySelector('#kbPreviewClose').addEventListener('click', () => overlay.remove())
@@ -6908,10 +7260,11 @@
             const sel = btn.id === selectedBtnId ? ' selected' : ''
             let extra = ''
             const noPriceTypes = new Set(['section','nav','page_link','back_home','void','return','hold','nosale','supervisor','lock','reprint','pricecheck','errcorrect','recall','pctdiscount','pctone','movedrawer','ubereats','viewor','digit','clear','qtyx','codeenter','subtotal','pay_cash','pay_card','park','num_display','cart_display'])
+            const isOpen = kbIsOpenPrice(btn)
             if (btn.type === 'page_link' && btn.parent_id) {
               const tgtName = getPageInfo(parseInt(btn.parent_id)).name || `Page ${btn.parent_id}`
               extra = `<div class="kb-cell-price" style="font-size:8px;opacity:.7">&rarr; ${esc(tgtName)}</div>`
-            } else if (btn.type === 'open_price') {
+            } else if (isOpen) {
               extra = '<div class="kb-cell-price" style="position:absolute;top:3px;right:3px;background:rgba(255,255,255,.92);color:#111;border-radius:3px;padding:1px 4px;font-size:9px;font-weight:800;white-space:nowrap;line-height:1.1">O/P</div>'
             } else if (Number(btn.active_price || btn.price || 0) > 0 && !noPriceTypes.has(btn.type)) {
               extra = `<div class="kb-cell-price" style="position:absolute;top:3px;right:3px;background:rgba(255,255,255,.92);color:#111;border-radius:3px;padding:1px 4px;font-size:9px;font-weight:800;white-space:nowrap;line-height:1.1">${kbCornerPrice(btn)}</div>`
@@ -7586,16 +7939,14 @@
       if ((btnType === 'section' || btnType === 'page_link') && (parseFloat($('#kbPrice').value) || 0) > 0) {
         $('#kbPrice').value = 0
       }
-      // Save as open_price type when checkbox is checked
-      if (btnType === 'product' && isOpenPrice) btnType = 'open_price'
-      const catFilter = (btnType === 'product' || btnType === 'open_price') ? linkedProduct : ($('#kbCatFilter').value.trim() || null)
-      const imageFitTypes = new Set(['product', 'open_price', 'fixed_price', 'page_link', 'section'])
+      const catFilter = btnType === 'product' ? linkedProduct : ($('#kbCatFilter').value.trim() || null)
+      const imageFitTypes = new Set(['product', 'page_link', 'section'])
       const imageFitMode = $('#kbImageZoom').checked ? 'image:cover' : 'image:contain'
       const btn = {
         id: editId || undefined,
         label,
         type: btnType,
-        price: btnType === 'page_link' || btnType === 'section' || btnType === 'open_price' ? 0 : (parseFloat($('#kbPrice').value) || 0),
+        price: btnType === 'product' || btnType === 'page_link' || btnType === 'section' ? 0 : (parseFloat($('#kbPrice').value) || 0),
         category_filter: catFilter,
         alpha_range: (btnType === 'nav') ? ($('#kbAlphaRange').value.trim() || null) : (imageFitTypes.has(btnType) ? imageFitMode : null),
         color: $('#kbColor').value,
@@ -7619,6 +7970,8 @@
           const p = await window.pos.getProductById(linkedProduct)
           if (p) {
             p.open_price = isOpenPrice
+            p.price = isOpenPrice ? 0 : productPrice
+            p.active_price = p.price
             await window.pos.upsertProduct(p)
           }
         } catch (_) {}
@@ -8140,16 +8493,16 @@
     // -- Price Tags / Labels ------------------------------------------------
 
     let labelQueue = []
-    const TAG_COLS = 2, TAG_ROWS = 10
+    const TAG_COLS = 3, TAG_ROWS = 10
 
     const DEFAULT_TAG_LAYOUT = [
-      { type: 'price',   x: 3,  y: 7,  w: 38, h: 54, size: 42, bold: true,  align: 'left',   font: 'Arial', visible: true },
-      { type: 'barcode', x: 46, y: 12, w: 50, h: 34, size: 20, bold: false, align: 'center', font: 'Arial', visible: true },
-      { type: 'barcode_text', x: 46, y: 47, w: 50, h: 11, size: 7, bold: false, align: 'center', font: 'Courier New', visible: true },
-      { type: 'name',    x: 3,  y: 68, w: 93, h: 24, size: 9,  bold: false, align: 'left',   font: 'Arial', visible: true },
-      { type: 'unit',    x: 3,  y: 55, w: 38, h: 10, size: 7,  bold: false, align: 'left',   font: 'Arial', visible: false },
+      { type: 'price',   x: 4,  y: 10, w: 38, h: 36, size: 24, bold: true,  align: 'left',   font: 'Arial', visible: true },
+      { type: 'barcode', x: 46, y: 12, w: 50, h: 30, size: 20, bold: false, align: 'center', font: 'Arial', visible: true },
+      { type: 'barcode_text', x: 46, y: 43, w: 50, h: 10, size: 6, bold: false, align: 'center', font: 'Courier New', visible: true },
+      { type: 'name',    x: 4,  y: 62, w: 92, h: 26, size: 8,  bold: false, align: 'left',   font: 'Arial', visible: true },
+      { type: 'unit',    x: 4,  y: 48, w: 38, h: 10, size: 6,  bold: false, align: 'left',   font: 'Arial', visible: false },
     ]
-    const TAG_LAYOUT_STORAGE_KEY = 'tillaroo_tag_layout3'
+    const TAG_LAYOUT_STORAGE_KEY = 'boundos_tag_layout_3x10_v1'
     let tagLayout = JSON.parse(localStorage.getItem(TAG_LAYOUT_STORAGE_KEY) || 'null') || JSON.parse(JSON.stringify(DEFAULT_TAG_LAYOUT))
     let selectedTagEl = null
 
@@ -8228,7 +8581,7 @@
         const base = `position:absolute;left:${left}px;top:${top}px;width:${w}px;height:${h}px;display:flex;align-items:center;justify-content:${jc};overflow:hidden;cursor:move;border-radius:2px;${sel}${fw}font-family:${tagFontCss(el.font)};text-align:${el.align||'center'};`
         const grip = isSel ? `<div class="tag-resize" data-tag-resize="${el.type}" style="position:absolute;right:0;bottom:0;width:10px;height:10px;cursor:se-resize;background:#3b82f6;border-radius:2px 0 2px 0;z-index:20"></div>` : ''
         const bc = SAMPLE.plu || SAMPLE.barcode || ''
-        const fs = el.size * (cw / 420 * 2.35)
+        const fs = el.size * (cw / 420 * 1.65)
         if (el.type === 'name') html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}font-size:${fs}px;line-height:1.1;color:#000">${esc(SAMPLE.name)}${grip}</div>`
         else if (el.type === 'price') html += `<div class="tag-el" data-tag-el="${el.type}" style="${base}font-size:${fs}px;color:#000">${money(SAMPLE.price)}${grip}</div>`
         else if (el.type === 'barcode') {
@@ -8341,7 +8694,7 @@
       return html
     }
 
-    // ── Sheet preview (scaled A4 with 2×10 grid) ─────────────────────
+    // ── Sheet preview (scaled A4 with 3×10 grid) ─────────────────────
 
     function expandQueue () {
       const flat = []
@@ -8800,8 +9153,30 @@
       $('#diagErrorLog').textContent = 'No errors captured'
     })
 
+    function setFullscreenControls(isFullScreen) {
+      const full = !!isFullScreen
+      document.querySelectorAll('[data-fullscreen-label]').forEach(el => {
+        el.textContent = full ? 'Exit full screen' : 'Full screen'
+      })
+      document.querySelectorAll('[data-fullscreen-control]').forEach(el => {
+        el.title = full ? 'Exit full screen (F11)' : 'Enter full screen (F11)'
+      })
+      document.querySelectorAll('[data-exit-fullscreen-only]').forEach(el => {
+        el.style.display = full ? '' : 'none'
+      })
+    }
+
+    async function initFullscreenControls() {
+      try {
+        const state = await window.pos.getFullscreenState()
+        setFullscreenControls(state?.isFullScreen)
+        window.pos.onFullscreenChanged?.(next => setFullscreenControls(next?.isFullScreen))
+      } catch (_) {}
+    }
+
     // -- Init -----------------------------------------------------------
 
+    initFullscreenControls()
     setDashDate(dashboardDate)
     window.pos.getMode().then(m => {
       appModeInfo = m || appModeInfo

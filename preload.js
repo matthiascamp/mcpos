@@ -156,6 +156,9 @@ contextBridge.exposeInMainWorld('pos', {
 
   // Window
   exitFullscreen:     ()      => ipcRenderer.invoke('window:exitFullscreen'),
+  toggleFullscreen:   ()      => ipcRenderer.invoke('window:toggleFullscreen'),
+  getFullscreenState: ()      => ipcRenderer.invoke('window:getFullscreenState'),
+  onFullscreenChanged:(cb)    => { ipcRenderer.removeAllListeners('window:fullscreen-changed'); ipcRenderer.on('window:fullscreen-changed', (_e, data) => cb(data)) },
   quit:               ()      => ipcRenderer.invoke('window:quit'),
   navigate:           (page)  => ipcRenderer.invoke('window:navigate', page),
   setMode:            (mode, role)  => ipcRenderer.invoke('window:setMode', mode, role),

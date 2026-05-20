@@ -601,7 +601,7 @@ async function initDatabase() {
     const rebrandDone = dbAll("SELECT value FROM settings WHERE key = 'rebrand_boundos_v1'")
     if (!rebrandDone.length) {
       db.run("UPDATE settings SET value = ?1 WHERE key = 'store_name' AND (value IS NULL OR value = '' OR value = 'Tillaroo')", [DEFAULT_STORE_NAME])
-      db.run("UPDATE settings SET value = ?1 WHERE key = 'receipt_header' AND (value IS NULL OR value = '' OR value LIKE 'Tillaroo%')", [`${DEFAULT_STORE_NAME}\n1164 Cavendish Rd, Mt Gravatt East\nFresh Fruit & Veg`])
+      db.run("UPDATE settings SET value = ?1 WHERE key = 'receipt_header' AND (value IS NULL OR value = '' OR value LIKE 'Tillaroo%')", ['Fresh Fruit & Veg'])
       db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('rebrand_boundos_v1', '1')")
       appLog('info', 'migration', 'Rebranded default store details to BoundOS')
     }
@@ -648,6 +648,72 @@ async function initDatabase() {
       db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('company_logo_boundos_png_v1', '1')")
     }
   } catch (e) { console.error('BoundOS PNG logo migration error:', e.message) }
+
+  // Replace stale generated logo data with the transparent BoundOS PNG.
+  try {
+    const transparentLogoDone = dbGet("SELECT value FROM settings WHERE key = 'company_logo_boundos_png_v2'")
+    if (!transparentLogoDone || !transparentLogoDone.value) {
+      const logoPath = path.join(__dirname, 'pos', 'boundos.png')
+      const currentLogo = dbGet("SELECT value FROM settings WHERE key = 'company_logo'")?.value || ''
+      const oldGeneratedLogoMarker = dbGet("SELECT value FROM settings WHERE key = 'company_logo_v2'")?.value || ''
+      const looksLikeGeneratedDefault = currentLogo.startsWith('data:image/png;base64,') && currentLogo.length > 300000
+      if (fs.existsSync(logoPath) && (!currentLogo || oldGeneratedLogoMarker || looksLikeGeneratedDefault)) {
+        const dataUrl = 'data:image/png;base64,' + fs.readFileSync(logoPath).toString('base64')
+        db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('company_logo', ?1)", [dataUrl])
+        appLog('info', 'migration', 'Replaced stale generated logo with transparent boundos.png')
+      }
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('company_logo_boundos_png_v2', '1')")
+    }
+  } catch (e) { console.error('Transparent BoundOS logo migration error:', e.message) }
+
+  // Default to a maximised normal window. True full screen stays available via F11.
+  try {
+    const windowDefaultDone = dbGet("SELECT value FROM settings WHERE key = 'startup_window_default_v1'")
+    if (!windowDefaultDone || !windowDefaultDone.value) {
+      const currentStartMode = dbGet("SELECT value FROM settings WHERE key = 'start_fullscreen'")?.value
+      if (!currentStartMode || currentStartMode === '1') {
+        db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('start_fullscreen', '0')")
+      }
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('startup_window_default_v1', '1')")
+    }
+  } catch (e) { console.error('Startup window default migration error:', e.message) }
+
+  // Align button PLUs with the Profit Track reference photos where they are readable.
+  try {
+    const pluAlignDone = dbGet("SELECT value FROM settings WHERE key = 'migration_profit_track_plu_alignment_v1'")
+    if (!pluAlignDone || !pluAlignDone.value) {
+      db.run(`INSERT OR IGNORE INTO products
+        (id, barcode, plu, name, category_id, price, cost_price, unit, tax_rate, track_stock, stock_qty, active, image_url, open_price, updated_at)
+        VALUES ('p-bag-reusable', NULL, NULL, 'Reusable Bag', 'cat-grocery', 0.15, 0.05, 'each', 0.10, 0, 0, 1, NULL, 0, datetime('now'))`)
+      db.run(`UPDATE products
+        SET name = 'Reusable Bag', price = 0.15, unit = 'each', open_price = 0, active = 1, updated_at = datetime('now')
+        WHERE id = 'p-bag-reusable'`)
+      db.run(`UPDATE keyboard_buttons
+        SET label = 'BAG', type = 'product', price = 0.15, product_id = 'p-bag-reusable',
+            parent_id = NULL, category_filter = NULL, updated_at = datetime('now')
+        WHERE id = 'btn-bags'`)
+
+      const applePlus = [
+        ['pg7-btn7', '4071'],
+        ['pg7-btn6', '4021'],
+        ['pg7-btn8', '4061'],
+        ['pg7-btn2', '4031'],
+        ['pg7-btn1', '3812'],
+        ['pg7-btn3', '4065'],
+        ['pg7-btn4', '4064'],
+        ['pg7-btn9', '4835'],
+        ['pg7-btn10', '40026']
+      ]
+      for (const [btnId, plu] of applePlus) {
+        const productId = dbGet("SELECT product_id FROM keyboard_buttons WHERE id = ?1", [btnId])?.product_id
+        if (productId) {
+          db.run("UPDATE products SET plu = ?1, barcode = ?1, updated_at = datetime('now') WHERE id = ?2", [plu, productId])
+        }
+      }
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('migration_profit_track_plu_alignment_v1', '1')")
+      appLog('info', 'migration', 'Aligned verified Profit Track PLUs and fixed BAG product link')
+    }
+  } catch (e) { console.error('Profit Track PLU alignment migration error:', e.message) }
 
   // Enforce deleted_records â€” remove anything that was intentionally deleted but got re-inserted
   try {
@@ -784,7 +850,7 @@ async function initDatabase() {
 
       // Try exact match first, then fuzzy
       let match = dbGet("SELECT id FROM products WHERE active = 1 AND LOWER(name) = LOWER(?1) LIMIT 1", [cleanName])
-      if (!match) match = dbGet("SELECT id FROM products WHERE active = 1 AND LOWER(name) LIKE '%' || LOWER(?1) || '%' LIMIT 1", [cleanName])
+      if (!match && cleanName.length > 4) match = dbGet("SELECT id FROM products WHERE active = 1 AND LOWER(name) LIKE '%' || LOWER(?1) || '%' LIMIT 1", [cleanName])
       if (!match && cleanName.length > 4) match = dbGet("SELECT id FROM products WHERE active = 1 AND LOWER(?1) LIKE '%' || LOWER(name) || '%' LIMIT 1", [cleanName])
 
       if (match) {
@@ -809,16 +875,72 @@ async function initDatabase() {
       }
     }
     if (relinked) appLog('info', 'startup', `Re-linked ${relinked} keyboard buttons to products (${newProducts} new products created)`)
-    // Fix legacy open_price buttons: if linked to a product that isn't open_price, change to product type
-    dbRun(`UPDATE keyboard_buttons SET type = 'product'
-      WHERE type = 'open_price' AND product_id IS NOT NULL
-      AND product_id IN (SELECT id FROM products WHERE open_price = 0 OR open_price IS NULL)`)
+    // Open-price state belongs to the linked product. Normalise any linked
+    // legacy keyboard open-price buttons into product buttons.
+    dbRun(`UPDATE products
+      SET open_price = 1, price = 0, updated_at = datetime('now')
+      WHERE id IN (SELECT product_id FROM keyboard_buttons WHERE type = 'open_price' AND product_id IS NOT NULL)`)
+    dbRun(`UPDATE keyboard_buttons
+      SET type = 'product', price = 0, updated_at = datetime('now')
+      WHERE type = 'open_price' AND product_id IS NOT NULL`)
   } catch (e) { appLog('error', 'startup', 'Keyboard re-link failed', e.message) }
 
   // â”€â”€ Intentional color coding for function buttons â”€â”€
   // Red = destructive (logout, return), Blue = navigation (hold, find sale),
   // Amber = caution (discount, open drawer), Teal = search, Purple = admin,
   // Gray = utility (reprint, price check), Green = payment (subtotal)
+  // Open-price products do not have a stored sale price. The cashier supplies
+  // the price at sale time; kg items multiply that chosen price by the scale.
+  try {
+    const openPriceCleaned = dbGet("SELECT value FROM settings WHERE key = 'migration_open_price_products_zero_v1'")
+    if (!openPriceCleaned || !openPriceCleaned.value) {
+      db.run("UPDATE products SET price = 0, updated_at = datetime('now') WHERE open_price = 1 AND ABS(COALESCE(price, 0)) > 0.001")
+      db.run(`UPDATE keyboard_buttons
+        SET price = 0, updated_at = datetime('now')
+        WHERE type = 'open_price' OR product_id IN (SELECT id FROM products WHERE open_price = 1)`)
+      db.run("UPDATE specials SET active = 0, updated_at = datetime('now') WHERE active = 1 AND product_id IN (SELECT id FROM products WHERE open_price = 1)")
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('migration_open_price_products_zero_v1', '1')")
+      appLog('info', 'migration', 'Cleared stored prices for open-price products')
+    }
+  } catch (e) { appLog('error', 'migration', 'Open-price product cleanup failed', e.message) }
+
+  // Keep open-price keyboard buttons price-free in both data and display labels.
+  try {
+    const openButtons = dbAll("SELECT id, label, price FROM keyboard_buttons WHERE type = 'open_price' OR product_id IN (SELECT id FROM products WHERE open_price = 1)")
+    let cleaned = 0
+    for (const btn of openButtons) {
+      const original = btn.label || ''
+      const nextLabel = original
+        .replace(/\\n\s*\$[\d.]+[^\n]*/gi, '')
+        .replace(/\n\s*\$[\d.]+[^\n]*/gi, '')
+      if (nextLabel !== original || Math.abs(Number(btn.price || 0)) > 0.001) {
+        db.run("UPDATE keyboard_buttons SET label = ?1, price = 0, updated_at = datetime('now') WHERE id = ?2", [nextLabel, btn.id])
+        cleaned++
+      }
+    }
+    if (cleaned) appLog('info', 'migration', `Removed visible prices from ${cleaned} open-price keyboard buttons`)
+  } catch (e) { appLog('error', 'migration', 'Open-price label cleanup failed', e.message) }
+
+  // PLU is the required product code. Barcode is kept as the same value so
+  // scanner lookup and PLU lookup behave identically.
+  try {
+    const pluRequiredDone = dbGet("SELECT value FROM settings WHERE key = 'migration_products_plu_required_v1'")
+    if (!pluRequiredDone || !pluRequiredDone.value) {
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('migration_products_plu_required_v1', '1')")
+      appLog('info', 'migration', 'PLU required rule enabled for future product saves')
+    }
+  } catch (e) { appLog('error', 'migration', 'PLU required product cleanup failed', e.message) }
+
+  // Enforce unique PLUs in product add/edit. Existing large databases are not
+  // rewritten during startup because that can block the splash screen.
+  try {
+    const uniquePluDone = dbGet("SELECT value FROM settings WHERE key = 'migration_products_unique_plu_v1'")
+    if (!uniquePluDone || !uniquePluDone.value) {
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('migration_products_unique_plu_v1', '1')")
+      appLog('info', 'migration', 'Unique PLU rule enabled for future product saves')
+    }
+  } catch (e) { appLog('error', 'migration', 'Unique PLU cleanup failed', e.message) }
+
   try {
     const colorDone = dbAll("SELECT value FROM settings WHERE key = 'migration_btn_colors_v1'")
     if (!colorDone.length) {
@@ -1245,6 +1367,48 @@ async function initDatabase() {
       db.run("UPDATE settings SET value = ?1 WHERE key = 'receipt_header'", [fixed])
       appLog('info', 'migration', 'Fixed receipt_header literal \\n')
     }
+    const dedupeDone = dbGet("SELECT value FROM settings WHERE key = 'receipt_header_dedupe_v1'")
+    if (!dedupeDone || !dedupeDone.value) {
+      const fields = {
+        storeName: dbGet("SELECT value FROM settings WHERE key = 'store_name'")?.value || DEFAULT_STORE_NAME,
+        storeAddress: dbGet("SELECT value FROM settings WHERE key = 'store_address'")?.value || '',
+        storePhone: dbGet("SELECT value FROM settings WHERE key = 'store_phone'")?.value || '',
+        storeAbn: dbGet("SELECT value FROM settings WHERE key = 'store_abn'")?.value || '',
+      }
+      const norm = value => String(value || '')
+        .replace(/^ph#\s*/i, '')
+        .replace(/^abn#\s*/i, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase()
+      const duplicates = new Set([
+        norm(fields.storeName),
+        norm(fields.storeAddress),
+        norm(fields.storePhone),
+        norm(fields.storeAbn),
+        norm('Tillaroo'),
+        norm('BoundOS'),
+        norm('WELCOME TO'),
+        norm('TAX INVOICE'),
+      ].filter(Boolean))
+      const addressNorm = norm(fields.storeAddress)
+      const currentHeader = dbGet("SELECT value FROM settings WHERE key = 'receipt_header'")?.value || ''
+      const cleaned = currentHeader
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(line => {
+          const n = norm(line)
+          if (!line || duplicates.has(n)) return false
+          if (addressNorm && (addressNorm.includes(n) || n.includes(addressNorm))) return false
+          return true
+        })
+        .join('\n')
+      if (cleaned !== currentHeader) {
+        db.run("UPDATE settings SET value = ?1 WHERE key = 'receipt_header'", [cleaned])
+        appLog('info', 'migration', 'Removed duplicate store fields from receipt_header')
+      }
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('receipt_header_dedupe_v1', '1')")
+    }
   } catch (e) { appLog('error', 'migration', 'Receipt footer fix failed', e.message) }
 
   // â”€â”€ Migration: Import all products from products.json â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -1396,6 +1560,126 @@ async function initDatabase() {
     }
   } catch (e) { appLog('error', 'migration', 'Grocery pantry image migration failed', e.message) }
 
+  // Repair current grocery/meat/flowers/coffee/cheese keyboard semantics.
+  try {
+    const groceryRepair = dbAll("SELECT value FROM settings WHERE key = 'migration_grocery_open_price_layout_v1'")
+    if (!groceryRepair.length || !groceryRepair[0].value) {
+      const openMain = [
+        ['btn-meat', 'MEAT', '#8f2d38', 2, 3, 2, 1],
+        ['btn-flowers', 'FLOWERS', '#be185d', 2, 5, 2, 1],
+        ['btn-coffee', 'COFFEE', '#6b4f3f', 3, 3, 2, 1],
+        ['btn-cheese', 'CHEESE', '#a16207', 4, 5, 2, 1],
+      ]
+      for (const [id, label, bg, row, col, cs, rs] of openMain) {
+        db.run(`UPDATE keyboard_buttons
+          SET label = ?1, type = 'open_price', price = 0, parent_id = NULL, category_filter = NULL,
+              product_id = NULL, bg_color = ?2, color = '#fff', grid_row = ?3, grid_col = ?4,
+              col_span = ?5, row_span = ?6, active = 1, updated_at = datetime('now')
+          WHERE id = ?7`, [label, bg, row, col, cs, rs, id])
+      }
+
+      db.run(`UPDATE keyboard_buttons
+        SET label = 'GROCERY', type = 'page_link', price = 0, parent_id = '6', category_filter = NULL,
+            product_id = NULL, grid_row = 5, grid_col = 3, col_span = 1, row_span = 1,
+            color = '#fff', bg_color = '#2563eb', active = 1, updated_at = datetime('now')
+        WHERE id = 'btn-grocery'`)
+      db.run(`INSERT OR REPLACE INTO keyboard_buttons
+        (id, label, type, price, image, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, parent_id, category_filter, product_id, active, updated_at)
+        VALUES ('btn-grocery-open', 'GROCERY\nOPEN PRICE', 'open_price', 0, NULL, '#fff', '#334155', 30, 'grid', 1, 5, 4, 1, 1, NULL, NULL, NULL, 1, datetime('now'))`)
+
+      db.run(`UPDATE keyboard_buttons
+        SET label = 'GROCERY', type = 'section', price = 0, grid_row = 0, grid_col = 0, col_span = 1, row_span = 1,
+            category_filter = 'Grocery', parent_id = NULL, product_id = NULL, active = 1, updated_at = datetime('now')
+        WHERE id = 'pg6-grocery'`)
+      db.run(`INSERT OR REPLACE INTO keyboard_buttons
+        (id, label, type, price, image, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, parent_id, category_filter, product_id, active, updated_at)
+        VALUES ('pg6-grocery-open', 'GROCERY OPEN PRICE', 'open_price', 0, NULL, '#fff', '#334155', 2, 'grid', 6, 0, 1, 1, 1, NULL, NULL, NULL, 1, datetime('now'))`)
+
+      const groceryButtons = [
+        ['pg6-confectionary', 'CONFECTIONARY', 0, 2, 3],
+        ['pg6-chips', 'CHIPS', 0, 3, 4],
+        ['pg6-pies', 'SIMPLY PIES', 0, 4, 5],
+        ['pg6-water', 'WATER 12PK', 0, 5, 6],
+        ['pg6-salmon', 'SALMON PIECES', 1, 0, 7],
+        ['pg6-salmon-fillet', 'SALMON FILLET', 1, 1, 8],
+        ['pg6-snapper', 'SNAPPER', 1, 2, 9],
+        ['pg6-snapper-fillet', 'SNAPPER FILLET', 1, 3, 10],
+        ['pg6-fresh-juice', 'FRESH JUICE 500ML', 1, 4, 11],
+        ['pg6-juice-1l', 'JUICE 1L', 1, 5, 12],
+        ['pg6-lemon-juice', 'LEMON JUICE 500ML', 1, 6, 13],
+        ['pg6-spices', 'ASSORTED SPICES', 2, 0, 14],
+        ['pg6-pickles', 'MIXED PICKLES', 2, 1, 15],
+        ['pg6-alt-milk', 'ALTERNATIVE MILK', 2, 2, 16],
+      ]
+      for (const [id, label, row, col, sort] of groceryButtons) {
+        db.run(`INSERT OR REPLACE INTO keyboard_buttons
+          (id, label, type, price, image, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, parent_id, category_filter, product_id, active, updated_at)
+          VALUES (?1, ?2, 'open_price', 0, COALESCE((SELECT image FROM keyboard_buttons WHERE id = ?1), NULL), '#fff', '#1a3d2a', ?5, 'grid', 6, ?3, ?4, 1, 1, NULL, NULL, NULL, 1, datetime('now'))`,
+          [id, label, row, col, sort])
+      }
+      db.run("UPDATE keyboard_buttons SET price = 0 WHERE page = 6 AND type = 'open_price'")
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('migration_grocery_open_price_layout_v1', '1')")
+      appLog('info', 'migration', 'Repaired grocery page and open-price department buttons')
+    }
+  } catch (e) { appLog('error', 'migration', 'Grocery/open-price layout repair failed', e.message) }
+
+  // Product DB is the source of truth for sale behaviour. Sellable keyboard
+  // buttons should stay type='product'; open price and weighed-open behaviour
+  // lives on products.open_price and products.unit.
+  try {
+    const openButtons = dbAll(`
+      SELECT id, label, image, page, category_filter, product_id, type
+      FROM keyboard_buttons
+      WHERE active = 1 AND type IN ('open_price', 'weighed_open')
+    `)
+    let normalised = 0
+    for (const btn of openButtons) {
+      const rawLabel = String(btn.label || '').replace(/\\n/g, '\n')
+      const cleanLabel = rawLabel
+        .replace(/\n\s*\$[\d.]+[^\n]*/gi, '')
+        .replace(/\\n\s*\$[\d.]+[^\n]*/gi, '')
+        .trim()
+      const firstLine = (cleanLabel.split('\n')[0] || cleanLabel).trim()
+      if (!firstLine) continue
+
+      const unit = btn.type === 'weighed_open' || /\bKG\b|\/kg/i.test(cleanLabel) ? 'kg' : (/\b100G\b|\/100g/i.test(cleanLabel) ? '100g' : 'each')
+      const plu = /^\d{3,6}$/.test(String(btn.category_filter || '')) ? String(btn.category_filter) : null
+      let categoryId = btn.page === 6 ? 'cat-grocery' : 'cat-fruit'
+      if (btn.page === 4 || btn.page === 5 || (btn.page >= 24 && btn.page <= 36)) categoryId = 'cat-veg'
+      else if (btn.page === 37) categoryId = 'cat-nuts'
+      else if (btn.page === 38) categoryId = 'cat-bread'
+      else if (btn.page === 39) categoryId = 'cat-gas'
+      else if (['btn-meat', 'btn-flowers', 'btn-coffee', 'btn-cheese', 'btn-grocery-open'].includes(btn.id)) categoryId = 'cat-grocery'
+
+      const productId = btn.product_id || `p-open-${btn.id.replace(/[^a-zA-Z0-9_-]/g, '-')}`
+      const productName = firstLine
+        .replace(/\s+(KG|EA|100G)$/i, '')
+        .toLowerCase()
+        .replace(/\b\w/g, ch => ch.toUpperCase())
+
+      db.run(`INSERT INTO products
+        (id, barcode, plu, name, category_id, price, cost_price, unit, tax_rate, track_stock, stock_qty, active, image_url, open_price, updated_at)
+        VALUES (?1, ?2, ?3, ?4, ?5, 0, 0, ?6, 0.00, 0, 0, 1, ?7, 1, datetime('now'))
+        ON CONFLICT(id) DO UPDATE SET
+          barcode = COALESCE(excluded.barcode, products.barcode),
+          plu = COALESCE(excluded.plu, products.plu),
+          name = excluded.name,
+          category_id = COALESCE(products.category_id, excluded.category_id),
+          price = 0,
+          unit = excluded.unit,
+          active = 1,
+          image_url = COALESCE(products.image_url, excluded.image_url),
+          open_price = 1,
+          updated_at = datetime('now')`,
+        [productId, plu, plu, productName, categoryId, unit, btn.image || null])
+      db.run(`UPDATE keyboard_buttons
+        SET type = 'product', price = 0, label = ?1, product_id = ?2, updated_at = datetime('now')
+        WHERE id = ?3`, [cleanLabel, productId, btn.id])
+      normalised++
+    }
+    if (normalised) appLog('info', 'migration', `Normalised ${normalised} keyboard open-price buttons to DB products`)
+  } catch (e) { appLog('error', 'migration', 'Open-price button normalisation failed', e.message) }
+
   // Re-apply once after keyboard imports/photo migrations, so fresh resets keep the palette too.
   try {
     const palettePostDone = dbAll("SELECT value FROM settings WHERE key = 'migration_main_keyboard_palette_v2_post_import'")
@@ -1426,12 +1710,12 @@ async function initDatabase() {
   saveDBSync()
   appLog('info', 'database', 'Database initialized', `Path: ${DB_PATH}`)
 
-  // Auto-backup on startup
-  createBackup('startup')
+  // Automatic backups are capped to once per day. Manual backups are still immediate.
+  createAutoBackupIfDue()
 
   // Daily backup timer â€” every 24 hours
   dailyBackupTimer = setInterval(() => {
-    createBackup('daily')
+    createAutoBackupIfDue()
   }, 24 * 60 * 60 * 1000)
 }
 
@@ -1541,6 +1825,32 @@ function createBackup(prefix = 'auto') {
     appLog('error', 'backup', 'Backup failed', e.message)
     return { error: 'Backup failed: ' + e.message }
   }
+}
+
+function getLastAutoBackupTimeMs() {
+  try {
+    if (!fs.existsSync(BACKUP_DIR)) return 0
+    const autoPrefixes = ['daily-', 'startup-', 'auto-']
+    return fs.readdirSync(BACKUP_DIR)
+      .filter(f => f.endsWith('.sqlite') && autoPrefixes.some(prefix => f.startsWith(prefix)))
+      .map(f => {
+        try { return fs.statSync(path.join(BACKUP_DIR, f)).mtimeMs } catch (_) { return 0 }
+      })
+      .reduce((latest, ts) => Math.max(latest, ts), 0)
+  } catch (_) {
+    return 0
+  }
+}
+
+function createAutoBackupIfDue() {
+  const minIntervalMs = 24 * 60 * 60 * 1000
+  const lastAutoBackup = getLastAutoBackupTimeMs()
+  if (lastAutoBackup && Date.now() - lastAutoBackup < minIntervalMs) {
+    appHealth.lastBackup = new Date(lastAutoBackup).toISOString()
+    appLog('info', 'backup', 'Automatic backup skipped; recent backup already exists')
+    return { skipped: true, lastBackup: appHealth.lastBackup }
+  }
+  return createBackup('daily')
 }
 
 function scheduleSave() {
@@ -1849,14 +2159,24 @@ function createWindow() {
 
   mainWindow.webContents.on('before-input-event', (event, input) => {
     if (input.key === 'F11') {
-      mainWindow.setKiosk(!mainWindow.isKiosk())
+      event.preventDefault()
+      mainWindow.setKiosk(false)
       mainWindow.setFullScreen(!mainWindow.isFullScreen())
     }
-    if (input.key === 'Escape' && mainWindow.isKiosk()) {
+    if (input.key === 'Escape' && (mainWindow.isKiosk() || mainWindow.isFullScreen())) {
       mainWindow.setKiosk(false)
       mainWindow.setFullScreen(false)
     }
   })
+
+  const sendFullscreenState = () => {
+    if (!mainWindow || mainWindow.isDestroyed()) return
+    mainWindow.webContents.send('window:fullscreen-changed', {
+      isFullScreen: mainWindow.isFullScreen() || mainWindow.isKiosk()
+    })
+  }
+  mainWindow.on('enter-full-screen', sendFullscreenState)
+  mainWindow.on('leave-full-screen', sendFullscreenState)
 
   // Close customer display when main window closes
   mainWindow.on('closed', () => {
@@ -1976,7 +2296,7 @@ app.whenReady().then(async () => {
       ipcMain.removeListener('splash:complete', finish)
       resolve()
     }
-    const fallback = setTimeout(finish, 2600)
+    const fallback = setTimeout(finish, 1200)
     ipcMain.once('splash:complete', finish)
   })
 
@@ -1986,7 +2306,7 @@ app.whenReady().then(async () => {
       ipcMain.removeListener('splash:handoff', finish)
       resolve()
     }
-    const fallback = setTimeout(finish, 1200)
+    const fallback = setTimeout(finish, 900)
     ipcMain.once('splash:handoff', finish)
   })
 
@@ -2080,7 +2400,16 @@ app.whenReady().then(async () => {
     await splashHandoff
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.show()
-      if (!isDevMode) { mainWindow.setFullScreen(true); mainWindow.setKiosk(true) }
+      const startFullScreen = dbGet("SELECT value FROM settings WHERE key = 'start_fullscreen'")?.value === '1'
+      if (!isDevMode && startFullScreen) {
+        mainWindow.setKiosk(false)
+        mainWindow.setFullScreen(true)
+      } else if (!isDevMode) {
+        mainWindow.maximize()
+      }
+      mainWindow.webContents.send('window:fullscreen-changed', {
+        isFullScreen: mainWindow.isFullScreen() || mainWindow.isKiosk()
+      })
     }
     await splashComplete
 
@@ -2119,11 +2448,33 @@ app.on('window-all-closed', () => {
 
 function setupIPC() {
 
+  const fullscreenState = () => ({
+    isFullScreen: !!(mainWindow && !mainWindow.isDestroyed() && (mainWindow.isFullScreen() || mainWindow.isKiosk()))
+  })
+  const broadcastFullscreenState = () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('window:fullscreen-changed', fullscreenState())
+    }
+  }
+
+  ipcMain.handle('window:getFullscreenState', () => fullscreenState())
+
+  ipcMain.handle('window:toggleFullscreen', () => {
+    if (mainWindow) {
+      mainWindow.setKiosk(false)
+      mainWindow.setFullScreen(!mainWindow.isFullScreen())
+      setTimeout(broadcastFullscreenState, 120)
+    }
+    return fullscreenState()
+  })
+
   ipcMain.handle('window:exitFullscreen', () => {
     if (mainWindow) {
       mainWindow.setKiosk(false)
       mainWindow.setFullScreen(false)
+      setTimeout(broadcastFullscreenState, 120)
     }
+    return fullscreenState()
   })
 
   ipcMain.handle('window:quit', () => {
@@ -2180,6 +2531,111 @@ function setupIPC() {
     const { execSync } = require('child_process')
     const https = require('https')
     const appDir = __dirname
+    const { spawn } = require('child_process')
+    const psQuote = value => `'${String(value).replace(/'/g, "''")}'`
+    const run = (cmd, args, opts = {}) => new Promise((resolve, reject) => {
+      const child = spawn(cmd, args, { windowsHide: true, ...opts })
+      let stdout = ''
+      let stderr = ''
+      child.stdout?.on('data', d => { stdout += d.toString() })
+      child.stderr?.on('data', d => { stderr += d.toString() })
+      child.on('error', reject)
+      child.on('close', code => {
+        if (code === 0) resolve({ stdout, stderr })
+        else reject(new Error(stderr || stdout || `${cmd} exited with code ${code}`))
+      })
+    })
+
+    // Git is not available on client machines. Use the GitHub source ZIP and
+    // apply it after BoundOS exits so hardware handlers are not holding files.
+    try {
+      const zipUrl = 'https://github.com/matthiascamp/mcpos/archive/refs/heads/main.zip'
+      const tmpZip = path.join(os.tmpdir(), `mcpos-update-${Date.now()}.zip`)
+      const tmpDir = path.join(os.tmpdir(), `mcpos-update-${Date.now()}`)
+
+      await new Promise((resolve, reject) => {
+        const follow = (url) => {
+          https.get(url, { headers: { 'User-Agent': SOFTWARE_NAME } }, res => {
+            if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) return follow(res.headers.location)
+            if (res.statusCode !== 200) return reject(new Error(`HTTP ${res.statusCode}`))
+            const ws = fs.createWriteStream(tmpZip)
+            res.pipe(ws)
+            ws.on('finish', () => ws.close(resolve))
+            ws.on('error', reject)
+          }).on('error', reject)
+        }
+        follow(zipUrl)
+      })
+
+      if (os.platform() === 'win32') {
+        await run('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command',
+          `Expand-Archive -LiteralPath ${psQuote(tmpZip)} -DestinationPath ${psQuote(tmpDir)} -Force`])
+      } else {
+        fs.mkdirSync(tmpDir, { recursive: true })
+        await run('unzip', ['-o', tmpZip, '-d', tmpDir])
+      }
+
+      const extracted = path.join(tmpDir, 'mcpos-main')
+      if (!fs.existsSync(extracted)) return { error: 'Download succeeded but extraction failed - folder not found' }
+      try { fs.unlinkSync(tmpZip) } catch (_) {}
+
+      saveDBSync()
+      createBackup('pre-update')
+
+      const relaunchArgs = process.argv.slice(1).filter(arg => !String(arg).includes('--squirrel-'))
+      const updaterScript = path.join(os.tmpdir(), `boundos-update-${Date.now()}.ps1`)
+      const script = `
+param(
+  [string]$Source,
+  [string]$Destination,
+  [int]$ParentPid,
+  [string]$ExePath,
+  [string]$ArgsJson,
+  [string]$TempRoot
+)
+$ErrorActionPreference = 'Stop'
+try { Wait-Process -Id $ParentPid -Timeout 60 } catch { Start-Sleep -Seconds 4 }
+$excludeDirs = @('node_modules', '.git', 'dist', 'dist2', 'backups')
+$excludeFiles = @('package-lock.json')
+$preserveRelative = @('db\\crisp-pos.sqlite')
+function Copy-BoundTree([string]$src, [string]$dst) {
+  if (!(Test-Path -LiteralPath $dst)) { New-Item -ItemType Directory -Path $dst -Force | Out-Null }
+  Get-ChildItem -LiteralPath $src -Force | ForEach-Object {
+    if ($_.PSIsContainer -and $excludeDirs -contains $_.Name) { return }
+    if (!$_.PSIsContainer -and $excludeFiles -contains $_.Name) { return }
+    $relative = $_.FullName.Substring($Source.Length).TrimStart('\\', '/')
+    if ($preserveRelative -contains $relative) { return }
+    $target = Join-Path $dst $_.Name
+    if ($_.PSIsContainer) {
+      Copy-BoundTree $_.FullName $target
+    } else {
+      Copy-Item -LiteralPath $_.FullName -Destination $target -Force
+    }
+  }
+}
+Copy-BoundTree $Source $Destination
+try { Remove-Item -LiteralPath $TempRoot -Recurse -Force } catch {}
+$args = @()
+if ($ArgsJson) { $args = [string[]]($ArgsJson | ConvertFrom-Json) }
+Start-Process -FilePath $ExePath -ArgumentList $args -WorkingDirectory $Destination
+`
+      fs.writeFileSync(updaterScript, script, 'utf-8')
+      const child = spawn('powershell.exe', [
+        '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', updaterScript,
+        extracted, appDir, String(process.pid), process.execPath, JSON.stringify(relaunchArgs), tmpDir
+      ], { detached: true, stdio: 'ignore', windowsHide: true })
+      child.unref()
+
+      appLog('info', 'update', 'Staged GitHub ZIP update; app will quit before files are replaced')
+      setTimeout(() => {
+        try { lanSync.stopAll() } catch (_) {}
+        app.quit()
+        setTimeout(() => app.exit(0), 500)
+      }, 800)
+      return { updated: true, staged: true, log: 'Downloaded update from GitHub ZIP.\nBoundOS will close, apply the update after hardware handlers stop, and relaunch.' }
+    } catch (e) {
+      return { error: `Download update failed: ${e.message}`, log: e.message }
+    }
 
     // Try git first
     let hasGit = false
@@ -2514,26 +2970,32 @@ function setupIPC() {
 
   ipcMain.handle('db:products:upsert', (_e, product) => {
     const id = product.id || uuid()
+    const isOpenPrice = !!product.open_price
+    const productPrice = isOpenPrice ? 0 : (product.price || 0)
+    const productPlu = String(product.plu || product.barcode || '').trim()
+    if (!productPlu) return { error: 'PLU is required for every product' }
 
-    // Check for barcode duplicates (exclude self)
-    let barcode_warning = null
-    if (product.barcode) {
-      const dup = dbGet("SELECT id, name FROM products WHERE barcode = ?1 AND id != ?2 AND active = 1", [product.barcode, id])
-      if (dup) barcode_warning = `Barcode "${product.barcode}" already used by "${dup.name}"`
+    // PLU and barcode are the same code; duplicates make scans ambiguous.
+    if (productPlu) {
+      const dup = dbGet("SELECT id, name FROM products WHERE (barcode = ?1 OR plu = ?1) AND id != ?2", [productPlu, id])
+      if (dup) return { error: `PLU/barcode "${productPlu}" is already used by "${dup.name}"` }
     }
 
     dbRun(`
       INSERT OR REPLACE INTO products (id, barcode, plu, name, category_id, price, cost_price, unit, tax_rate, track_stock, stock_qty, active, image_url, open_price, updated_at)
       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, datetime('now'))
-    `, [id, product.barcode || null, product.plu || null, product.name, product.category_id || null,
-        product.price, product.cost_price || 0, product.unit || 'each',
+    `, [id, productPlu, productPlu, product.name, product.category_id || null,
+        productPrice, product.cost_price || 0, product.unit || 'each',
         product.tax_rate ?? 0.10, product.track_stock ? 1 : 0,
         product.stock_qty || 0, product.active !== false ? 1 : 0, product.image_url || null,
-        product.open_price ? 1 : 0])
+        isOpenPrice ? 1 : 0])
+    if (isOpenPrice) {
+      dbRun("UPDATE specials SET active = 0, updated_at = datetime('now') WHERE product_id = ?1 AND active = 1", [id])
+    }
 
     queueSync('products', id, product.id ? 'update' : 'insert')
     lanSync.bumpVersion()
-    return { id, barcode_warning }
+    return { id }
   })
 
   ipcMain.handle('db:categories:upsert', (_e, cat) => {
@@ -2553,6 +3015,7 @@ function setupIPC() {
     let count = 0
     for (const p of products) {
       if (!p.id || !p.name) continue
+      const productPlu = String(p.plu || p.barcode || p.id).trim()
       dbRun(`INSERT INTO products (id, barcode, plu, name, category_id, price, cost_price, unit, tax_rate, track_stock, stock_qty, active, image_url, updated_at)
         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, datetime('now'))
         ON CONFLICT(id) DO UPDATE SET
@@ -2561,7 +3024,7 @@ function setupIPC() {
           cost_price = excluded.cost_price, unit = excluded.unit,
           tax_rate = excluded.tax_rate, image_url = excluded.image_url,
           updated_at = excluded.updated_at`,
-        [p.id, p.barcode || null, p.plu || null, p.name, p.category_id || null,
+        [p.id, productPlu, productPlu, p.name, p.category_id || null,
          p.price, p.cost_price || 0, p.unit || 'each', p.tax_rate ?? 0.10,
          p.track_stock ? 1 : 0, p.stock_qty || 0, p.active !== false ? 1 : 0, p.image_url || null])
       count++
@@ -2678,7 +3141,7 @@ function setupIPC() {
 
   ipcMain.handle('db:deals:getProducts', (_e, dealId) => {
     return dbAll(`
-      SELECT dp.*, p.name as product_name, p.price, p.barcode
+      SELECT dp.*, p.name as product_name, p.price, p.plu, p.barcode
       FROM deal_products dp
       JOIN products p ON p.id = dp.product_id
       WHERE dp.deal_id = ?1
@@ -3374,6 +3837,9 @@ function setupIPC() {
 
   ipcMain.handle('db:keyboard:upsert', (_e, btn) => {
     const id = btn.id || uuid()
+    const buttonType = btn.product_id && (btn.type === 'open_price' || btn.type === 'fixed_price' || btn.type === 'weighed_open')
+      ? 'product'
+      : (btn.type || 'product')
     // Don't resurrect intentionally deleted buttons (e.g. from realtime sync)
     if (btn.id) {
       const deleted = dbGet("SELECT 1 FROM deleted_records WHERE table_name = 'keyboard_buttons' AND record_id = ?1", [btn.id])
@@ -3382,20 +3848,14 @@ function setupIPC() {
     dbRun(`
       INSERT OR REPLACE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, product_id, active, updated_at)
       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, datetime('now'))
-    `, [id, btn.label, btn.type, btn.price || 0, btn.image || null, btn.color || '#fff',
+    `, [id, btn.label, buttonType, btn.price || 0, btn.image || null, btn.color || '#fff',
         btn.bg_color || '#1a3d2a', btn.parent_id || null, btn.category_filter || null,
         btn.alpha_range || null, btn.sort_order || 0, btn.position || 'grid',
         btn.page || 1, btn.grid_row || 0, btn.grid_col || 0,
         btn.col_span || 1, btn.row_span || 1, btn.product_id || null,
         btn.active !== false ? 1 : 0])
-    // If button has a linked product and price changed, update the product too
-    if (btn.product_id && btn.price) {
-      const existing = dbGet("SELECT price FROM products WHERE id = ?1", [btn.product_id])
-      if (existing && Math.abs((existing.price || 0) - btn.price) > 0.001) {
-        dbRun("UPDATE products SET price = ?1, updated_at = datetime('now') WHERE id = ?2", [btn.price, btn.product_id])
-        queueSync('products', btn.product_id, 'update')
-      }
-    }
+    // Product price/open-price state is saved through db:products:upsert.
+    // Keyboard buttons only store layout, label, style, and product linkage.
     queueSync('keyboard_buttons', id, btn.id ? 'update' : 'insert')
     saveDBSync()
     lanSync.bumpVersion()
@@ -4963,6 +5423,41 @@ function setupIPC() {
     const text = s => parts.push(Buffer.from(s + '\n', 'latin1'))
     const cmd = buf => parts.push(buf)
     const lr = (l, r) => `${l}${' '.repeat(Math.max(1, W - l.length - r.length))}${r}`
+    const normaliseReceiptLine = value => String(value || '')
+      .replace(/^ph#\s*/i, '')
+      .replace(/^abn#\s*/i, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase()
+    const receiptHeaderLines = data => {
+      const duplicates = new Set([
+        normaliseReceiptLine(data.storeName || SOFTWARE_NAME),
+        normaliseReceiptLine(data.storePhone),
+        normaliseReceiptLine(data.storeAddress),
+        normaliseReceiptLine(data.storeAbn),
+        normaliseReceiptLine('Tillaroo'),
+        normaliseReceiptLine('BoundOS'),
+        normaliseReceiptLine('WELCOME TO'),
+        normaliseReceiptLine('TAX INVOICE'),
+      ].filter(Boolean))
+      const addressNorm = normaliseReceiptLine(data.storeAddress)
+      return String(data.header || '')
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(line => {
+          const n = normaliseReceiptLine(line)
+          if (!line || duplicates.has(n)) return false
+          if (addressNorm && (addressNorm.includes(n) || n.includes(addressNorm))) return false
+          return true
+        })
+    }
+    const paymentLabel = method => {
+      const raw = String(method || 'payment').trim().toLowerCase()
+      if (raw === 'card' || raw === 'eftpos') return 'Payment Eftpos'
+      if (raw === 'cash') return 'Payment Cash'
+      if (raw === 'gift_card') return 'Payment Gift Card'
+      return `Payment ${raw.charAt(0).toUpperCase()}${raw.slice(1)}`
+    }
     const emitBarcode = value => {
       const barcodeStr = String(value || '').replace(/-/g, '')
       if (!barcodeStr) return
@@ -4987,20 +5482,11 @@ function setupIPC() {
     }
 
     // Header block â€” receipt_header is the primary source of store info
-    if (receiptData.header) {
-      const lines = receiptData.header.split('\n').filter(l => l.trim())
-      if (lines.length > 0) {
-        cmd(ESCPOS.BOLD_ON); cmd(ESCPOS.DOUBLE_SIZE)
-        text(lines[0].trim())
-        cmd(ESCPOS.NORMAL_SIZE); cmd(ESCPOS.BOLD_OFF)
-        for (let i = 1; i < lines.length; i++) text(lines[i].trim())
-      }
-    } else {
-      cmd(ESCPOS.BOLD_ON); cmd(ESCPOS.DOUBLE_SIZE)
-      text(receiptData.storeName || SOFTWARE_NAME)
-      cmd(ESCPOS.NORMAL_SIZE); cmd(ESCPOS.BOLD_OFF)
-      if (receiptData.storeAddress) text(receiptData.storeAddress)
-    }
+    cmd(ESCPOS.BOLD_ON); cmd(ESCPOS.DOUBLE_SIZE)
+    text(receiptData.storeName || SOFTWARE_NAME)
+    cmd(ESCPOS.NORMAL_SIZE); cmd(ESCPOS.BOLD_OFF)
+    for (const line of receiptHeaderLines(receiptData)) text(line)
+    if (receiptData.storeAddress) text(receiptData.storeAddress)
     if (receiptData.storePhone) text(`PH# ${receiptData.storePhone}`)
     if (receiptData.storeAbn) text(`ABN# ${receiptData.storeAbn}`)
     text('Thank you for shopping with us')
@@ -5049,9 +5535,8 @@ function setupIPC() {
     cmd(ESCPOS.BOLD_OFF)
 
     // Payment methods
-    for (const pay of receiptData.payments) {
-      const methodName = pay.method === 'card' ? 'Eftpos' : pay.method.charAt(0).toUpperCase() + pay.method.slice(1)
-      text(lr(methodName, `$${pay.amount.toFixed(2)}`))
+    for (const pay of receiptData.payments || []) {
+      text(lr(paymentLabel(pay.method), `$${Number(pay.amount || 0).toFixed(2)}`))
     }
     if (receiptData.change > 0) text(lr('Change', `$${receiptData.change.toFixed(2)}`))
 

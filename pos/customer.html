@@ -769,6 +769,51 @@ body{
   color:#07150d;
 }
 .thank-store,.goodbye{color:rgba(7,21,13,.58)}
+
+/* Deal cards should read as compact specials, not oversized panels. */
+.deals-grid{
+  align-content:start;
+  align-items:start;
+  grid-auto-rows:auto;
+  overflow-y:auto;
+}
+.deal-card{
+  min-height:0;
+  height:auto;
+  padding:1.05vmin 1.15vmin;
+  gap:.75vmin;
+}
+.deal-card-top{
+  gap:.85vmin;
+}
+.deal-emoji{
+  font-size:3.8vmin;
+}
+.deal-name{
+  font-size:1.7vmin;
+  line-height:1.12;
+}
+.deal-pricing{
+  margin-top:.3vmin;
+}
+.deal-special-price,.deal-special-text{
+  font-size:2.55vmin;
+}
+.deal-normal-price{
+  font-size:1.65vmin;
+}
+.deal-unit{
+  font-size:1.35vmin;
+}
+
+.brand-circle-img.company-logo,
+.idle-hero-logo.company-logo,
+.idle-footer-logo.company-logo{
+  background:transparent;
+  object-fit:contain;
+  border-radius:0;
+  box-shadow:none;
+}
 </style>
 </head>
 <body>
@@ -983,6 +1028,12 @@ body{
     return Math.min(1.4, Math.max(0.5, n))
   }
 
+  function normaliseLogoSource(src) {
+    if (!src) return 'boundos.png'
+    const isOldGeneratedLogo = src.startsWith('data:image/png;base64,') && src.length > 300000
+    return isOldGeneratedLogo ? 'boundos.png' : src
+  }
+
   function applyCompanyLogoStyle(fit, scale) {
     const safeFit = normaliseLogoFit(fit)
     const safeScale = normaliseLogoScale(scale)
@@ -1009,8 +1060,9 @@ body{
     if (storeAddress) document.getElementById('storeAddress').textContent = address
     const activeAddress = document.getElementById('activeStoreAddress')
     if (activeAddress) activeAddress.textContent = address
+    const logoSrc = normaliseLogoSource(companyLogo)
     document.querySelectorAll('.company-logo').forEach(img => {
-      img.src = companyLogo || 'boundos.png'
+      img.src = logoSrc
       img.alt = name
     })
     applyCompanyLogoStyle(companyLogoFit, companyLogoScale)

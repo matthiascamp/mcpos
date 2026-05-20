@@ -4143,6 +4143,47 @@ function apply(db) {
     stmt.run([b.id,b.label,b.type,b.price,b.image,b.color,b.bg_color,b.parent_id,b.category_filter,b.alpha_range,b.sort_order,b.position,b.page,b.grid_row,b.grid_col,b.col_span,b.row_span,b.product_id,b.active]);
   }
   stmt.free();
+
+  const productStmt = db.prepare(`INSERT INTO products
+    (id, barcode, plu, name, category_id, price, cost_price, unit, tax_rate, track_stock, stock_qty, active, image_url, open_price, updated_at)
+    VALUES (?, ?, ?, ?, ?, 0, 0, ?, 0.00, 0, 0, 1, ?, 1, datetime('now'))
+    ON CONFLICT(id) DO UPDATE SET
+      barcode = COALESCE(excluded.barcode, products.barcode),
+      plu = COALESCE(excluded.plu, products.plu),
+      name = excluded.name,
+      category_id = COALESCE(products.category_id, excluded.category_id),
+      price = 0,
+      unit = excluded.unit,
+      active = 1,
+      image_url = COALESCE(products.image_url, excluded.image_url),
+      open_price = 1,
+      updated_at = datetime('now')`);
+  const buttonStmt = db.prepare("UPDATE keyboard_buttons SET type='product', price=0, label=?, product_id=? WHERE id=?");
+  for (const b of buttons) {
+    if (b.type !== 'open_price' || !b.active) continue;
+    const cleanLabel = String(b.label || '')
+      .replace(/\\n\s*\$[\d.]+[^\n]*/gi, '')
+      .replace(/\n\s*\$[\d.]+[^\n]*/gi, '')
+      .trim();
+    const firstLine = (cleanLabel.split(/\n|\\n/)[0] || cleanLabel).trim();
+    if (!firstLine) continue;
+    const unit = /\bKG\b|\/kg/i.test(cleanLabel) ? 'kg' : (/\b100G\b|\/100g/i.test(cleanLabel) ? '100g' : 'each');
+    const plu = /^\d{3,6}$/.test(String(b.category_filter || '')) ? String(b.category_filter) : null;
+    let categoryId = b.page === 6 ? 'cat-grocery' : 'cat-fruit';
+    if (b.page === 4 || b.page === 5 || (b.page >= 24 && b.page <= 36)) categoryId = 'cat-veg';
+    else if (b.page === 37) categoryId = 'cat-nuts';
+    else if (b.page === 38) categoryId = 'cat-bread';
+    else if (b.page === 39) categoryId = 'cat-gas';
+    const productId = b.product_id || `p-open-${String(b.id).replace(/[^a-zA-Z0-9_-]/g, '-')}`;
+    const productName = firstLine
+      .replace(/\s+(KG|EA|100G)$/i, '')
+      .toLowerCase()
+      .replace(/\b\w/g, ch => ch.toUpperCase());
+    productStmt.run([productId, plu, plu, productName, categoryId, unit, b.image || null]);
+    buttonStmt.run([cleanLabel, productId, b.id]);
+  }
+  productStmt.free();
+  buttonStmt.free();
   db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('kb_subpages_ver', ?)", [VERSION]);
   return buttons.length;
 }
