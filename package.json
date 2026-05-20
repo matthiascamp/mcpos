@@ -1,7 +1,7 @@
 {
-  "name": "boundos-client",
+  "name": "yieldpos-client",
   "version": "1.0.0",
-  "description": "BoundOS Client - Electron + SQLite + Supabase",
+  "description": "YieldPOS Client - Electron + SQLite + Supabase",
   "main": "main.js",
   "scripts": {
     "start": "set ELECTRON_RUN_AS_NODE=& electron . --register",
@@ -9,6 +9,7 @@
     "admin": "set ELECTRON_RUN_AS_NODE=& electron . --admin",
     "dev": "set ELECTRON_RUN_AS_NODE=& electron . --register --dev",
     "dev:admin": "set ELECTRON_RUN_AS_NODE=& electron . --admin --dev",
+    "snapshot:db": "node snapshot-runtime-db.js",
     "import": "node import-data.js",
     "build": "electron-builder --win",
     "build:portable": "electron-builder --win portable",
@@ -27,8 +28,8 @@
     "electron-builder": "^25.1.8"
   },
   "build": {
-    "appId": "com.boundos.client",
-    "productName": "BoundOS Client",
+    "appId": "com.yieldpos.client",
+    "productName": "YieldPOS Client",
     "directories": {
       "output": "dist2"
     },
@@ -47,6 +48,7 @@
       "keyboard-layout.json",
       "pos/**",
       "db/**",
+      "!db/crisp-pos.before-snapshot-*.sqlite",
       "node_modules/**"
     ],
     "win": {
@@ -58,14 +60,14 @@
           ]
         }
       ],
-      "icon": "pos/boundos.png"
+      "icon": "pos/YieldPOS.png"
     },
     "portable": {
-      "artifactName": "BoundOS-Client-${version}.exe"
+      "artifactName": "YieldPOS-Client-${version}.exe"
     },
     "nsis": {
       "oneClick": true,
-      "artifactName": "BoundOS-Client-Setup-${version}.exe"
+      "artifactName": "YieldPOS-Client-Setup-${version}.exe"
     },
     "extraResources": [
       {

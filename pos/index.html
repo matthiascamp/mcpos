@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BoundOS Client - Register</title>
+<title>YieldPOS Client - Register</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
 <style>
@@ -85,8 +85,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .action-row{display:flex;gap:6px}
 .action-btn{padding:clamp(6px,1.2vh,12px);border-radius:10px;border:none;font-size:clamp(11px,1.3vw,14px);font-weight:700;cursor:pointer;font-family:inherit;flex:1;min-height:clamp(36px,5vh,48px);transition:all .12s;letter-spacing:-.2px}
 .action-btn:active:not(:disabled){transform:scale(.97)}
-.btn-pay{background:linear-gradient(135deg,#4fbd77 0%,#3a9c5e 60%,#2d7a4a 100%);color:#fff;box-shadow:0 4px 14px rgba(58,156,94,.3),inset 0 1px 0 rgba(255,255,255,.15)}
-.btn-pay:active:not(:disabled){background:linear-gradient(135deg,#3a9c5e 0%,#2d7a4a 100%);box-shadow:0 1px 4px rgba(58,156,94,.2)}.btn-pay:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
+.btn-pay{background:#15803d;color:#fff;box-shadow:0 4px 14px rgba(21,128,61,.25),inset 0 1px 0 rgba(255,255,255,.12)}
+.btn-pay:active:not(:disabled){background:#166534;box-shadow:0 1px 4px rgba(21,128,61,.18)}.btn-pay:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
 .btn-card{background:#f0f1f3;color:#4a5068;border:1px solid #e2e4e8}
 .btn-card:active:not(:disabled){background:#e2e4e8}.btn-card:disabled{opacity:.35;cursor:not-allowed}
 .btn-park{background:#fff;color:#8891a5;border:1px solid #e2e4e8}.btn-park:active{background:#f4f5f7}
@@ -100,23 +100,23 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .pos-grid{flex:1;display:grid;gap:clamp(3px,0.45vw,6px);padding:0;min-height:0}
 .pos-grid-btn{border:none;border-radius:clamp(8px,1vw,14px);font-weight:600;font-size:clamp(9px,1.1vw,13px);cursor:pointer;text-align:center;line-height:1.2;font-family:'Inter',sans-serif;transition:transform .12s cubic-bezier(.2,0,0,1),box-shadow .12s,filter .12s;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:clamp(2px,0.5vh,5px) clamp(3px,0.5vw,6px);word-break:break-word;position:relative;overflow:hidden;user-select:none;box-shadow:0 4px 10px rgba(0,0,0,.35),0 1px 3px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.07)}
 .pos-grid-btn:active{transform:scale(.94) translateY(2px);box-shadow:0 1px 2px rgba(0,0,0,.3),inset 0 2px 4px rgba(0,0,0,.15);filter:brightness(.85)}
-.pos-grid-btn img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.pos-grid-btn img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;transform:scale(var(--key-img-scale,1));transform-origin:center}
 .pos-grid-btn.has-img{position:relative}
 .pos-grid-btn.has-img::after{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(to top,rgba(0,0,0,.8) 0%,rgba(0,0,0,.35) 30%,rgba(0,0,0,.08) 55%,transparent 100%);pointer-events:none}
 .pos-grid-btn.has-img > span:not(.btn-price-badge):not(.btn-plu-badge):not(.btn-cat-badge){position:relative;z-index:2;font-size:clamp(10px,1.1vw,13px);font-weight:700;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.9),0 0 16px rgba(0,0,0,.5);margin-top:auto;padding-bottom:clamp(3px,0.5vh,6px);letter-spacing:-.2px;text-align:center}
 .pos-grid-btn.img-cover img{inset:0;width:100%;height:100%;max-width:none;max-height:none;object-fit:cover;padding:0}
-.pos-grid-btn.img-contain.has-img{background:#fff!important;color:#111!important;border-radius:2px;border:1px solid #d6d6d6;padding:0;box-shadow:0 2px 6px rgba(0,0,0,.28);align-items:stretch;justify-content:flex-end}
+.pos-grid-btn.img-contain.has-img{background:#fff!important;color:#111!important;border-radius:2px;border:1px solid #d6d6d6;padding:0;box-shadow:0 2px 8px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.13),inset 0 -1px 0 rgba(0,0,0,.12);align-items:stretch;justify-content:flex-end}
 .pos-grid-btn.img-contain.has-img::after{display:none}
 .pos-grid-btn.img-contain.has-img img{inset:4px 4px 28px 4px;width:auto;height:auto;max-width:calc(100% - 8px);max-height:calc(100% - 32px);margin:auto;object-fit:contain;border-radius:0}
 .pos-grid-btn.img-contain.has-img > span:not(.btn-price-badge):not(.btn-plu-badge):not(.btn-cat-badge){width:100%;min-height:26px;margin-top:auto;padding:2px 4px 4px;background:rgba(255,255,255,.96);color:#111;text-shadow:none;font-size:clamp(8px,0.95vw,12px);font-weight:800;line-height:1.1;letter-spacing:0;text-align:center}
-.pos-grid-btn.open-price-key .btn-plu-badge{background:rgba(0,0,0,.4);color:rgba(255,255,255,.6);font-size:clamp(7px,0.65vw,9px);font-weight:600}
+.pos-grid-btn.open-price-key .btn-plu-badge{background:rgba(0,0,0,.4);color:rgba(255,255,255,.6);font-size:clamp(8px,0.78vw,11px);font-weight:600}
 
 /* ─── Function buttons (utility keys) ────────────────────────────── */
-.pos-grid-btn.func-key{font-size:clamp(8px,0.9vw,11px);font-weight:700;letter-spacing:.3px;text-transform:uppercase;border:1px solid rgba(255,255,255,.13);box-shadow:0 2px 7px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.13)}
+.pos-grid-btn.func-key{font-size:clamp(9px,1vw,12px);font-weight:700;letter-spacing:.3px;text-transform:uppercase;border:1px solid rgba(255,255,255,.13);box-shadow:0 2px 7px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.13)}
 .pos-grid-btn.func-key:active{filter:brightness(.78);box-shadow:0 1px 2px rgba(0,0,0,.28),inset 0 2px 4px rgba(0,0,0,.22)}
 
 /* ─── Back / home navigation buttons ────────────────────────────── */
-.pos-grid-btn.back-key{font-size:clamp(11px,1.3vw,15px);font-weight:700;letter-spacing:-.2px;background:linear-gradient(135deg,#4fbd77 0%,#3a9c5e 50%,#2d7a4a 100%);color:#fff;border:none;border-radius:10px;box-shadow:0 4px 12px rgba(58,156,94,.3),inset 0 1px 0 rgba(255,255,255,.2);transition:all .1s}
+.pos-grid-btn.back-key{font-size:clamp(11px,1.3vw,15px);font-weight:700;letter-spacing:-.2px;background:#15803d;color:#fff;border:none;border-radius:10px;box-shadow:0 4px 12px rgba(21,128,61,.25),inset 0 1px 0 rgba(255,255,255,.12);transition:all .1s}
 .pos-grid-btn.back-key:active{transform:scale(.96);filter:brightness(.8);box-shadow:0 1px 4px rgba(58,156,94,.2)}
 
 /* ─── Department / product buttons ───────────────────────────────── */
@@ -127,33 +127,33 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .pos-grid-btn.dept-key.has-img::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,var(--cat-glow,transparent) 0%,transparent 38%);z-index:1;pointer-events:none;opacity:.28}
 .pos-grid-btn.dept-key.img-contain.has-img{border-bottom:1px solid #d6d6d6}
 .pos-grid-btn.dept-key.img-contain.has-img::before{display:none}
-.pos-grid-btn.cat-key{box-shadow:0 1px 2px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08)}
-.pos-grid-btn.cat-key.has-img{border-bottom:1px solid rgba(255,255,255,.12);box-shadow:0 1px 2px rgba(0,0,0,.14)}
+.pos-grid-btn.cat-key{border:1px solid rgba(255,255,255,.11);box-shadow:0 2px 8px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.13),inset 0 -1px 0 rgba(0,0,0,.12)}
+.pos-grid-btn.cat-key.has-img{border-bottom:1px solid rgba(255,255,255,.12);box-shadow:0 2px 8px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.13),inset 0 -1px 0 rgba(0,0,0,.12)}
 .pos-grid-btn.cat-key.has-img::before{display:none}
 .pos-grid-btn.cat-key.has-img::after{background:linear-gradient(to top,rgba(0,0,0,.58) 0%,rgba(0,0,0,.18) 42%,transparent 76%)}
 .pos-grid-btn.cat-key.has-img > span:not(.btn-price-badge):not(.btn-plu-badge):not(.btn-cat-badge){text-shadow:none;background:rgba(0,0,0,.45);border-radius:4px;padding:3px 6px;margin-bottom:3px}
 .pos-grid-btn.cat-key.img-contain.has-img > span:not(.btn-price-badge):not(.btn-plu-badge):not(.btn-cat-badge){background:rgba(255,255,255,.96);border-radius:0;margin-bottom:0}
 
 /* ─── Price badge (top-right corner) ────────────────────────────── */
-.btn-price-badge{position:absolute;top:2px;right:3px;z-index:3;font-size:clamp(7px,0.65vw,9px);font-weight:800;color:#111;background:rgba(255,255,255,.92);padding:1px 4px;border-radius:3px;letter-spacing:.2px;pointer-events:none;white-space:nowrap;line-height:1.1;font-family:'JetBrains Mono','Courier New',monospace}
+.btn-price-badge{position:absolute;top:2px;right:3px;z-index:3;font-size:clamp(8px,0.78vw,11px);font-weight:800;color:#111;background:rgba(255,255,255,.92);padding:2px 5px;border-radius:3px;letter-spacing:.1px;pointer-events:none;white-space:nowrap;line-height:1.1;font-family:'JetBrains Mono','Courier New',monospace}
 .pos-grid-btn.open-price-key .btn-price-badge{color:#111;background:rgba(255,255,255,.92);font-weight:800}
 /* ─── PLU badge (top-left corner) ───────────────────────────────── */
-.btn-plu-badge{position:absolute;top:2px;left:3px;z-index:3;font-size:clamp(7px,0.65vw,9px);font-weight:600;color:rgba(255,255,255,.6);background:rgba(0,0,0,.4);padding:1px 3px;border-radius:3px;letter-spacing:-.2px;pointer-events:none;font-family:'JetBrains Mono','Courier New',monospace}
+.btn-plu-badge{position:absolute;top:2px;left:3px;z-index:3;font-size:clamp(8px,0.78vw,11px);font-weight:600;color:rgba(255,255,255,.66);background:rgba(0,0,0,.44);padding:2px 4px;border-radius:3px;letter-spacing:-.2px;pointer-events:none;font-family:'JetBrains Mono','Courier New',monospace}
 .btn-cat-badge{position:absolute;top:2px;left:3px;z-index:3;font-size:clamp(7px,0.65vw,9px);font-weight:800;color:#111;background:rgba(255,255,255,.92);padding:1px 4px;border-radius:3px;letter-spacing:.2px;pointer-events:none;font-family:'JetBrains Mono','Courier New',monospace}
 
 /* ─── Numpad zone ────────────────────────────────────────────────── */
 .pos-grid-btn.digit-btn{font-size:clamp(18px,2.5vw,28px);font-weight:700;background:linear-gradient(180deg,#ffffff 0%,#f4f5f7 100%);color:#1a1a2e;border:1px solid rgba(0,0,0,.06);border-radius:clamp(8px,1vw,14px);box-shadow:0 4px 10px rgba(0,0,0,.12),0 2px 3px rgba(0,0,0,.06),inset 0 -3px 0 rgba(0,0,0,.04),inset 0 1px 0 rgba(255,255,255,.95)}
 .pos-grid-btn.digit-btn:active{background:linear-gradient(180deg,#ebedf0 0%,#dfe2e6 100%);box-shadow:0 1px 2px rgba(0,0,0,.08),inset 0 2px 4px rgba(0,0,0,.06);transform:scale(.96) translateY(2px)}
-.pos-grid-btn.digit-btn.num-action{font-size:clamp(10px,1vw,12px);font-weight:800;letter-spacing:.3px;text-transform:uppercase;background:linear-gradient(180deg,#e8eaef 0%,#d5d8e0 100%);color:#4a5068;box-shadow:0 3px 6px rgba(0,0,0,.1),inset 0 -2px 0 rgba(0,0,0,.04),inset 0 1px 0 rgba(255,255,255,.7)}
+.pos-grid-btn.digit-btn.num-action{font-size:clamp(11px,1.1vw,13px);font-weight:800;letter-spacing:.3px;text-transform:uppercase;background:linear-gradient(180deg,#e8eaef 0%,#d5d8e0 100%);color:#4a5068;box-shadow:0 3px 6px rgba(0,0,0,.1),inset 0 -2px 0 rgba(0,0,0,.04),inset 0 1px 0 rgba(255,255,255,.7)}
 .pos-grid-btn.digit-btn.num-action:active{background:linear-gradient(180deg,#d0d4dc 0%,#c2c7d0 100%);box-shadow:0 1px 2px rgba(0,0,0,.08),inset 0 2px 3px rgba(0,0,0,.06);transform:scale(.96) translateY(2px)}
-.pos-grid-btn.digit-btn.num-orange{background:linear-gradient(135deg,#ff9500 0%,#f97316 50%,#e8650e 100%);color:#fff;font-size:clamp(10px,1vw,12px);font-weight:800;letter-spacing:.3px;text-transform:uppercase;border:1px solid rgba(255,160,0,.4);box-shadow:0 4px 12px rgba(249,115,22,.35),0 2px 4px rgba(249,115,22,.2),inset 0 1px 0 rgba(255,255,255,.25),inset 0 -2px 0 rgba(0,0,0,.1)}
+.pos-grid-btn.digit-btn.num-orange{background:linear-gradient(135deg,#ff9500 0%,#f97316 50%,#e8650e 100%);color:#fff;font-size:clamp(11px,1.1vw,13px);font-weight:800;letter-spacing:.3px;text-transform:uppercase;border:1px solid rgba(255,160,0,.4);box-shadow:0 4px 12px rgba(249,115,22,.35),0 2px 4px rgba(249,115,22,.2),inset 0 1px 0 rgba(255,255,255,.25),inset 0 -2px 0 rgba(0,0,0,.1)}
 .pos-grid-btn.digit-btn.num-orange:active{filter:brightness(.85);box-shadow:0 1px 4px rgba(249,115,22,.3),inset 0 2px 4px rgba(0,0,0,.15);transform:scale(.96) translateY(2px)}
 .pos-grid-btn.num-display-cell{background:linear-gradient(180deg,#080b10 0%,#0f1318 100%);color:#6ed99b;font-family:'JetBrains Mono','Courier New',monospace;font-size:clamp(16px,2.2vw,24px);font-weight:700;text-align:right;justify-content:flex-end;padding:clamp(3px,0.6vh,6px) clamp(8px,1.2vw,16px);border-radius:clamp(8px,1vw,14px);cursor:default;border:2px solid #1e2a35;box-shadow:inset 0 3px 12px rgba(0,0,0,.6),inset 0 0 30px rgba(110,217,155,.04),0 1px 0 rgba(255,255,255,.03)}
 .pos-grid-btn.num-display-cell.qty-mode{color:#f97316;border-color:#3a2510;box-shadow:inset 0 3px 12px rgba(0,0,0,.6),inset 0 0 30px rgba(249,115,22,.06),0 1px 0 rgba(255,255,255,.03)}
 .pos-grid-btn.empty-cell{background:transparent;border:none;cursor:default;box-shadow:none}
 
 /* ─── Payment / nav buttons ──────────────────────────────────────── */
-.pos-grid-btn.pay-key{font-size:clamp(10px,1.3vw,14px);font-weight:800;letter-spacing:-.3px;border:1px solid rgba(255,255,255,.18);box-shadow:0 2px 9px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.18),inset 0 -1px 0 rgba(0,0,0,.12)}
+.pos-grid-btn.pay-key{font-size:clamp(11px,1.43vw,16px);font-weight:800;letter-spacing:-.3px;border:1px solid rgba(255,255,255,.18);box-shadow:0 2px 9px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.18),inset 0 -1px 0 rgba(0,0,0,.12)}
 .pos-grid-btn.pay-key:active{filter:brightness(.8);transform:scale(.96) translateY(2px);box-shadow:0 1px 3px rgba(0,0,0,.28),inset 0 2px 6px rgba(0,0,0,.2)}
 
 /* Cart embedded in grid */
@@ -166,7 +166,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 
 /* ═══ Section View ════════════════════════════════════════════════ */
 .section-view{flex:1;display:flex;flex-direction:column;background:radial-gradient(ellipse at 50% 0%,#1f2333 0%,#13151d 100%)}
-.section-back-btn{background:linear-gradient(135deg,#4fbd77 0%,#3a9c5e 50%,#2d7a4a 100%);color:#fff;border:none;border-radius:clamp(8px,1vw,14px);font-weight:700;font-size:clamp(12px,1.3vw,16px);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;min-height:clamp(60px,10vh,100px);box-shadow:0 4px 12px rgba(58,156,94,.3),inset 0 1px 0 rgba(255,255,255,.2);transition:all .1s}
+.section-back-btn{background:#15803d;color:#fff;border:none;border-radius:clamp(8px,1vw,14px);font-weight:700;font-size:clamp(12px,1.3vw,16px);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;min-height:clamp(60px,10vh,100px);box-shadow:0 4px 12px rgba(21,128,61,.25),inset 0 1px 0 rgba(255,255,255,.12);transition:all .1s}
 .section-back-btn:active{transform:scale(.96);filter:brightness(.8);box-shadow:0 1px 4px rgba(58,156,94,.2)}
 
 .product-grid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(4px,0.6vw,8px);padding:clamp(6px,1vw,12px);align-content:start;background:transparent}
@@ -187,7 +187,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .nav-dark{background:linear-gradient(180deg,#424a5c 0%,#323a4a 100%);color:#e8eaef;flex:2}
 .nav-small{background:linear-gradient(180deg,#2e3242 0%,#252838 100%);color:#c8cdd8;flex:1;border-color:#3d4255}
 .nav-gold{background:linear-gradient(135deg,#fbbf24 0%,#f59e0b 40%,#d97706 100%);color:#fff;flex:2.5;border-color:rgba(251,191,36,.4);box-shadow:0 4px 14px rgba(245,158,11,.25),inset 0 1px 0 rgba(255,255,255,.2);text-shadow:0 1px 2px rgba(0,0,0,.2)}
-.nav-green{background:linear-gradient(135deg,#4fbd77 0%,#3a9c5e 40%,#2d7a4a 100%);color:#fff;flex:2.5;border-color:rgba(79,189,119,.4);box-shadow:0 4px 14px rgba(58,156,94,.25),inset 0 1px 0 rgba(255,255,255,.2);text-shadow:0 1px 2px rgba(0,0,0,.2)}
+.nav-green{background:#15803d;color:#fff;flex:2.5;border-color:rgba(21,128,61,.45);box-shadow:0 4px 14px rgba(21,128,61,.22),inset 0 1px 0 rgba(255,255,255,.12);text-shadow:0 1px 2px rgba(0,0,0,.2)}
 .nav-red{background:linear-gradient(135deg,#f87171 0%,#ef4444 40%,#dc2626 100%);color:#fff;font-size:clamp(12px,1.4vw,16px);font-weight:800;flex:2;border-color:rgba(248,113,113,.4);box-shadow:0 4px 14px rgba(239,68,68,.3),inset 0 1px 0 rgba(255,255,255,.2);text-shadow:0 1px 2px rgba(0,0,0,.2)}
 .nav-spacer{width:clamp(6px,0.8vw,12px);flex-shrink:0}
 
@@ -198,8 +198,10 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .cart-item{border-left:3px solid transparent}
 
 /* ═══ Footer ═════════════════════════════════════════════════════ */
-.pos-footer{height:clamp(16px,2.2vh,24px);background:#0d0f14;color:#4a5068;display:flex;align-items:center;padding:0 clamp(6px,1vw,12px);gap:clamp(6px,1vw,14px);font-size:clamp(8px,0.9vw,10px);flex-shrink:0}
+.pos-footer{height:clamp(22px,3vh,30px);background:#0d0f14;color:#d5d9e2;display:flex;align-items:center;padding:0 clamp(8px,1vw,14px);gap:clamp(10px,1.2vw,18px);font-size:clamp(10px,1vw,12px);font-weight:700;letter-spacing:.2px;flex-shrink:0;border-top:1px solid rgba(255,255,255,.06)}
 .footer-spacer{flex:1}
+.footer-clock{font-family:'JetBrains Mono','Courier New',monospace;color:#6ed99b;font-size:clamp(11px,1.1vw,13px);min-width:104px}
+.footer-muted{color:#8a93a6;font-weight:600}
 
 /* ═══ Modals ═════════════════════════════════════════════════════ */
 .modal-overlay{position:fixed;inset:0;background:rgba(15,17,23,.5);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:100}
@@ -223,44 +225,47 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 /* On-screen QWERTY keyboard */
 .osk-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:2500;display:flex;align-items:flex-end;justify-content:center;padding-bottom:20px}
 .osk-overlay:not(.show){display:none}
-.osk-container{background:#dfe4ea;border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:12px;width:min(760px,96vw);box-shadow:0 -4px 30px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.5)}
-.osk-input-preview{background:#fff;border-radius:10px;padding:10px 14px;font-size:18px;font-weight:700;margin-bottom:10px;min-height:44px;word-break:break-all;border:2px solid #cfd6df;color:#1f2937}
-.osk-row{display:flex;gap:6px;justify-content:center;margin-bottom:6px}
+.osk-container{background:#dfe4ea;border:1px solid rgba(0,0,0,.08);border-radius:16px;padding:16px;width:min(1120px,98vw);box-shadow:0 -4px 30px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.5)}
+.osk-input-preview{background:#fff;border-radius:12px;padding:14px 18px;font-size:22px;font-weight:700;margin-bottom:14px;min-height:56px;word-break:break-all;border:2px solid #cfd6df;color:#1f2937}
+.osk-row{display:flex;gap:8px;justify-content:center;margin-bottom:8px}
 .osk-row:last-child{margin-bottom:0}
-.osk-key{border:none;border-radius:10px;background:linear-gradient(180deg,#fff,#f3f5f8);color:#1f2937;font-size:20px;font-weight:800;min-width:56px;height:54px;cursor:pointer;transition:all .08s;box-shadow:0 1px 3px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.8);font-family:inherit}
+.osk-key{border:none;border-radius:12px;background:linear-gradient(180deg,#fff,#f3f5f8);color:#1f2937;font-size:27px;font-weight:800;min-width:76px;height:72px;cursor:pointer;transition:all .08s;box-shadow:0 1px 3px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.8);font-family:inherit;touch-action:manipulation}
 .osk-key:active{transform:scale(.94);background:#d8dde5}
-.osk-key.wide{min-width:86px;font-size:14px}
-.osk-key.space{flex:1;max-width:360px;font-size:14px;letter-spacing:.4px}
-.osk-key.action{background:linear-gradient(180deg,#15803d,#166534);color:#fff;min-width:96px;font-size:14px}
+.osk-key.wide{min-width:116px;font-size:17px}
+.osk-key.space{flex:1;max-width:520px;font-size:17px;letter-spacing:.4px}
+.osk-key.action{background:#15803d;color:#fff;min-width:132px;font-size:17px}
 .osk-key.action:active{background:#1b4332}
-.osk-key.secondary{background:linear-gradient(180deg,#475569,#334155);color:#fff;min-width:86px;font-size:14px}
-.osk-key.del{background:linear-gradient(180deg,#fee2e2,#fecaca);color:#991b1b;font-size:14px}
+.osk-key.secondary{background:linear-gradient(180deg,#475569,#334155);color:#fff;min-width:116px;font-size:17px}
+.osk-key.del{background:linear-gradient(180deg,#fee2e2,#fecaca);color:#991b1b;font-size:17px}
 
 /* Item Search modal */
 .search-modal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:3000;display:none;flex-direction:column}
 .search-modal.show{display:flex}
-.search-modal-inner{flex:1;display:flex;flex-direction:column;max-width:900px;width:100%;margin:0 auto;padding:16px;gap:10px}
-.search-modal-bar{display:flex;gap:10px;align-items:center}
-.search-modal-input{flex:1;font-size:22px;font-weight:600;padding:12px 18px;border-radius:12px;border:2px solid #e2e4e8;background:#fff;outline:none;font-family:inherit}
+.search-modal-inner{flex:1;display:flex;flex-direction:column;max-width:1280px;width:100%;margin:0 auto;padding:18px;gap:12px}
+.search-modal-bar{display:grid;grid-template-columns:minmax(0,1fr) 64px;gap:12px;align-items:stretch}
+.search-modal-input{width:100%;height:64px;font-size:23px;font-weight:700;padding:0 18px;border-radius:12px;border:2px solid #e2e4e8;background:#fff;outline:none;font-family:inherit}
 .search-modal-input:focus{border-color:#4fbd77}
-.search-modal-close{width:56px;height:56px;border-radius:12px;border:none;background:#ef4444;color:#fff;font-size:24px;font-weight:700;cursor:pointer}
+.search-modal-close{width:64px;height:64px;border-radius:12px;border:none;background:#ef4444;color:#fff;font-size:26px;font-weight:800;cursor:pointer}
+.search-filter-row{display:grid;grid-template-columns:repeat(3,minmax(150px,1fr)) auto;gap:10px;align-items:center}
+.search-filter-row select{height:48px;padding:0 14px;border-radius:10px;border:1px solid #d7dbe3;font-size:14px;font-weight:700;font-family:inherit;background:#fff;color:#1f2937}
+.search-filter-row .result-count{min-width:120px;text-align:right;font-size:13px;color:#d5d9e2;font-weight:800}
 .search-modal-results{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;align-content:start;padding:4px 0}
 .search-modal-item{padding:16px 12px;border-radius:12px;background:#fff;border:1px solid #e2e4e8;cursor:pointer;text-align:center;transition:all .1s;min-height:64px;display:flex;flex-direction:column;justify-content:center}
 .search-modal-item:active{transform:scale(.95);background:#f0fdf4}
 .search-modal-item .sr-name{font-size:13px;font-weight:600;color:#1a1a2e;margin-bottom:4px;line-height:1.2}
 .search-modal-item .sr-price{font-size:15px;font-weight:700;color:#3a9c5e}
 .search-modal-item .sr-unit{font-size:11px;color:#888}
-.search-kb{background:#dfe4ea;border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:12px;flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.5)}
-.search-kb-row{display:flex;gap:6px;justify-content:center;margin-bottom:6px}
+.search-kb{background:#dfe4ea;border:1px solid rgba(0,0,0,.08);border-radius:18px;padding:16px;flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.5)}
+.search-kb-row{display:flex;gap:9px;justify-content:center;margin-bottom:9px}
 .search-kb-row:last-child{margin-bottom:0}
-.search-kb-key{border:none;border-radius:10px;background:linear-gradient(180deg,#fff,#f3f5f8);color:#1f2937;font-size:21px;font-weight:800;min-width:62px;height:60px;cursor:pointer;transition:all .08s;box-shadow:0 1px 3px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.8);font-family:inherit;touch-action:manipulation}
+.search-kb-key{border:none;border-radius:13px;background:linear-gradient(180deg,#fff,#f3f5f8);color:#1f2937;font-size:29px;font-weight:800;min-width:84px;height:78px;cursor:pointer;transition:all .08s;box-shadow:0 1px 3px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.8);font-family:inherit;touch-action:manipulation}
 .search-kb-key:active{transform:scale(.94);background:#d8dde5}
-.search-kb-key.wide{min-width:86px;font-size:14px}
-.search-kb-key.xwide{min-width:116px;font-size:14px}
-.search-kb-key.space{flex:1;max-width:360px;font-size:14px;letter-spacing:.4px}
-.search-kb-key.action{background:linear-gradient(180deg,#15803d,#166534);color:#fff;min-width:96px;font-size:14px}
-.search-kb-key.secondary{background:linear-gradient(180deg,#475569,#334155);color:#fff;min-width:86px;font-size:14px}
-.search-kb-key.del{background:linear-gradient(180deg,#fee2e2,#fecaca);color:#991b1b;font-size:14px}
+.search-kb-key.wide{min-width:122px;font-size:18px}
+.search-kb-key.xwide{min-width:172px;font-size:18px}
+.search-kb-key.space{flex:1;max-width:560px;font-size:18px;letter-spacing:.4px}
+.search-kb-key.action{background:#15803d;color:#fff;min-width:148px;font-size:18px}
+.search-kb-key.secondary{background:linear-gradient(180deg,#475569,#334155);color:#fff;min-width:122px;font-size:18px}
+.search-kb-key.del{background:linear-gradient(180deg,#fee2e2,#fecaca);color:#991b1b;font-size:18px}
 
 .modal{background:#fff;border:none;border-radius:16px;padding:clamp(20px,2.8vw,32px);width:clamp(380px,42vw,560px);min-width:min(92vw,380px);max-width:94vw;box-shadow:0 20px 60px rgba(0,0,0,.2),0 0 0 1px rgba(0,0,0,.05);animation:modalIn .25s ease-out}
 @keyframes modalIn{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
@@ -275,17 +280,17 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .quick-cash button:active{background:#e2e4e8;transform:scale(.97)}
 .change-display{text-align:center;font-size:18px;margin-bottom:14px;min-height:24px;font-weight:800;font-family:'Inter',sans-serif;letter-spacing:-.3px}
 .change-display.positive{color:#3a9c5e}.change-display.short{color:#ef4444}
-.modal-actions{display:flex;gap:8px}
-.modal-actions button{flex:1;padding:16px;border-radius:10px;border:none;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;min-height:58px;transition:all .1s;touch-action:manipulation}
+.modal-actions{display:flex;gap:10px}
+.modal-actions button{flex:1;padding:18px;border-radius:12px;border:none;font-size:17px;font-weight:800;cursor:pointer;font-family:inherit;min-height:64px;transition:all .1s;touch-action:manipulation}
 .modal-actions button:active{transform:scale(.97)}
 .modal-cancel{background:#f0f1f3;color:#4a5068;border:1px solid #e2e4e8 !important}.modal-cancel:active{background:#e2e4e8}
 .modal-confirm{background:#3a9c5e;color:#fff;box-shadow:0 2px 8px rgba(58,156,94,.2)}.modal-confirm:active:not(:disabled){background:#2d7a4a}.modal-confirm:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
-.modal-overlay .modal button{min-height:56px;touch-action:manipulation}
-.modal-overlay .modal button[style*="padding:10px"]{min-height:56px!important;padding-top:14px!important;padding-bottom:14px!important}
-.modal-overlay .modal input,.modal-overlay .modal select{min-height:48px;touch-action:manipulation}
+.modal-overlay .modal button{min-height:62px;touch-action:manipulation}
+.modal-overlay .modal button[style*="padding:10px"]{min-height:62px!important;padding-top:16px!important;padding-bottom:16px!important}
+.modal-overlay .modal input,.modal-overlay .modal select{min-height:52px;touch-action:manipulation}
 
-.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px}
-.numpad button{padding:16px;border-radius:10px;border:1px solid #e2e4e8;background:#fafbfc;color:#1a1a2e;font-size:1.35rem;font-weight:700;cursor:pointer;font-family:inherit;min-height:64px;transition:all .1s;touch-action:manipulation}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:16px}
+.numpad button{padding:18px;border-radius:12px;border:1px solid #e2e4e8;background:#fafbfc;color:#1a1a2e;font-size:1.55rem;font-weight:800;cursor:pointer;font-family:inherit;min-height:76px;transition:all .1s;touch-action:manipulation}
 .numpad button:active{background:#e2e4e8;transform:scale(.97)}
 .price-display{font-family:'Inter',sans-serif;font-size:2.4rem;font-weight:800;text-align:center;color:#1a1a2e;margin-bottom:4px;letter-spacing:-1px}
 .price-subtitle{text-align:center;color:#8891a5;margin-bottom:14px;font-size:12px}
@@ -391,7 +396,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 
 <!-- ═══ PIN Login ═══════════════════════════════════════════════════ -->
 <div class="login-overlay" id="loginOverlay">
-  <img src="boundos.png" class="login-logo company-logo" alt="" style="width:140px;height:140px">
+  <img src="YieldPOS.png" class="login-logo company-logo" alt="" style="width:140px;height:140px">
   <div class="login-store" id="loginStoreName"></div>
   <div class="login-subtitle">Enter your PIN to start</div>
   <div class="pin-display" id="pinDisplay"></div>
@@ -428,24 +433,22 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 <!-- ═══ Status Bar ═════════════════════════════════════════════════ -->
 <div class="status-bar">
   <div class="status-left">
-    <img src="boundos.png" alt="" class="company-logo" style="width:28px;height:28px;object-fit:cover;border-radius:50%;flex-shrink:0;object-position:center">
-    <span class="store-name">BoundOS</span>
+    <img src="YieldPOS.png" alt="" class="company-logo" style="width:28px;height:28px;object-fit:cover;border-radius:50%;flex-shrink:0;object-position:center">
+    <span class="store-name">YieldPOS</span>
     <div style="position:relative">
       <input type="text" id="searchInput" class="scan-input" placeholder="" autofocus style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden">
     </div>
     <span class="staff-info" id="staffBadge">Not logged in</span>
-    <a href="#" class="admin-link" id="adminSwitchBtn">Management</a>
-    <button id="fullscreenToggleBtn" data-fullscreen-control onclick="window.pos.toggleFullscreen()" style="background:none;border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 10px;border-radius:4px;font-size:11px;cursor:pointer;min-height:32px" title="Enter full screen (F11)"><span data-fullscreen-label>Full screen</span></button>
-    <div class="sync-info"><span class="sync-dot" id="syncDot"></span><span id="syncLabel">Online</span></div>
   </div>
   <div class="status-right">
-    <span id="statusClock" style="font-size:14px;font-weight:600;color:#ccc;font-family:'Courier New',monospace;margin-right:6px"></span>
     <div id="scaleDisplay" style="display:none;background:#111;border:1px solid #333;border-radius:6px;padding:2px 10px;font-family:'Courier New',monospace;min-width:100px;text-align:right;margin-right:4px">
       <span style="font-size:9px;color:#666;text-transform:uppercase;letter-spacing:1px">Scale</span>
       <span id="scaleWeight" style="font-size:18px;font-weight:700;color:#4ade80;margin-left:6px">0.000 kg</span>
     </div>
     <div class="health-dots">
       <span><span class="health-dot" id="dotServer"></span>Server</span>
+      <span><span class="health-dot" id="dotPrinter"></span>Printer</span>
+      <span><span class="health-dot" id="dotScanner"></span>Scanner</span>
       <span><span class="health-dot" id="dotDrawer"></span>Drawer</span>
     </div>
     <button id="receiptToggle" style="background:none;border:1px solid rgba(255,255,255,.3);color:#4fbd77;padding:3px 8px;border-radius:4px;font-size:11px;cursor:pointer;min-height:26px;white-space:nowrap" title="Toggle auto-receipt printing">REC: ON</button>
@@ -498,11 +501,11 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 
 <!-- ═══ Footer ═════════════════════════════════════════════════════ -->
 <div class="pos-footer">
+  <span id="clock" class="footer-clock"></span>
   <span id="laneInfo">Lane #01</span>
   <span id="clerkInfo"></span>
   <div class="footer-spacer"></div>
-  <span id="clock"></span>
-  <span id="appVersion" style="color:#333;font-size:8px"></span>
+  <span id="appVersion" class="footer-muted"></span>
 </div>
 
 <!-- ═══ Payment Options Modal ══════════════════════════════════════ -->
@@ -511,7 +514,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 <!-- ═══ Unified Payment Modal ═════════════════════════════════════ -->
 <div class="modal-overlay" id="cashModal"><div class="modal" style="width:520px;padding:0;overflow:hidden">
   <!-- Header with total -->
-  <div id="payHeader" style="background:linear-gradient(135deg,#3a9c5e,#2d7a4a);padding:20px 24px;text-align:center">
+  <div id="payHeader" style="background:#15803d;padding:20px 24px;text-align:center">
     <div style="font-size:13px;color:rgba(255,255,255,.7);font-weight:600;text-transform:uppercase;letter-spacing:1px" id="cashModalTitle">Total Due</div>
     <div style="font-size:48px;font-weight:800;color:#fff;letter-spacing:-1px;margin-top:2px" id="cashModalTotal">$0.00</div>
     <div id="cashRoundingLine" style="display:none;font-size:11px;color:rgba(255,255,255,.6);margin-top:4px"></div>
@@ -536,7 +539,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 
     <!-- Quick cash denominations -->
     <div class="quick-cash" id="quickCash" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px">
-      <button data-amt="exact" id="payExact" style="padding:12px 0;border-radius:10px;border:none;background:linear-gradient(135deg,#4fbd77,#3a9c5e);color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">Exact</button>
+      <button data-amt="exact" id="payExact" style="padding:12px 0;border-radius:10px;border:none;background:#15803d;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">Exact</button>
       <button data-amt="5" style="padding:12px 0;border-radius:10px;border:2px solid #e2e4e8;background:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">$5</button>
       <button data-amt="10" style="padding:12px 0;border-radius:10px;border:2px solid #e2e4e8;background:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">$10</button>
       <button data-amt="20" style="padding:12px 0;border-radius:10px;border:2px solid #e2e4e8;background:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">$20</button>
@@ -559,7 +562,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
       <button data-cv="C" style="padding:16px 0;border-radius:10px;border:none;background:#ef4444;color:#fff;font-size:18px;font-weight:800;cursor:pointer;font-family:inherit">CLR</button>
       <button data-cv="0" style="padding:16px 0;border-radius:10px;border:1px solid #ddd;background:#fff;font-size:22px;font-weight:700;cursor:pointer;font-family:inherit">0</button>
       <button data-cv="." style="padding:16px 0;border-radius:10px;border:1px solid #ddd;background:#fff;font-size:22px;font-weight:700;cursor:pointer;font-family:inherit">.</button>
-      <button data-cv="OK" style="padding:16px 0;border-radius:10px;border:none;background:linear-gradient(135deg,#4fbd77,#3a9c5e);color:#fff;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;grid-column:span 2">PAY CASH</button>
+      <button data-cv="OK" style="padding:16px 0;border-radius:10px;border:none;background:#15803d;color:#fff;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;grid-column:span 2">PAY CASH</button>
     </div>
 
     <!-- Change display -->
@@ -589,6 +592,20 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
     <button data-val="00">00</button><button data-val="0">0</button><button data-val="C">C</button>
   </div>
   <div class="modal-actions"><button class="modal-cancel" id="openPriceCancel">Cancel</button><button class="modal-confirm" id="openPriceConfirm">Add to Cart</button></div>
+</div></div>
+
+<!-- Quantity Modal -->
+<div class="modal-overlay" id="quantityModal"><div class="modal">
+  <h2 id="quantityTitle">Enter Quantity</h2>
+  <div class="price-display" id="quantityDisplay">0</div>
+  <div class="price-subtitle" id="quantitySub">How many?</div>
+  <div class="numpad" id="quantityPad">
+    <button data-val="1">1</button><button data-val="2">2</button><button data-val="3">3</button>
+    <button data-val="4">4</button><button data-val="5">5</button><button data-val="6">6</button>
+    <button data-val="7">7</button><button data-val="8">8</button><button data-val="9">9</button>
+    <button data-val="00">00</button><button data-val="0">0</button><button data-val="C">C</button>
+  </div>
+  <div class="modal-actions"><button class="modal-cancel" id="quantityCancel">Cancel</button><button class="modal-confirm" id="quantityConfirm">Add to Cart</button></div>
 </div></div>
 
 <!-- ═══ Price Change Modal ═════════════════════════════════════════ -->
@@ -740,7 +757,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 </div></div>
 
 <!-- ═══ Supervisor PIN Modal ═══════════════════════════════════════ -->
-<div class="modal-overlay" id="supervisorModal"><div class="modal" style="width:320px">
+<div class="modal-overlay" id="supervisorModal"><div class="modal" style="width:min(430px,94vw)">
   <h2>Supervisor PIN</h2>
   <div class="pin-display" id="supPinDisplay" style="text-align:center;min-height:30px"></div>
   <div class="numpad" id="supPinPad">
@@ -754,7 +771,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 </div></div>
 
 <!-- ═══ Price Check Modal ═════════════════════════════════════════ -->
-<div class="modal-overlay" id="priceCheckModal"><div class="modal" style="width:min(760px,94vw)">
+<div class="modal-overlay" id="priceCheckModal"><div class="modal" style="width:min(1280px,98vw)">
   <h2>Price Check</h2>
   <div style="margin-bottom:12px"><input type="text" id="pcSearchInput" placeholder="Scan barcode or type to search..." style="width:100%;padding:10px;border-radius:6px;border:1px solid #ccc;font-size:14px;outline:none"></div>
   <div id="pcResults" style="max-height:320px;overflow-y:auto"></div>
@@ -1004,18 +1021,18 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
     <input type="text" class="search-modal-input" id="itemSearchInput" placeholder="Search by name, barcode, or PLU..." autocomplete="off">
     <button class="search-modal-close" id="itemSearchClose">✕</button>
   </div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-    <select id="isFilterCat" style="padding:8px 12px;border-radius:8px;border:1px solid #ddd;font-size:13px;font-family:inherit;background:#fff">
+  <div class="search-filter-row">
+    <select id="isFilterCat">
       <option value="">All Categories</option>
     </select>
-    <select id="isFilterUnit" style="padding:8px 12px;border-radius:8px;border:1px solid #ddd;font-size:13px;font-family:inherit;background:#fff">
+    <select id="isFilterUnit">
       <option value="">All Units</option>
       <option value="each">Each</option>
       <option value="kg">Per kg</option>
       <option value="100g">Per 100g</option>
       <option value="litre">Per litre</option>
     </select>
-    <select id="isFilterPrice" style="padding:8px 12px;border-radius:8px;border:1px solid #ddd;font-size:13px;font-family:inherit;background:#fff">
+    <select id="isFilterPrice">
       <option value="">Any Price</option>
       <option value="0-2">Under $2</option>
       <option value="2-5">$2 - $5</option>
@@ -1023,7 +1040,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
       <option value="10-50">$10 - $50</option>
       <option value="50-999">Over $50</option>
     </select>
-    <span id="isResultCount" style="margin-left:auto;font-size:12px;color:#888;font-weight:600"></span>
+    <span id="isResultCount" class="result-count"></span>
   </div>
   <div class="search-modal-results" id="itemSearchResults">
     <div style="grid-column:1/-1;text-align:center;padding:40px;color:#888;font-size:15px;">Search by product name, barcode or code number</div>
@@ -1049,7 +1066,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 </div>
 
 <div class="sale-complete" id="saleComplete"><div class="sale-complete-inner sale-summary">
-  <img src="boundos.png" class="sale-check company-logo" alt="">
+  <img src="YieldPOS.png" class="sale-check company-logo" alt="">
   <div class="sale-complete-text" id="saleCompleteTitle">Sale Complete</div>
   <div id="saleSummaryBody"></div>
   <div class="sale-complete-change" id="saleChangeDisplay"></div>
@@ -1064,13 +1081,14 @@ const cart = new Cart()
 let currentStaff = null, pendingWeightProduct = null
 let allCategories = [], activeDeals = []
 let sectionStack = [], currentGroups = {}
-let numBuf = '', qtyMultiplier = 1
+let numBuf = '', qtyMultiplier = 1, qtyExplicit = false
 let returnMode = false, supervisorMode = false, supervisorTimer = null
 let lastCompletedTxns = [], pcFoundProduct = null
 let payProcessing = false
 let viewingSaleId = null
 let cashNumBuf = ''
-let autoReceipt = localStorage.getItem('tillaroo_auto_receipt') !== '0'
+let autoReceipt = true
+let showEftposAcceptedButton = true
 
 function normaliseLogoFit(value) {
   return value === 'cover' ? 'cover' : 'contain'
@@ -1092,16 +1110,27 @@ function applyCompanyLogoStyle(fit, scale) {
 
 async function refreshBranding () {
   const settings = await window.pos.getAllSettings()
-  const name = settings.store_name || 'BoundOS'
-  document.title = 'BoundOS Client - Register'
+  const name = settings.store_name || 'YieldPOS'
+  showEftposAcceptedButton = settings.show_eftpos_accepted_button !== '0'
+  document.title = 'YieldPOS Client - Register'
   const loginName = document.getElementById('loginStoreName')
   if (loginName) loginName.textContent = name
   document.querySelectorAll('.store-name').forEach(el => { el.textContent = name })
   document.querySelectorAll('.company-logo').forEach(img => {
-    img.src = settings.company_logo || 'boundos.png'
+    img.src = settings.company_logo || 'YieldPOS.png'
     img.alt = name
   })
   applyCompanyLogoStyle(settings.company_logo_fit, settings.company_logo_scale)
+}
+function applyEftposAcceptedButtonVisibility (isRefund = false) {
+  const btn = $('#payOptEftposManual')
+  if (btn) btn.style.display = isRefund || !showEftposAcceptedButton ? 'none' : ''
+}
+async function refreshEftposAcceptedButtonSetting (isRefund = false) {
+  try {
+    showEftposAcceptedButton = await window.pos.getSetting('show_eftpos_accepted_button') !== '0'
+    applyEftposAcceptedButtonVisibility(isRefund)
+  } catch (_) {}
 }
 function updateReceiptToggle () {
   const btn = $('#receiptToggle')
@@ -1109,10 +1138,25 @@ function updateReceiptToggle () {
   btn.style.color = autoReceipt ? '#4fbd77' : '#ef4444'
   btn.style.borderColor = autoReceipt ? 'rgba(79,189,119,.4)' : 'rgba(239,68,68,.4)'
 }
-$('#receiptToggle').addEventListener('click', () => {
-  autoReceipt = !autoReceipt
-  localStorage.setItem('tillaroo_auto_receipt', autoReceipt ? '1' : '0')
+async function initAutoReceiptSetting () {
+  try {
+    const dbValue = await window.pos.getSetting('auto_receipt')
+    if (dbValue === null) {
+      const localValue = localStorage.getItem('tillaroo_auto_receipt')
+      autoReceipt = localValue !== '0'
+      await window.pos.setSetting('auto_receipt', autoReceipt ? '1' : '0')
+    } else {
+      autoReceipt = dbValue !== '0'
+    }
+    localStorage.removeItem('tillaroo_auto_receipt')
+  } catch (_) {}
   updateReceiptToggle()
+}
+
+$('#receiptToggle').addEventListener('click', async () => {
+  autoReceipt = !autoReceipt
+  updateReceiptToggle()
+  try { await window.pos.setSetting('auto_receipt', autoReceipt ? '1' : '0') } catch (_) {}
   showToast(autoReceipt ? 'Auto-receipt ON' : 'Auto-receipt OFF', 'info')
 })
 updateReceiptToggle()
@@ -1197,6 +1241,7 @@ if (window.pos && typeof window.pos.onScannerData === 'function') {
 }
 if (window.pos && typeof window.pos.onScannerStatus === 'function') {
   window.pos.onScannerStatus(s => {
+    setHealthDot('dotScanner', !!s.connected, s.connected ? `Scanner connected: ${s.device || ''}` : `Scanner not connected${s.reason ? ': ' + s.reason : ''}`)
     if (s.connected) showToast(`Scanner ready (${s.device})`, 'success')
   })
 }
@@ -1249,13 +1294,23 @@ function hideViewSaleBanner () {
 }
 
 // ═══ Clock & Sync ══════════════════════════════════════════════════
+function formatRegisterClock (date = new Date()) {
+  let h = date.getHours()
+  const suffix = h >= 12 ? 'PM' : 'AM'
+  h = h % 12 || 12
+  const m = String(date.getMinutes()).padStart(2, '0')
+  const s = String(date.getSeconds()).padStart(2, '0')
+  return `${h}:${m}:${s} ${suffix}`
+}
+
 function updateClock () {
-  $('#clock').textContent = new Date().toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+  $('#clock').textContent = formatRegisterClock()
 }
 setInterval(updateClock, 1000); updateClock()
 
 function updateSync () {
   const d = $('#syncDot'), l = $('#syncLabel')
+  if (!d || !l) return
   if (navigator.onLine) { d.classList.remove('offline'); l.textContent = 'Online' }
   else { d.classList.add('offline'); l.textContent = 'Offline' }
 }
@@ -1266,6 +1321,30 @@ function markDataUpdated (source) {
     const time = new Date().toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })
     l.textContent = `Updated ${time}`
     l.title = source ? `Last data update: ${source}` : 'Last data update'
+  }
+}
+function setHealthDot (id, connected, title = '') {
+  const dot = document.getElementById(id)
+  if (!dot) return
+  dot.style.background = connected === null ? '#888' : (connected ? '#4fbd77' : '#a44')
+  dot.title = title
+  const label = dot.parentElement
+  if (label) label.title = title
+}
+async function refreshHardwareIndicators () {
+  try {
+    const health = await window.pos.getHealth()
+    const hw = health?.hardware || {}
+    const printerName = hw.printer?.name || ''
+    const scannerName = hw.scanner?.name || hw.scanner?.vendor || ''
+    const drawerVia = hw.drawer?.via || ''
+    setHealthDot('dotPrinter', !!hw.printer?.connected, printerName ? `Printer connected: ${printerName}` : 'Printer not connected')
+    setHealthDot('dotScanner', !!hw.scanner?.connected, scannerName ? `Scanner connected: ${scannerName}` : 'Scanner not connected')
+    setHealthDot('dotDrawer', !!hw.drawer?.connected, drawerVia ? `Drawer available via ${drawerVia}` : 'Drawer not available')
+  } catch (_) {
+    setHealthDot('dotPrinter', null, 'Printer status unknown')
+    setHealthDot('dotScanner', null, 'Scanner status unknown')
+    setHealthDot('dotDrawer', null, 'Drawer status unknown')
   }
 }
 window.addEventListener('online', updateSync)
@@ -1384,7 +1463,7 @@ function signedMoney (amount) {
   return `${amount >= 0 ? '+' : '-'}${money(abs)}`
 }
 function eodDrawerInstruction (counted, desired) {
-  if (!desired || desired <= 0) return 'No desired till float is set.'
+  if (!desired || desired <= 0) return ''
   const diff = counted - desired
   if (Math.abs(diff) < 0.01) return `Leave ${money(desired)} in the till for the next shift.`
   if (diff > 0) return `Take out ${money(diff)} to leave ${money(desired)} in the till.`
@@ -1396,9 +1475,8 @@ async function showFloatPrompt () {
     suggested = desiredFloatForSettings(await window.pos.getAllSettings())
   } catch (_) {}
   floatBuf = suggested > 0 ? String(Math.round(suggested * 100)) : ''
-  $('#floatSuggested').textContent = suggested > 0
-    ? `Suggested start float: ${money(suggested)}`
-    : 'Suggested start float: not set'
+  $('#floatSuggested').style.display = suggested > 0 ? 'block' : 'none'
+  $('#floatSuggested').textContent = suggested > 0 ? `Suggested start float: ${money(suggested)}` : ''
   updateFloatDisplay()
   $('#floatOverlay').classList.remove('hidden')
 }
@@ -1441,7 +1519,7 @@ document.addEventListener('keydown', e => {
 })
 
 // ═══ Dynamic POS Keyboard Grid ═════════════════════════════════════
-const FUNC_TYPES = new Set(['void','return','hold','nosale','supervisor','lock','reprint','pricecheck','errcorrect','recall','pctdiscount','pctone','movedrawer','ubereats','viewor','endofday','discount','product_lookup','item_search'])
+const FUNC_TYPES = new Set(['void','return','hold','nosale','supervisor','lock','reprint','pricecheck','errcorrect','recall','pctdiscount','pctone','movedrawer','ubereats','viewor','endofday','discount','product_lookup','item_search','management'])
 const NUMPAD_TYPES = new Set(['digit','clear','qtyx','codeenter'])
 const DEPT_TYPES = new Set(['section','open_price','fixed_price','price_change','product','weighed_open'])
 const NAV_TYPES = new Set(['nav','subtotal','page_link','back_home'])
@@ -1458,7 +1536,7 @@ function updateNumDisplay () {
   // Status bar numpad display
   const nb = $('#numBufDisplay')
   if (nb) {
-    if (qtyMultiplier > 1) {
+    if (qtyExplicit) {
       nb.textContent = `QTY ×${qtyMultiplier}`
       nb.style.display = ''; nb.style.color = '#ff8800'
     } else if (numBuf) {
@@ -1471,7 +1549,7 @@ function updateNumDisplay () {
   // Legacy in-grid display
   const d = document.querySelector('.num-display-cell')
   if (d) {
-    if (qtyMultiplier > 1) { d.textContent = `QTY ×${qtyMultiplier}`; d.classList.add('qty-mode') }
+    if (qtyExplicit) { d.textContent = `QTY ×${qtyMultiplier}`; d.classList.add('qty-mode') }
     else { d.textContent = numBuf || ''; d.classList.remove('qty-mode') }
   }
 }
@@ -1564,10 +1642,12 @@ function renderPosButton (btn, gridStyle) {
   const rawLabel = btn.label || ''
   const label = esc(rawLabel)
   const imgSrc = btn.image || btn.product_image_url || ''
+  const shadedImageTypes = new Set(['fixed_price', 'open_price', 'product', 'section', 'page_link', 'weighed_open'])
   const explicitImageFit = btn.alpha_range === 'image:cover' ? 'cover' : btn.alpha_range === 'image:contain' ? 'contain' : ''
-  const defaultImageFit = (effectiveType === 'fixed_price' || effectiveType === 'open_price' || effectiveType === 'product') ? 'contain' : 'cover'
-  const imageFit = imgSrc ? (explicitImageFit || defaultImageFit) : ''
-  const imgHtml = imgSrc ? `<img src="${esc(imgSrc)}" alt="">` : ''
+  const imageFit = imgSrc ? (explicitImageFit || (shadedImageTypes.has(effectiveType) ? 'cover' : 'cover')) : ''
+  const imgScaleRaw = Number(btn.image_scale || 100)
+  const imgScale = Number.isFinite(imgScaleRaw) && imgScaleRaw > 0 ? Math.max(50, Math.min(220, imgScaleRaw)) / 100 : 1
+  const imgHtml = imgSrc ? `<img src="${esc(imgSrc)}" alt="" style="--key-img-scale:${imgScale}">` : ''
   const imgClass = imgSrc ? ` has-img img-${imageFit}` : ''
 
   // Numpad display — not a button but an indicator cell
@@ -1623,8 +1703,6 @@ function renderPosButton (btn, gridStyle) {
 
   // Department / product / nav — everything else
   const isOpenPriceButton = effectiveType === 'open_price' || Number(btn.product_open_price || 0) === 1
-  const categoryStyleOpenIds = new Set(['btn-meat', 'btn-flowers', 'btn-coffee', 'btn-cheese'])
-  const isCategoryStyleOpen = isOpenPriceButton && categoryStyleOpenIds.has(btn.id)
   const isItem = effectiveType === 'fixed_price' || effectiveType === 'open_price' || effectiveType === 'product'
   const priceVal = btn.active_price || btn.price || 0
   const showPriceBadge = isItem && !isOpenPriceButton && priceVal > 0
@@ -1634,14 +1712,17 @@ function renderPosButton (btn, gridStyle) {
     : (/\/kg|\bkg\b/i.test(rawLabel) ? 'kg' : (/\/each|\beach\b|\bea\b/i.test(rawLabel) ? 'each' : ''))
   const priceUnit = productUnit || labelUnit || 'each'
   const priceSuffix = priceUnit === 'kg' ? '/kg' : priceUnit === '100g' ? '/100g' : '/each'
-  const priceBadge = showPriceBadge ? `<span class="btn-price-badge">${money(priceVal)}${priceSuffix}</span>` : ''
+  const priceBadge = isOpenPriceButton
+    ? '<span class="btn-price-badge">O/P</span>'
+    : (showPriceBadge ? `<span class="btn-price-badge">${money(priceVal)}${priceSuffix}</span>` : '')
   const btnPlu = btn.product_plu || (isOpenPriceButton && /^\d{3,6}$/.test(btn.category_filter || '') ? btn.category_filter : '')
   const pluBadge = btnPlu ? `<span class="btn-plu-badge">${esc(btnPlu)}</span>` : ''
   // Strip embedded price lines from open-price labels; fixed/product buttons show them as badges.
   let displayLabel = label.replace(/\\n/g,'<br>')
   if (priceBadge || isOpenPriceButton) displayLabel = displayLabel.replace(/<br>\$[\d.]+.*$/, '')
   const labelHtml = `<span>${displayLabel}</span>${priceBadge}${pluBadge}`
-  const itemClass = isOpenPriceButton ? ` open-price-key${isCategoryStyleOpen ? ' cat-key' : ''}` : (type === 'section' ? ' cat-key' : '')
+  const standardMerchClass = (isItem || type === 'section') ? ' cat-key' : ''
+  const itemClass = `${isOpenPriceButton ? ' open-price-key' : ''}${standardMerchClass}`
   const catBadge = type === 'section' ? '<span class="btn-cat-badge">CAT</span>' : ''
   const productRef = btn.category_filter || ''
   return `<div class="pos-grid-btn dept-key${imgClass}${itemClass}" data-type="${esc(type)}" data-cat="${esc(productRef)}"
@@ -1666,12 +1747,12 @@ $('#posGrid').addEventListener('click', async e => {
   // Numpad actions
   if (action && NUMPAD_TYPES.has(action) && !type) {
     if (action === 'clear') {
-      numBuf = ''; qtyMultiplier = 1
+      numBuf = ''; qtyMultiplier = 1; qtyExplicit = false
       if (returnMode) { returnMode = false; $('#returnBanner').classList.remove('active') }
       updateNumDisplay(); updateQtyBadge()
     } else if (action === 'qtyx') {
       const qty = parseInt(numBuf)
-      if (qty > 0) { qtyMultiplier = qty; numBuf = ''; updateNumDisplay(); updateQtyBadge(); showToast(`Next item × ${qtyMultiplier}`, 'info') }
+      if (qty > 0) { qtyMultiplier = qty; qtyExplicit = true; numBuf = ''; updateNumDisplay(); updateQtyBadge(); showToast(`Next item × ${qtyMultiplier}`, 'info') }
     } else if (action === 'codeenter') {
       if (!numBuf) return
       try {
@@ -1756,7 +1837,7 @@ $('#posGrid').addEventListener('click', async e => {
           const p2 = { ...prod, price: customPrice, active_price: customPrice }
           cart.addProduct(p2, qty, true); applyDeals()
           showToast(`${prod.name} ${sw.toFixed(3)} kg × ${money(customPrice)}/kg = ${money(sw * customPrice)}`, 'success')
-          qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); updateQtyBadge()
+          clearQtyEntry()
           returnToMainKeyboard(); refocus()
         } else {
           showWeighedOpenModal(prod.name, customPrice)
@@ -1770,7 +1851,7 @@ $('#posGrid').addEventListener('click', async e => {
           const p = prod.active_price || prod.price || 0
           cart.addProduct(prod, qty, true); applyDeals()
           showToast(`${prod.name} ${sw.toFixed(3)} kg × ${money(p)} = ${money(sw * p)}`, 'success')
-          qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); updateQtyBadge()
+          clearQtyEntry()
           returnToMainKeyboard(); refocus()
         } else { pendingWeightProduct = prod; showWeightModal(prod) }
         return
@@ -1780,7 +1861,7 @@ $('#posGrid').addEventListener('click', async e => {
         if (customPrice > 0) {
           const p2 = { ...prod, price: customPrice, active_price: customPrice }
           cart.addProduct(p2, returnMode ? -qtyMultiplier : qtyMultiplier, true)
-          qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); updateQtyBadge(); applyDeals()
+          clearQtyEntry(); applyDeals()
           showToast(`${prod.name} $${customPrice.toFixed(2)} added`, 'success')
           returnToMainKeyboard(); refocus(); return
         }
@@ -1792,7 +1873,7 @@ $('#posGrid').addEventListener('click', async e => {
           const p = prod.active_price || prod.price
           cart.addProduct(prod, qty, true); applyDeals()
           showToast(`${prod.name} ${sw.toFixed(3)} kg × ${money(p)} = ${money(sw * p)}`, 'success')
-          qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); updateQtyBadge()
+          clearQtyEntry()
           returnToMainKeyboard(); refocus()
         } else { pendingWeightProduct = prod; showWeightModal(prod) }
       } else if (isOpenPrice && !numBuf) {
@@ -1805,7 +1886,7 @@ $('#posGrid').addEventListener('click', async e => {
       if (customPrice > 0 && sw > 0) {
         const qty = returnMode ? -sw : sw
         cart.addProduct({ id: 'OPEN_KG_' + Date.now(), name, price: customPrice, active_price: customPrice, unit: 'kg', tax_rate: 0.10, is_special: false }, qty, true)
-        qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); updateQtyBadge(); applyDeals()
+        clearQtyEntry(); applyDeals()
         showToast(`${name} ${sw.toFixed(3)} kg × ${money(customPrice)}/kg = ${money(sw * customPrice)}`, 'success')
         returnToMainKeyboard(); refocus()
       } else {
@@ -1822,7 +1903,7 @@ $('#posGrid').addEventListener('click', async e => {
           const qty = returnMode ? -sw : sw
           cart.addProduct(kbProd, qty, true); applyDeals()
           showToast(`${name} ${sw.toFixed(3)} kg × ${money(btnPrice)} = ${money(sw * btnPrice)}`, 'success')
-          qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); updateQtyBadge()
+          clearQtyEntry()
           returnToMainKeyboard(); refocus()
         } else { pendingWeightProduct = kbProd; showWeightModal(kbProd) }
       } else {
@@ -1833,7 +1914,7 @@ $('#posGrid').addEventListener('click', async e => {
       const cents = parseInt(numBuf); const price = cents / 100
       if (price > 0) {
         cart.addProduct({ id: 'OPEN_' + Date.now(), name, price, active_price: price, unit: 'each', tax_rate: 0.10, is_special: false }, returnMode ? -qtyMultiplier : qtyMultiplier, true)
-        qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); updateQtyBadge(); applyDeals()
+        clearQtyEntry(); applyDeals()
         showToast(`${name} $${price.toFixed(2)} added`, 'success')
         returnToMainKeyboard(); refocus()
       }
@@ -1881,8 +1962,8 @@ $('#posGrid').addEventListener('click', async e => {
 async function printHeldSaleReceipt (txnId, txnP) {
   const settings = await window.pos.getAllSettings()
   await window.pos.printReceipt({
-    storeName: settings.store_name || 'BoundOS',
-    storeAddress: '', storePhone: '', storeAbn: '',
+    storeName: settings.store_name || 'YieldPOS',
+    storeAddress: '', storePhone: '', storeHours: settings.store_hours || '', storeAbn: '',
     header: '*** HELD SALE ***',
     date: new Date().toLocaleString('en-AU'),
     txnId,
@@ -1930,11 +2011,13 @@ async function handleFuncButton (action) {
       } catch (e) { showToast('Drawer: ' + e.message, 'error') }
       break
     case 'movedrawer':
-      try { const dr = await window.pos.openDrawer(); if (dr?.error) showToast('Drawer: ' + dr.error, 'error') } catch (_) {}
-      await window.pos.logCashDrawer({ staff_id: currentStaff?.id, action: 'open', note: 'Log out — drawer opened' })
-      window.pos.logAudit({ staff_id: currentStaff?.id, staff_name: currentStaff?.name, action: 'logout', detail: 'Logged out via drawer button' })
+      window.pos.openDrawer({ skipProbe: true }).then(dr => {
+        if (dr?.error) showToast('Drawer: ' + dr.error, 'info')
+      }).catch(() => {})
+      window.pos.logCashDrawer({ staff_id: currentStaff?.id, action: 'open', note: 'Log out - drawer requested' }).catch(() => {})
+      window.pos.logAudit({ staff_id: currentStaff?.id, staff_name: currentStaff?.name, action: 'logout', detail: 'Logged out via drawer button' }).catch(() => {})
       if (returnMode) { returnMode = false; $('#returnBanner').classList.remove('active') }
-      numBuf = ''; qtyMultiplier = 1; updateNumDisplay()
+      clearQtyEntry()
       closeAllModals()
       showLogin()
       break
@@ -1957,7 +2040,7 @@ async function handleFuncButton (action) {
     case 'lock':
       if (returnMode) { returnMode = false; $('#returnBanner').classList.remove('active') }
       if (supervisorMode) { supervisorMode = false; $('#supervisorBanner').classList.remove('active'); if (supervisorTimer) clearTimeout(supervisorTimer) }
-      numBuf = ''; qtyMultiplier = 1; updateNumDisplay()
+      clearQtyEntry()
       closeAllModals()
       showLogin()
       break
@@ -1975,6 +2058,7 @@ async function handleFuncButton (action) {
     case 'endofday': showEodModal(); break
     case 'product_lookup': showProductLookup(); break
     case 'item_search': showItemSearchModal(); break
+    case 'management': openManagementScreen(); break
   }
 }
 
@@ -2177,13 +2261,29 @@ $('#productGrid').addEventListener('click', async e => {
 
 function updateQtyBadge () {
   const badge = $('#qtyBadge')
-  if (qtyMultiplier > 1) { badge.textContent = `QTY ×${qtyMultiplier}`; badge.classList.add('show') }
+  if (qtyExplicit) { badge.textContent = `QTY ×${qtyMultiplier}`; badge.classList.add('show') }
   else badge.classList.remove('show')
+}
+
+function clearQtyEntry () {
+  qtyMultiplier = 1
+  qtyExplicit = false
+  numBuf = ''
+  updateNumDisplay()
+  updateQtyBadge()
 }
 
 function returnToMainKeyboard () {
   if (posCurrentPage !== 1) { posPageHistory = []; posCurrentPage = 1; renderPosGrid() }
   if (sectionStack.length) goHome()
+}
+
+function addEachProductToCart (product, qty) {
+  cart.addProduct(product, returnMode ? -qty : qty, true)
+  applyDeals()
+  showToast(`${product.name}${qty > 1 ? ' ×' + qty : ''}${returnMode ? ' (return)' : ''} added`, 'success')
+  clearQtyEntry()
+  returnToMainKeyboard(); si.value = ''; refocus()
 }
 
 function addToCart (product) {
@@ -2194,18 +2294,17 @@ function addToCart (product) {
       const p = product.active_price || product.price
       cart.addProduct(product, qty, true); applyDeals()
       showToast(`${product.name} ${sw.toFixed(3)} kg × ${money(p)} = ${money(sw * p)}`, 'success')
-      qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); updateQtyBadge()
+      clearQtyEntry()
       returnToMainKeyboard(); refocus()
       return
     }
     pendingWeightProduct = product; showWeightModal(product); return
   }
-  const qty = returnMode ? -qtyMultiplier : qtyMultiplier
-  cart.addProduct(product, qty, true)
-  applyDeals()
-  showToast(`${product.name}${Math.abs(qtyMultiplier) > 1 ? ' ×' + Math.abs(qtyMultiplier) : ''}${returnMode ? ' (return)' : ''} added`, 'success')
-  qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); updateQtyBadge()
-  returnToMainKeyboard(); si.value = ''; refocus()
+  if (!qtyExplicit) {
+    showQuantityModal(product)
+    return
+  }
+  addEachProductToCart(product, qtyMultiplier)
 }
 
 // ═══ Search / Barcode ═════════════════════════════════════════════
@@ -2250,6 +2349,43 @@ function showNotFoundAlert(code) {
   overlay.querySelector('button').focus()
 }
 
+// ═══ Quantity Modal ════════════════════════════════════════════════
+let quantityBuf = ''
+let quantityProduct = null
+function showQuantityModal (product) {
+  quantityProduct = product
+  quantityBuf = ''
+  $('#quantityTitle').textContent = product.name
+  $('#quantitySub').textContent = `Quantity @ ${money(product.active_price ?? (product.price || 0))} each`
+  updateQuantityDisplay()
+  $('#quantityModal').classList.add('show')
+}
+function updateQuantityDisplay () {
+  $('#quantityDisplay').textContent = quantityBuf || '0'
+}
+$('#quantityPad').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return
+  const v = b.dataset.val
+  if (v === 'C') quantityBuf = ''
+  else {
+    quantityBuf += v
+    quantityBuf = String(Math.min(parseInt(quantityBuf || '0') || 0, 999))
+  }
+  updateQuantityDisplay()
+})
+$('#quantityConfirm').addEventListener('click', () => {
+  const qty = parseInt(quantityBuf || '0')
+  if (!qty || qty <= 0 || !quantityProduct) return
+  addEachProductToCart(quantityProduct, qty)
+  $('#quantityModal').classList.remove('show')
+  quantityProduct = null
+})
+$('#quantityCancel').addEventListener('click', () => {
+  $('#quantityModal').classList.remove('show')
+  quantityProduct = null
+  refocus()
+})
+
 // ═══ Open Price Modal ═════════════════════════════════════════════
 let openPriceBuf = '', openPriceLabel = ''
 let openPriceProduct = null
@@ -2274,7 +2410,7 @@ $('#openPriceConfirm').addEventListener('click', () => {
     ? { ...openPriceProduct, price, active_price: price }
     : { id: 'OPEN_' + Date.now(), name: openPriceLabel, price, active_price: price, unit: 'each', tax_rate: 0.10, is_special: false }
   cart.addProduct(prod, returnMode ? -qtyMultiplier : qtyMultiplier, true)
-  qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); updateQtyBadge(); applyDeals()
+  clearQtyEntry(); applyDeals()
   showToast(`${openPriceLabel} $${price.toFixed(2)} added`, 'success')
   $('#openPriceModal').classList.remove('show'); returnToMainKeyboard(); refocus()
   openPriceProduct = null
@@ -2350,7 +2486,7 @@ $('#weighedOpenConfirm').addEventListener('click', () => {
   applyDeals()
   showToast(`${weighedOpenLabel} ${w.toFixed(3)} kg × $${price.toFixed(2)} = $${(w*price).toFixed(2)} added`, 'success')
   $('#weighedOpenModal').classList.remove('show')
-  qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); updateQtyBadge()
+  clearQtyEntry()
   returnToMainKeyboard(); refocus()
 })
 $('#weighedOpenCancel').addEventListener('click', () => { $('#weighedOpenModal').classList.remove('show'); refocus() })
@@ -2498,7 +2634,7 @@ $('#weightConfirm').addEventListener('click', () => {
   showToast(`${pendingWeightProduct.name} added`, 'success')
   cancelScaleAwait()
   $('#weightModal').classList.remove('show'); pendingWeightProduct = null
-  qtyMultiplier = 1; numBuf = ''; updateNumDisplay(); updateQtyBadge()
+  clearQtyEntry()
   returnToMainKeyboard(); si.value = ''; refocus()
 })
 $('#weightCancel').addEventListener('click', () => { cancelScaleAwait(); $('#weightModal').classList.remove('show'); pendingWeightProduct = null; refocus() })
@@ -2838,10 +2974,10 @@ $('#recallList').addEventListener('click', async e => {
       const s = await window.pos.getAllSettings()
       const date = txn?.created_at ? new Date(txn.created_at + (txn.created_at.includes('Z') ? '' : 'Z')).toLocaleString('en-AU') : ''
       const receiptData = {
-        storeName: s.store_name || 'BoundOS', storeAddress: s.store_address || '',
+        storeName: s.store_name || 'YieldPOS', storeAddress: s.store_address || '', storeHours: s.store_hours || '',
         storePhone: s.store_phone || '', storeAbn: s.store_abn || '',
         header: s.receipt_header || '', date,
-        txnId, receiptNumber: txn?.receipt_number || null,
+        txnId, receiptNumber: txn?.receipt_number || null, barcode: txnId,
         staffName: txn?.staff_name || currentStaff?.name || '', staffRole: currentStaff?.role || 'cashier',
         registerId: s.register_id || 'LANE01',
         items: cart.items, subtotal: cart.subtotal, tax: cart.tax, discount: cart.discount, total: cart.total,
@@ -3349,10 +3485,10 @@ function renderSplitPayments () {
 async function buildReceiptData (txn, r) {
   const s = await window.pos.getAllSettings()
   return {
-    storeName: s.store_name || 'BoundOS', storeAddress: s.store_address || '',
+    storeName: s.store_name || 'YieldPOS', storeAddress: s.store_address || '', storeHours: s.store_hours || '',
     storePhone: s.store_phone || '', storeAbn: s.store_abn || '',
     header: s.receipt_header || '', date: new Date().toLocaleString('en-AU'),
-    txnId: r.id, receiptNumber: r.receiptNumber || null,
+    txnId: r.id, receiptNumber: r.receiptNumber || null, barcode: r.id,
     staffName: currentStaff?.name || '', staffRole: currentStaff?.role || 'cashier',
     registerId: s.register_id || 'LANE01',
     items: txn.items, subtotal: txn.subtotal, tax: txn.tax, discount: txn.discount, total: txn.total,
@@ -3499,11 +3635,12 @@ function showCashModal () {
   pendingPayments = []
   const total = cart.total
   const isRefund = total < 0
+  refreshEftposAcceptedButtonSetting(isRefund)
   const rounded = cashRound(Math.abs(total))
   const rounding = +(rounded - Math.abs(total)).toFixed(2)
   $('#cashModalTitle').textContent = isRefund ? 'REFUND' : 'TOTAL DUE'
   $('#cashModalTotal').textContent = isRefund ? `-${money(rounded)}` : money(rounded)
-  $('#payHeader').style.background = isRefund ? 'linear-gradient(135deg,#dc2626,#b91c1c)' : 'linear-gradient(135deg,#3a9c5e,#2d7a4a)'
+  $('#payHeader').style.background = isRefund ? '#dc2626' : '#15803d'
   // Show rounding line if applicable
   const roundEl = $('#cashRoundingLine')
   if (roundEl) {
@@ -3512,7 +3649,7 @@ function showCashModal () {
   }
   cashNumBuf = ''; updateCashDisplay(); $('#changeDisplay').textContent = ''; $('#changeBreakdown').style.display = 'none'; $('#cashConfirm').disabled = true
   $('#splitCardBtn').style.display = isRefund ? 'none' : ''
-  $('#payOptEftposManual').style.display = isRefund ? 'none' : ''
+  applyEftposAcceptedButtonVisibility(isRefund)
   renderSplitPayments()
   $('#cashModal').classList.add('show')
 }
@@ -3667,10 +3804,10 @@ $('#cashConfirm').addEventListener('click', async () => {
     const r = await window.pos.saveTransaction(txn)
     const s = await window.pos.getAllSettings()
     const receiptData = {
-      storeName: s.store_name || 'BoundOS', storeAddress: s.store_address || '',
+      storeName: s.store_name || 'YieldPOS', storeAddress: s.store_address || '', storeHours: s.store_hours || '',
       storePhone: s.store_phone || '', storeAbn: s.store_abn || '',
       header: s.receipt_header || '', date: new Date().toLocaleString('en-AU'),
-      txnId: r.id, receiptNumber: r.receiptNumber || null,
+      txnId: r.id, receiptNumber: r.receiptNumber || null, barcode: r.id,
       staffName: currentStaff?.name || '', staffRole: currentStaff?.role || 'cashier',
       registerId: s.register_id || 'LANE01',
       items: txn.items, subtotal: txn.subtotal, tax: txn.tax, discount: txn.discount, total: txn.total,
@@ -4019,8 +4156,9 @@ function updateEodTotals () {
       varEl.textContent = `Difference: ${signedMoney(diff)}`
       varEl.style.background = '#fee2e2'; varEl.style.color = '#991b1b'
     }
-    instructionEl.style.display = 'block'
-    instructionEl.textContent = eodDrawerInstruction(total, eodDesiredFloatAmount)
+    const instruction = eodDrawerInstruction(total, eodDesiredFloatAmount)
+    instructionEl.style.display = instruction ? 'block' : 'none'
+    instructionEl.textContent = instruction
   } else {
     varEl.style.display = 'none'
     instructionEl.style.display = 'none'
@@ -4044,29 +4182,40 @@ $('#eodSubmit').addEventListener('click', async () => {
   const variance = countedTotal - eodExpectedAmount
   const notes = $('#eodNotes').value.trim()
   const drawerInstruction = eodDrawerInstruction(countedTotal, eodDesiredFloatAmount)
+  const eodNoteParts = [
+    `EOD count: ${money(countedTotal)}`,
+    `Expected: ${money(eodExpectedAmount)}`,
+    `Difference: ${signedMoney(variance)}`,
+    ...(eodDesiredFloatAmount > 0 ? [`Desired Float: ${money(eodDesiredFloatAmount)}`] : []),
+    ...(notes ? [notes] : [])
+  ]
 
   // Log to cash_drawer
   await window.pos.logCashDrawer({
     staff_id: currentStaff?.id,
     action: 'close',
     amount: countedTotal,
-    note: `EOD count: ${money(countedTotal)} | Expected: ${money(eodExpectedAmount)} | Difference: ${signedMoney(variance)} | Desired Float: ${eodDesiredFloatAmount > 0 ? money(eodDesiredFloatAmount) : 'Not set'}${notes ? ' | ' + notes : ''}`
+    note: eodNoteParts.join(' | ')
   })
 
   // Print EOD report
   try {
     const settings = await window.pos.getAllSettings()
     const zReport = await window.pos.zReport()
+    const registerId = settings.register_id || 'LANE01'
+    const eodTotals = await window.pos.eodRegisterTotals({ register_id: registerId }).catch(() => ({ eftpos_total: 0 }))
+    const eftposTotal = Number(eodTotals?.eftpos_total || 0)
     const receiptData = {
-      storeName: settings.store_name || 'BoundOS',
+      storeName: settings.store_name || 'YieldPOS',
       storeAddress: settings.store_address || '',
+      storeHours: settings.store_hours || '',
       storePhone: settings.store_phone || '',
       storeAbn: settings.store_abn || '',
       header: '*** END OF DAY REPORT ***',
       date: new Date().toLocaleString('en-AU'),
       txnId: 'EOD-' + new Date().toISOString().slice(0, 10),
       staffName: currentStaff?.name || '',
-      registerId: settings.register_id || 'LANE01',
+      registerId,
       items: breakdown.map(b => ({ name: b.label, qty: b.qty, unit_price: EOD_DENOMINATIONS.find(d => d.label === b.label)?.value || 0, line_total: b.subtotal, discount: 0 })),
       subtotal: countedTotal,
       tax: 0,
@@ -4074,13 +4223,18 @@ $('#eodSubmit').addEventListener('click', async () => {
       total: countedTotal,
       payments: [
         { method: 'Expected in Drawer', amount: eodExpectedAmount },
-        { method: 'Counted', amount: countedTotal },
+        { method: 'Cash Count', amount: countedTotal },
+        { method: 'EFTPOS Total', amount: eftposTotal },
         { method: 'Difference', amount: Math.abs(variance) },
         ...(eodDesiredFloatAmount > 0 ? [{ method: 'Desired Float', amount: eodDesiredFloatAmount }] : []),
       ],
       change: 0,
       status: 'eod',
-      footer: `${zReport?.summary?.txn_count || 0} transactions today | Sales: ${money(zReport?.summary?.total_sales || 0)}\n${drawerInstruction}\n${notes || 'End of Day - Drawer Closed'}`
+      footer: [
+        `${zReport?.summary?.txn_count || 0} transactions today | Sales: ${money(zReport?.summary?.total_sales || 0)}`,
+        drawerInstruction,
+        notes || 'End of Day - Drawer Closed'
+      ].filter(Boolean).join('\n')
     }
     await window.pos.printReceipt(receiptData)
     showToast('EOD report printed', 'success')
@@ -4300,8 +4454,9 @@ async function init () {
 
   try {
     // Critical path — get keyboard interactive ASAP
-    const [, categories] = await Promise.all([
+    const [, , categories] = await Promise.all([
       refreshBranding(),
+      initAutoReceiptSetting(),
       window.pos.getCategories()
     ])
     allCategories = categories
@@ -4353,24 +4508,15 @@ async function init () {
   setInterval(async () => {
     try {
       const status = await window.pos.getLanStatus()
-      const dot = document.getElementById('dotServer')
-      if (!dot) return
-      if (!status || status.mode === 'off') dot.style.background = '#888'
-      else if (status.connected) dot.style.background = '#4fbd77'
-      else dot.style.background = '#a44'
+      if (!status || status.mode === 'off') setHealthDot('dotServer', null, 'LAN sync is off')
+      else setHealthDot('dotServer', !!status.connected, status.connected ? `LAN ${status.mode} connected` : `LAN ${status.mode} disconnected`)
     } catch (_) {}
   }, 10000)
+  refreshHardwareIndicators()
+  setInterval(refreshHardwareIndicators, 10000)
 
   // Live clock
-  function updateClock () {
-    const now = new Date()
-    const h = String(now.getHours()).padStart(2, '0')
-    const m = String(now.getMinutes()).padStart(2, '0')
-    const el = document.getElementById('statusClock')
-    if (el) el.textContent = `${h}:${m}`
-  }
   updateClock()
-  setInterval(updateClock, 15000)
 
   window.pos.getVersion().then(v => { const el = document.getElementById('appVersion'); if (el) el.textContent = v }).catch(() => {})
 }
@@ -4477,12 +4623,16 @@ window.pos.onScaleWeight((data) => {
 })
 
 // ── Admin switch (no PIN required — role-based tabs are handled on admin page) ──
+function openManagementScreen () {
+  window.pos.navigate('admin.html?mode=register&from=register')
+}
+
 ;(function() {
   const btn = document.getElementById('adminSwitchBtn')
   if (!btn) return
   btn.addEventListener('click', e => {
     e.preventDefault()
-    window.pos.navigate('admin.html?mode=register&from=register')
+    openManagementScreen()
   })
 })()
 </script>

@@ -1,0 +1,5701 @@
+[
+  {
+    "db": "C:\\Users\\Matthias\\Downloads\\mcpos\\db\\crisp-pos.sqlite",
+    "backup": "C:\\Users\\Matthias\\Downloads\\mcpos\\db\\crisp-pos.before-price-list-20260520-212050.sqlite",
+    "updated": 2932,
+    "inserted": 11,
+    "moved_conflicts": 6,
+    "relinked_buttons": 0,
+    "duplicates_resolved": 2,
+    "changes": [
+      {
+        "action": "updated",
+        "id": "0786972f-7f03-4abb-9e92-eb7d008db3fa",
+        "from": {
+          "plu": "5791",
+          "name": "MANDARINES AFROURER   KG",
+          "price": 7.99,
+          "category_id": "cat-fruit"
+        },
+        "to": {
+          "source_row": 8,
+          "pcode": "1008281",
+          "plu": "5791",
+          "barcode": "5791",
+          "name": "MANDARINES AFROURER KG",
+          "norm_name": "MANDARINES AFROURER KG",
+          "price": 7.99,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "c24b4a51-2a14-4eb4-9d47-0bbd96195cec",
+        "from": {
+          "plu": "723",
+          "name": "FRUIT & VEG EA",
+          "price": 0.0,
+          "category_id": "cat-fruit"
+        },
+        "to": {
+          "source_row": 9,
+          "pcode": "386",
+          "plu": "723",
+          "barcode": "723",
+          "name": "(S) FRUIT & VEG EA",
+          "norm_name": "FRUIT VEG EA",
+          "price": 0.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "5cc58403-288c-4037-8d9f-3f3653c65b16",
+        "from": {
+          "plu": "722",
+          "name": "FRUIT & VEG KG",
+          "price": 14.99,
+          "category_id": "cat-fruit"
+        },
+        "to": {
+          "source_row": 10,
+          "pcode": "385",
+          "plu": "722",
+          "barcode": "722",
+          "name": "(S) FRUIT & VEG KG",
+          "norm_name": "FRUIT VEG KG",
+          "price": 14.99,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "228fad78-6ca2-4395-afe2-c2e9c0c7ed3f",
+        "from": {
+          "plu": "709",
+          "name": "PAW PAW CUT",
+          "price": 4.89,
+          "category_id": "cat-fruit"
+        },
+        "to": {
+          "source_row": 11,
+          "pcode": "372",
+          "plu": "709",
+          "barcode": "709",
+          "name": "(S) PAW PAW CUT",
+          "norm_name": "PAW PAW CUT",
+          "price": 4.89,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "58be16ef-9130-4ce4-bed7-036e46e25889",
+        "from": {
+          "plu": "732",
+          "name": "PAW PAW RED CUT KG",
+          "price": 5.99,
+          "category_id": "cat-fruit"
+        },
+        "to": {
+          "source_row": 12,
+          "pcode": "394",
+          "plu": "732",
+          "barcode": "732",
+          "name": "(S) PAW PAW RED CUT KG",
+          "norm_name": "PAW PAW RED CUT KG",
+          "price": 5.99,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "778d15c5-5d54-4337-874d-be265328b86a",
+        "from": {
+          "plu": "795",
+          "name": "RED PAPAYA KG",
+          "price": 5.99,
+          "category_id": "cat-fruit"
+        },
+        "to": {
+          "source_row": 13,
+          "pcode": "8722",
+          "plu": "795",
+          "barcode": "795",
+          "name": "(S) RED PAPAYA KG",
+          "norm_name": "RED PAPAYA KG",
+          "price": 5.99,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "c33d8cac-f730-4078-aa5c-a61997a03e43",
+        "from": {
+          "plu": "799",
+          "name": "SEEDLESS WATERMELON CUT KG",
+          "price": 1.89,
+          "category_id": "cat-fruit"
+        },
+        "to": {
+          "source_row": 14,
+          "pcode": "1834",
+          "plu": "799",
+          "barcode": "799",
+          "name": "(S) SEEDLESS WATERMELON CUT KG",
+          "norm_name": "SEEDLESS WATERMELON CUT KG",
+          "price": 1.89,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "3c12f5fa-663f-4d45-9a76-1f6e7c797cb7",
+        "from": {
+          "plu": "714",
+          "name": "WATERMELON KG",
+          "price": 2.29,
+          "category_id": "cat-fruit"
+        },
+        "to": {
+          "source_row": 15,
+          "pcode": "377",
+          "plu": "714",
+          "barcode": "714",
+          "name": "(S) WATERMELON KG",
+          "norm_name": "WATERMELON KG",
+          "price": 2.29,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "779372af-ecee-4ee6-b5bb-0be83342ad3a",
+        "from": {
+          "plu": "719",
+          "name": "SEEDLESS WATERMELON WHOLE",
+          "price": 1.69,
+          "category_id": "cat-fruit"
+        },
+        "to": {
+          "source_row": 16,
+          "pcode": "9962",
+          "plu": "719",
+          "barcode": "719",
+          "name": "(S)SEEDLESS WATERMELON WHOLE",
+          "norm_name": "SEEDLESS WATERMELON WHOLE",
+          "price": 1.69,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "moved_conflict",
+        "old_id": "p-banana",
+        "old_name": "Bananas",
+        "old_plu": "4011",
+        "new_plu": "500039605485950017"
+      },
+      {
+        "action": "inserted",
+        "id": "price-list-4011",
+        "to": {
+          "source_row": 19,
+          "pcode": "1007781",
+          "plu": "4011",
+          "barcode": "4011",
+          "name": "APPLE PINK LADY KG",
+          "norm_name": "APPLE PINK LADY KG",
+          "price": 8.99,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "moved_conflict",
+        "old_id": "p-apple-rg",
+        "old_name": "Royal Gala Apples",
+        "old_plu": "4015",
+        "new_plu": "500039605485950018"
+      },
+      {
+        "action": "moved_conflict",
+        "old_id": "p-kb-pg7-btn8",
+        "old_name": "Large Royal Gala Apple",
+        "old_plu": "4015",
+        "new_plu": "500039605485950019"
+      },
+      {
+        "action": "inserted",
+        "id": "price-list-4015",
+        "to": {
+          "source_row": 20,
+          "pcode": "1007782",
+          "plu": "4015",
+          "barcode": "4015",
+          "name": "APPLE PINK LADY SMALL KG",
+          "norm_name": "APPLE PINK LADY SMALL KG",
+          "price": 4.99,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "moved_conflict",
+        "old_id": "p-lettuce",
+        "old_name": "Iceberg Lettuce",
+        "old_plu": "4061",
+        "new_plu": "500039605485950020"
+      },
+      {
+        "action": "inserted",
+        "id": "price-list-4061",
+        "to": {
+          "source_row": 22,
+          "pcode": "1007800",
+          "plu": "4061",
+          "barcode": "4061",
+          "name": "APPLE ROYAL GALA LGE KG",
+          "norm_name": "APPLE ROYAL GALA LGE KG",
+          "price": 6.89,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "f68fc092-a1c2-4833-a198-1717786eaaa3",
+        "from": {
+          "plu": "4155",
+          "name": "AVOCADOES  SMALL EA",
+          "price": 1.0,
+          "category_id": "cat-fruit"
+        },
+        "to": {
+          "source_row": 30,
+          "pcode": "1007837",
+          "plu": "4155",
+          "barcode": "4155",
+          "name": "AVOCADOES SMALL EA",
+          "norm_name": "AVOCADOES SMALL EA",
+          "price": 1.0,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "9f6a5df7-9e75-4a21-9747-c2b61e6dc347",
+        "from": {
+          "plu": "4201",
+          "name": "BANANAS CAVENDISH  KG",
+          "price": 4.99,
+          "category_id": "cat-fruit"
+        },
+        "to": {
+          "source_row": 33,
+          "pcode": "1007847",
+          "plu": "4201",
+          "barcode": "4201",
+          "name": "BANANAS CAVENDISH KG",
+          "norm_name": "BANANAS CAVENDISH KG",
+          "price": 4.99,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "a2f4f0c7-73a3-4c1c-9e4c-bf807d128f25",
+        "from": {
+          "plu": "8292",
+          "name": "BLOOD ORANGES  KG",
+          "price": 4.89,
+          "category_id": "cat-fruit"
+        },
+        "to": {
+          "source_row": 45,
+          "pcode": "20679",
+          "plu": "8292",
+          "barcode": "8292",
+          "name": "BLOOD ORANGES KG",
+          "norm_name": "BLOOD ORANGES KG",
+          "price": 4.89,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "7bd23c19-e702-49ec-abde-35f128e3b7c2",
+        "from": {
+          "plu": "9317948009233",
+          "name": "BLUEBERRIES  125G",
+          "price": 3.99,
+          "category_id": "cat-fruit"
+        },
+        "to": {
+          "source_row": 46,
+          "pcode": "26575",
+          "plu": "9317948009233",
+          "barcode": "9317948009233",
+          "name": "BLUEBERRIES 125G",
+          "norm_name": "BLUEBERRIES 125G",
+          "price": 3.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "972a4a26-e692-4b11-8f5f-b6afc18f049a",
+        "from": {
+          "plu": "9327403000101",
+          "name": "BLUEBERRY FRESH  125G",
+          "price": 5.99,
+          "category_id": "cat-fruit"
+        },
+        "to": {
+          "source_row": 54,
+          "pcode": "24942",
+          "plu": "9327403000101",
+          "barcode": "9327403000101",
+          "name": "BLUEBERRY FRESH 125G",
+          "norm_name": "BLUEBERRY FRESH 125G",
+          "price": 5.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "6b16cc3c-9333-4ecc-853c-a7faee9c5342",
+        "from": {
+          "plu": "4491",
+          "name": "GRAPE  WHITE SEEDLESS KG",
+          "price": 7.89,
+          "category_id": "cat-fruit"
+        },
+        "to": {
+          "source_row": 76,
+          "pcode": "1007913",
+          "plu": "4491",
+          "barcode": "4491",
+          "name": "GRAPE WHITE SEEDLESS KG",
+          "norm_name": "GRAPE WHITE SEEDLESS KG",
+          "price": 7.89,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "20be4cff-346a-456f-8fe5-f2aa70fdea93",
+        "from": {
+          "plu": "4681",
+          "name": "IMPERIAL MANDARINS  KG",
+          "price": 2.99,
+          "category_id": "cat-fruit"
+        },
+        "to": {
+          "source_row": 83,
+          "pcode": "1007977",
+          "plu": "4681",
+          "barcode": "4681",
+          "name": "IMPERIAL MANDARINS KG",
+          "norm_name": "IMPERIAL MANDARINS KG",
+          "price": 2.99,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "f1d97061-14f2-42f1-9fd6-32f624284164",
+        "from": {
+          "plu": "3812",
+          "name": "JAZZ  APPLE  KG",
+          "price": 7.99,
+          "category_id": "cat-fruit"
+        },
+        "to": {
+          "source_row": 84,
+          "pcode": "19000",
+          "plu": "3812",
+          "barcode": "3812",
+          "name": "JAZZ APPLE KG",
+          "norm_name": "JAZZ APPLE KG",
+          "price": 7.99,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "5b250a00-623d-43d7-b467-ee052798bfe3",
+        "from": {
+          "plu": "4621",
+          "name": "LEMONS FRESH  KG",
+          "price": 5.99,
+          "category_id": "cat-fruit"
+        },
+        "to": {
+          "source_row": 90,
+          "pcode": "1007951",
+          "plu": "4621",
+          "barcode": "4621",
+          "name": "LEMONS FRESH KG",
+          "norm_name": "LEMONS FRESH KG",
+          "price": 5.99,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "ae18e675-c545-4e3e-a6da-9b2f06165ff3",
+        "from": {
+          "plu": "4665",
+          "name": "MANDARINES MURCOT  KG",
+          "price": 5.89,
+          "category_id": "cat-fruit"
+        },
+        "to": {
+          "source_row": 98,
+          "pcode": "1007969",
+          "plu": "4665",
+          "barcode": "4665",
+          "name": "MANDARINES MURCOT KG",
+          "norm_name": "MANDARINES MURCOT KG",
+          "price": 5.89,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "26d128bc-df65-4a87-96f5-d7031bb35317",
+        "from": {
+          "plu": "5772",
+          "name": "KEITT  EA",
+          "price": 1.99,
+          "category_id": "cat-fruit"
+        },
+        "to": {
+          "source_row": 101,
+          "pcode": "1008276",
+          "plu": "5772",
+          "barcode": "5772",
+          "name": "KEITT EA",
+          "norm_name": "KEITT EA",
+          "price": 1.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "603ee4b1-887a-47a4-8cd0-66d140e58a45",
+        "from": {
+          "plu": "4851",
+          "name": "NECTARINE WHITE  KG",
+          "price": 6.99,
+          "category_id": "cat-fruit"
+        },
+        "to": {
+          "source_row": 110,
+          "pcode": "1008029",
+          "plu": "4851",
+          "barcode": "4851",
+          "name": "NECTARINE WHITE KG",
+          "norm_name": "NECTARINE WHITE KG",
+          "price": 6.99,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "107900f3-9ca7-43ce-bfa9-15da8d35b356",
+        "from": {
+          "plu": "5461",
+          "name": "PAW PAW GREEN  KG",
+          "price": 6.99,
+          "category_id": "cat-fruit"
+        },
+        "to": {
+          "source_row": 122,
+          "pcode": "1008219",
+          "plu": "5461",
+          "barcode": "5461",
+          "name": "PAW PAW GREEN KG",
+          "norm_name": "PAW PAW GREEN KG",
+          "price": 6.99,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "99a104eb-fd2d-4108-81c2-c2448fa9ac1c",
+        "from": {
+          "plu": "5081",
+          "name": "PEACH YELLOW  KG",
+          "price": 6.99,
+          "category_id": "cat-fruit"
+        },
+        "to": {
+          "source_row": 127,
+          "pcode": "1008104",
+          "plu": "5081",
+          "barcode": "5081",
+          "name": "PEACH YELLOW KG",
+          "norm_name": "PEACH YELLOW KG",
+          "price": 6.99,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "fe30f455-8d34-4fce-bfe0-16a59beba383",
+        "from": {
+          "plu": "5022",
+          "name": "PERSIMMON  KG",
+          "price": 12.99,
+          "category_id": "cat-fruit"
+        },
+        "to": {
+          "source_row": 133,
+          "pcode": "1008089",
+          "plu": "5022",
+          "barcode": "5022",
+          "name": "PERSIMMON KG",
+          "norm_name": "PERSIMMON KG",
+          "price": 12.99,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "f669e020-89bd-49f0-a9dd-bb3f9e7d2dfc",
+        "from": {
+          "plu": "5422",
+          "name": "PINEAPPLE  EXTRA LARGE",
+          "price": 7.99,
+          "category_id": "cat-fruit"
+        },
+        "to": {
+          "source_row": 136,
+          "pcode": "18231",
+          "plu": "5422",
+          "barcode": "5422",
+          "name": "PINEAPPLE EXTRA LARGE",
+          "norm_name": "PINEAPPLE EXTRA LARGE",
+          "price": 7.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "e146137b-5c5e-4703-993a-1424a27f9b92",
+        "from": {
+          "plu": "5241",
+          "name": "PLUMS SUGAR  KG",
+          "price": 11.99,
+          "category_id": "cat-fruit"
+        },
+        "to": {
+          "source_row": 146,
+          "pcode": "1008160",
+          "plu": "5241",
+          "barcode": "5241",
+          "name": "PLUMS SUGAR KG",
+          "norm_name": "PLUMS SUGAR KG",
+          "price": 11.99,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "c33e93b1-7d5a-4980-a4a1-76627027814d",
+        "from": {
+          "plu": "5121",
+          "name": "RED  PLUMS KG",
+          "price": 9.89,
+          "category_id": "cat-fruit"
+        },
+        "to": {
+          "source_row": 155,
+          "pcode": "18371",
+          "plu": "5121",
+          "barcode": "5121",
+          "name": "RED PLUMS KG",
+          "norm_name": "RED PLUMS KG",
+          "price": 9.89,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "moved_conflict",
+        "old_id": "p-mushroom",
+        "old_name": "Cup Mushrooms",
+        "old_plu": "4065",
+        "new_plu": "500039605485950021"
+      },
+      {
+        "action": "inserted",
+        "id": "price-list-4065",
+        "to": {
+          "source_row": 159,
+          "pcode": "1007801",
+          "plu": "4065",
+          "barcode": "4065",
+          "name": "SM ROYAL GALA",
+          "norm_name": "SM ROYAL GALA",
+          "price": 4.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "4183576f-d2b7-4b15-81f0-fc41ec217f6d",
+        "from": {
+          "plu": "4801",
+          "name": "WATERMELON  SEEDLESS WHOLE KG",
+          "price": 2.09,
+          "category_id": "cat-fruit"
+        },
+        "to": {
+          "source_row": 178,
+          "pcode": "1008015",
+          "plu": "4801",
+          "barcode": "4801",
+          "name": "WATERMELON SEEDLESS WHOLE KG",
+          "norm_name": "WATERMELON SEEDLESS WHOLE KG",
+          "price": 2.09,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "1.FRUIT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "2dec79fd-dd9b-4738-8706-12447cb0708d",
+        "from": {
+          "plu": "9312722000055",
+          "name": "BYRON BAY CHOC  250G",
+          "price": 8.95,
+          "category_id": "584d2762-9e80-43d1-9f05-4477731ebece"
+        },
+        "to": {
+          "source_row": 216,
+          "pcode": "7564",
+          "plu": "9312722000055",
+          "barcode": "9312722000055",
+          "name": "BYRON BAY CHOC 250G",
+          "norm_name": "BYRON BAY CHOC 250G",
+          "price": 8.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "584d2762-9e80-43d1-9f05-4477731ebece",
+          "category_name": "Confectionery",
+          "dept": "10.CONFECT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "1bcfca79-a6f9-4f17-a6cf-9f61524dffce",
+        "from": {
+          "plu": "9310881910383",
+          "name": "D/LEA LIQ TWIST ORIG  280GM~",
+          "price": 1.78,
+          "category_id": "584d2762-9e80-43d1-9f05-4477731ebece"
+        },
+        "to": {
+          "source_row": 257,
+          "pcode": "516015",
+          "plu": "9310881910383",
+          "barcode": "9310881910383",
+          "name": "D/LEA LIQ TWIST ORIG 280GM~",
+          "norm_name": "D LEA LIQ TWIST ORIG 280GM",
+          "price": 1.78,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "584d2762-9e80-43d1-9f05-4477731ebece",
+          "category_name": "Confectionery",
+          "dept": "10.CONFECT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "c9eeeb22-8f1d-4e80-92b2-f9ddb00a5ed3",
+        "from": {
+          "plu": "9348728000805",
+          "name": "MILK CHOCOLATE  BAR  200G",
+          "price": 12.95,
+          "category_id": "584d2762-9e80-43d1-9f05-4477731ebece"
+        },
+        "to": {
+          "source_row": 326,
+          "pcode": "26801",
+          "plu": "9348728000805",
+          "barcode": "9348728000805",
+          "name": "MILK CHOCOLATE BAR 200G",
+          "norm_name": "MILK CHOCOLATE BAR 200G",
+          "price": 12.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "584d2762-9e80-43d1-9f05-4477731ebece",
+          "category_name": "Confectionery",
+          "dept": "10.CONFECT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "75b4c93d-721c-47ed-92e2-bf8cc7d4cf3c",
+        "from": {
+          "plu": "4000417018007",
+          "name": "RITTER  CHOCOLATE",
+          "price": 6.99,
+          "category_id": "584d2762-9e80-43d1-9f05-4477731ebece"
+        },
+        "to": {
+          "source_row": 372,
+          "pcode": "1002373",
+          "plu": "4000417018007",
+          "barcode": "4000417018007",
+          "name": "RITTER CHOCOLATE",
+          "norm_name": "RITTER CHOCOLATE",
+          "price": 6.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "584d2762-9e80-43d1-9f05-4477731ebece",
+          "category_name": "Confectionery",
+          "dept": "10.CONFECT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "39c37c72-293c-4980-b14f-848a8c879a2a",
+        "from": {
+          "plu": "93439220",
+          "name": "SWEET OZ  CHOC 26GM",
+          "price": 1.6,
+          "category_id": "584d2762-9e80-43d1-9f05-4477731ebece"
+        },
+        "to": {
+          "source_row": 405,
+          "pcode": "1233",
+          "plu": "93439220",
+          "barcode": "93439220",
+          "name": "SWEET OZ CHOC 26GM",
+          "norm_name": "SWEET OZ CHOC 26GM",
+          "price": 1.6,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "584d2762-9e80-43d1-9f05-4477731ebece",
+          "category_name": "Confectionery",
+          "dept": "10.CONFECT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "baeb3450-8a2e-4f66-ad88-ecfa2e4124ec",
+        "from": {
+          "plu": "9348728000171",
+          "name": "TRIPLE CHOCOLATE  86G",
+          "price": 5.95,
+          "category_id": "584d2762-9e80-43d1-9f05-4477731ebece"
+        },
+        "to": {
+          "source_row": 413,
+          "pcode": "25304",
+          "plu": "9348728000171",
+          "barcode": "9348728000171",
+          "name": "TRIPLE CHOCOLATE 86G",
+          "norm_name": "TRIPLE CHOCOLATE 86G",
+          "price": 5.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "584d2762-9e80-43d1-9f05-4477731ebece",
+          "category_name": "Confectionery",
+          "dept": "10.CONFECT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "5cb683b1-ee04-4341-850e-dccfaed0e4cf",
+        "from": {
+          "plu": "9348728000126",
+          "name": "TURKISH DELIGHT & PIST.  200G",
+          "price": 12.95,
+          "category_id": "584d2762-9e80-43d1-9f05-4477731ebece"
+        },
+        "to": {
+          "source_row": 415,
+          "pcode": "25309",
+          "plu": "9348728000126",
+          "barcode": "9348728000126",
+          "name": "TURKISH DELIGHT & PIST. 200G",
+          "norm_name": "TURKISH DELIGHT PIST 200G",
+          "price": 12.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "584d2762-9e80-43d1-9f05-4477731ebece",
+          "category_name": "Confectionery",
+          "dept": "10.CONFECT"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "59aaa72d-5404-4c40-a261-5d1ea8bba3e3",
+        "from": {
+          "plu": "706502742997",
+          "name": "ALMOMD RD GF PALEO LECTIN FREE",
+          "price": 13.95,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 435,
+          "pcode": "20784",
+          "plu": "706502742997",
+          "barcode": "706502742997",
+          "name": "ALMOMD RD GF PALEO LECTIN FREE",
+          "norm_name": "ALMOMD RD GF PALEO LECTIN FREE",
+          "price": 13.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "451f295f-5e8d-40cd-af61-2726a737b2c1",
+        "from": {
+          "plu": "706502742768",
+          "name": "ALMOND RD GF PALEO PUMPKIN",
+          "price": 13.95,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 436,
+          "pcode": "23619",
+          "plu": "706502742768",
+          "barcode": "706502742768",
+          "name": "ALMOND RD GF PALEO PUMPKIN",
+          "norm_name": "ALMOND RD GF PALEO PUMPKIN",
+          "price": 13.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "64d19fc4-cae6-4ed7-b2ce-212a01c01eea",
+        "from": {
+          "plu": "706502742904",
+          "name": "ALMOND ROAD BYKERY",
+          "price": 13.95,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 437,
+          "pcode": "24857",
+          "plu": "706502742904",
+          "barcode": "706502742904",
+          "name": "ALMOND ROAD BYKERY",
+          "norm_name": "ALMOND ROAD BYKERY",
+          "price": 13.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "79fbe0d3-adf0-4702-872c-e420a6d603eb",
+        "from": {
+          "plu": "706502742935",
+          "name": "ALMOND ROAD GF PALEO SEEDED",
+          "price": 13.95,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 438,
+          "pcode": "20643",
+          "plu": "706502742935",
+          "barcode": "706502742935",
+          "name": "ALMOND ROAD GF PALEO SEEDED",
+          "norm_name": "ALMOND ROAD GF PALEO SEEDED",
+          "price": 13.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "38834c69-ac14-47e2-ac22-f02331d550b9",
+        "from": {
+          "plu": "4468",
+          "name": "ASSORTED MUFFINS EUSTRALIS",
+          "price": 5.5,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 439,
+          "pcode": "23657",
+          "plu": "4468",
+          "barcode": "4468",
+          "name": "ASSORTED MUFFINS EUSTRALIS",
+          "norm_name": "ASSORTED MUFFINS EUSTRALIS",
+          "price": 5.5,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "0ff6b93f-b3fe-4505-a620-9aea7ef9bb97",
+        "from": {
+          "plu": "9336864000544",
+          "name": "BBCK BEEF LASAG TRD ITLN 400GM",
+          "price": 2.88,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 440,
+          "pcode": "537350",
+          "plu": "9336864000544",
+          "barcode": "9336864000544",
+          "name": "BBCK BEEF LASAG TRD ITLN 400GM",
+          "norm_name": "BBCK BEEF LASAG TRD ITLN 400GM",
+          "price": 2.88,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "8e4b6c8d-0a90-4021-8a3c-d7ae84256785",
+        "from": {
+          "plu": "9336864003606",
+          "name": "BBCK BF CHK RAGOUT GNOCC 350GM",
+          "price": 3.29,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 441,
+          "pcode": "575867",
+          "plu": "9336864003606",
+          "barcode": "9336864003606",
+          "name": "BBCK BF CHK RAGOUT GNOCC 350GM",
+          "norm_name": "BBCK BF CHK RAGOUT GNOCC 350GM",
+          "price": 3.29,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "374bf1c9-b464-4f1a-a946-4661ec3f3402",
+        "from": {
+          "plu": "9336864004450",
+          "name": "BBCK GF BUTR CKN TUM RCE 350GM",
+          "price": 3.29,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 442,
+          "pcode": "537457",
+          "plu": "9336864004450",
+          "barcode": "9336864004450",
+          "name": "BBCK GF BUTR CKN TUM RCE 350GM",
+          "norm_name": "BBCK GF BUTR CKN TUM RCE 350GM",
+          "price": 3.29,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "b5ee7caa-d8c0-4e10-af05-1354ec13a903",
+        "from": {
+          "plu": "9336864007376",
+          "name": "BBCK GF CKN&SDTOM RISOTO 350GM",
+          "price": 3.29,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 443,
+          "pcode": "537764",
+          "plu": "9336864007376",
+          "barcode": "9336864007376",
+          "name": "BBCK GF CKN&SDTOM RISOTO 350GM",
+          "norm_name": "BBCK GF CKN SDTOM RISOTO 350GM",
+          "price": 3.29,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "bc4c66dd-da67-44d7-a75e-6c92f86ed2d9",
+        "from": {
+          "plu": "9336864003620",
+          "name": "BBCK LAMB CAB SAV & MASH 350GM",
+          "price": 3.29,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 444,
+          "pcode": "575891",
+          "plu": "9336864003620",
+          "barcode": "9336864003620",
+          "name": "BBCK LAMB CAB SAV & MASH 350GM",
+          "norm_name": "BBCK LAMB CAB SAV MASH 350GM",
+          "price": 3.29,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "961e4806-8813-4b7e-ba68-2b72ffbadf9e",
+        "from": {
+          "plu": "9336864003743",
+          "name": "BBCK SPAG PESTO CRSP BCN 350GM",
+          "price": 3.29,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 445,
+          "pcode": "576544",
+          "plu": "9336864003743",
+          "barcode": "9336864003743",
+          "name": "BBCK SPAG PESTO CRSP BCN 350GM",
+          "norm_name": "BBCK SPAG PESTO CRSP BCN 350GM",
+          "price": 3.29,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "0d977f8e-591c-438d-bf26-6b89c95d3a64",
+        "from": {
+          "plu": "1673",
+          "name": "BREAD",
+          "price": 100.0,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 446,
+          "pcode": "27504",
+          "plu": "1673",
+          "barcode": "1673",
+          "name": "BREAD",
+          "norm_name": "BREAD",
+          "price": 100.0,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "b93ec82d-0cf5-4c43-a4d7-32f8ff4452a5",
+        "from": {
+          "plu": "909",
+          "name": "BREAD",
+          "price": 15.0,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 447,
+          "pcode": "8744",
+          "plu": "909",
+          "barcode": "909",
+          "name": "BREAD",
+          "norm_name": "BREAD",
+          "price": 15.0,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "5e411fbd-468d-40db-b8c5-a80c679dd9a8",
+        "from": {
+          "plu": "706502574154",
+          "name": "HAMID BAKERY BREAD",
+          "price": 6.95,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 448,
+          "pcode": "25064",
+          "plu": "706502574154",
+          "barcode": "706502574154",
+          "name": "HAMID BAKERY BREAD",
+          "norm_name": "HAMID BAKERY BREAD",
+          "price": 6.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "f6021541-298c-4983-985f-14bcf3f7c576",
+        "from": {
+          "plu": "9349472000103",
+          "name": "BYRON BAY PIZZA",
+          "price": 21.99,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 449,
+          "pcode": "26828",
+          "plu": "9349472000103",
+          "barcode": "9349472000103",
+          "name": "BYRON BAY PIZZA",
+          "norm_name": "BYRON BAY PIZZA",
+          "price": 21.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "9f1838c5-30ec-49e9-a695-80c25027e323",
+        "from": {
+          "plu": "3876",
+          "name": "LONG SPIRAL CROISSANT",
+          "price": 3.2,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 450,
+          "pcode": "27170",
+          "plu": "3876",
+          "barcode": "3876",
+          "name": "LONG SPIRAL CROISSANT",
+          "norm_name": "LONG SPIRAL CROISSANT",
+          "price": 3.2,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "5ae46632-476c-45c8-b124-8469f09ce313",
+        "from": {
+          "plu": "620",
+          "name": "EUSTRALIS LA RUSTIGUETTE",
+          "price": 3.5,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 451,
+          "pcode": "19452",
+          "plu": "620",
+          "barcode": "620",
+          "name": "EUSTRALIS LA RUSTIGUETTE",
+          "norm_name": "EUSTRALIS LA RUSTIGUETTE",
+          "price": 3.5,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "561702ac-8748-4b07-8d51-efa2fdf1e963",
+        "from": {
+          "plu": "8197",
+          "name": "EUSTRALIS APPLE TURNOVER",
+          "price": 3.0,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 452,
+          "pcode": "27172",
+          "plu": "8197",
+          "barcode": "8197",
+          "name": "EUSTRALIS APPLE TURNOVER",
+          "norm_name": "EUSTRALIS APPLE TURNOVER",
+          "price": 3.0,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "fa904f6b-8748-41b1-8e85-1acb6c73790f",
+        "from": {
+          "plu": "631",
+          "name": "EUSTRALIS BAGUETTE WHITE",
+          "price": 5.95,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 453,
+          "pcode": "19451",
+          "plu": "631",
+          "barcode": "631",
+          "name": "EUSTRALIS BAGUETTE WHITE",
+          "norm_name": "EUSTRALIS BAGUETTE WHITE",
+          "price": 5.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "bbcb85d1-c898-418c-b2b2-86a405815731",
+        "from": {
+          "plu": "643",
+          "name": "EUSTRALIS  CROISSANT ALMOND EA",
+          "price": 3.79,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 454,
+          "pcode": "20252",
+          "plu": "643",
+          "barcode": "643",
+          "name": "EUSTRALIS CROISSANT ALMOND EA",
+          "norm_name": "EUSTRALIS CROISSANT ALMOND EA",
+          "price": 3.79,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "321151d2-5ba7-447c-869a-fc2b3146d74c",
+        "from": {
+          "plu": "635",
+          "name": "EUSTRALIS  CROISSANT CHOCOLATE EA",
+          "price": 3.49,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 455,
+          "pcode": "19454",
+          "plu": "635",
+          "barcode": "635",
+          "name": "EUSTRALIS CROISSANT CHOCOLATE EA",
+          "norm_name": "EUSTRALIS CROISSANT CHOCOLATE EA",
+          "price": 3.49,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "ae07a6cc-7381-40ab-a603-5977be28ea12",
+        "from": {
+          "plu": "634",
+          "name": "EUSTRALIS  CROISSANT EA",
+          "price": 2.99,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 456,
+          "pcode": "19453",
+          "plu": "634",
+          "barcode": "634",
+          "name": "EUSTRALIS CROISSANT EA",
+          "norm_name": "EUSTRALIS CROISSANT EA",
+          "price": 2.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "42d8a163-88e3-48f8-bc0d-eb80f236d84e",
+        "from": {
+          "plu": "642",
+          "name": "EUSTRALIS FIG LOAF",
+          "price": 9.95,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 457,
+          "pcode": "20115",
+          "plu": "642",
+          "barcode": "642",
+          "name": "EUSTRALIS FIG LOAF",
+          "norm_name": "EUSTRALIS FIG LOAF",
+          "price": 9.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "768b47fd-62d9-4fe8-8f89-0c56afda0d6b",
+        "from": {
+          "plu": "4469",
+          "name": "EUSTRALIS SNAILS",
+          "price": 3.59,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 458,
+          "pcode": "23658",
+          "plu": "4469",
+          "barcode": "4469",
+          "name": "EUSTRALIS SNAILS",
+          "norm_name": "EUSTRALIS SNAILS",
+          "price": 3.59,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "e2e9ad34-6bc7-4138-930c-607e67d83a50",
+        "from": {
+          "plu": "626",
+          "name": "EUSTRALIS WHITE SOURDOUGH LOAF",
+          "price": 9.95,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 459,
+          "pcode": "19444",
+          "plu": "626",
+          "barcode": "626",
+          "name": "EUSTRALIS WHITE SOURDOUGH LOAF",
+          "norm_name": "EUSTRALIS WHITE SOURDOUGH LOAF",
+          "price": 9.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "3d6befc3-b3a4-42c3-a82a-59378a910c1b",
+        "from": {
+          "plu": "9345265000077",
+          "name": "FILLA BUNS 3 PK",
+          "price": 4.49,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 460,
+          "pcode": "19589",
+          "plu": "9345265000077",
+          "barcode": "9345265000077",
+          "name": "FILLA BUNS 3 PK",
+          "norm_name": "FILLA BUNS 3 PK",
+          "price": 4.49,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "d66caeb8-067a-4d5b-a075-8de58a686a88",
+        "from": {
+          "plu": "9345265000046",
+          "name": "FILLA BURGERS 4 PK",
+          "price": 4.5,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 461,
+          "pcode": "19588",
+          "plu": "9345265000046",
+          "barcode": "9345265000046",
+          "name": "FILLA BURGERS 4 PK",
+          "norm_name": "FILLA BURGERS 4 PK",
+          "price": 4.5,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "2dfcb0c4-ca67-43b6-87bd-e5fa8a8b8394",
+        "from": {
+          "plu": "9369999301361",
+          "name": "FILLABAKERY W/MEAL 6PK",
+          "price": 3.99,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 462,
+          "pcode": "6797",
+          "plu": "9369999301361",
+          "barcode": "9369999301361",
+          "name": "FILLABAKERY W/MEAL 6PK",
+          "norm_name": "FILLABAKERY W MEAL 6PK",
+          "price": 3.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "c8bdfc08-bab5-4ab8-b346-07d8747de260",
+        "from": {
+          "plu": "9369999030438",
+          "name": "FILLABAKERY LEBANESE BREAD 6PK",
+          "price": 3.7,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 463,
+          "pcode": "6723",
+          "plu": "9369999030438",
+          "barcode": "9369999030438",
+          "name": "FILLABAKERY LEBANESE BREAD 6PK",
+          "norm_name": "FILLABAKERY LEBANESE BREAD 6PK",
+          "price": 3.7,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "ebbb02f8-2ccf-4962-8422-7a294110fb59",
+        "from": {
+          "plu": "9345265000039",
+          "name": "FILLA ROLLS 3 PK",
+          "price": 5.49,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 464,
+          "pcode": "19590",
+          "plu": "9345265000039",
+          "barcode": "9345265000039",
+          "name": "FILLA ROLLS 3 PK",
+          "norm_name": "FILLA ROLLS 3 PK",
+          "price": 5.49,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "d3e0d903-db83-477e-97cc-190ff3040e6f",
+        "from": {
+          "plu": "9345265000053",
+          "name": "FILLA TORTILLA 6 PK",
+          "price": 5.49,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 465,
+          "pcode": "19591",
+          "plu": "9345265000053",
+          "barcode": "9345265000053",
+          "name": "FILLA TORTILLA 6 PK",
+          "norm_name": "FILLA TORTILLA 6 PK",
+          "price": 5.49,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "e3afd57b-8ffe-44f8-b992-7e7e286a38f5",
+        "from": {
+          "plu": "9345265000015",
+          "name": "FILLA BAKERY TURKISH BREAD",
+          "price": 5.99,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 466,
+          "pcode": "9074",
+          "plu": "9345265000015",
+          "barcode": "9345265000015",
+          "name": "FILLA BAKERY TURKISH BREAD",
+          "norm_name": "FILLA BAKERY TURKISH BREAD",
+          "price": 5.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "a9fea8ca-2294-4567-8752-f5938ff0a351",
+        "from": {
+          "plu": "9345265000022",
+          "name": "FILLA TURKISH GARLIC",
+          "price": 5.99,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 467,
+          "pcode": "19586",
+          "plu": "9345265000022",
+          "barcode": "9345265000022",
+          "name": "FILLA TURKISH GARLIC",
+          "norm_name": "FILLA TURKISH GARLIC",
+          "price": 5.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "e0ace873-409e-4be0-9d95-5cb8977482b5",
+        "from": {
+          "plu": "6220",
+          "name": "FROZEN CROISSANTS PK",
+          "price": 9.95,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 468,
+          "pcode": "24799",
+          "plu": "6220",
+          "barcode": "6220",
+          "name": "FROZEN CROISSANTS PK",
+          "norm_name": "FROZEN CROISSANTS PK",
+          "price": 9.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "ae3e04af-b9f1-4976-830b-615a48cb62a6",
+        "from": {
+          "plu": "799439078932",
+          "name": "FRUIT LOAF 720G",
+          "price": 12.99,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 469,
+          "pcode": "26874",
+          "plu": "799439078932",
+          "barcode": "799439078932",
+          "name": "FRUIT LOAF 720G",
+          "norm_name": "FRUIT LOAF 720G",
+          "price": 12.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "8a208b08-3e31-430e-b37d-9c83c38e7e7a",
+        "from": {
+          "plu": "9310332002032",
+          "name": "GB MULTIGRAIN 750G",
+          "price": 5.99,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 470,
+          "pcode": "27074",
+          "plu": "9310332002032",
+          "barcode": "9310332002032",
+          "name": "GB MULTIGRAIN 750G",
+          "norm_name": "GB MULTIGRAIN 750G",
+          "price": 5.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "b29145f4-d677-47ac-97e2-ad42a121ecc2",
+        "from": {
+          "plu": "9310332001974",
+          "name": "GB WHITE BREAD 750G",
+          "price": 5.99,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 471,
+          "pcode": "27073",
+          "plu": "9310332001974",
+          "barcode": "9310332001974",
+          "name": "GB WHITE BREAD 750G",
+          "norm_name": "GB WHITE BREAD 750G",
+          "price": 5.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "ad97f8ab-feee-496a-816e-780773332cbc",
+        "from": {
+          "plu": "9310332002018",
+          "name": "GB WHOLEMEAL 750G",
+          "price": 5.99,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 472,
+          "pcode": "27072",
+          "plu": "9310332002018",
+          "barcode": "9310332002018",
+          "name": "GB WHOLEMEAL 750G",
+          "norm_name": "GB WHOLEMEAL 750G",
+          "price": 5.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "eb66e7aa-8741-44d9-9be9-784c262e2df4",
+        "from": {
+          "plu": "680596849940",
+          "name": "GERMAN BAKEHOUSE FRUIT LOAF 750G",
+          "price": 9.95,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 473,
+          "pcode": "19102",
+          "plu": "680596849940",
+          "barcode": "680596849940",
+          "name": "GERMAN BAKEHOUSE FRUIT LOAF 750G",
+          "norm_name": "GERMAN BAKEHOUSE FRUIT LOAF 750G",
+          "price": 9.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "252f8ef3-02e5-4f5d-930d-8695b37ff836",
+        "from": {
+          "plu": "680596849957",
+          "name": "GERMAN BAKEHOUSE SOURDOUGH 700G",
+          "price": 9.45,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 474,
+          "pcode": "25699",
+          "plu": "680596849957",
+          "barcode": "680596849957",
+          "name": "GERMAN BAKEHOUSE SOURDOUGH 700G",
+          "norm_name": "GERMAN BAKEHOUSE SOURDOUGH 700G",
+          "price": 9.45,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "e8ec55cb-fe03-4172-ab32-201d3dfb4353",
+        "from": {
+          "plu": "680596849865",
+          "name": "GERMAN B'HOUSE M'GRAIN S'DOUGH",
+          "price": 9.45,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 475,
+          "pcode": "15538",
+          "plu": "680596849865",
+          "barcode": "680596849865",
+          "name": "GERMAN B'HOUSE M'GRAIN S'DOUGH",
+          "norm_name": "GERMAN B HOUSE M GRAIN S DOUGH",
+          "price": 9.45,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "19ffeef6-df8b-4bd2-8f19-af72d6aeb80b",
+        "from": {
+          "plu": "680596849872",
+          "name": "GERMAN B'HOUSE PUMPKIN SEED",
+          "price": 9.45,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 476,
+          "pcode": "15539",
+          "plu": "680596849872",
+          "barcode": "680596849872",
+          "name": "GERMAN B'HOUSE PUMPKIN SEED",
+          "norm_name": "GERMAN B HOUSE PUMPKIN SEED",
+          "price": 9.45,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "b61aabdc-2278-4989-bd31-214334a5f4a2",
+        "from": {
+          "plu": "680596849889",
+          "name": "GERMAN BAKEHOUSE SUNFLOWER S/D",
+          "price": 9.45,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 477,
+          "pcode": "20656",
+          "plu": "680596849889",
+          "barcode": "680596849889",
+          "name": "GERMAN BAKEHOUSE SUNFLOWER S/D",
+          "norm_name": "GERMAN BAKEHOUSE SUNFLOWER S D",
+          "price": 9.45,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "2beb7f8b-19a0-4693-b872-5b09985c3d34",
+        "from": {
+          "plu": "680596849933",
+          "name": "GERMAN SWISS LOAF",
+          "price": 9.45,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 478,
+          "pcode": "17877",
+          "plu": "680596849933",
+          "barcode": "680596849933",
+          "name": "GERMAN SWISS LOAF",
+          "norm_name": "GERMAN SWISS LOAF",
+          "price": 9.45,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "bec01e7e-f9fe-4c89-84cf-f1a3056be06a",
+        "from": {
+          "plu": "781005417221",
+          "name": "HAMID BAKERY BREAD 2PK",
+          "price": 6.95,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 479,
+          "pcode": "26293",
+          "plu": "781005417221",
+          "barcode": "781005417221",
+          "name": "HAMID BAKERY BREAD 2PK",
+          "norm_name": "HAMID BAKERY BREAD 2PK",
+          "price": 6.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "d14f8b43-723b-4efa-a284-f721465f5349",
+        "from": {
+          "plu": "27331011468",
+          "name": "LA BANDERITA TORTILLAS 640G",
+          "price": 11.65,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 480,
+          "pcode": "24853",
+          "plu": "27331011468",
+          "barcode": "27331011468",
+          "name": "LA BANDERITA TORTILLAS 640G",
+          "norm_name": "LA BANDERITA TORTILLAS 640G",
+          "price": 11.65,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "d241a436-4be2-4c10-bd4b-87f8ac38f11b",
+        "from": {
+          "plu": "9310332000236",
+          "name": "MULTIGRAIN SLICED BREAD 900G",
+          "price": 5.5,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 481,
+          "pcode": "26571",
+          "plu": "9310332000236",
+          "barcode": "9310332000236",
+          "name": "MULTIGRAIN SLICED BREAD 900G",
+          "norm_name": "MULTIGRAIN SLICED BREAD 900G",
+          "price": 5.5,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "121afa5a-b30f-4c2f-9c63-b7b92b26de4f",
+        "from": {
+          "plu": "9310332011348",
+          "name": "RYE BREAD KING HENRY 900G",
+          "price": 9.95,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 482,
+          "pcode": "26576",
+          "plu": "9310332011348",
+          "barcode": "9310332011348",
+          "name": "RYE BREAD KING HENRY 900G",
+          "norm_name": "RYE BREAD KING HENRY 900G",
+          "price": 9.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "cfa4628f-f340-4ce2-a7ab-29034a994aad",
+        "from": {
+          "plu": "8008698010259",
+          "name": "SCHAR CIABATTINE ROLLS",
+          "price": 11.3,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 483,
+          "pcode": "1777",
+          "plu": "8008698010259",
+          "barcode": "8008698010259",
+          "name": "SCHAR CIABATTINE ROLLS",
+          "norm_name": "SCHAR CIABATTINE ROLLS",
+          "price": 11.3,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "05b715cf-2935-45ae-a3db-72c5d2aceffe",
+        "from": {
+          "plu": "9360032000012",
+          "name": "TORTILLA WRAPS 6PK 420G",
+          "price": 7.99,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 484,
+          "pcode": "26711",
+          "plu": "9360032000012",
+          "barcode": "9360032000012",
+          "name": "TORTILLA WRAPS 6PK 420G",
+          "norm_name": "TORTILLA WRAPS 6PK 420G",
+          "price": 7.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "ae2ef4a3-4542-41ec-912b-00c6ed3696dd",
+        "from": {
+          "plu": "9360032000104",
+          "name": "TORTILLA WRAPS 8PK 360G",
+          "price": 7.99,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 485,
+          "pcode": "26712",
+          "plu": "9360032000104",
+          "barcode": "9360032000104",
+          "name": "TORTILLA WRAPS 8PK 360G",
+          "norm_name": "TORTILLA WRAPS 8PK 360G",
+          "price": 7.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "e773e747-989e-4ba3-a8a8-de8697d1a219",
+        "from": {
+          "plu": "9310332000090",
+          "name": "SLICED BREAD 900G",
+          "price": 5.5,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 486,
+          "pcode": "26569",
+          "plu": "9310332000090",
+          "barcode": "9310332000090",
+          "name": "SLICED BREAD 900G",
+          "norm_name": "SLICED BREAD 900G",
+          "price": 5.5,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "5b13a308-d086-4368-aee1-370c0e6b1fa9",
+        "from": {
+          "plu": "9310332000106",
+          "name": "WHOLEMEAL SLICED 900G",
+          "price": 5.5,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 487,
+          "pcode": "26570",
+          "plu": "9310332000106",
+          "barcode": "9310332000106",
+          "name": "WHOLEMEAL SLICED 900G",
+          "norm_name": "WHOLEMEAL SLICED 900G",
+          "price": 5.5,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "ce6da687-7dbb-4a53-aadf-c40beb686a50",
+        "from": {
+          "plu": "9360032000098",
+          "name": "WRAPS ORIGINAL 360G",
+          "price": 6.99,
+          "category_id": "226c1104-6e1e-4caf-9ef9-6125a920303c"
+        },
+        "to": {
+          "source_row": 488,
+          "pcode": "26710",
+          "plu": "9360032000098",
+          "barcode": "9360032000098",
+          "name": "WRAPS ORIGINAL 360G",
+          "norm_name": "WRAPS ORIGINAL 360G",
+          "price": 6.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bread",
+          "category_name": "Bread & Croissants",
+          "dept": "11.BREAD"
+        }
+      },
+      {
+        "action": "inserted",
+        "id": "price-list-22",
+        "to": {
+          "source_row": 574,
+          "pcode": "20331",
+          "plu": "22",
+          "barcode": "22",
+          "name": "REUSABLE PLASTIC BAG",
+          "norm_name": "REUSABLE PLASTIC BAG",
+          "price": 0.15,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-bags",
+          "category_name": "Bags",
+          "dept": "15. BAGS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "b67a2ff8-c3d7-478e-b06b-418ecad68f48",
+        "from": {
+          "plu": "93238946",
+          "name": "B/BERG GINGER BEER       375M^",
+          "price": 9.33,
+          "category_id": "98278373-18c3-45fe-ba1c-3c891de1c628"
+        },
+        "to": {
+          "source_row": 604,
+          "pcode": "168778",
+          "plu": "93238946",
+          "barcode": "93238946",
+          "name": "B/BERG GINGER BEER 375M^",
+          "norm_name": "B BERG GINGER BEER 375M",
+          "price": 9.33,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "98278373-18c3-45fe-ba1c-3c891de1c628",
+          "category_name": "Drinks",
+          "dept": "16.DRINKS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "a8ec29bb-7c01-4b84-83c8-9e18e0b089c4",
+        "from": {
+          "plu": "9300675001113",
+          "name": "COCA COLA               1.25L^",
+          "price": 3.96,
+          "category_id": "98278373-18c3-45fe-ba1c-3c891de1c628"
+        },
+        "to": {
+          "source_row": 608,
+          "pcode": "51393",
+          "plu": "9300675001113",
+          "barcode": "9300675001113",
+          "name": "COCA COLA 1.25L^",
+          "norm_name": "COCA COLA 1 25L",
+          "price": 3.96,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "98278373-18c3-45fe-ba1c-3c891de1c628",
+          "category_name": "Drinks",
+          "dept": "16.DRINKS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "05afaa56-512e-48d2-8aa6-c1abef966b5a",
+        "from": {
+          "plu": "9300675003094",
+          "name": "FANTA ORANGE            1.25L^",
+          "price": 3.96,
+          "category_id": "98278373-18c3-45fe-ba1c-3c891de1c628"
+        },
+        "to": {
+          "source_row": 626,
+          "pcode": "51617",
+          "plu": "9300675003094",
+          "barcode": "9300675003094",
+          "name": "FANTA ORANGE 1.25L^",
+          "norm_name": "FANTA ORANGE 1 25L",
+          "price": 3.96,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "98278373-18c3-45fe-ba1c-3c891de1c628",
+          "category_name": "Drinks",
+          "dept": "16.DRINKS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "7ae3fcb8-9fd3-435e-bf6c-3c6b2bdc34a3",
+        "from": {
+          "plu": "9310640620034",
+          "name": "GATORADE DRK LEMON LIME  600M^",
+          "price": 9.17,
+          "category_id": "98278373-18c3-45fe-ba1c-3c891de1c628"
+        },
+        "to": {
+          "source_row": 628,
+          "pcode": "429691",
+          "plu": "9310640620034",
+          "barcode": "9310640620034",
+          "name": "GATORADE DRK LEMON LIME 600M^",
+          "norm_name": "GATORADE DRK LEMON LIME 600M",
+          "price": 9.17,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "98278373-18c3-45fe-ba1c-3c891de1c628",
+          "category_name": "Drinks",
+          "dept": "16.DRINKS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "7cd9c89d-6763-4171-83de-2d2c814f1e20",
+        "from": {
+          "plu": "9336243005740",
+          "name": "IMPRESSED JUICE  TROPICAL 1 LT",
+          "price": 5.85,
+          "category_id": "98278373-18c3-45fe-ba1c-3c891de1c628"
+        },
+        "to": {
+          "source_row": 632,
+          "pcode": "22389",
+          "plu": "9336243005740",
+          "barcode": "9336243005740",
+          "name": "IMPRESSED JUICE TROPICAL 1 LT",
+          "norm_name": "IMPRESSED JUICE TROPICAL 1 LT",
+          "price": 5.85,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "98278373-18c3-45fe-ba1c-3c891de1c628",
+          "category_name": "Drinks",
+          "dept": "16.DRINKS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "ec5c19e7-c866-4f70-9a01-7de289c5d35e",
+        "from": {
+          "plu": "9338201001030",
+          "name": "NOAH'S  J U I C E",
+          "price": 4.5,
+          "category_id": "98278373-18c3-45fe-ba1c-3c891de1c628"
+        },
+        "to": {
+          "source_row": 645,
+          "pcode": "21849",
+          "plu": "9338201001030",
+          "barcode": "9338201001030",
+          "name": "NOAH'S J U I C E",
+          "norm_name": "NOAH S J U I C E",
+          "price": 4.5,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "98278373-18c3-45fe-ba1c-3c891de1c628",
+          "category_name": "Drinks",
+          "dept": "16.DRINKS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "e4b21294-5672-47a5-a82c-5cdd7f77a54e",
+        "from": {
+          "plu": "78",
+          "name": "NU / STIRLING  WATER BOX 12PK",
+          "price": 7.99,
+          "category_id": "98278373-18c3-45fe-ba1c-3c891de1c628"
+        },
+        "to": {
+          "source_row": 647,
+          "pcode": "17953",
+          "plu": "78",
+          "barcode": "78",
+          "name": "NU / STIRLING WATER BOX 12PK",
+          "norm_name": "NU STIRLING WATER BOX 12PK",
+          "price": 7.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "98278373-18c3-45fe-ba1c-3c891de1c628",
+          "category_name": "Drinks",
+          "dept": "16.DRINKS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "6b04c9ae-9101-49d8-b22b-dc2b4e2fcb8f",
+        "from": {
+          "plu": "9313820016504",
+          "name": "PEPSI MAX               1.25L^",
+          "price": 3.96,
+          "category_id": "98278373-18c3-45fe-ba1c-3c891de1c628"
+        },
+        "to": {
+          "source_row": 652,
+          "pcode": "1005229",
+          "plu": "9313820016504",
+          "barcode": "9313820016504",
+          "name": "PEPSI MAX 1.25L^",
+          "norm_name": "PEPSI MAX 1 25L",
+          "price": 3.96,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "98278373-18c3-45fe-ba1c-3c891de1c628",
+          "category_name": "Drinks",
+          "dept": "16.DRINKS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "e9a4cb5e-1635-4b42-8c7b-a05e7ed491c4",
+        "from": {
+          "plu": "9350271000393",
+          "name": "*SPECIAL* REMEDY 4PK  CANS",
+          "price": 8.99,
+          "category_id": "98278373-18c3-45fe-ba1c-3c891de1c628"
+        },
+        "to": {
+          "source_row": 662,
+          "pcode": "21662",
+          "plu": "9350271000393",
+          "barcode": "9350271000393",
+          "name": "*SPECIAL* REMEDY 4PK CANS",
+          "norm_name": "SPECIAL REMEDY 4PK CANS",
+          "price": 8.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "98278373-18c3-45fe-ba1c-3c891de1c628",
+          "category_name": "Drinks",
+          "dept": "16.DRINKS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "6811d5da-9482-408a-b3b1-cdfaa1dc802e",
+        "from": {
+          "plu": "744",
+          "name": "BEANS FRESH",
+          "price": 5.99,
+          "category_id": "cat-veg"
+        },
+        "to": {
+          "source_row": 716,
+          "pcode": "405",
+          "plu": "744",
+          "barcode": "744",
+          "name": "(S) BEANS FRESH",
+          "norm_name": "BEANS FRESH",
+          "price": 5.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-veg",
+          "category_name": "Vegetables",
+          "dept": "2.VEGIES"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "1a815f6a-f612-4eda-aa1d-241e679d6671",
+        "from": {
+          "plu": "796",
+          "name": "CAPSICUM TRAY KG",
+          "price": 4.89,
+          "category_id": "cat-veg"
+        },
+        "to": {
+          "source_row": 717,
+          "pcode": "8723",
+          "plu": "796",
+          "barcode": "796",
+          "name": "(S) CAPSICUM TRAY KG",
+          "norm_name": "CAPSICUM TRAY KG",
+          "price": 4.89,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-veg",
+          "category_name": "Vegetables",
+          "dept": "2.VEGIES"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "ca320c2f-a591-43f7-b2e6-407e07b6c781",
+        "from": {
+          "plu": "742",
+          "name": "CHILLI BIRDS EYE",
+          "price": 39.99,
+          "category_id": "cat-veg"
+        },
+        "to": {
+          "source_row": 718,
+          "pcode": "404",
+          "plu": "742",
+          "barcode": "742",
+          "name": "(S) CHILLI BIRDS EYE",
+          "norm_name": "CHILLI BIRDS EYE",
+          "price": 39.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-veg",
+          "category_name": "Vegetables",
+          "dept": "2.VEGIES"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "6ecdff66-9b3a-402b-8efe-0ffeda94c8e2",
+        "from": {
+          "plu": "785",
+          "name": "KG FRESH GALANGAL",
+          "price": 15.5,
+          "category_id": "cat-veg"
+        },
+        "to": {
+          "source_row": 719,
+          "pcode": "2131",
+          "plu": "785",
+          "barcode": "785",
+          "name": "(S) KG FRESH GALANGAL",
+          "norm_name": "KG FRESH GALANGAL",
+          "price": 15.5,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-veg",
+          "category_name": "Vegetables",
+          "dept": "2.VEGIES"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "ba70bd92-a06f-4645-bd89-41722d76083a",
+        "from": {
+          "plu": "784",
+          "name": "KG FRESH GINGER",
+          "price": 68.9,
+          "category_id": "cat-veg"
+        },
+        "to": {
+          "source_row": 720,
+          "pcode": "2130",
+          "plu": "784",
+          "barcode": "784",
+          "name": "(S) KG FRESH GINGER",
+          "norm_name": "KG FRESH GINGER",
+          "price": 68.9,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-veg",
+          "category_name": "Vegetables",
+          "dept": "2.VEGIES"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "adb66d51-90e4-4c8a-817e-02508a56fd0b",
+        "from": {
+          "plu": "786",
+          "name": "KG FRESH TUMERIC",
+          "price": 15.9,
+          "category_id": "cat-veg"
+        },
+        "to": {
+          "source_row": 721,
+          "pcode": "2132",
+          "plu": "786",
+          "barcode": "786",
+          "name": "(S) KG FRESH TUMERIC",
+          "norm_name": "KG FRESH TUMERIC",
+          "price": 15.9,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-veg",
+          "category_name": "Vegetables",
+          "dept": "2.VEGIES"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "478f304f-2d6c-4bc2-bc0d-2fb30161f7af",
+        "from": {
+          "plu": "782",
+          "name": "KG HOT GREEN CHILLI",
+          "price": 19.99,
+          "category_id": "cat-veg"
+        },
+        "to": {
+          "source_row": 722,
+          "pcode": "2128",
+          "plu": "782",
+          "barcode": "782",
+          "name": "(S) KG HOT GREEN CHILLI",
+          "norm_name": "KG HOT GREEN CHILLI",
+          "price": 19.99,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-veg",
+          "category_name": "Vegetables",
+          "dept": "2.VEGIES"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "a274d148-55b8-4b10-aa2c-3695acf9cf20",
+        "from": {
+          "plu": "783",
+          "name": "KG JALAPENO CHILLI",
+          "price": 29.99,
+          "category_id": "cat-veg"
+        },
+        "to": {
+          "source_row": 723,
+          "pcode": "2129",
+          "plu": "783",
+          "barcode": "783",
+          "name": "(S) KG JALAPENO CHILLI",
+          "norm_name": "KG JALAPENO CHILLI",
+          "price": 29.99,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-veg",
+          "category_name": "Vegetables",
+          "dept": "2.VEGIES"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "cca1c3f9-a70f-40ff-8877-bb69c8d51597",
+        "from": {
+          "plu": "773",
+          "name": "OKRA KG",
+          "price": 12.9,
+          "category_id": "cat-veg"
+        },
+        "to": {
+          "source_row": 724,
+          "pcode": "1285",
+          "plu": "773",
+          "barcode": "773",
+          "name": "(S) OKRA KG",
+          "norm_name": "OKRA KG",
+          "price": 12.9,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-veg",
+          "category_name": "Vegetables",
+          "dept": "2.VEGIES"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "0c5149a0-605a-4cb9-8740-6c4df5e2b980",
+        "from": {
+          "plu": "1051",
+          "name": "BEANS FRESH  KG",
+          "price": 15.99,
+          "category_id": "cat-veg"
+        },
+        "to": {
+          "source_row": 741,
+          "pcode": "1007256",
+          "plu": "1051",
+          "barcode": "1051",
+          "name": "BEANS FRESH KG",
+          "norm_name": "BEANS FRESH KG",
+          "price": 15.99,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-veg",
+          "category_name": "Vegetables",
+          "dept": "2.VEGIES"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "82288c2b-6e70-4702-b352-fb422ceb526e",
+        "from": {
+          "plu": "1202",
+          "name": "CABBAGE CHINESE  EA",
+          "price": 7.89,
+          "category_id": "cat-veg"
+        },
+        "to": {
+          "source_row": 749,
+          "pcode": "1007291",
+          "plu": "1202",
+          "barcode": "1202",
+          "name": "CABBAGE CHINESE EA",
+          "norm_name": "CABBAGE CHINESE EA",
+          "price": 7.89,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-veg",
+          "category_name": "Vegetables",
+          "dept": "2.VEGIES"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "809fa3cb-ba45-4eb4-8484-77b96858c97f",
+        "from": {
+          "plu": "1312",
+          "name": "CABBAGE SUGAR  EA",
+          "price": 4.99,
+          "category_id": "cat-veg"
+        },
+        "to": {
+          "source_row": 752,
+          "pcode": "1007310",
+          "plu": "1312",
+          "barcode": "1312",
+          "name": "CABBAGE SUGAR EA",
+          "norm_name": "CABBAGE SUGAR EA",
+          "price": 4.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-veg",
+          "category_name": "Vegetables",
+          "dept": "2.VEGIES"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "920c49fe-f50c-4df5-bf66-dbbc06f9010a",
+        "from": {
+          "plu": "1781",
+          "name": "CUCUMBER LEBANESE  KG",
+          "price": 5.89,
+          "category_id": "cat-veg"
+        },
+        "to": {
+          "source_row": 777,
+          "pcode": "1008548",
+          "plu": "1781",
+          "barcode": "1781",
+          "name": "CUCUMBER LEBANESE KG",
+          "norm_name": "CUCUMBER LEBANESE KG",
+          "price": 5.89,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-veg",
+          "category_name": "Vegetables",
+          "dept": "2.VEGIES"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "a4c79193-8bcd-4223-b53b-0d2cd6024d29",
+        "from": {
+          "plu": "729",
+          "name": "GARLIC AUSTRALIAN KG",
+          "price": 39.99,
+          "category_id": "cat-veg"
+        },
+        "to": {
+          "source_row": 785,
+          "pcode": "391",
+          "plu": "729",
+          "barcode": "729",
+          "name": "(S) GARLIC AUSTRALIAN KG",
+          "norm_name": "GARLIC AUSTRALIAN KG",
+          "price": 39.99,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-veg",
+          "category_name": "Vegetables",
+          "dept": "2.VEGIES"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "0c86ef83-ca6b-4839-9f10-123885c08ecf",
+        "from": {
+          "plu": "1851",
+          "name": "GARLIC  KG",
+          "price": 29.89,
+          "category_id": "cat-veg"
+        },
+        "to": {
+          "source_row": 789,
+          "pcode": "1001531",
+          "plu": "1851",
+          "barcode": "1851",
+          "name": "GARLIC KG",
+          "norm_name": "GARLIC KG",
+          "price": 29.89,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-veg",
+          "category_name": "Vegetables",
+          "dept": "2.VEGIES"
+        }
+      },
+      {
+        "action": "moved_conflict",
+        "old_id": "p-eggs-12",
+        "old_name": "Free Range Eggs 12pk",
+        "old_plu": "9332022008001",
+        "new_plu": "500039605485950022"
+      },
+      {
+        "action": "inserted",
+        "id": "price-list-9332022008001",
+        "to": {
+          "source_row": 796,
+          "pcode": "19513",
+          "plu": "9332022008001",
+          "barcode": "9332022008001",
+          "name": "JACOBS EGG CAGE 800G",
+          "norm_name": "JACOBS EGG CAGE 800G",
+          "price": 8.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-veg",
+          "category_name": "Vegetables",
+          "dept": "2.VEGIES"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "6c68cc83-d877-4f66-b96e-4016f362d275",
+        "from": {
+          "plu": "2721",
+          "name": "JAP PUMPKIN OUTSIDE  KG",
+          "price": 1.99,
+          "category_id": "cat-veg"
+        },
+        "to": {
+          "source_row": 797,
+          "pcode": "7318",
+          "plu": "2721",
+          "barcode": "2721",
+          "name": "JAP PUMPKIN OUTSIDE KG",
+          "norm_name": "JAP PUMPKIN OUTSIDE KG",
+          "price": 1.99,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-veg",
+          "category_name": "Vegetables",
+          "dept": "2.VEGIES"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "85d1a8b6-dbd6-4f32-930e-718e180b4ef1",
+        "from": {
+          "plu": "2414",
+          "name": "ONIONS BROWN 1  KG BAG",
+          "price": 2.99,
+          "category_id": "cat-veg"
+        },
+        "to": {
+          "source_row": 817,
+          "pcode": "21392",
+          "plu": "2414",
+          "barcode": "2414",
+          "name": "ONIONS BROWN 1 KG BAG",
+          "norm_name": "ONIONS BROWN 1 KG BAG",
+          "price": 2.99,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-veg",
+          "category_name": "Vegetables",
+          "dept": "2.VEGIES"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "76964ed2-c272-4297-9561-39b2fa36d12a",
+        "from": {
+          "plu": "5653",
+          "name": "CHOI SUM  BUNCH",
+          "price": 3.79,
+          "category_id": "cat-veg"
+        },
+        "to": {
+          "source_row": 827,
+          "pcode": "17728",
+          "plu": "5653",
+          "barcode": "5653",
+          "name": "CHOI SUM BUNCH",
+          "norm_name": "CHOI SUM BUNCH",
+          "price": 3.79,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-veg",
+          "category_name": "Vegetables",
+          "dept": "2.VEGIES"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "0becaa58-93cd-49b0-8f48-8e0f62050aca",
+        "from": {
+          "plu": "2521",
+          "name": "POTATOES BRUSHED  KG",
+          "price": 2.99,
+          "category_id": "cat-veg"
+        },
+        "to": {
+          "source_row": 831,
+          "pcode": "1007545",
+          "plu": "2521",
+          "barcode": "2521",
+          "name": "POTATOES BRUSHED KG",
+          "norm_name": "POTATOES BRUSHED KG",
+          "price": 2.99,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-veg",
+          "category_name": "Vegetables",
+          "dept": "2.VEGIES"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "194641eb-38a8-44d4-9943-6a19469e8c4b",
+        "from": {
+          "plu": "2571",
+          "name": "POTATOES LGE SWEET GOLD  KG",
+          "price": 3.99,
+          "category_id": "cat-veg"
+        },
+        "to": {
+          "source_row": 836,
+          "pcode": "1007559",
+          "plu": "2571",
+          "barcode": "2571",
+          "name": "POTATOES LGE SWEET GOLD KG",
+          "norm_name": "POTATOES LGE SWEET GOLD KG",
+          "price": 3.99,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-veg",
+          "category_name": "Vegetables",
+          "dept": "2.VEGIES"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "e2aaef7b-68c3-4c8c-946d-d2e26606287f",
+        "from": {
+          "plu": "3031",
+          "name": "TOMATOES ROMA/EGG  KG",
+          "price": 7.89,
+          "category_id": "cat-veg"
+        },
+        "to": {
+          "source_row": 870,
+          "pcode": "1007667",
+          "plu": "3031",
+          "barcode": "3031",
+          "name": "TOMATOES ROMA/EGG KG",
+          "norm_name": "TOMATOES ROMA EGG KG",
+          "price": 7.89,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-veg",
+          "category_name": "Vegetables",
+          "dept": "2.VEGIES"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "ef44d8eb-f0f6-4da4-932d-cc0154ba4de3",
+        "from": {
+          "plu": "3181",
+          "name": "TOMATOES TRUSS VINE   KG",
+          "price": 8.99,
+          "category_id": "cat-veg"
+        },
+        "to": {
+          "source_row": 872,
+          "pcode": "1007704",
+          "plu": "3181",
+          "barcode": "3181",
+          "name": "TOMATOES TRUSS VINE KG",
+          "norm_name": "TOMATOES TRUSS VINE KG",
+          "price": 8.99,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-veg",
+          "category_name": "Vegetables",
+          "dept": "2.VEGIES"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "e29538fc-c04c-4603-a7a7-095b9608f3f5",
+        "from": {
+          "plu": "9319224400055",
+          "name": "BEAN SPROUTS 250G",
+          "price": 2.99,
+          "category_id": "01c3f622-a426-43da-a0cb-e14290568b07"
+        },
+        "to": {
+          "source_row": 880,
+          "pcode": "22572",
+          "plu": "9319224400055",
+          "barcode": "9319224400055",
+          "name": "BEAN SPROUTS 250G",
+          "norm_name": "BEAN SPROUTS 250G",
+          "price": 2.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "22.FRUIT WHOLESALE"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "7918ca06-e717-4c1c-b9a5-06f502c7b2cf",
+        "from": {
+          "plu": "93578226",
+          "name": "BLUE BERRY 170G",
+          "price": 4.89,
+          "category_id": "01c3f622-a426-43da-a0cb-e14290568b07"
+        },
+        "to": {
+          "source_row": 881,
+          "pcode": "27384",
+          "plu": "93578226",
+          "barcode": "93578226",
+          "name": "BLUE BERRY 170G",
+          "norm_name": "BLUE BERRY 170G",
+          "price": 4.89,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "22.FRUIT WHOLESALE"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "58198521-2b8e-4a77-8014-c38fa6c6dc80",
+        "from": {
+          "plu": "9353769000127",
+          "name": "CHERRY TOMATOES 250G",
+          "price": 4.99,
+          "category_id": "01c3f622-a426-43da-a0cb-e14290568b07"
+        },
+        "to": {
+          "source_row": 882,
+          "pcode": "22334",
+          "plu": "9353769000127",
+          "barcode": "9353769000127",
+          "name": "CHERRY TOMATOES 250G",
+          "norm_name": "CHERRY TOMATOES 250G",
+          "price": 4.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "22.FRUIT WHOLESALE"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "fd69cef2-7672-4938-9017-6cde000fbdde",
+        "from": {
+          "plu": "8858754200878",
+          "name": "COCO THUMB",
+          "price": 4.49,
+          "category_id": "01c3f622-a426-43da-a0cb-e14290568b07"
+        },
+        "to": {
+          "source_row": 883,
+          "pcode": "27338",
+          "plu": "8858754200878",
+          "barcode": "8858754200878",
+          "name": "COCO THUMB",
+          "norm_name": "COCO THUMB",
+          "price": 4.49,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "22.FRUIT WHOLESALE"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "4ed62a6e-e814-4f6c-83bd-3cdcda2db210",
+        "from": {
+          "plu": "9329539000079",
+          "name": "CURRY LEAVES 15G",
+          "price": 3.99,
+          "category_id": "01c3f622-a426-43da-a0cb-e14290568b07"
+        },
+        "to": {
+          "source_row": 884,
+          "pcode": "22593",
+          "plu": "9329539000079",
+          "barcode": "9329539000079",
+          "name": "CURRY LEAVES 15G",
+          "norm_name": "CURRY LEAVES 15G",
+          "price": 3.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "22.FRUIT WHOLESALE"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "dedb89ba-082d-4db4-a327-21156e36ef1d",
+        "from": {
+          "plu": "91263",
+          "name": "FRUIT AND VEG WHOLESALE",
+          "price": 1000.0,
+          "category_id": "01c3f622-a426-43da-a0cb-e14290568b07"
+        },
+        "to": {
+          "source_row": 885,
+          "pcode": "27747",
+          "plu": "91263",
+          "barcode": "91263",
+          "name": "FRUIT AND VEG WHOLESALE",
+          "norm_name": "FRUIT AND VEG WHOLESALE",
+          "price": 1000.0,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "22.FRUIT WHOLESALE"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "68a8f9e5-d1e2-4753-8c47-7bd8578323fa",
+        "from": {
+          "plu": "9329539000314",
+          "name": "KAFFIR LIME LEAF",
+          "price": 3.99,
+          "category_id": "01c3f622-a426-43da-a0cb-e14290568b07"
+        },
+        "to": {
+          "source_row": 886,
+          "pcode": "22626",
+          "plu": "9329539000314",
+          "barcode": "9329539000314",
+          "name": "KAFFIR LIME LEAF",
+          "norm_name": "KAFFIR LIME LEAF",
+          "price": 3.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "22.FRUIT WHOLESALE"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "eec85368-2310-49f8-bbb2-41577d78db90",
+        "from": {
+          "plu": "30712345000010",
+          "name": "MANGO DEAL",
+          "price": 2.99,
+          "category_id": "01c3f622-a426-43da-a0cb-e14290568b07"
+        },
+        "to": {
+          "source_row": 887,
+          "pcode": "27137",
+          "plu": "30712345000010",
+          "barcode": "30712345000010",
+          "name": "MANGO DEAL",
+          "norm_name": "MANGO DEAL",
+          "price": 2.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-fruit",
+          "category_name": "Fruit",
+          "dept": "22.FRUIT WHOLESALE"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "bf95474b-627e-49fa-86dd-74f3a69e57d8",
+        "from": {
+          "plu": "22756",
+          "name": "ASSORTED LETTUCE BAGS",
+          "price": 2.99,
+          "category_id": "28812e67-272d-40d1-95a0-d091f963113b"
+        },
+        "to": {
+          "source_row": 890,
+          "pcode": "22756",
+          "plu": "22756",
+          "barcode": "22756",
+          "name": "ASSORTED LETTUCE BAGS",
+          "norm_name": "ASSORTED LETTUCE BAGS",
+          "price": 2.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-veg",
+          "category_name": "Vegetables",
+          "dept": "23.VEGIES WHOLESALE"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "cb6bfafe-654a-40df-9305-dc42417991ba",
+        "from": {
+          "plu": "9341471000153",
+          "name": "BABY COS",
+          "price": 3.99,
+          "category_id": "28812e67-272d-40d1-95a0-d091f963113b"
+        },
+        "to": {
+          "source_row": 891,
+          "pcode": "27166",
+          "plu": "9341471000153",
+          "barcode": "9341471000153",
+          "name": "BABY COS",
+          "norm_name": "BABY COS",
+          "price": 3.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-veg",
+          "category_name": "Vegetables",
+          "dept": "23.VEGIES WHOLESALE"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "277d4616-dbf4-4ea0-a471-06d7f38bb605",
+        "from": {
+          "plu": "9334573000077",
+          "name": "BABY COS TWIN",
+          "price": 3.99,
+          "category_id": "28812e67-272d-40d1-95a0-d091f963113b"
+        },
+        "to": {
+          "source_row": 892,
+          "pcode": "27154",
+          "plu": "9334573000077",
+          "barcode": "9334573000077",
+          "name": "BABY COS TWIN",
+          "norm_name": "BABY COS TWIN",
+          "price": 3.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-veg",
+          "category_name": "Vegetables",
+          "dept": "23.VEGIES WHOLESALE"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "d5b6b1ca-7b93-45ff-a94d-7921a6b298ff",
+        "from": {
+          "plu": "9332907005019",
+          "name": "CARROTS 1 KG BAG",
+          "price": 2.69,
+          "category_id": "28812e67-272d-40d1-95a0-d091f963113b"
+        },
+        "to": {
+          "source_row": 893,
+          "pcode": "27875",
+          "plu": "9332907005019",
+          "barcode": "9332907005019",
+          "name": "CARROTS 1 KG BAG",
+          "norm_name": "CARROTS 1 KG BAG",
+          "price": 2.69,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-veg",
+          "category_name": "Vegetables",
+          "dept": "23.VEGIES WHOLESALE"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "ec65561f-7d3f-49d3-bb55-36311ee4e106",
+        "from": {
+          "plu": "9317948006720",
+          "name": "KUMATO TOMATOS 500G",
+          "price": 5.99,
+          "category_id": "28812e67-272d-40d1-95a0-d091f963113b"
+        },
+        "to": {
+          "source_row": 894,
+          "pcode": "27136",
+          "plu": "9317948006720",
+          "barcode": "9317948006720",
+          "name": "KUMATO TOMATOS 500G",
+          "norm_name": "KUMATO TOMATOS 500G",
+          "price": 5.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-veg",
+          "category_name": "Vegetables",
+          "dept": "23.VEGIES WHOLESALE"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "4a57a23c-dd31-45ea-9c67-382c053f74f7",
+        "from": {
+          "plu": "3282",
+          "name": "CORIANDER FRESH  LGE BUNCH",
+          "price": 3.89,
+          "category_id": "eeef6c48-d58f-4b92-b2f4-ab41e88e28a5"
+        },
+        "to": {
+          "source_row": 899,
+          "pcode": "1007728",
+          "plu": "3282",
+          "barcode": "3282",
+          "name": "CORIANDER FRESH LGE BUNCH",
+          "norm_name": "CORIANDER FRESH LGE BUNCH",
+          "price": 3.89,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "eeef6c48-d58f-4b92-b2f4-ab41e88e28a5",
+          "category_name": "Fresh Herbs",
+          "dept": "3.HERBS FRESH"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "5cdfc7f7-815e-4c5b-99ab-a556c2d20d27",
+        "from": {
+          "plu": "151",
+          "name": "B A C O N  RIND LESS KG",
+          "price": 29.99,
+          "category_id": "cat-deli"
+        },
+        "to": {
+          "source_row": 935,
+          "pcode": "88",
+          "plu": "151",
+          "barcode": "151",
+          "name": "B A C O N RIND LESS KG",
+          "norm_name": "B A C O N RIND LESS KG",
+          "price": 29.99,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-deli",
+          "category_name": "Deli",
+          "dept": "4.DELI"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "6ca3ff9a-a164-4e53-85a6-e76cb1d44012",
+        "from": {
+          "plu": "9332172000115",
+          "name": "BARAMBAH B U S H  HONEY 1KG",
+          "price": 9.95,
+          "category_id": "cat-deli"
+        },
+        "to": {
+          "source_row": 943,
+          "pcode": "6891",
+          "plu": "9332172000115",
+          "barcode": "9332172000115",
+          "name": "BARAMBAH B U S H HONEY 1KG",
+          "norm_name": "BARAMBAH B U S H HONEY 1KG",
+          "price": 9.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-deli",
+          "category_name": "Deli",
+          "dept": "4.DELI"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "c4c7c68a-6ab1-4d4f-9d77-09efd81e98fe",
+        "from": {
+          "plu": "9332172010084",
+          "name": "BARAMBAH  NATURAL  1KG",
+          "price": 9.89,
+          "category_id": "cat-deli"
+        },
+        "to": {
+          "source_row": 944,
+          "pcode": "1010077",
+          "plu": "9332172010084",
+          "barcode": "9332172010084",
+          "name": "BARAMBAH NATURAL 1KG",
+          "norm_name": "BARAMBAH NATURAL 1KG",
+          "price": 9.89,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-deli",
+          "category_name": "Deli",
+          "dept": "4.DELI"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "3defb895-d556-4846-a156-140ec32d77ab",
+        "from": {
+          "plu": "9310272006862",
+          "name": "BUTTER NORCO UNSALT  250G",
+          "price": 6.55,
+          "category_id": "cat-deli"
+        },
+        "to": {
+          "source_row": 960,
+          "pcode": "23980",
+          "plu": "9310272006862",
+          "barcode": "9310272006862",
+          "name": "BUTTER NORCO UNSALT 250G",
+          "norm_name": "BUTTER NORCO UNSALT 250G",
+          "price": 6.55,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-deli",
+          "category_name": "Deli",
+          "dept": "4.DELI"
+        }
+      },
+      {
+        "action": "inserted",
+        "id": "price-list-13",
+        "to": {
+          "source_row": 986,
+          "pcode": "1008543",
+          "plu": "13",
+          "barcode": "13",
+          "name": "DELI/DAIRY",
+          "norm_name": "DELI DAIRY",
+          "price": 0.0,
+          "unit": "each",
+          "open_price": 1,
+          "category_id": "cat-deli",
+          "category_name": "Deli",
+          "dept": "4.DELI"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "d3816606-1248-4ca9-91a3-6f832daf021b",
+        "from": {
+          "plu": "38",
+          "name": "DUTCH  GOUDA CHEESE",
+          "price": 25.6,
+          "category_id": "cat-deli"
+        },
+        "to": {
+          "source_row": 987,
+          "pcode": "1908",
+          "plu": "38",
+          "barcode": "38",
+          "name": "DUTCH GOUDA CHEESE",
+          "norm_name": "DUTCH GOUDA CHEESE",
+          "price": 25.6,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-deli",
+          "category_name": "Deli",
+          "dept": "4.DELI"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "73daf429-d4f1-47c6-907c-ea5839291746",
+        "from": {
+          "plu": "639839000198",
+          "name": "EPIROS SAGANAKI  200G",
+          "price": 9.95,
+          "category_id": "cat-deli"
+        },
+        "to": {
+          "source_row": 991,
+          "pcode": "25261",
+          "plu": "639839000198",
+          "barcode": "639839000198",
+          "name": "EPIROS SAGANAKI 200G",
+          "norm_name": "EPIROS SAGANAKI 200G",
+          "price": 9.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-deli",
+          "category_name": "Deli",
+          "dept": "4.DELI"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "e3bf9b14-9344-4643-a1a0-d20b089bec1a",
+        "from": {
+          "plu": "9329937005287",
+          "name": "GOTZINGER  NY HOT DOGS",
+          "price": 8.95,
+          "category_id": "cat-deli"
+        },
+        "to": {
+          "source_row": 1005,
+          "pcode": "16750",
+          "plu": "9329937005287",
+          "barcode": "9329937005287",
+          "name": "GOTZINGER NY HOT DOGS",
+          "norm_name": "GOTZINGER NY HOT DOGS",
+          "price": 8.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-deli",
+          "category_name": "Deli",
+          "dept": "4.DELI"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "19b53a8c-c3c9-4e0f-990e-4e46380e31b4",
+        "from": {
+          "plu": "9339132004176",
+          "name": "I N   S E A S O N   D I P S",
+          "price": 5.99,
+          "category_id": "cat-deli"
+        },
+        "to": {
+          "source_row": 1016,
+          "pcode": "22586",
+          "plu": "9339132004176",
+          "barcode": "9339132004176",
+          "name": "I N S E A S O N D I P S",
+          "norm_name": "I N S E A S O N D I P S",
+          "price": 5.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-deli",
+          "category_name": "Deli",
+          "dept": "4.DELI"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "1ace710b-a134-46d3-a38c-0cfac0ed4fb8",
+        "from": {
+          "plu": "9339132004046",
+          "name": "IN SEASON  GREEN OLIVES DILL",
+          "price": 8.99,
+          "category_id": "cat-deli"
+        },
+        "to": {
+          "source_row": 1018,
+          "pcode": "22979",
+          "plu": "9339132004046",
+          "barcode": "9339132004046",
+          "name": "IN SEASON GREEN OLIVES DILL",
+          "norm_name": "IN SEASON GREEN OLIVES DILL",
+          "price": 8.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-deli",
+          "category_name": "Deli",
+          "dept": "4.DELI"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "da0129df-f4fd-4742-a931-7e75b8e51468",
+        "from": {
+          "plu": "9339132002202",
+          "name": "IN SEASON  P I Z Z A",
+          "price": 13.95,
+          "category_id": "cat-deli"
+        },
+        "to": {
+          "source_row": 1020,
+          "pcode": "18757",
+          "plu": "9339132002202",
+          "barcode": "9339132002202",
+          "name": "IN SEASON P I Z Z A",
+          "norm_name": "IN SEASON P I Z Z A",
+          "price": 13.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-deli",
+          "category_name": "Deli",
+          "dept": "4.DELI"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "ec5f95b9-c45c-41f0-bb72-9f015d83e6d3",
+        "from": {
+          "plu": "9317320305007",
+          "name": "MEREDITH  SHEEP YOG  500G",
+          "price": 8.45,
+          "category_id": "cat-deli"
+        },
+        "to": {
+          "source_row": 1046,
+          "pcode": "1009693",
+          "plu": "9317320305007",
+          "barcode": "9317320305007",
+          "name": "MEREDITH SHEEP YOG 500G",
+          "norm_name": "MEREDITH SHEEP YOG 500G",
+          "price": 8.45,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-deli",
+          "category_name": "Deli",
+          "dept": "4.DELI"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "d43edce3-ed54-4ead-b8c5-cf0130282c04",
+        "from": {
+          "plu": "9310272007814",
+          "name": "NORCO TASTY BLOCK CHEESE 500  G",
+          "price": 11.5,
+          "category_id": "cat-deli"
+        },
+        "to": {
+          "source_row": 1058,
+          "pcode": "22874",
+          "plu": "9310272007814",
+          "barcode": "9310272007814",
+          "name": "NORCO TASTY BLOCK CHEESE 500 G",
+          "norm_name": "NORCO TASTY BLOCK CHEESE 500 G",
+          "price": 11.5,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-deli",
+          "category_name": "Deli",
+          "dept": "4.DELI"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "537392b7-1e94-420f-b3dd-82e3b6863eb7",
+        "from": {
+          "plu": "9322515011212",
+          "name": "O B  SWEET  CHILLI  C R A B",
+          "price": 8.5,
+          "category_id": "cat-deli"
+        },
+        "to": {
+          "source_row": 1068,
+          "pcode": "8269",
+          "plu": "9322515011212",
+          "barcode": "9322515011212",
+          "name": "O B SWEET CHILLI C R A B",
+          "norm_name": "O B SWEET CHILLI C R A B",
+          "price": 8.5,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-deli",
+          "category_name": "Deli",
+          "dept": "4.DELI"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "7bd92e59-5f15-437f-ae10-c6c9f82df62e",
+        "from": {
+          "plu": "9336946000431",
+          "name": "RAYBEK  FETTA WALNUT OLIVES 250G",
+          "price": 6.95,
+          "category_id": "cat-deli"
+        },
+        "to": {
+          "source_row": 1084,
+          "pcode": "26651",
+          "plu": "9336946000431",
+          "barcode": "9336946000431",
+          "name": "RAYBEK FETTA WALNUT OLIVES 250G",
+          "norm_name": "RAYBEK FETTA WALNUT OLIVES 250G",
+          "price": 6.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-deli",
+          "category_name": "Deli",
+          "dept": "4.DELI"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "e9af296f-b7d5-4c13-970f-2634215a631d",
+        "from": {
+          "plu": "9343632001184",
+          "name": "RAYBEK  OLIVE TAPENADE",
+          "price": 5.85,
+          "category_id": "cat-deli"
+        },
+        "to": {
+          "source_row": 1100,
+          "pcode": "19482",
+          "plu": "9343632001184",
+          "barcode": "9343632001184",
+          "name": "RAYBEK OLIVE TAPENADE",
+          "norm_name": "RAYBEK OLIVE TAPENADE",
+          "price": 5.85,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-deli",
+          "category_name": "Deli",
+          "dept": "4.DELI"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "a0169113-9d9f-4978-bb41-bb5197c6cbdc",
+        "from": {
+          "plu": "9340939000278",
+          "name": "ROZA'S   P E S T O",
+          "price": 11.99,
+          "category_id": "cat-deli"
+        },
+        "to": {
+          "source_row": 1124,
+          "pcode": "1010296",
+          "plu": "9340939000278",
+          "barcode": "9340939000278",
+          "name": "ROZA'S P E S T O",
+          "norm_name": "ROZA S P E S T O",
+          "price": 11.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-deli",
+          "category_name": "Deli",
+          "dept": "4.DELI"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "3e64ad7f-f0bd-431b-890d-2c16c192bfc2",
+        "from": {
+          "plu": "796548902301",
+          "name": "SEAFOOD  SALAD MIX 1KG",
+          "price": 10.95,
+          "category_id": "cat-deli"
+        },
+        "to": {
+          "source_row": 1131,
+          "pcode": "26931",
+          "plu": "796548902301",
+          "barcode": "796548902301",
+          "name": "SEAFOOD SALAD MIX 1KG",
+          "norm_name": "SEAFOOD SALAD MIX 1KG",
+          "price": 10.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-deli",
+          "category_name": "Deli",
+          "dept": "4.DELI"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "6e65caf1-f567-442a-aeac-42637e853be1",
+        "from": {
+          "plu": "849",
+          "name": "SLICED BORGO  PEPPERONI",
+          "price": 38.99,
+          "category_id": "cat-deli"
+        },
+        "to": {
+          "source_row": 1142,
+          "pcode": "3555",
+          "plu": "849",
+          "barcode": "849",
+          "name": "SLICED BORGO PEPPERONI",
+          "norm_name": "SLICED BORGO PEPPERONI",
+          "price": 38.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-deli",
+          "category_name": "Deli",
+          "dept": "4.DELI"
+        }
+      },
+      {
+        "action": "inserted",
+        "id": "price-list-802",
+        "to": {
+          "source_row": 1160,
+          "pcode": "3510",
+          "plu": "802",
+          "barcode": "802",
+          "name": "ROMAN ARTICHOKES KG",
+          "norm_name": "ROMAN ARTICHOKES KG",
+          "price": 35.99,
+          "unit": "kg",
+          "open_price": 0,
+          "category_id": "cat-deli",
+          "category_name": "Deli",
+          "dept": "5.DELI SERVICE"
+        }
+      },
+      {
+        "action": "inserted",
+        "id": "price-list-15",
+        "to": {
+          "source_row": 1161,
+          "pcode": "7066",
+          "plu": "15",
+          "barcode": "15",
+          "name": "SERVICE DELI",
+          "norm_name": "SERVICE DELI",
+          "price": 0.0,
+          "unit": "each",
+          "open_price": 1,
+          "category_id": "cat-deli",
+          "category_name": "Deli",
+          "dept": "5.DELI SERVICE"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "930a6d33-b42e-43b0-ab7e-1eeb3d9d4ff6",
+        "from": {
+          "plu": "9311485001866",
+          "name": "BEERENBERG  MANGO LIME DRESSING",
+          "price": 5.95,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 1368,
+          "pcode": "22570",
+          "plu": "9311485001866",
+          "barcode": "9311485001866",
+          "name": "BEERENBERG MANGO LIME DRESSING",
+          "norm_name": "BEERENBERG MANGO LIME DRESSING",
+          "price": 5.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "abe44a5d-b897-40d0-8fba-75f08a37f76b",
+        "from": {
+          "plu": "9311485004294",
+          "name": "BEERENBERG LEMON CAPER  300ML",
+          "price": 7.1,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 1378,
+          "pcode": "26621",
+          "plu": "9311485004294",
+          "barcode": "9311485004294",
+          "name": "BEERENBERG LEMON CAPER 300ML",
+          "norm_name": "BEERENBERG LEMON CAPER 300ML",
+          "price": 7.1,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "c55d03e7-496b-4c9a-ac13-c52ef822733f",
+        "from": {
+          "plu": "93560887",
+          "name": "BEERENBERG  APPLE 160G",
+          "price": 5.3,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 1381,
+          "pcode": "719",
+          "plu": "93560887",
+          "barcode": "93560887",
+          "name": "BEERENBERG APPLE 160G",
+          "norm_name": "BEERENBERG APPLE 160G",
+          "price": 5.3,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "5fd684f6-44f8-4da4-8dfb-7a9ed710526c",
+        "from": {
+          "plu": "9312529001637",
+          "name": "BORLANDS  SHORTBREAD",
+          "price": 4.99,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 1442,
+          "pcode": "23594",
+          "plu": "9312529001637",
+          "barcode": "9312529001637",
+          "name": "BORLANDS SHORTBREAD",
+          "norm_name": "BORLANDS SHORTBREAD",
+          "price": 4.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "b6fd233c-06c4-4720-9a79-5eb9aefce710",
+        "from": {
+          "plu": "9311122000955",
+          "name": "CARAMEL DIP  130G",
+          "price": 2.99,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 1521,
+          "pcode": "26841",
+          "plu": "9311122000955",
+          "barcode": "9311122000955",
+          "name": "CARAMEL DIP 130G",
+          "norm_name": "CARAMEL DIP 130G",
+          "price": 2.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "943f34d6-189a-47c0-baa4-f4e08608b190",
+        "from": {
+          "plu": "93753180",
+          "name": "CHALLENGE CRUSHED  GINGER",
+          "price": 6.45,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 1617,
+          "pcode": "1001801",
+          "plu": "93753180",
+          "barcode": "93753180",
+          "name": "CHALLENGE CRUSHED GINGER",
+          "norm_name": "CHALLENGE CRUSHED GINGER",
+          "price": 6.45,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "203be61b-2143-42db-b363-3b8490eae059",
+        "from": {
+          "plu": "9343679000560",
+          "name": "CIMINO FLORENTINES  WHITE 180G",
+          "price": 13.95,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 1657,
+          "pcode": "26751",
+          "plu": "9343679000560",
+          "barcode": "9343679000560",
+          "name": "CIMINO FLORENTINES WHITE 180G",
+          "norm_name": "CIMINO FLORENTINES WHITE 180G",
+          "price": 13.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "55e29339-7a02-4f0a-9972-2f3c28309678",
+        "from": {
+          "plu": "9344338004431",
+          "name": "ECLIP  MUES CRML&GNUT 450GM^",
+          "price": 3.22,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 1745,
+          "pcode": "545422",
+          "plu": "9344338004431",
+          "barcode": "9344338004431",
+          "name": "ECLIP MUES CRML&GNUT 450GM^",
+          "norm_name": "ECLIP MUES CRML GNUT 450GM",
+          "price": 3.22,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "a8407931-d428-4af6-89bf-2038ed1cd3fc",
+        "from": {
+          "plu": "9310179004992",
+          "name": "G/C BEETROOT SLICED      450G~",
+          "price": 1.11,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 1814,
+          "pcode": "1004398",
+          "plu": "9310179004992",
+          "barcode": "9310179004992",
+          "name": "G/C BEETROOT SLICED 450G~",
+          "norm_name": "G C BEETROOT SLICED 450G",
+          "price": 1.11,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "c71d12a7-7caa-48db-9acf-683508b8ab4b",
+        "from": {
+          "plu": "9328327000956",
+          "name": "G/GARDEN LEMONGRASS PASTE  80G",
+          "price": 5.95,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 1820,
+          "pcode": "26539",
+          "plu": "9328327000956",
+          "barcode": "9328327000956",
+          "name": "G/GARDEN LEMONGRASS PASTE 80G",
+          "norm_name": "G GARDEN LEMONGRASS PASTE 80G",
+          "price": 5.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "cd17d189-9351-4fe6-8de2-97d7175fe5e8",
+        "from": {
+          "plu": "9348728000065",
+          "name": "GRANOLA  650G",
+          "price": 18.95,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 1858,
+          "pcode": "27033",
+          "plu": "9348728000065",
+          "barcode": "9348728000065",
+          "name": "GRANOLA 650G",
+          "norm_name": "GRANOLA 650G",
+          "price": 18.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "92a24c52-3385-4dfc-9103-def9d7ea5ea9",
+        "from": {
+          "plu": "80687439126",
+          "name": "JENS BISCUITS JAM DROPS  300G",
+          "price": 10.5,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 1946,
+          "pcode": "24384",
+          "plu": "80687439126",
+          "barcode": "80687439126",
+          "name": "JENS BISCUITS JAM DROPS 300G",
+          "norm_name": "JENS BISCUITS JAM DROPS 300G",
+          "price": 10.5,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "06dd5da6-9848-4b94-a809-8a433178e65b",
+        "from": {
+          "plu": "39045402739",
+          "name": "KUHNE GHERKIN  PICKLED 670G",
+          "price": 9.99,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 2001,
+          "pcode": "9046",
+          "plu": "39045402739",
+          "barcode": "39045402739",
+          "name": "KUHNE GHERKIN PICKLED 670G",
+          "norm_name": "KUHNE GHERKIN PICKLED 670G",
+          "price": 9.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "813e8272-4eff-465e-a279-b8a4892457e0",
+        "from": {
+          "plu": "8004690057308",
+          "name": "LA MOLISANA BRONZO  500G",
+          "price": 4.95,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 2027,
+          "pcode": "26672",
+          "plu": "8004690057308",
+          "barcode": "8004690057308",
+          "name": "LA MOLISANA BRONZO 500G",
+          "norm_name": "LA MOLISANA BRONZO 500G",
+          "price": 4.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "8be38d54-5907-4cff-a05c-17cd4b1925ec",
+        "from": {
+          "plu": "8004690342190",
+          "name": "LA MOLISANA LAZAGNE 219  500G",
+          "price": 6.95,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 2032,
+          "pcode": "24841",
+          "plu": "8004690342190",
+          "barcode": "8004690342190",
+          "name": "LA MOLISANA LAZAGNE 219 500G",
+          "norm_name": "LA MOLISANA LAZAGNE 219 500G",
+          "price": 6.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "02030bb9-ec96-4d25-90bc-d86269466fd5",
+        "from": {
+          "plu": "8009915001340",
+          "name": "LE VENZIANE ELICHE  250",
+          "price": 4.99,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 2057,
+          "pcode": "15632",
+          "plu": "8009915001340",
+          "barcode": "8009915001340",
+          "name": "LE VENZIANE ELICHE 250",
+          "norm_name": "LE VENZIANE ELICHE 250",
+          "price": 4.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "9d4f8393-acf0-43c8-b4ab-15d19698c877",
+        "from": {
+          "plu": "9310012021049",
+          "name": "M/F SCE TOMATO           500M^",
+          "price": 0.99,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 2105,
+          "pcode": "1003849",
+          "plu": "9310012021049",
+          "barcode": "9310012021049",
+          "name": "M/F SCE TOMATO 500M^",
+          "norm_name": "M F SCE TOMATO 500M",
+          "price": 0.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "db00b9ff-b778-469e-a0af-915a7601c62c",
+        "from": {
+          "plu": "65254724362",
+          "name": "MAPLES SYRUP  250ML",
+          "price": 7.95,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 2139,
+          "pcode": "24869",
+          "plu": "65254724362",
+          "barcode": "65254724362",
+          "name": "MAPLES SYRUP 250ML",
+          "norm_name": "MAPLES SYRUP 250ML",
+          "price": 7.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "f60afbc8-0da0-46bf-a415-d890d8394708",
+        "from": {
+          "plu": "5201041022616",
+          "name": "NOUGAT  ALMOND 50G",
+          "price": 1.99,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 2280,
+          "pcode": "26770",
+          "plu": "5201041022616",
+          "barcode": "5201041022616",
+          "name": "NOUGAT ALMOND 50G",
+          "norm_name": "NOUGAT ALMOND 50G",
+          "price": 1.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "95482c71-0aa5-4da4-b041-75a96c49a9cb",
+        "from": {
+          "plu": "9310342002503",
+          "name": "OLSSON SALT TABLE  1KG^",
+          "price": 4.5,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 2290,
+          "pcode": "395188",
+          "plu": "9310342002503",
+          "barcode": "9310342002503",
+          "name": "OLSSON SALT TABLE 1KG^",
+          "norm_name": "OLSSON SALT TABLE 1KG",
+          "price": 4.5,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "29eaaf95-ca6f-420c-b305-e00a91fe5385",
+        "from": {
+          "plu": "4088700087954",
+          "name": "POPCORN TIME RAINBOW  8PK",
+          "price": 5.99,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 2422,
+          "pcode": "22974",
+          "plu": "4088700087954",
+          "barcode": "4088700087954",
+          "name": "POPCORN TIME RAINBOW 8PK",
+          "norm_name": "POPCORN TIME RAINBOW 8PK",
+          "price": 5.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "145c2276-4911-4fb4-9201-dd59b72528b1",
+        "from": {
+          "plu": "9350271003240",
+          "name": "REMEDY  LEMONLIME BITTERS 2PK",
+          "price": 8.95,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 2501,
+          "pcode": "25930",
+          "plu": "9350271003240",
+          "barcode": "9350271003240",
+          "name": "REMEDY LEMONLIME BITTERS 2PK",
+          "norm_name": "REMEDY LEMONLIME BITTERS 2PK",
+          "price": 8.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "7d803a87-a709-41e3-b927-47a0697c2ef4",
+        "from": {
+          "plu": "9350271002984",
+          "name": "REMEDY KOMBUCHA ORANGE  750 ML",
+          "price": 6.95,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 2505,
+          "pcode": "25935",
+          "plu": "9350271002984",
+          "barcode": "9350271002984",
+          "name": "REMEDY KOMBUCHA ORANGE 750 ML",
+          "norm_name": "REMEDY KOMBUCHA ORANGE 750 ML",
+          "price": 6.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "2cb179f5-f50d-44f8-851c-8c91a5a4c7d6",
+        "from": {
+          "plu": "9312336037461",
+          "name": "S/F ORGANIC YUZU  SEASONING 69G",
+          "price": 8.95,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 2555,
+          "pcode": "25888",
+          "plu": "9312336037461",
+          "barcode": "9312336037461",
+          "name": "S/F ORGANIC YUZU SEASONING 69G",
+          "norm_name": "S F ORGANIC YUZU SEASONING 69G",
+          "price": 8.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "b265ce8e-7055-48e6-866f-62a235dba1eb",
+        "from": {
+          "plu": "9310140283807",
+          "name": "S/RCE RICE WHITE L/GRN    1KG^",
+          "price": 3.99,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 2560,
+          "pcode": "518408",
+          "plu": "9310140283807",
+          "barcode": "9310140283807",
+          "name": "S/RCE RICE WHITE L/GRN 1KG^",
+          "norm_name": "S RCE RICE WHITE L GRN 1KG",
+          "price": 3.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "c511c8a5-0a20-4a6b-82f0-72e3e91e8dd6",
+        "from": {
+          "plu": "9314820010158",
+          "name": "SQUISITO PAESANI  500",
+          "price": 7.45,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 2669,
+          "pcode": "22934",
+          "plu": "9314820010158",
+          "barcode": "9314820010158",
+          "name": "SQUISITO PAESANI 500",
+          "norm_name": "SQUISITO PAESANI 500",
+          "price": 7.45,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "3cdffd48-6731-4c2a-a64c-1556e8f3b4f6",
+        "from": {
+          "plu": "9319224800084",
+          "name": "STIRFRY SAUCE  250ML",
+          "price": 5.99,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 2677,
+          "pcode": "26940",
+          "plu": "9319224800084",
+          "barcode": "9319224800084",
+          "name": "STIRFRY SAUCE 250ML",
+          "norm_name": "STIRFRY SAUCE 250ML",
+          "price": 5.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "dbca1d5c-3404-4c8f-8287-d25e3a4355eb",
+        "from": {
+          "plu": "9319224800121",
+          "name": "STIRFRY SAUCE  250ML",
+          "price": 5.99,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 2678,
+          "pcode": "26945",
+          "plu": "9319224800121",
+          "barcode": "9319224800121",
+          "name": "STIRFRY SAUCE 250ML",
+          "norm_name": "STIRFRY SAUCE 250ML",
+          "price": 5.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "1b803e8e-9ea6-4758-b1fe-0b9f7d2c76af",
+        "from": {
+          "plu": "9310175140809",
+          "name": "VAL VERDE FISH  STOCK",
+          "price": 3.6,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 2786,
+          "pcode": "23916",
+          "plu": "9310175140809",
+          "barcode": "9310175140809",
+          "name": "VAL VERDE FISH STOCK",
+          "norm_name": "VAL VERDE FISH STOCK",
+          "price": 3.6,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "bae9aece-9685-4d29-a240-ba655b8b0668",
+        "from": {
+          "plu": "9310175104092",
+          "name": "VAL VERDE BLACK  BEANS 400GM",
+          "price": 2.25,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 2795,
+          "pcode": "23406",
+          "plu": "9310175104092",
+          "barcode": "9310175104092",
+          "name": "VAL VERDE BLACK BEANS 400GM",
+          "norm_name": "VAL VERDE BLACK BEANS 400GM",
+          "price": 2.25,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "abd10a55-0562-43d1-80b4-1806a3b53bdd",
+        "from": {
+          "plu": "9310631620838",
+          "name": "VITTORIA MINT  CHOCOCHINO 375G",
+          "price": 6.5,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 2815,
+          "pcode": "23493",
+          "plu": "9310631620838",
+          "barcode": "9310631620838",
+          "name": "VITTORIA MINT CHOCOCHINO 375G",
+          "norm_name": "VITTORIA MINT CHOCOCHINO 375G",
+          "price": 6.5,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "8dd80d69-1b00-4018-b7e4-dd3c8a1fcd41",
+        "from": {
+          "plu": "9310631620791",
+          "name": "VITTORIA WHITE  CHOCOCHINO 375G",
+          "price": 6.5,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 2816,
+          "pcode": "23495",
+          "plu": "9310631620791",
+          "barcode": "9310631620791",
+          "name": "VITTORIA WHITE CHOCOCHINO 375G",
+          "norm_name": "VITTORIA WHITE CHOCOCHINO 375G",
+          "price": 6.5,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "581cb2c8-2326-47f1-bf0b-2b5fef7c5854",
+        "from": {
+          "plu": "9335964002014",
+          "name": "WILD NECTAR JAR  350G",
+          "price": 10.49,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 2841,
+          "pcode": "27374",
+          "plu": "9335964002014",
+          "barcode": "9335964002014",
+          "name": "WILD NECTAR JAR 350G",
+          "norm_name": "WILD NECTAR JAR 350G",
+          "price": 10.49,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-grocery",
+          "category_name": "Grocery",
+          "dept": "6.GROCERY"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "4e07bf5b-eacb-4825-8bda-55e7c6063bd3",
+        "from": {
+          "plu": "39",
+          "name": "FLOWERS BUNCH  14.99",
+          "price": 14.99,
+          "category_id": "cat-flowers"
+        },
+        "to": {
+          "source_row": 2955,
+          "pcode": "1909",
+          "plu": "39",
+          "barcode": "39",
+          "name": "FLOWERS BUNCH 14.99",
+          "norm_name": "FLOWERS BUNCH 14 99",
+          "price": 14.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-flowers",
+          "category_name": "Flowers",
+          "dept": "8.FLOWERS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "a852bf40-e476-41dd-ae69-94c83d72aa28",
+        "from": {
+          "plu": "44",
+          "name": "FLOWERS BUNCH  19.99",
+          "price": 19.99,
+          "category_id": "cat-flowers"
+        },
+        "to": {
+          "source_row": 2956,
+          "pcode": "1916",
+          "plu": "44",
+          "barcode": "44",
+          "name": "FLOWERS BUNCH 19.99",
+          "norm_name": "FLOWERS BUNCH 19 99",
+          "price": 19.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-flowers",
+          "category_name": "Flowers",
+          "dept": "8.FLOWERS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "a3a8aba9-9dec-4179-b8ce-49677fbfe459",
+        "from": {
+          "plu": "46",
+          "name": "FLOWERS BUNCH  25.00",
+          "price": 25.0,
+          "category_id": "cat-flowers"
+        },
+        "to": {
+          "source_row": 2957,
+          "pcode": "1918",
+          "plu": "46",
+          "barcode": "46",
+          "name": "FLOWERS BUNCH 25.00",
+          "norm_name": "FLOWERS BUNCH 25 00",
+          "price": 25.0,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-flowers",
+          "category_name": "Flowers",
+          "dept": "8.FLOWERS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "1c7e26a8-7969-4ee9-bf57-67f9ea72f9ae",
+        "from": {
+          "plu": "47",
+          "name": "FLOWERS BUNCH  30.00",
+          "price": 32.0,
+          "category_id": "cat-flowers"
+        },
+        "to": {
+          "source_row": 2958,
+          "pcode": "1919",
+          "plu": "47",
+          "barcode": "47",
+          "name": "FLOWERS BUNCH 30.00",
+          "norm_name": "FLOWERS BUNCH 30 00",
+          "price": 32.0,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-flowers",
+          "category_name": "Flowers",
+          "dept": "8.FLOWERS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "cbcd135c-c080-4b5a-b2c5-5752faf0e41d",
+        "from": {
+          "plu": "34",
+          "name": "FLOWERS BUNCH  9.99",
+          "price": 9.99,
+          "category_id": "cat-flowers"
+        },
+        "to": {
+          "source_row": 2959,
+          "pcode": "1903",
+          "plu": "34",
+          "barcode": "34",
+          "name": "FLOWERS BUNCH 9.99",
+          "norm_name": "FLOWERS BUNCH 9 99",
+          "price": 9.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-flowers",
+          "category_name": "Flowers",
+          "dept": "8.FLOWERS"
+        }
+      },
+      {
+        "action": "inserted",
+        "id": "price-list-60",
+        "to": {
+          "source_row": 2960,
+          "pcode": "1930",
+          "plu": "60",
+          "barcode": "60",
+          "name": "FLOWERS BUNCH ASST",
+          "norm_name": "FLOWERS BUNCH ASST",
+          "price": 0.0,
+          "unit": "each",
+          "open_price": 1,
+          "category_id": "cat-flowers",
+          "category_name": "Flowers",
+          "dept": "8.FLOWERS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "2ee63da0-68f9-4bb3-90a9-3703223bad5e",
+        "from": {
+          "plu": "9317616005802",
+          "name": "AEGEAN WALNUTS 350G",
+          "price": 9.95,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2963,
+          "pcode": "22472",
+          "plu": "9317616005802",
+          "barcode": "9317616005802",
+          "name": "AEGEAN WALNUTS 350G",
+          "norm_name": "AEGEAN WALNUTS 350G",
+          "price": 9.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "a72470f1-c1da-450d-8007-7f2fd754ffb9",
+        "from": {
+          "plu": "9317616005055",
+          "name": "AEGEAN ALMOND MEAL 200G",
+          "price": 4.95,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2964,
+          "pcode": "22733",
+          "plu": "9317616005055",
+          "barcode": "9317616005055",
+          "name": "AEGEAN ALMOND MEAL 200G",
+          "norm_name": "AEGEAN ALMOND MEAL 200G",
+          "price": 4.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "50a47c08-7144-4e02-9336-3b5af8bfba31",
+        "from": {
+          "plu": "9317616005345",
+          "name": "AEGEAN BBQ CORN NUGGETS 200GR",
+          "price": 3.95,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2965,
+          "pcode": "24218",
+          "plu": "9317616005345",
+          "barcode": "9317616005345",
+          "name": "AEGEAN BBQ CORN NUGGETS 200GR",
+          "norm_name": "AEGEAN BBQ CORN NUGGETS 200GR",
+          "price": 3.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "d3fd12a7-f505-4a83-ad7c-893a812e377c",
+        "from": {
+          "plu": "9317616005154",
+          "name": "AEGEAN BRAZIL NUTS 200 GR",
+          "price": 8.95,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2966,
+          "pcode": "24337",
+          "plu": "9317616005154",
+          "barcode": "9317616005154",
+          "name": "AEGEAN BRAZIL NUTS 200 GR",
+          "norm_name": "AEGEAN BRAZIL NUTS 200 GR",
+          "price": 8.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "8f10d35c-d140-40d9-ae02-c187624f781c",
+        "from": {
+          "plu": "9317616005185",
+          "name": "AEGEAN CASHEWS SALTED 450G",
+          "price": 12.95,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2967,
+          "pcode": "17509",
+          "plu": "9317616005185",
+          "barcode": "9317616005185",
+          "name": "AEGEAN CASHEWS SALTED 450G",
+          "norm_name": "AEGEAN CASHEWS SALTED 450G",
+          "price": 12.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "328be2d5-040c-44e9-84dd-abce8ddd450c",
+        "from": {
+          "plu": "9317616005109",
+          "name": "AEGEAN DRIED APRICOTS 425G",
+          "price": 7.5,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2968,
+          "pcode": "22735",
+          "plu": "9317616005109",
+          "barcode": "9317616005109",
+          "name": "AEGEAN DRIED APRICOTS 425G",
+          "norm_name": "AEGEAN DRIED APRICOTS 425G",
+          "price": 7.5,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "81dfd0d1-8cf2-47e2-a574-dcbf62f0e605",
+        "from": {
+          "plu": "9317616616718",
+          "name": "AEGEAN DRIED CRANBERRIES 500G",
+          "price": 7.5,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2969,
+          "pcode": "22738",
+          "plu": "9317616616718",
+          "barcode": "9317616616718",
+          "name": "AEGEAN DRIED CRANBERRIES 500G",
+          "norm_name": "AEGEAN DRIED CRANBERRIES 500G",
+          "price": 7.5,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "f5de01b7-cdbc-40f1-9cd0-605a270cab43",
+        "from": {
+          "plu": "9317616537877",
+          "name": "AEGEAN DRIED FIGS 250G",
+          "price": 4.99,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2970,
+          "pcode": "22730",
+          "plu": "9317616537877",
+          "barcode": "9317616537877",
+          "name": "AEGEAN DRIED FIGS 250G",
+          "norm_name": "AEGEAN DRIED FIGS 250G",
+          "price": 4.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "462e2a89-f1b7-483e-85c6-22e1703e75a0",
+        "from": {
+          "plu": "9317616847594",
+          "name": "AEGEAN DRY RST ALMONDS 375 GR",
+          "price": 9.35,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2971,
+          "pcode": "24248",
+          "plu": "9317616847594",
+          "barcode": "9317616847594",
+          "name": "AEGEAN DRY RST ALMONDS 375 GR",
+          "norm_name": "AEGEAN DRY RST ALMONDS 375 GR",
+          "price": 9.35,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "e1f8c8c5-6690-4b03-ad71-79be8dc564f6",
+        "from": {
+          "plu": "9317616005222",
+          "name": "AEGEAN FRUIT AND NUT 450 GR",
+          "price": 8.95,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2972,
+          "pcode": "24216",
+          "plu": "9317616005222",
+          "barcode": "9317616005222",
+          "name": "AEGEAN FRUIT AND NUT 450 GR",
+          "norm_name": "AEGEAN FRUIT AND NUT 450 GR",
+          "price": 8.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "77d9ba24-6d2e-455f-986d-85558829c5e8",
+        "from": {
+          "plu": "9317616573912",
+          "name": "AEGEAN MYKONOS NUT MIX 425GR",
+          "price": 12.5,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2973,
+          "pcode": "24196",
+          "plu": "9317616573912",
+          "barcode": "9317616573912",
+          "name": "AEGEAN MYKONOS NUT MIX 425GR",
+          "norm_name": "AEGEAN MYKONOS NUT MIX 425GR",
+          "price": 12.5,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "68598a7c-bde4-4168-9537-4d5da8e5d0d4",
+        "from": {
+          "plu": "9317616005239",
+          "name": "AEGEAN NATURAL MACADAMIAS 375G",
+          "price": 19.95,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2974,
+          "pcode": "22732",
+          "plu": "9317616005239",
+          "barcode": "9317616005239",
+          "name": "AEGEAN NATURAL MACADAMIAS 375G",
+          "norm_name": "AEGEAN NATURAL MACADAMIAS 375G",
+          "price": 19.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "7f862d7b-307d-401e-85e7-302e756f0d35",
+        "from": {
+          "plu": "9317616171262",
+          "name": "AEGEAN PECAN NUTS 250G",
+          "price": 9.95,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2975,
+          "pcode": "24061",
+          "plu": "9317616171262",
+          "barcode": "9317616171262",
+          "name": "AEGEAN PECAN NUTS 250G",
+          "norm_name": "AEGEAN PECAN NUTS 250G",
+          "price": 9.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "42fe54a6-0849-47d8-b2f9-78b972401c10",
+        "from": {
+          "plu": "9317616624089",
+          "name": "AEGEAN PEPITAS 500 GR",
+          "price": 7.15,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2976,
+          "pcode": "24007",
+          "plu": "9317616624089",
+          "barcode": "9317616624089",
+          "name": "AEGEAN PEPITAS 500 GR",
+          "norm_name": "AEGEAN PEPITAS 500 GR",
+          "price": 7.15,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "c99d3b23-6479-4d41-a960-27bd8af684ce",
+        "from": {
+          "plu": "9317616005697",
+          "name": "AEGEAN PITTED DATES 500 GR",
+          "price": 4.25,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2977,
+          "pcode": "23615",
+          "plu": "9317616005697",
+          "barcode": "9317616005697",
+          "name": "AEGEAN PITTED DATES 500 GR",
+          "norm_name": "AEGEAN PITTED DATES 500 GR",
+          "price": 4.25,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "7ef17e23-eb81-4001-8f14-674d056c5bd4",
+        "from": {
+          "plu": "9317616005451",
+          "name": "AEGEAN R&S PUMPKIN SEED",
+          "price": 3.95,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2978,
+          "pcode": "20055",
+          "plu": "9317616005451",
+          "barcode": "9317616005451",
+          "name": "AEGEAN R&S PUMPKIN SEED",
+          "norm_name": "AEGEAN R S PUMPKIN SEED",
+          "price": 3.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "b77ceb0d-00b5-451a-a89a-24713f93a8d5",
+        "from": {
+          "plu": "9317616005253",
+          "name": "AEGEAN R/S MACADAMIAS NUTS",
+          "price": 19.95,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2979,
+          "pcode": "22731",
+          "plu": "9317616005253",
+          "barcode": "9317616005253",
+          "name": "AEGEAN R/S MACADAMIAS NUTS",
+          "norm_name": "AEGEAN R S MACADAMIAS NUTS",
+          "price": 19.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "80a93854-93bb-4620-b2d9-f6d1cde818d4",
+        "from": {
+          "plu": "9317616563159",
+          "name": "AEGEAN RICE CRACKERS 180 GR",
+          "price": 3.99,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2980,
+          "pcode": "24219",
+          "plu": "9317616563159",
+          "barcode": "9317616563159",
+          "name": "AEGEAN RICE CRACKERS 180 GR",
+          "norm_name": "AEGEAN RICE CRACKERS 180 GR",
+          "price": 3.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "843bdb88-3650-425d-b7ff-6fb107a5ef72",
+        "from": {
+          "plu": "9317616005437",
+          "name": "AEGEAN SALT RST PISTACIOS 375",
+          "price": 12.95,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2981,
+          "pcode": "23613",
+          "plu": "9317616005437",
+          "barcode": "9317616005437",
+          "name": "AEGEAN SALT RST PISTACIOS 375",
+          "norm_name": "AEGEAN SALT RST PISTACIOS 375",
+          "price": 12.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "f7c08b7d-8029-422c-a424-fd8bc7982f8a",
+        "from": {
+          "plu": "9317616428625",
+          "name": "AEGEAN SALT PISTACHIOS 270G",
+          "price": 12.95,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2982,
+          "pcode": "21158",
+          "plu": "9317616428625",
+          "barcode": "9317616428625",
+          "name": "AEGEAN SALT PISTACHIOS 270G",
+          "norm_name": "AEGEAN SALT PISTACHIOS 270G",
+          "price": 12.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "f6901c1b-5f32-4b48-a115-06d2588c48ac",
+        "from": {
+          "plu": "9317616005475",
+          "name": "AEGEAN SESAME SEEDS 250 GR",
+          "price": 2.95,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2983,
+          "pcode": "24217",
+          "plu": "9317616005475",
+          "barcode": "9317616005475",
+          "name": "AEGEAN SESAME SEEDS 250 GR",
+          "norm_name": "AEGEAN SESAME SEEDS 250 GR",
+          "price": 2.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "895faae3-162d-47b4-86fe-a68d504e92ad",
+        "from": {
+          "plu": "9317616006595",
+          "name": "AEGEAN SLT MAC CASHEW MIX 425 G",
+          "price": 13.95,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2984,
+          "pcode": "24244",
+          "plu": "9317616006595",
+          "barcode": "9317616006595",
+          "name": "AEGEAN SLT MAC CASHEW MIX 425 G",
+          "norm_name": "AEGEAN SLT MAC CASHEW MIX 425 G",
+          "price": 13.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "2eb38fc5-b201-4e92-9881-bf694d3f5931",
+        "from": {
+          "plu": "9317616005086",
+          "name": "AEGEAN SMOKED ALMONDS 375 GR",
+          "price": 9.35,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2985,
+          "pcode": "24002",
+          "plu": "9317616005086",
+          "barcode": "9317616005086",
+          "name": "AEGEAN SMOKED ALMONDS 375 GR",
+          "norm_name": "AEGEAN SMOKED ALMONDS 375 GR",
+          "price": 9.35,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "6226230b-edaf-4114-9e60-f1a9506ce3bd",
+        "from": {
+          "plu": "9317616005307",
+          "name": "AEGEAR ST & SALTED PEANUTS 500 G",
+          "price": 4.95,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2986,
+          "pcode": "24309",
+          "plu": "9317616005307",
+          "barcode": "9317616005307",
+          "name": "AEGEAR ST & SALTED PEANUTS 500 G",
+          "norm_name": "AEGEAR ST SALTED PEANUTS 500 G",
+          "price": 4.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "33499556-ee36-4f33-bc6b-5ac1243baa0d",
+        "from": {
+          "plu": "9315054005354",
+          "name": "ALMONDS SLIVERED 100G",
+          "price": 4.85,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2987,
+          "pcode": "27016",
+          "plu": "9315054005354",
+          "barcode": "9315054005354",
+          "name": "ALMONDS SLIVERED 100G",
+          "norm_name": "ALMONDS SLIVERED 100G",
+          "price": 4.85,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "efccb4de-42d7-475c-9966-500c8be08e64",
+        "from": {
+          "plu": "8683825023168",
+          "name": "COLOURED SUGAR CHICKPEAS 350G",
+          "price": 7.99,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2988,
+          "pcode": "26685",
+          "plu": "8683825023168",
+          "barcode": "8683825023168",
+          "name": "COLOURED SUGAR CHICKPEAS 350G",
+          "norm_name": "COLOURED SUGAR CHICKPEAS 350G",
+          "price": 7.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "30bf51fb-8c44-4e0c-b920-460a1484aaf9",
+        "from": {
+          "plu": "19321",
+          "name": "MACADAMIAS 1KG BAG",
+          "price": 9.95,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2989,
+          "pcode": "27168",
+          "plu": "19321",
+          "barcode": "19321",
+          "name": "MACADAMIAS 1KG BAG",
+          "norm_name": "MACADAMIAS 1KG BAG",
+          "price": 9.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "f802784f-7188-48c7-983b-7ff45c47c990",
+        "from": {
+          "plu": "9315054009314",
+          "name": "MARK GROC HONY MACADAMIAS 140G",
+          "price": 7.95,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2990,
+          "pcode": "23382",
+          "plu": "9315054009314",
+          "barcode": "9315054009314",
+          "name": "MARK GROC HONY MACADAMIAS 140G",
+          "norm_name": "MARK GROC HONY MACADAMIAS 140G",
+          "price": 7.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "f4e43edb-061a-4223-9335-76efe8721251",
+        "from": {
+          "plu": "9315054009468",
+          "name": "MARK GROC PASTELLI 200 GR",
+          "price": 5.1,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2991,
+          "pcode": "23383",
+          "plu": "9315054009468",
+          "barcode": "9315054009468",
+          "name": "MARK GROC PASTELLI 200 GR",
+          "norm_name": "MARK GROC PASTELLI 200 GR",
+          "price": 5.1,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "a29c1cc0-6d19-4aa3-9e84-a619f8bfe74b",
+        "from": {
+          "plu": "9315054005699",
+          "name": "MARK GROC PINE NUTS 100 GR",
+          "price": 8.85,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2992,
+          "pcode": "23607",
+          "plu": "9315054005699",
+          "barcode": "9315054005699",
+          "name": "MARK GROC PINE NUTS 100 GR",
+          "norm_name": "MARK GROC PINE NUTS 100 GR",
+          "price": 8.85,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "58fef629-2608-4879-b293-03f2a7af48d4",
+        "from": {
+          "plu": "8683825023199",
+          "name": "ROASTED CHICKPEAS  350G",
+          "price": 7.99,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2993,
+          "pcode": "26684",
+          "plu": "8683825023199",
+          "barcode": "8683825023199",
+          "name": "ROASTED CHICKPEAS 350G",
+          "norm_name": "ROASTED CHICKPEAS 350G",
+          "price": 7.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "7231276f-2daa-43b1-a736-62ecefab5c27",
+        "from": {
+          "plu": "9317616622306",
+          "name": "SUNFLOWER KERBLS 500G",
+          "price": 5.85,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2994,
+          "pcode": "25208",
+          "plu": "9317616622306",
+          "barcode": "9317616622306",
+          "name": "SUNFLOWER KERBLS 500G",
+          "norm_name": "SUNFLOWER KERBLS 500G",
+          "price": 5.85,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "7f531083-6b92-4418-859c-27de989ca69f",
+        "from": {
+          "plu": "9341533002064",
+          "name": "SUNFLOWER SEED R/SALTED 400G",
+          "price": 9.95,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2995,
+          "pcode": "26145",
+          "plu": "9341533002064",
+          "barcode": "9341533002064",
+          "name": "SUNFLOWER SEED R/SALTED 400G",
+          "norm_name": "SUNFLOWER SEED R SALTED 400G",
+          "price": 9.95,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "3bb9b771-a9cb-4ba9-a5b5-a2498dc9eaaa",
+        "from": {
+          "plu": "6124",
+          "name": "WALNUTS 1KG",
+          "price": 13.99,
+          "category_id": "624c5660-bb0d-4884-8934-0d9e66bb6caf"
+        },
+        "to": {
+          "source_row": 2996,
+          "pcode": "654",
+          "plu": "6124",
+          "barcode": "6124",
+          "name": "WALNUTS 1KG",
+          "norm_name": "WALNUTS 1KG",
+          "price": 13.99,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-nuts",
+          "category_name": "Nuts",
+          "dept": "9.NUTS"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "p-open-btn-coffee",
+        "from": {
+          "plu": null,
+          "name": "Coffee",
+          "price": 0.0,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 3007,
+          "pcode": "946",
+          "plu": "52",
+          "barcode": "52",
+          "name": "COFFEE",
+          "norm_name": "COFFEE",
+          "price": 0.0,
+          "unit": "each",
+          "open_price": 1,
+          "category_id": "cat-coffee",
+          "category_name": "Coffee",
+          "dept": "COFFEE"
+        }
+      },
+      {
+        "action": "updated",
+        "id": "p-open-btn-meat",
+        "from": {
+          "plu": null,
+          "name": "Meat",
+          "price": 0.0,
+          "category_id": "cat-grocery"
+        },
+        "to": {
+          "source_row": 3015,
+          "pcode": "21014",
+          "plu": "73",
+          "barcode": "73",
+          "name": "MEAT",
+          "norm_name": "MEAT",
+          "price": 0.0,
+          "unit": "each",
+          "open_price": 1,
+          "category_id": "cat-meat",
+          "category_name": "Meat",
+          "dept": "MEAT"
+        }
+      },
+      {
+        "action": "inserted",
+        "id": "price-list-16",
+        "to": {
+          "source_row": 3019,
+          "pcode": "27571",
+          "plu": "16",
+          "barcode": "16",
+          "name": "UBER EATS ADJUSTMENT",
+          "norm_name": "UBER EATS ADJUSTMENT",
+          "price": 0.01,
+          "unit": "each",
+          "open_price": 0,
+          "category_id": "cat-uber-eats",
+          "category_name": "Uber Eats",
+          "dept": "UBER EATS"
+        }
+      },
+      {
+        "action": "resolved_duplicate",
+        "id": "p-kb-pg7-btn9",
+        "name": "Kanzi Apple",
+        "old_plu": "20219",
+        "new_plu": "500039605485950023"
+      },
+      {
+        "action": "resolved_duplicate",
+        "id": "p-kb-pg7-btn7",
+        "name": "Large Granny Smith Apple",
+        "old_plu": "4017",
+        "new_plu": "500039605485950024"
+      }
+    ],
+    "final": {
+      "products": 3397,
+      "active_products": 3391,
+      "duplicate_plus": 0,
+      "missing_sheet_plus": 0
+    }
+  },
+  {
+    "db": "C:\\Users\\Matthias\\AppData\\Roaming\\YieldPOS Client\\crisp-pos.sqlite",
+    "error": "[Errno 13] Permission denied: 'C:\\\\Users\\\\Matthias\\\\AppData\\\\Roaming\\\\YieldPOS Client\\\\crisp-pos.before-price-list-20260520-212224.sqlite'"
+  }
+]

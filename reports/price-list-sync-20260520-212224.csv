@@ -1,0 +1,246 @@
+db,action,id,old_plu,new_plu,old_name,new_name
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,0786972f-7f03-4abb-9e92-eb7d008db3fa,5791,5791,MANDARINES AFROURER   KG,MANDARINES AFROURER KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,c24b4a51-2a14-4eb4-9d47-0bbd96195cec,723,723,FRUIT & VEG EA,(S) FRUIT & VEG EA
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,5cc58403-288c-4037-8d9f-3f3653c65b16,722,722,FRUIT & VEG KG,(S) FRUIT & VEG KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,228fad78-6ca2-4395-afe2-c2e9c0c7ed3f,709,709,PAW PAW CUT,(S) PAW PAW CUT
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,58be16ef-9130-4ce4-bed7-036e46e25889,732,732,PAW PAW RED CUT KG,(S) PAW PAW RED CUT KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,778d15c5-5d54-4337-874d-be265328b86a,795,795,RED PAPAYA KG,(S) RED PAPAYA KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,c33d8cac-f730-4078-aa5c-a61997a03e43,799,799,SEEDLESS WATERMELON CUT KG,(S) SEEDLESS WATERMELON CUT KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,3c12f5fa-663f-4d45-9a76-1f6e7c797cb7,714,714,WATERMELON KG,(S) WATERMELON KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,779372af-ecee-4ee6-b5bb-0be83342ad3a,719,719,SEEDLESS WATERMELON WHOLE,(S)SEEDLESS WATERMELON WHOLE
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,moved_conflict,p-banana,4011,500039605485950017,Bananas,
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,inserted,price-list-4011,,4011,,APPLE PINK LADY KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,moved_conflict,p-apple-rg,4015,500039605485950018,Royal Gala Apples,
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,moved_conflict,p-kb-pg7-btn8,4015,500039605485950019,Large Royal Gala Apple,
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,inserted,price-list-4015,,4015,,APPLE PINK LADY SMALL KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,moved_conflict,p-lettuce,4061,500039605485950020,Iceberg Lettuce,
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,inserted,price-list-4061,,4061,,APPLE ROYAL GALA LGE KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,f68fc092-a1c2-4833-a198-1717786eaaa3,4155,4155,AVOCADOES  SMALL EA,AVOCADOES SMALL EA
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,9f6a5df7-9e75-4a21-9747-c2b61e6dc347,4201,4201,BANANAS CAVENDISH  KG,BANANAS CAVENDISH KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,a2f4f0c7-73a3-4c1c-9e4c-bf807d128f25,8292,8292,BLOOD ORANGES  KG,BLOOD ORANGES KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,7bd23c19-e702-49ec-abde-35f128e3b7c2,9317948009233,9317948009233,BLUEBERRIES  125G,BLUEBERRIES 125G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,972a4a26-e692-4b11-8f5f-b6afc18f049a,9327403000101,9327403000101,BLUEBERRY FRESH  125G,BLUEBERRY FRESH 125G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,6b16cc3c-9333-4ecc-853c-a7faee9c5342,4491,4491,GRAPE  WHITE SEEDLESS KG,GRAPE WHITE SEEDLESS KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,20be4cff-346a-456f-8fe5-f2aa70fdea93,4681,4681,IMPERIAL MANDARINS  KG,IMPERIAL MANDARINS KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,f1d97061-14f2-42f1-9fd6-32f624284164,3812,3812,JAZZ  APPLE  KG,JAZZ APPLE KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,5b250a00-623d-43d7-b467-ee052798bfe3,4621,4621,LEMONS FRESH  KG,LEMONS FRESH KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,ae18e675-c545-4e3e-a6da-9b2f06165ff3,4665,4665,MANDARINES MURCOT  KG,MANDARINES MURCOT KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,26d128bc-df65-4a87-96f5-d7031bb35317,5772,5772,KEITT  EA,KEITT EA
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,603ee4b1-887a-47a4-8cd0-66d140e58a45,4851,4851,NECTARINE WHITE  KG,NECTARINE WHITE KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,107900f3-9ca7-43ce-bfa9-15da8d35b356,5461,5461,PAW PAW GREEN  KG,PAW PAW GREEN KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,99a104eb-fd2d-4108-81c2-c2448fa9ac1c,5081,5081,PEACH YELLOW  KG,PEACH YELLOW KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,fe30f455-8d34-4fce-bfe0-16a59beba383,5022,5022,PERSIMMON  KG,PERSIMMON KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,f669e020-89bd-49f0-a9dd-bb3f9e7d2dfc,5422,5422,PINEAPPLE  EXTRA LARGE,PINEAPPLE EXTRA LARGE
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,e146137b-5c5e-4703-993a-1424a27f9b92,5241,5241,PLUMS SUGAR  KG,PLUMS SUGAR KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,c33e93b1-7d5a-4980-a4a1-76627027814d,5121,5121,RED  PLUMS KG,RED PLUMS KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,moved_conflict,p-mushroom,4065,500039605485950021,Cup Mushrooms,
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,inserted,price-list-4065,,4065,,SM ROYAL GALA
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,4183576f-d2b7-4b15-81f0-fc41ec217f6d,4801,4801,WATERMELON  SEEDLESS WHOLE KG,WATERMELON SEEDLESS WHOLE KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,2dec79fd-dd9b-4738-8706-12447cb0708d,9312722000055,9312722000055,BYRON BAY CHOC  250G,BYRON BAY CHOC 250G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,1bcfca79-a6f9-4f17-a6cf-9f61524dffce,9310881910383,9310881910383,D/LEA LIQ TWIST ORIG  280GM~,D/LEA LIQ TWIST ORIG 280GM~
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,c9eeeb22-8f1d-4e80-92b2-f9ddb00a5ed3,9348728000805,9348728000805,MILK CHOCOLATE  BAR  200G,MILK CHOCOLATE BAR 200G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,75b4c93d-721c-47ed-92e2-bf8cc7d4cf3c,4000417018007,4000417018007,RITTER  CHOCOLATE,RITTER CHOCOLATE
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,39c37c72-293c-4980-b14f-848a8c879a2a,93439220,93439220,SWEET OZ  CHOC 26GM,SWEET OZ CHOC 26GM
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,baeb3450-8a2e-4f66-ad88-ecfa2e4124ec,9348728000171,9348728000171,TRIPLE CHOCOLATE  86G,TRIPLE CHOCOLATE 86G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,5cb683b1-ee04-4341-850e-dccfaed0e4cf,9348728000126,9348728000126,TURKISH DELIGHT & PIST.  200G,TURKISH DELIGHT & PIST. 200G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,59aaa72d-5404-4c40-a261-5d1ea8bba3e3,706502742997,706502742997,ALMOMD RD GF PALEO LECTIN FREE,ALMOMD RD GF PALEO LECTIN FREE
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,451f295f-5e8d-40cd-af61-2726a737b2c1,706502742768,706502742768,ALMOND RD GF PALEO PUMPKIN,ALMOND RD GF PALEO PUMPKIN
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,64d19fc4-cae6-4ed7-b2ce-212a01c01eea,706502742904,706502742904,ALMOND ROAD BYKERY,ALMOND ROAD BYKERY
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,79fbe0d3-adf0-4702-872c-e420a6d603eb,706502742935,706502742935,ALMOND ROAD GF PALEO SEEDED,ALMOND ROAD GF PALEO SEEDED
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,38834c69-ac14-47e2-ac22-f02331d550b9,4468,4468,ASSORTED MUFFINS EUSTRALIS,ASSORTED MUFFINS EUSTRALIS
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,0ff6b93f-b3fe-4505-a620-9aea7ef9bb97,9336864000544,9336864000544,BBCK BEEF LASAG TRD ITLN 400GM,BBCK BEEF LASAG TRD ITLN 400GM
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,8e4b6c8d-0a90-4021-8a3c-d7ae84256785,9336864003606,9336864003606,BBCK BF CHK RAGOUT GNOCC 350GM,BBCK BF CHK RAGOUT GNOCC 350GM
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,374bf1c9-b464-4f1a-a946-4661ec3f3402,9336864004450,9336864004450,BBCK GF BUTR CKN TUM RCE 350GM,BBCK GF BUTR CKN TUM RCE 350GM
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,b5ee7caa-d8c0-4e10-af05-1354ec13a903,9336864007376,9336864007376,BBCK GF CKN&SDTOM RISOTO 350GM,BBCK GF CKN&SDTOM RISOTO 350GM
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,bc4c66dd-da67-44d7-a75e-6c92f86ed2d9,9336864003620,9336864003620,BBCK LAMB CAB SAV & MASH 350GM,BBCK LAMB CAB SAV & MASH 350GM
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,961e4806-8813-4b7e-ba68-2b72ffbadf9e,9336864003743,9336864003743,BBCK SPAG PESTO CRSP BCN 350GM,BBCK SPAG PESTO CRSP BCN 350GM
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,0d977f8e-591c-438d-bf26-6b89c95d3a64,1673,1673,BREAD,BREAD
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,b93ec82d-0cf5-4c43-a4d7-32f8ff4452a5,909,909,BREAD,BREAD
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,5e411fbd-468d-40db-b8c5-a80c679dd9a8,706502574154,706502574154,HAMID BAKERY BREAD,HAMID BAKERY BREAD
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,f6021541-298c-4983-985f-14bcf3f7c576,9349472000103,9349472000103,BYRON BAY PIZZA,BYRON BAY PIZZA
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,9f1838c5-30ec-49e9-a695-80c25027e323,3876,3876,LONG SPIRAL CROISSANT,LONG SPIRAL CROISSANT
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,5ae46632-476c-45c8-b124-8469f09ce313,620,620,EUSTRALIS LA RUSTIGUETTE,EUSTRALIS LA RUSTIGUETTE
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,561702ac-8748-4b07-8d51-efa2fdf1e963,8197,8197,EUSTRALIS APPLE TURNOVER,EUSTRALIS APPLE TURNOVER
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,fa904f6b-8748-41b1-8e85-1acb6c73790f,631,631,EUSTRALIS BAGUETTE WHITE,EUSTRALIS BAGUETTE WHITE
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,bbcb85d1-c898-418c-b2b2-86a405815731,643,643,EUSTRALIS  CROISSANT ALMOND EA,EUSTRALIS CROISSANT ALMOND EA
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,321151d2-5ba7-447c-869a-fc2b3146d74c,635,635,EUSTRALIS  CROISSANT CHOCOLATE EA,EUSTRALIS CROISSANT CHOCOLATE EA
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,ae07a6cc-7381-40ab-a603-5977be28ea12,634,634,EUSTRALIS  CROISSANT EA,EUSTRALIS CROISSANT EA
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,42d8a163-88e3-48f8-bc0d-eb80f236d84e,642,642,EUSTRALIS FIG LOAF,EUSTRALIS FIG LOAF
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,768b47fd-62d9-4fe8-8f89-0c56afda0d6b,4469,4469,EUSTRALIS SNAILS,EUSTRALIS SNAILS
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,e2e9ad34-6bc7-4138-930c-607e67d83a50,626,626,EUSTRALIS WHITE SOURDOUGH LOAF,EUSTRALIS WHITE SOURDOUGH LOAF
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,3d6befc3-b3a4-42c3-a82a-59378a910c1b,9345265000077,9345265000077,FILLA BUNS 3 PK,FILLA BUNS 3 PK
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,d66caeb8-067a-4d5b-a075-8de58a686a88,9345265000046,9345265000046,FILLA BURGERS 4 PK,FILLA BURGERS 4 PK
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,2dfcb0c4-ca67-43b6-87bd-e5fa8a8b8394,9369999301361,9369999301361,FILLABAKERY W/MEAL 6PK,FILLABAKERY W/MEAL 6PK
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,c8bdfc08-bab5-4ab8-b346-07d8747de260,9369999030438,9369999030438,FILLABAKERY LEBANESE BREAD 6PK,FILLABAKERY LEBANESE BREAD 6PK
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,ebbb02f8-2ccf-4962-8422-7a294110fb59,9345265000039,9345265000039,FILLA ROLLS 3 PK,FILLA ROLLS 3 PK
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,d3e0d903-db83-477e-97cc-190ff3040e6f,9345265000053,9345265000053,FILLA TORTILLA 6 PK,FILLA TORTILLA 6 PK
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,e3afd57b-8ffe-44f8-b992-7e7e286a38f5,9345265000015,9345265000015,FILLA BAKERY TURKISH BREAD,FILLA BAKERY TURKISH BREAD
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,a9fea8ca-2294-4567-8752-f5938ff0a351,9345265000022,9345265000022,FILLA TURKISH GARLIC,FILLA TURKISH GARLIC
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,e0ace873-409e-4be0-9d95-5cb8977482b5,6220,6220,FROZEN CROISSANTS PK,FROZEN CROISSANTS PK
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,ae3e04af-b9f1-4976-830b-615a48cb62a6,799439078932,799439078932,FRUIT LOAF 720G,FRUIT LOAF 720G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,8a208b08-3e31-430e-b37d-9c83c38e7e7a,9310332002032,9310332002032,GB MULTIGRAIN 750G,GB MULTIGRAIN 750G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,b29145f4-d677-47ac-97e2-ad42a121ecc2,9310332001974,9310332001974,GB WHITE BREAD 750G,GB WHITE BREAD 750G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,ad97f8ab-feee-496a-816e-780773332cbc,9310332002018,9310332002018,GB WHOLEMEAL 750G,GB WHOLEMEAL 750G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,eb66e7aa-8741-44d9-9be9-784c262e2df4,680596849940,680596849940,GERMAN BAKEHOUSE FRUIT LOAF 750G,GERMAN BAKEHOUSE FRUIT LOAF 750G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,252f8ef3-02e5-4f5d-930d-8695b37ff836,680596849957,680596849957,GERMAN BAKEHOUSE SOURDOUGH 700G,GERMAN BAKEHOUSE SOURDOUGH 700G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,e8ec55cb-fe03-4172-ab32-201d3dfb4353,680596849865,680596849865,GERMAN B'HOUSE M'GRAIN S'DOUGH,GERMAN B'HOUSE M'GRAIN S'DOUGH
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,19ffeef6-df8b-4bd2-8f19-af72d6aeb80b,680596849872,680596849872,GERMAN B'HOUSE PUMPKIN SEED,GERMAN B'HOUSE PUMPKIN SEED
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,b61aabdc-2278-4989-bd31-214334a5f4a2,680596849889,680596849889,GERMAN BAKEHOUSE SUNFLOWER S/D,GERMAN BAKEHOUSE SUNFLOWER S/D
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,2beb7f8b-19a0-4693-b872-5b09985c3d34,680596849933,680596849933,GERMAN SWISS LOAF,GERMAN SWISS LOAF
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,bec01e7e-f9fe-4c89-84cf-f1a3056be06a,781005417221,781005417221,HAMID BAKERY BREAD 2PK,HAMID BAKERY BREAD 2PK
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,d14f8b43-723b-4efa-a284-f721465f5349,27331011468,27331011468,LA BANDERITA TORTILLAS 640G,LA BANDERITA TORTILLAS 640G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,d241a436-4be2-4c10-bd4b-87f8ac38f11b,9310332000236,9310332000236,MULTIGRAIN SLICED BREAD 900G,MULTIGRAIN SLICED BREAD 900G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,121afa5a-b30f-4c2f-9c63-b7b92b26de4f,9310332011348,9310332011348,RYE BREAD KING HENRY 900G,RYE BREAD KING HENRY 900G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,cfa4628f-f340-4ce2-a7ab-29034a994aad,8008698010259,8008698010259,SCHAR CIABATTINE ROLLS,SCHAR CIABATTINE ROLLS
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,05b715cf-2935-45ae-a3db-72c5d2aceffe,9360032000012,9360032000012,TORTILLA WRAPS 6PK 420G,TORTILLA WRAPS 6PK 420G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,ae2ef4a3-4542-41ec-912b-00c6ed3696dd,9360032000104,9360032000104,TORTILLA WRAPS 8PK 360G,TORTILLA WRAPS 8PK 360G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,e773e747-989e-4ba3-a8a8-de8697d1a219,9310332000090,9310332000090,SLICED BREAD 900G,SLICED BREAD 900G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,5b13a308-d086-4368-aee1-370c0e6b1fa9,9310332000106,9310332000106,WHOLEMEAL SLICED 900G,WHOLEMEAL SLICED 900G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,ce6da687-7dbb-4a53-aadf-c40beb686a50,9360032000098,9360032000098,WRAPS ORIGINAL 360G,WRAPS ORIGINAL 360G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,inserted,price-list-22,,22,,REUSABLE PLASTIC BAG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,b67a2ff8-c3d7-478e-b06b-418ecad68f48,93238946,93238946,B/BERG GINGER BEER       375M^,B/BERG GINGER BEER 375M^
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,a8ec29bb-7c01-4b84-83c8-9e18e0b089c4,9300675001113,9300675001113,COCA COLA               1.25L^,COCA COLA 1.25L^
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,05afaa56-512e-48d2-8aa6-c1abef966b5a,9300675003094,9300675003094,FANTA ORANGE            1.25L^,FANTA ORANGE 1.25L^
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,7ae3fcb8-9fd3-435e-bf6c-3c6b2bdc34a3,9310640620034,9310640620034,GATORADE DRK LEMON LIME  600M^,GATORADE DRK LEMON LIME 600M^
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,7cd9c89d-6763-4171-83de-2d2c814f1e20,9336243005740,9336243005740,IMPRESSED JUICE  TROPICAL 1 LT,IMPRESSED JUICE TROPICAL 1 LT
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,ec5c19e7-c866-4f70-9a01-7de289c5d35e,9338201001030,9338201001030,NOAH'S  J U I C E,NOAH'S J U I C E
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,e4b21294-5672-47a5-a82c-5cdd7f77a54e,78,78,NU / STIRLING  WATER BOX 12PK,NU / STIRLING WATER BOX 12PK
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,6b04c9ae-9101-49d8-b22b-dc2b4e2fcb8f,9313820016504,9313820016504,PEPSI MAX               1.25L^,PEPSI MAX 1.25L^
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,e9a4cb5e-1635-4b42-8c7b-a05e7ed491c4,9350271000393,9350271000393,*SPECIAL* REMEDY 4PK  CANS,*SPECIAL* REMEDY 4PK CANS
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,6811d5da-9482-408a-b3b1-cdfaa1dc802e,744,744,BEANS FRESH,(S) BEANS FRESH
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,1a815f6a-f612-4eda-aa1d-241e679d6671,796,796,CAPSICUM TRAY KG,(S) CAPSICUM TRAY KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,ca320c2f-a591-43f7-b2e6-407e07b6c781,742,742,CHILLI BIRDS EYE,(S) CHILLI BIRDS EYE
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,6ecdff66-9b3a-402b-8efe-0ffeda94c8e2,785,785,KG FRESH GALANGAL,(S) KG FRESH GALANGAL
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,ba70bd92-a06f-4645-bd89-41722d76083a,784,784,KG FRESH GINGER,(S) KG FRESH GINGER
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,adb66d51-90e4-4c8a-817e-02508a56fd0b,786,786,KG FRESH TUMERIC,(S) KG FRESH TUMERIC
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,478f304f-2d6c-4bc2-bc0d-2fb30161f7af,782,782,KG HOT GREEN CHILLI,(S) KG HOT GREEN CHILLI
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,a274d148-55b8-4b10-aa2c-3695acf9cf20,783,783,KG JALAPENO CHILLI,(S) KG JALAPENO CHILLI
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,cca1c3f9-a70f-40ff-8877-bb69c8d51597,773,773,OKRA KG,(S) OKRA KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,0c5149a0-605a-4cb9-8740-6c4df5e2b980,1051,1051,BEANS FRESH  KG,BEANS FRESH KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,82288c2b-6e70-4702-b352-fb422ceb526e,1202,1202,CABBAGE CHINESE  EA,CABBAGE CHINESE EA
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,809fa3cb-ba45-4eb4-8484-77b96858c97f,1312,1312,CABBAGE SUGAR  EA,CABBAGE SUGAR EA
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,920c49fe-f50c-4df5-bf66-dbbc06f9010a,1781,1781,CUCUMBER LEBANESE  KG,CUCUMBER LEBANESE KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,a4c79193-8bcd-4223-b53b-0d2cd6024d29,729,729,GARLIC AUSTRALIAN KG,(S) GARLIC AUSTRALIAN KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,0c86ef83-ca6b-4839-9f10-123885c08ecf,1851,1851,GARLIC  KG,GARLIC KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,moved_conflict,p-eggs-12,9332022008001,500039605485950022,Free Range Eggs 12pk,
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,inserted,price-list-9332022008001,,9332022008001,,JACOBS EGG CAGE 800G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,6c68cc83-d877-4f66-b96e-4016f362d275,2721,2721,JAP PUMPKIN OUTSIDE  KG,JAP PUMPKIN OUTSIDE KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,85d1a8b6-dbd6-4f32-930e-718e180b4ef1,2414,2414,ONIONS BROWN 1  KG BAG,ONIONS BROWN 1 KG BAG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,76964ed2-c272-4297-9561-39b2fa36d12a,5653,5653,CHOI SUM  BUNCH,CHOI SUM BUNCH
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,0becaa58-93cd-49b0-8f48-8e0f62050aca,2521,2521,POTATOES BRUSHED  KG,POTATOES BRUSHED KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,194641eb-38a8-44d4-9943-6a19469e8c4b,2571,2571,POTATOES LGE SWEET GOLD  KG,POTATOES LGE SWEET GOLD KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,e2aaef7b-68c3-4c8c-946d-d2e26606287f,3031,3031,TOMATOES ROMA/EGG  KG,TOMATOES ROMA/EGG KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,ef44d8eb-f0f6-4da4-932d-cc0154ba4de3,3181,3181,TOMATOES TRUSS VINE   KG,TOMATOES TRUSS VINE KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,e29538fc-c04c-4603-a7a7-095b9608f3f5,9319224400055,9319224400055,BEAN SPROUTS 250G,BEAN SPROUTS 250G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,7918ca06-e717-4c1c-b9a5-06f502c7b2cf,93578226,93578226,BLUE BERRY 170G,BLUE BERRY 170G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,58198521-2b8e-4a77-8014-c38fa6c6dc80,9353769000127,9353769000127,CHERRY TOMATOES 250G,CHERRY TOMATOES 250G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,fd69cef2-7672-4938-9017-6cde000fbdde,8858754200878,8858754200878,COCO THUMB,COCO THUMB
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,4ed62a6e-e814-4f6c-83bd-3cdcda2db210,9329539000079,9329539000079,CURRY LEAVES 15G,CURRY LEAVES 15G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,dedb89ba-082d-4db4-a327-21156e36ef1d,91263,91263,FRUIT AND VEG WHOLESALE,FRUIT AND VEG WHOLESALE
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,68a8f9e5-d1e2-4753-8c47-7bd8578323fa,9329539000314,9329539000314,KAFFIR LIME LEAF,KAFFIR LIME LEAF
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,eec85368-2310-49f8-bbb2-41577d78db90,30712345000010,30712345000010,MANGO DEAL,MANGO DEAL
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,bf95474b-627e-49fa-86dd-74f3a69e57d8,22756,22756,ASSORTED LETTUCE BAGS,ASSORTED LETTUCE BAGS
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,cb6bfafe-654a-40df-9305-dc42417991ba,9341471000153,9341471000153,BABY COS,BABY COS
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,277d4616-dbf4-4ea0-a471-06d7f38bb605,9334573000077,9334573000077,BABY COS TWIN,BABY COS TWIN
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,d5b6b1ca-7b93-45ff-a94d-7921a6b298ff,9332907005019,9332907005019,CARROTS 1 KG BAG,CARROTS 1 KG BAG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,ec65561f-7d3f-49d3-bb55-36311ee4e106,9317948006720,9317948006720,KUMATO TOMATOS 500G,KUMATO TOMATOS 500G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,4a57a23c-dd31-45ea-9c67-382c053f74f7,3282,3282,CORIANDER FRESH  LGE BUNCH,CORIANDER FRESH LGE BUNCH
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,5cdfc7f7-815e-4c5b-99ab-a556c2d20d27,151,151,B A C O N  RIND LESS KG,B A C O N RIND LESS KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,6ca3ff9a-a164-4e53-85a6-e76cb1d44012,9332172000115,9332172000115,BARAMBAH B U S H  HONEY 1KG,BARAMBAH B U S H HONEY 1KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,c4c7c68a-6ab1-4d4f-9d77-09efd81e98fe,9332172010084,9332172010084,BARAMBAH  NATURAL  1KG,BARAMBAH NATURAL 1KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,3defb895-d556-4846-a156-140ec32d77ab,9310272006862,9310272006862,BUTTER NORCO UNSALT  250G,BUTTER NORCO UNSALT 250G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,inserted,price-list-13,,13,,DELI/DAIRY
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,d3816606-1248-4ca9-91a3-6f832daf021b,38,38,DUTCH  GOUDA CHEESE,DUTCH GOUDA CHEESE
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,73daf429-d4f1-47c6-907c-ea5839291746,639839000198,639839000198,EPIROS SAGANAKI  200G,EPIROS SAGANAKI 200G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,e3bf9b14-9344-4643-a1a0-d20b089bec1a,9329937005287,9329937005287,GOTZINGER  NY HOT DOGS,GOTZINGER NY HOT DOGS
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,19b53a8c-c3c9-4e0f-990e-4e46380e31b4,9339132004176,9339132004176,I N   S E A S O N   D I P S,I N S E A S O N D I P S
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,1ace710b-a134-46d3-a38c-0cfac0ed4fb8,9339132004046,9339132004046,IN SEASON  GREEN OLIVES DILL,IN SEASON GREEN OLIVES DILL
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,da0129df-f4fd-4742-a931-7e75b8e51468,9339132002202,9339132002202,IN SEASON  P I Z Z A,IN SEASON P I Z Z A
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,ec5f95b9-c45c-41f0-bb72-9f015d83e6d3,9317320305007,9317320305007,MEREDITH  SHEEP YOG  500G,MEREDITH SHEEP YOG 500G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,d43edce3-ed54-4ead-b8c5-cf0130282c04,9310272007814,9310272007814,NORCO TASTY BLOCK CHEESE 500  G,NORCO TASTY BLOCK CHEESE 500 G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,537392b7-1e94-420f-b3dd-82e3b6863eb7,9322515011212,9322515011212,O B  SWEET  CHILLI  C R A B,O B SWEET CHILLI C R A B
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,7bd92e59-5f15-437f-ae10-c6c9f82df62e,9336946000431,9336946000431,RAYBEK  FETTA WALNUT OLIVES 250G,RAYBEK FETTA WALNUT OLIVES 250G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,e9af296f-b7d5-4c13-970f-2634215a631d,9343632001184,9343632001184,RAYBEK  OLIVE TAPENADE,RAYBEK OLIVE TAPENADE
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,a0169113-9d9f-4978-bb41-bb5197c6cbdc,9340939000278,9340939000278,ROZA'S   P E S T O,ROZA'S P E S T O
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,3e64ad7f-f0bd-431b-890d-2c16c192bfc2,796548902301,796548902301,SEAFOOD  SALAD MIX 1KG,SEAFOOD SALAD MIX 1KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,6e65caf1-f567-442a-aeac-42637e853be1,849,849,SLICED BORGO  PEPPERONI,SLICED BORGO PEPPERONI
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,inserted,price-list-802,,802,,ROMAN ARTICHOKES KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,inserted,price-list-15,,15,,SERVICE DELI
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,930a6d33-b42e-43b0-ab7e-1eeb3d9d4ff6,9311485001866,9311485001866,BEERENBERG  MANGO LIME DRESSING,BEERENBERG MANGO LIME DRESSING
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,abe44a5d-b897-40d0-8fba-75f08a37f76b,9311485004294,9311485004294,BEERENBERG LEMON CAPER  300ML,BEERENBERG LEMON CAPER 300ML
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,c55d03e7-496b-4c9a-ac13-c52ef822733f,93560887,93560887,BEERENBERG  APPLE 160G,BEERENBERG APPLE 160G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,5fd684f6-44f8-4da4-8dfb-7a9ed710526c,9312529001637,9312529001637,BORLANDS  SHORTBREAD,BORLANDS SHORTBREAD
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,b6fd233c-06c4-4720-9a79-5eb9aefce710,9311122000955,9311122000955,CARAMEL DIP  130G,CARAMEL DIP 130G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,943f34d6-189a-47c0-baa4-f4e08608b190,93753180,93753180,CHALLENGE CRUSHED  GINGER,CHALLENGE CRUSHED GINGER
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,203be61b-2143-42db-b363-3b8490eae059,9343679000560,9343679000560,CIMINO FLORENTINES  WHITE 180G,CIMINO FLORENTINES WHITE 180G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,55e29339-7a02-4f0a-9972-2f3c28309678,9344338004431,9344338004431,ECLIP  MUES CRML&GNUT 450GM^,ECLIP MUES CRML&GNUT 450GM^
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,a8407931-d428-4af6-89bf-2038ed1cd3fc,9310179004992,9310179004992,G/C BEETROOT SLICED      450G~,G/C BEETROOT SLICED 450G~
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,c71d12a7-7caa-48db-9acf-683508b8ab4b,9328327000956,9328327000956,G/GARDEN LEMONGRASS PASTE  80G,G/GARDEN LEMONGRASS PASTE 80G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,cd17d189-9351-4fe6-8de2-97d7175fe5e8,9348728000065,9348728000065,GRANOLA  650G,GRANOLA 650G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,92a24c52-3385-4dfc-9103-def9d7ea5ea9,80687439126,80687439126,JENS BISCUITS JAM DROPS  300G,JENS BISCUITS JAM DROPS 300G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,06dd5da6-9848-4b94-a809-8a433178e65b,39045402739,39045402739,KUHNE GHERKIN  PICKLED 670G,KUHNE GHERKIN PICKLED 670G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,813e8272-4eff-465e-a279-b8a4892457e0,8004690057308,8004690057308,LA MOLISANA BRONZO  500G,LA MOLISANA BRONZO 500G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,8be38d54-5907-4cff-a05c-17cd4b1925ec,8004690342190,8004690342190,LA MOLISANA LAZAGNE 219  500G,LA MOLISANA LAZAGNE 219 500G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,02030bb9-ec96-4d25-90bc-d86269466fd5,8009915001340,8009915001340,LE VENZIANE ELICHE  250,LE VENZIANE ELICHE 250
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,9d4f8393-acf0-43c8-b4ab-15d19698c877,9310012021049,9310012021049,M/F SCE TOMATO           500M^,M/F SCE TOMATO 500M^
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,db00b9ff-b778-469e-a0af-915a7601c62c,65254724362,65254724362,MAPLES SYRUP  250ML,MAPLES SYRUP 250ML
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,f60afbc8-0da0-46bf-a415-d890d8394708,5201041022616,5201041022616,NOUGAT  ALMOND 50G,NOUGAT ALMOND 50G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,95482c71-0aa5-4da4-b041-75a96c49a9cb,9310342002503,9310342002503,OLSSON SALT TABLE  1KG^,OLSSON SALT TABLE 1KG^
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,29eaaf95-ca6f-420c-b305-e00a91fe5385,4088700087954,4088700087954,POPCORN TIME RAINBOW  8PK,POPCORN TIME RAINBOW 8PK
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,145c2276-4911-4fb4-9201-dd59b72528b1,9350271003240,9350271003240,REMEDY  LEMONLIME BITTERS 2PK,REMEDY LEMONLIME BITTERS 2PK
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,7d803a87-a709-41e3-b927-47a0697c2ef4,9350271002984,9350271002984,REMEDY KOMBUCHA ORANGE  750 ML,REMEDY KOMBUCHA ORANGE 750 ML
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,2cb179f5-f50d-44f8-851c-8c91a5a4c7d6,9312336037461,9312336037461,S/F ORGANIC YUZU  SEASONING 69G,S/F ORGANIC YUZU SEASONING 69G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,b265ce8e-7055-48e6-866f-62a235dba1eb,9310140283807,9310140283807,S/RCE RICE WHITE L/GRN    1KG^,S/RCE RICE WHITE L/GRN 1KG^
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,c511c8a5-0a20-4a6b-82f0-72e3e91e8dd6,9314820010158,9314820010158,SQUISITO PAESANI  500,SQUISITO PAESANI 500
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,3cdffd48-6731-4c2a-a64c-1556e8f3b4f6,9319224800084,9319224800084,STIRFRY SAUCE  250ML,STIRFRY SAUCE 250ML
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,dbca1d5c-3404-4c8f-8287-d25e3a4355eb,9319224800121,9319224800121,STIRFRY SAUCE  250ML,STIRFRY SAUCE 250ML
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,1b803e8e-9ea6-4758-b1fe-0b9f7d2c76af,9310175140809,9310175140809,VAL VERDE FISH  STOCK,VAL VERDE FISH STOCK
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,bae9aece-9685-4d29-a240-ba655b8b0668,9310175104092,9310175104092,VAL VERDE BLACK  BEANS 400GM,VAL VERDE BLACK BEANS 400GM
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,abd10a55-0562-43d1-80b4-1806a3b53bdd,9310631620838,9310631620838,VITTORIA MINT  CHOCOCHINO 375G,VITTORIA MINT CHOCOCHINO 375G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,8dd80d69-1b00-4018-b7e4-dd3c8a1fcd41,9310631620791,9310631620791,VITTORIA WHITE  CHOCOCHINO 375G,VITTORIA WHITE CHOCOCHINO 375G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,581cb2c8-2326-47f1-bf0b-2b5fef7c5854,9335964002014,9335964002014,WILD NECTAR JAR  350G,WILD NECTAR JAR 350G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,4e07bf5b-eacb-4825-8bda-55e7c6063bd3,39,39,FLOWERS BUNCH  14.99,FLOWERS BUNCH 14.99
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,a852bf40-e476-41dd-ae69-94c83d72aa28,44,44,FLOWERS BUNCH  19.99,FLOWERS BUNCH 19.99
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,a3a8aba9-9dec-4179-b8ce-49677fbfe459,46,46,FLOWERS BUNCH  25.00,FLOWERS BUNCH 25.00
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,1c7e26a8-7969-4ee9-bf57-67f9ea72f9ae,47,47,FLOWERS BUNCH  30.00,FLOWERS BUNCH 30.00
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,cbcd135c-c080-4b5a-b2c5-5752faf0e41d,34,34,FLOWERS BUNCH  9.99,FLOWERS BUNCH 9.99
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,inserted,price-list-60,,60,,FLOWERS BUNCH ASST
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,2ee63da0-68f9-4bb3-90a9-3703223bad5e,9317616005802,9317616005802,AEGEAN WALNUTS 350G,AEGEAN WALNUTS 350G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,a72470f1-c1da-450d-8007-7f2fd754ffb9,9317616005055,9317616005055,AEGEAN ALMOND MEAL 200G,AEGEAN ALMOND MEAL 200G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,50a47c08-7144-4e02-9336-3b5af8bfba31,9317616005345,9317616005345,AEGEAN BBQ CORN NUGGETS 200GR,AEGEAN BBQ CORN NUGGETS 200GR
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,d3fd12a7-f505-4a83-ad7c-893a812e377c,9317616005154,9317616005154,AEGEAN BRAZIL NUTS 200 GR,AEGEAN BRAZIL NUTS 200 GR
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,8f10d35c-d140-40d9-ae02-c187624f781c,9317616005185,9317616005185,AEGEAN CASHEWS SALTED 450G,AEGEAN CASHEWS SALTED 450G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,328be2d5-040c-44e9-84dd-abce8ddd450c,9317616005109,9317616005109,AEGEAN DRIED APRICOTS 425G,AEGEAN DRIED APRICOTS 425G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,81dfd0d1-8cf2-47e2-a574-dcbf62f0e605,9317616616718,9317616616718,AEGEAN DRIED CRANBERRIES 500G,AEGEAN DRIED CRANBERRIES 500G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,f5de01b7-cdbc-40f1-9cd0-605a270cab43,9317616537877,9317616537877,AEGEAN DRIED FIGS 250G,AEGEAN DRIED FIGS 250G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,462e2a89-f1b7-483e-85c6-22e1703e75a0,9317616847594,9317616847594,AEGEAN DRY RST ALMONDS 375 GR,AEGEAN DRY RST ALMONDS 375 GR
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,e1f8c8c5-6690-4b03-ad71-79be8dc564f6,9317616005222,9317616005222,AEGEAN FRUIT AND NUT 450 GR,AEGEAN FRUIT AND NUT 450 GR
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,77d9ba24-6d2e-455f-986d-85558829c5e8,9317616573912,9317616573912,AEGEAN MYKONOS NUT MIX 425GR,AEGEAN MYKONOS NUT MIX 425GR
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,68598a7c-bde4-4168-9537-4d5da8e5d0d4,9317616005239,9317616005239,AEGEAN NATURAL MACADAMIAS 375G,AEGEAN NATURAL MACADAMIAS 375G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,7f862d7b-307d-401e-85e7-302e756f0d35,9317616171262,9317616171262,AEGEAN PECAN NUTS 250G,AEGEAN PECAN NUTS 250G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,42fe54a6-0849-47d8-b2f9-78b972401c10,9317616624089,9317616624089,AEGEAN PEPITAS 500 GR,AEGEAN PEPITAS 500 GR
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,c99d3b23-6479-4d41-a960-27bd8af684ce,9317616005697,9317616005697,AEGEAN PITTED DATES 500 GR,AEGEAN PITTED DATES 500 GR
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,7ef17e23-eb81-4001-8f14-674d056c5bd4,9317616005451,9317616005451,AEGEAN R&S PUMPKIN SEED,AEGEAN R&S PUMPKIN SEED
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,b77ceb0d-00b5-451a-a89a-24713f93a8d5,9317616005253,9317616005253,AEGEAN R/S MACADAMIAS NUTS,AEGEAN R/S MACADAMIAS NUTS
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,80a93854-93bb-4620-b2d9-f6d1cde818d4,9317616563159,9317616563159,AEGEAN RICE CRACKERS 180 GR,AEGEAN RICE CRACKERS 180 GR
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,843bdb88-3650-425d-b7ff-6fb107a5ef72,9317616005437,9317616005437,AEGEAN SALT RST PISTACIOS 375,AEGEAN SALT RST PISTACIOS 375
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,f7c08b7d-8029-422c-a424-fd8bc7982f8a,9317616428625,9317616428625,AEGEAN SALT PISTACHIOS 270G,AEGEAN SALT PISTACHIOS 270G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,f6901c1b-5f32-4b48-a115-06d2588c48ac,9317616005475,9317616005475,AEGEAN SESAME SEEDS 250 GR,AEGEAN SESAME SEEDS 250 GR
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,895faae3-162d-47b4-86fe-a68d504e92ad,9317616006595,9317616006595,AEGEAN SLT MAC CASHEW MIX 425 G,AEGEAN SLT MAC CASHEW MIX 425 G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,2eb38fc5-b201-4e92-9881-bf694d3f5931,9317616005086,9317616005086,AEGEAN SMOKED ALMONDS 375 GR,AEGEAN SMOKED ALMONDS 375 GR
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,6226230b-edaf-4114-9e60-f1a9506ce3bd,9317616005307,9317616005307,AEGEAR ST & SALTED PEANUTS 500 G,AEGEAR ST & SALTED PEANUTS 500 G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,33499556-ee36-4f33-bc6b-5ac1243baa0d,9315054005354,9315054005354,ALMONDS SLIVERED 100G,ALMONDS SLIVERED 100G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,efccb4de-42d7-475c-9966-500c8be08e64,8683825023168,8683825023168,COLOURED SUGAR CHICKPEAS 350G,COLOURED SUGAR CHICKPEAS 350G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,30bf51fb-8c44-4e0c-b920-460a1484aaf9,19321,19321,MACADAMIAS 1KG BAG,MACADAMIAS 1KG BAG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,f802784f-7188-48c7-983b-7ff45c47c990,9315054009314,9315054009314,MARK GROC HONY MACADAMIAS 140G,MARK GROC HONY MACADAMIAS 140G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,f4e43edb-061a-4223-9335-76efe8721251,9315054009468,9315054009468,MARK GROC PASTELLI 200 GR,MARK GROC PASTELLI 200 GR
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,a29c1cc0-6d19-4aa3-9e84-a619f8bfe74b,9315054005699,9315054005699,MARK GROC PINE NUTS 100 GR,MARK GROC PINE NUTS 100 GR
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,58fef629-2608-4879-b293-03f2a7af48d4,8683825023199,8683825023199,ROASTED CHICKPEAS  350G,ROASTED CHICKPEAS 350G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,7231276f-2daa-43b1-a736-62ecefab5c27,9317616622306,9317616622306,SUNFLOWER KERBLS 500G,SUNFLOWER KERBLS 500G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,7f531083-6b92-4418-859c-27de989ca69f,9341533002064,9341533002064,SUNFLOWER SEED R/SALTED 400G,SUNFLOWER SEED R/SALTED 400G
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,3bb9b771-a9cb-4ba9-a5b5-a2498dc9eaaa,6124,6124,WALNUTS 1KG,WALNUTS 1KG
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,p-open-btn-coffee,,52,Coffee,COFFEE
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,updated,p-open-btn-meat,,73,Meat,MEAT
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,inserted,price-list-16,,16,,UBER EATS ADJUSTMENT
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,resolved_duplicate,p-kb-pg7-btn9,20219,500039605485950023,,
+C:\Users\Matthias\Downloads\mcpos\db\crisp-pos.sqlite,resolved_duplicate,p-kb-pg7-btn7,4017,500039605485950024,,

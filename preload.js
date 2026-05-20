@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld('pos', {
   getProductById:     (id)     => ipcRenderer.invoke('db:products:getById', id),
   getProductsByCategory:(catId)=> ipcRenderer.invoke('db:products:getByCategory', catId),
   getCategories:      ()       => ipcRenderer.invoke('db:categories:getAll'),
+  getNextProductPlu:  ()       => ipcRenderer.invoke('db:products:nextPlu'),
   upsertProduct:      (p)     => ipcRenderer.invoke('db:products:upsert', p),
   upsertCategory:     (c)     => ipcRenderer.invoke('db:categories:upsert', c),
   bulkUpsertProducts: (arr)   => ipcRenderer.invoke('db:products:bulkUpsert', arr),
@@ -66,6 +67,7 @@ contextBridge.exposeInMainWorld('pos', {
   salesByCategory:    (date)  => ipcRenderer.invoke('db:reports:salesByCategory', date),
   voidRefundCount:    (date)  => ipcRenderer.invoke('db:reports:voidRefundCount', date),
   zReport:            (date)  => ipcRenderer.invoke('db:reports:zReport', date),
+  eodRegisterTotals:  (opts)  => ipcRenderer.invoke('db:reports:eodRegisterTotals', opts),
   weeklySummary:      (weekStart) => ipcRenderer.invoke('db:reports:weeklySummary', weekStart),
 
   // Insights
@@ -121,7 +123,7 @@ contextBridge.exposeInMainWorld('pos', {
 
   // Hardware
   printReceipt:       (data)  => ipcRenderer.invoke('hardware:printReceipt', data),
-  openDrawer:         ()      => ipcRenderer.invoke('hardware:openDrawer'),
+  openDrawer:         (opts)  => ipcRenderer.invoke('hardware:openDrawer', opts),
   probeDevices:       ()      => ipcRenderer.invoke('hardware:probe'),
   readScale:          ()      => ipcRenderer.invoke('hardware:readScale'),
   zeroScale:          ()      => ipcRenderer.invoke('hardware:zeroScale'),

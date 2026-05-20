@@ -86,7 +86,7 @@ async function getToken () {
 
   const result = await request(authHost(), 'POST', '/v1/tokens/cloudpos', {
     secret: state.secret,
-    posName: 'BoundOS Client',
+    posName: 'YieldPOS Client',
     posVersion: '1.0.0',
     posId: state.posId || genuuid(),
     posVendorId: 'b8f0e2a0-1234-4abc-9def-567890abcdef'

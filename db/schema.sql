@@ -1,4 +1,4 @@
--- BoundOS POS - Local SQLite Schema
+-- YieldPOS POS - Local SQLite Schema
 -- This is the offline-first database that lives on each register.
 -- All reads/writes hit this DB. A sync queue pushes changes to Supabase.
 
@@ -167,10 +167,11 @@ CREATE TABLE IF NOT EXISTS settings (
 );
 
 INSERT OR IGNORE INTO settings (key, value) VALUES
-  ('store_name', 'BoundOS'),
+  ('store_name', 'YieldPOS'),
   ('store_address', '1164 Cavendish Rd, Mt Gravatt East QLD 4122'),
   ('store_phone', ''),
   ('store_abn', ''),
+  ('store_hours', 'Open 6am - 7pm every day'),
   ('receipt_header', 'Fresh Fruit & Veg'),
   ('receipt_footer', 'Thank you for shopping local!\nOpen 6am - 7pm every day'),
   ('register_id', 'LANE01'),
@@ -180,6 +181,9 @@ INSERT OR IGNORE INTO settings (key, value) VALUES
   ('tax_rate', '0.10'),
   ('company_logo_fit', 'contain'),
   ('company_logo_scale', '1'),
+  ('auto_receipt', '1'),
+  ('show_eftpos_accepted_button', '1'),
+  ('price_tag_layout_3x10', ''),
   ('layout_v3_shifted', '1'),
   ('nav_buttons_fixed', '1'),
   ('next_receipt_number', '1');
@@ -246,6 +250,7 @@ CREATE TABLE IF NOT EXISTS keyboard_buttons (
   type            TEXT NOT NULL,  -- product: open_price|fixed_price|section|nav  function: return|hold|nosale|reprint|pricecheck|recall|discount|movedrawer|endofday  numpad: digit|clear|qtyx|codeenter  payment: subtotal|pay_cash|pay_card|park  nav: page_link|back_home
   price           REAL DEFAULT 0,
   image           TEXT,
+  image_scale     REAL DEFAULT 100,
   color           TEXT DEFAULT '#fff',
   bg_color        TEXT DEFAULT '#1a3d2a',
   parent_id       TEXT,

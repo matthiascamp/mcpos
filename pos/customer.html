@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BoundOS Client - Customer Display</title>
+<title>YieldPOS Client - Customer Display</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -92,7 +92,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:linear-gradient(160deg,
 /* ═══ Sale Complete ════════════════════════════════════════════════════════ */
 .sale-complete{flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;gap:3vmin;padding:4vh 4vw}
 .sale-complete.active{display:flex}
-.check-circle{width:14vmin;height:14vmin;border-radius:50%;background:linear-gradient(135deg,#4fbd77,#3a9c5e);display:flex;align-items:center;justify-content:center;animation:popIn .4s ease;box-shadow:0 4px 30px rgba(79,189,119,.3)}
+.check-circle{width:14vmin;height:14vmin;border-radius:50%;background:#15803d;display:flex;align-items:center;justify-content:center;animation:popIn .4s ease;box-shadow:0 4px 30px rgba(21,128,61,.26)}
 .check-circle svg{width:7vmin;height:7vmin;stroke:#fff;stroke-width:3;fill:none}
 .thank-you{font-family:'Playfair Display',serif;font-size:6vmin;font-weight:700;color:#f5f0e8;animation:fadeIn .6s ease}
 .thank-store{font-size:2.5vmin;color:rgba(245,240,232,.5);margin-top:-.5vmin}
@@ -212,7 +212,7 @@ body{background:
   .sale-right{width:34vw}
 }
 
-/* BoundOS gourmet palette */
+/* YieldPOS gourmet palette */
 :root{
   --cream:#f7f0dc;
   --cream-soft:#efe4c8;
@@ -319,7 +319,7 @@ body{
     rgba(7,21,13,.86);
 }
 
-/* BoundOS customer display design pass */
+/* YieldPOS customer display design pass */
 :root{
   --bo-cream:#f7f0dc;
   --bo-cream-soft:#efe4c8;
@@ -814,14 +814,31 @@ body{
   border-radius:0;
   box-shadow:none;
 }
+
+.idle-footer-text{
+  font-size:1.6vmin;
+  line-height:1.35;
+  font-weight:700;
+}
+.sidebar-footer-text{
+  font-size:1.25vmin;
+  line-height:1.45;
+  font-weight:650;
+}
+.powered-by,
+.sidebar-footer .powered-by{
+  font-size:1.22vmin;
+  line-height:1.3;
+  font-weight:850;
+}
 </style>
 </head>
 <body>
 
 <div class="header">
-  <img src="boundos.png" alt="BoundOS" class="brand-circle-img company-logo">
+  <img src="YieldPOS.png" alt="YieldPOS" class="brand-circle-img company-logo">
   <div>
-    <div class="store-name" id="storeName">BoundOS</div>
+    <div class="store-name" id="storeName">YieldPOS</div>
     <div class="store-sub" id="storeSub">Fresh Fruit & Veg</div>
   </div>
   <div class="header-status">
@@ -833,7 +850,7 @@ body{
   <!-- Idle screen with Today's Deals -->
   <div class="idle-screen" id="idleScreen">
     <div class="idle-hero">
-      <img src="boundos.png" alt="" class="idle-hero-logo company-logo">
+      <img src="YieldPOS.png" alt="" class="idle-hero-logo company-logo">
       <div>
         <div class="deals-title">Fresh picks today</div>
         <div class="deals-subtitle">Specials, staples, and seasonal favourites</div>
@@ -842,10 +859,13 @@ body{
     <div class="deals-grid" id="dealsGrid"></div>
     <div class="idle-footer">
       <div class="idle-footer-left">
-        <img src="boundos.png" alt="BoundOS" class="idle-footer-logo company-logo">
-        <div class="idle-footer-text" id="storeAddress">1164 Cavendish Rd, Mt Gravatt East QLD 4122</div>
+        <img src="YieldPOS.png" alt="YieldPOS" class="idle-footer-logo company-logo">
+        <div>
+          <div class="idle-footer-text" id="storeAddress">1164 Cavendish Rd, Mt Gravatt East QLD 4122</div>
+          <div class="idle-footer-text" id="storeHours">Open 6am - 7pm every day</div>
+        </div>
       </div>
-      <div class="powered-by">Powered by BoundOS</div>
+      <div class="powered-by">Powered by YieldPOS</div>
     </div>
   </div>
 
@@ -885,7 +905,8 @@ body{
       <div class="sidebar-deals" id="sidebarDeals"></div>
       <div class="sidebar-footer">
         <div class="sidebar-footer-text" id="activeStoreAddress">1164 Cavendish Rd, Mt Gravatt East QLD 4122</div>
-        <div class="powered-by">Powered by BoundOS</div>
+        <div class="sidebar-footer-text" id="activeStoreHours">Open 6am - 7pm every day</div>
+        <div class="powered-by">Powered by YieldPOS</div>
       </div>
     </div>
   </div>
@@ -1029,9 +1050,9 @@ body{
   }
 
   function normaliseLogoSource(src) {
-    if (!src) return 'boundos.png'
+    if (!src) return 'YieldPOS.png'
     const isOldGeneratedLogo = src.startsWith('data:image/png;base64,') && src.length > 300000
-    return isOldGeneratedLogo ? 'boundos.png' : src
+    return isOldGeneratedLogo ? 'YieldPOS.png' : src
   }
 
   function applyCompanyLogoStyle(fit, scale) {
@@ -1045,21 +1066,26 @@ body{
   }
 
   async function refreshBranding() {
-    const [storeName, storeAddress, companyLogo, companyLogoFit, companyLogoScale] = await Promise.all([
+    const [storeName, storeAddress, storeHours, companyLogo, companyLogoFit, companyLogoScale] = await Promise.all([
       ipcRenderer.invoke('db:settings:get', 'store_name'),
       ipcRenderer.invoke('db:settings:get', 'store_address'),
+      ipcRenderer.invoke('db:settings:get', 'store_hours'),
       ipcRenderer.invoke('db:settings:get', 'company_logo'),
       ipcRenderer.invoke('db:settings:get', 'company_logo_fit'),
       ipcRenderer.invoke('db:settings:get', 'company_logo_scale')
     ])
-    const name = storeName || 'BoundOS'
-    document.title = 'BoundOS Client - Customer Display'
+    const name = storeName || 'YieldPOS'
+    document.title = 'YieldPOS Client - Customer Display'
     document.getElementById('storeName').textContent = name
     document.querySelector('.thank-store').textContent = `Thank you for shopping at ${name}`
     const address = storeAddress || '1164 Cavendish Rd, Mt Gravatt East QLD 4122'
     if (storeAddress) document.getElementById('storeAddress').textContent = address
     const activeAddress = document.getElementById('activeStoreAddress')
     if (activeAddress) activeAddress.textContent = address
+    const hours = storeHours || ''
+    document.getElementById('storeHours').textContent = hours
+    const activeHours = document.getElementById('activeStoreHours')
+    if (activeHours) activeHours.textContent = hours
     const logoSrc = normaliseLogoSource(companyLogo)
     document.querySelectorAll('.company-logo').forEach(img => {
       img.src = logoSrc
@@ -1141,6 +1167,14 @@ body{
       const activeAddress = document.getElementById('activeStoreAddress')
       if (activeAddress) activeAddress.textContent = data.storeAddress
     }
+    if (Object.prototype.hasOwnProperty.call(data, 'storeHours')) {
+      const hours = data.storeHours || ''
+      document.getElementById('storeHours').textContent = hours
+      const activeHours = document.getElementById('activeStoreHours')
+      if (activeHours) activeHours.textContent = hours
+    }
+
+    if (!Object.prototype.hasOwnProperty.call(data, 'items')) return
 
     if (!items || items.length === 0) {
       document.getElementById('idleScreen').style.display = 'flex'

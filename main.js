@@ -16,15 +16,23 @@ let appShuttingDown = false
 
 const runtimeAppMode = process.argv.includes('--admin') ? 'admin' : 'register'
 const isRegisterApp = runtimeAppMode === 'register'
-const SOFTWARE_NAME = 'BoundOS Client'
-const DEFAULT_STORE_NAME = 'BoundOS'
+const SOFTWARE_NAME = 'YieldPOS Client'
+const DEFAULT_STORE_NAME = 'YieldPOS'
 app.setName(SOFTWARE_NAME)
-if (process.platform === 'win32') app.setAppUserModelId('com.boundos.client')
-const DB_PATH = path.join(app.getPath('userData'), 'crisp-pos.sqlite')
+if (process.platform === 'win32') app.setAppUserModelId('com.yieldpos.client')
+const USER_DATA_DIR = app.getPath('userData')
+const LEGACY_USER_DATA_DIR = path.join(app.getPath('appData'), 'Bound' + 'OS Client')
+if (!fs.existsSync(path.join(USER_DATA_DIR, 'crisp-pos.sqlite')) && fs.existsSync(path.join(LEGACY_USER_DATA_DIR, 'crisp-pos.sqlite'))) {
+  try {
+    fs.mkdirSync(USER_DATA_DIR, { recursive: true })
+    fs.copyFileSync(path.join(LEGACY_USER_DATA_DIR, 'crisp-pos.sqlite'), path.join(USER_DATA_DIR, 'crisp-pos.sqlite'))
+  } catch (_) {}
+}
+const DB_PATH = path.join(USER_DATA_DIR, 'crisp-pos.sqlite')
 const BUNDLED_DB_PATH = path.join(__dirname, 'db', 'crisp-pos.sqlite')
 const SCHEMA_PATH = path.join(__dirname, 'db', 'schema.sql')
-const LOG_DIR = path.join(app.getPath('userData'), 'logs')
-const BACKUP_DIR = path.join(app.getPath('userData'), 'backups')
+const LOG_DIR = path.join(USER_DATA_DIR, 'logs')
+const BACKUP_DIR = path.join(USER_DATA_DIR, 'backups')
 
 // â”€â”€â”€ App Logging System â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // File-based logging: {userData}/logs/app-YYYY-MM-DD.log
@@ -67,6 +75,74 @@ function appLog (level, source, message, detail) {
   }
 }
 
+function isProcessAlive (pid) {
+  const n = Number(pid)
+  if (!Number.isInteger(n) || n <= 0) return false
+  try {
+    process.kill(n, 0)
+    return true
+  } catch (e) {
+    return e?.code === 'EPERM'
+  }
+}
+
+let modeLockFd = null
+let modeLockPath = null
+
+function releaseModeProcessLock () {
+  if (!modeLockPath) return
+  try {
+    if (modeLockFd !== null) fs.closeSync(modeLockFd)
+  } catch (_) {}
+  modeLockFd = null
+  try {
+    const lock = fs.existsSync(modeLockPath) ? JSON.parse(fs.readFileSync(modeLockPath, 'utf8')) : null
+    if (!lock || Number(lock.pid) === process.pid) fs.unlinkSync(modeLockPath)
+  } catch (_) {}
+  modeLockPath = null
+}
+
+function acquireModeProcessLock (mode) {
+  const lockDir = path.join(USER_DATA_DIR, 'locks')
+  fs.mkdirSync(lockDir, { recursive: true })
+  modeLockPath = path.join(lockDir, `${mode}.lock`)
+
+  const writeLock = () => {
+    modeLockFd = fs.openSync(modeLockPath, 'wx')
+    fs.writeFileSync(modeLockFd, JSON.stringify({
+      pid: process.pid,
+      mode,
+      startedAt: new Date().toISOString()
+    }))
+    appLog('info', 'startup', `Acquired ${mode} process lock`, modeLockPath)
+    return true
+  }
+
+  try {
+    return writeLock()
+  } catch (e) {
+    if (e?.code !== 'EEXIST') throw e
+  }
+
+  try {
+    const existing = JSON.parse(fs.readFileSync(modeLockPath, 'utf8'))
+    if (isProcessAlive(existing.pid)) {
+      appLog('warn', 'startup', `Another ${mode} process is already running`, existing)
+      return false
+    }
+    fs.unlinkSync(modeLockPath)
+    appLog('warn', 'startup', `Removed stale ${mode} process lock`, existing)
+    return writeLock()
+  } catch (e) {
+    try { fs.unlinkSync(modeLockPath) } catch (_) {}
+    return writeLock()
+  }
+}
+
+const gotModeLock = acquireModeProcessLock(runtimeAppMode)
+if (!gotModeLock) app.quit()
+app.on('will-quit', releaseModeProcessLock)
+process.on('exit', releaseModeProcessLock)
 // Prune old log files at startup â€” keep last 14 days
 try {
   if (fs.existsSync(LOG_DIR)) {
@@ -134,6 +210,7 @@ async function initDatabase() {
     "ALTER TABLE keyboard_buttons ADD COLUMN grid_col INTEGER DEFAULT 0",
     "ALTER TABLE keyboard_buttons ADD COLUMN col_span INTEGER DEFAULT 1",
     "ALTER TABLE keyboard_buttons ADD COLUMN row_span INTEGER DEFAULT 1",
+    "ALTER TABLE keyboard_buttons ADD COLUMN image_scale REAL DEFAULT 100",
     "INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span) VALUES ('np-display', '', 'num_display', '#00cc00', '#111111', 29, 'grid', 1, 2, 3, 1, 4)",
     // Fix np-display overlap: must be inactive (overlaps btn-meat at row 2, col 3)
     "UPDATE keyboard_buttons SET active = 0 WHERE id = 'np-display'",
@@ -217,6 +294,10 @@ async function initDatabase() {
     "UPDATE keyboard_buttons SET bg_color = '#166534', color = '#fff' WHERE id IN ('btn-veg-ag','btn-veg-hz')",
     "INSERT OR IGNORE INTO settings (key, value) VALUES ('company_logo_fit', 'contain')",
     "INSERT OR IGNORE INTO settings (key, value) VALUES ('company_logo_scale', '1')",
+    "INSERT OR IGNORE INTO settings (key, value) VALUES ('auto_receipt', '1')",
+    "INSERT OR IGNORE INTO settings (key, value) VALUES ('show_eftpos_accepted_button', '1')",
+    "INSERT OR IGNORE INTO settings (key, value) VALUES ('price_tag_layout_3x10', '')",
+    "INSERT OR IGNORE INTO settings (key, value) VALUES ('store_hours', 'Open 6am - 7pm every day')",
     "INSERT OR IGNORE INTO settings (key, value) VALUES ('desired_till_float', '0')",
     "INSERT OR IGNORE INTO settings (key, value) VALUES ('till_desired_floats', '{}')",
     // Add family grouping for categories
@@ -596,22 +677,22 @@ async function initDatabase() {
   // Link keyboard buttons to products by matching names (best image match)
   relinkKeyboardProducts()
 
-  // Rebrand: update default store details to BoundOS. Existing custom store names/logos are left alone.
+  // Rebrand: update default store details to YieldPOS. Existing custom store names/logos are left alone.
   try {
-    const rebrandDone = dbAll("SELECT value FROM settings WHERE key = 'rebrand_boundos_v1'")
+    const rebrandDone = dbAll("SELECT value FROM settings WHERE key = 'rebrand_yieldpos_v1'")
     if (!rebrandDone.length) {
-      db.run("UPDATE settings SET value = ?1 WHERE key = 'store_name' AND (value IS NULL OR value = '' OR value = 'Tillaroo')", [DEFAULT_STORE_NAME])
+      db.run("UPDATE settings SET value = ?1 WHERE key = 'store_name' AND (value IS NULL OR value = '' OR value = 'Tillaroo' OR value = ?2)", [DEFAULT_STORE_NAME, 'Bound' + 'OS'])
       db.run("UPDATE settings SET value = ?1 WHERE key = 'receipt_header' AND (value IS NULL OR value = '' OR value LIKE 'Tillaroo%')", ['Fresh Fruit & Veg'])
-      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('rebrand_boundos_v1', '1')")
-      appLog('info', 'migration', 'Rebranded default store details to BoundOS')
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('rebrand_yieldpos_v1', '1')")
+      appLog('info', 'migration', 'Rebranded default store details to YieldPOS')
     }
   } catch (e) { console.error('Rebrand migration error:', e.message) }
 
   // Set/replace the default software logo. Custom uploaded company logos are preserved.
   try {
-    const logoFixed = dbGet("SELECT value FROM settings WHERE key = 'company_logo_boundos_v1'")
+    const logoFixed = dbGet("SELECT value FROM settings WHERE key = 'company_logo_yieldpos_v1'")
     if (!logoFixed || !logoFixed.value) {
-      const logoPath = path.join(__dirname, 'pos', 'boundos.png')
+      const logoPath = path.join(__dirname, 'pos', 'YieldPOS.png')
       const oldLogoPath = path.join(__dirname, 'pos', 'logo-circle.png')
       const currentLogo = dbGet("SELECT value FROM settings WHERE key = 'company_logo'")?.value || ''
       const oldDefault = fs.existsSync(oldLogoPath)
@@ -621,19 +702,20 @@ async function initDatabase() {
         const logoData = fs.readFileSync(logoPath)
         const dataUrl = 'data:image/png;base64,' + logoData.toString('base64')
         db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('company_logo', ?1)", [dataUrl])
-        appLog('info', 'migration', 'Set default BoundOS logo')
+        appLog('info', 'migration', 'Set default YieldPOS logo')
       }
-      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('company_logo_boundos_v1', '1')")
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('company_logo_yieldpos_v1', '1')")
     }
   } catch (e) { console.error('Company logo migration error:', e.message) }
 
-  // Upgrade the built-in default logo to boundos.png while preserving uploaded logos.
+  // Upgrade the built-in default logo to YieldPOS.png while preserving uploaded logos.
   try {
-    const pngLogoDone = dbGet("SELECT value FROM settings WHERE key = 'company_logo_boundos_png_v1'")
+    const pngLogoDone = dbGet("SELECT value FROM settings WHERE key = 'company_logo_yieldpos_png_v1'")
     if (!pngLogoDone || !pngLogoDone.value) {
-      const logoPath = path.join(__dirname, 'pos', 'boundos.png')
+      const logoPath = path.join(__dirname, 'pos', 'YieldPOS.png')
       const previousPaths = [
-        path.join(__dirname, 'pos', 'boundos-logo.png'),
+        path.join(__dirname, 'pos', 'YieldPOS.png'),
+        path.join(__dirname, 'pos', 'bound' + 'os.png'),
         path.join(__dirname, 'pos', 'logo-circle.png')
       ]
       const currentLogo = dbGet("SELECT value FROM settings WHERE key = 'company_logo'")?.value || ''
@@ -643,28 +725,28 @@ async function initDatabase() {
       if (fs.existsSync(logoPath) && (!currentLogo || previousDefaults.includes(currentLogo))) {
         const dataUrl = 'data:image/png;base64,' + fs.readFileSync(logoPath).toString('base64')
         db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('company_logo', ?1)", [dataUrl])
-        appLog('info', 'migration', 'Updated default app logo to boundos.png')
+        appLog('info', 'migration', 'Updated default app logo to YieldPOS.png')
       }
-      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('company_logo_boundos_png_v1', '1')")
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('company_logo_yieldpos_png_v1', '1')")
     }
-  } catch (e) { console.error('BoundOS PNG logo migration error:', e.message) }
+  } catch (e) { console.error('YieldPOS PNG logo migration error:', e.message) }
 
-  // Replace stale generated logo data with the transparent BoundOS PNG.
+  // Replace stale generated logo data with the transparent YieldPOS PNG.
   try {
-    const transparentLogoDone = dbGet("SELECT value FROM settings WHERE key = 'company_logo_boundos_png_v2'")
+    const transparentLogoDone = dbGet("SELECT value FROM settings WHERE key = 'company_logo_yieldpos_png_v2'")
     if (!transparentLogoDone || !transparentLogoDone.value) {
-      const logoPath = path.join(__dirname, 'pos', 'boundos.png')
+      const logoPath = path.join(__dirname, 'pos', 'YieldPOS.png')
       const currentLogo = dbGet("SELECT value FROM settings WHERE key = 'company_logo'")?.value || ''
       const oldGeneratedLogoMarker = dbGet("SELECT value FROM settings WHERE key = 'company_logo_v2'")?.value || ''
       const looksLikeGeneratedDefault = currentLogo.startsWith('data:image/png;base64,') && currentLogo.length > 300000
       if (fs.existsSync(logoPath) && (!currentLogo || oldGeneratedLogoMarker || looksLikeGeneratedDefault)) {
         const dataUrl = 'data:image/png;base64,' + fs.readFileSync(logoPath).toString('base64')
         db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('company_logo', ?1)", [dataUrl])
-        appLog('info', 'migration', 'Replaced stale generated logo with transparent boundos.png')
+        appLog('info', 'migration', 'Replaced stale generated logo with transparent YieldPOS.png')
       }
-      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('company_logo_boundos_png_v2', '1')")
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('company_logo_yieldpos_png_v2', '1')")
     }
-  } catch (e) { console.error('Transparent BoundOS logo migration error:', e.message) }
+  } catch (e) { console.error('Transparent YieldPOS logo migration error:', e.message) }
 
   // Default to a maximised normal window. True full screen stays available via F11.
   try {
@@ -924,6 +1006,15 @@ async function initDatabase() {
   // PLU is the required product code. Barcode is kept as the same value so
   // scanner lookup and PLU lookup behave identically.
   try {
+    const barcodeToPluDone = dbGet("SELECT value FROM settings WHERE key = 'migration_barcode_to_plu_v1'")
+    if (!barcodeToPluDone || !barcodeToPluDone.value) {
+      const moved = dbRun(`UPDATE products
+        SET plu = TRIM(barcode), updated_at = datetime('now')
+        WHERE (plu IS NULL OR TRIM(plu) = '')
+          AND barcode IS NOT NULL AND TRIM(barcode) != ''`)
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('migration_barcode_to_plu_v1', '1')")
+      appLog('info', 'migration', `Moved barcode-only product codes into PLU (${moved?.changes || 0} products)`)
+    }
     const pluRequiredDone = dbGet("SELECT value FROM settings WHERE key = 'migration_products_plu_required_v1'")
     if (!pluRequiredDone || !pluRequiredDone.value) {
       db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('migration_products_plu_required_v1', '1')")
@@ -1008,6 +1099,23 @@ async function initDatabase() {
       appLog('info', 'migration', 'Applied main keyboard palette v2')
     }
   } catch (e) { appLog('error', 'migration', 'Main keyboard palette migration failed', e.message) }
+
+  // Register home utility layout: keep receipt compact and expose Management as
+  // an on-keyboard Advanced button so it travels with the DB-backed keyboard.
+  try {
+    const utilityLayoutDone = dbAll("SELECT value FROM settings WHERE key = 'migration_register_utility_layout_v1'")
+    if (!utilityLayoutDone.length) {
+      db.run(`UPDATE keyboard_buttons
+        SET label = 'RECEIPT', grid_row = 0, grid_col = 0, col_span = 1, row_span = 1, active = 1,
+            bg_color = '#475569', color = '#fff'
+        WHERE id = 'fn-reprint'`)
+      db.run(`INSERT OR REPLACE INTO keyboard_buttons
+        (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, active, product_id, updated_at)
+        VALUES ('fn-advanced', 'ADVANCED', 'management', 0, NULL, '#fff', '#334155', NULL, NULL, NULL, 6, 'grid', 1, 0, 1, 2, 1, 1, NULL, datetime('now'))`)
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('migration_register_utility_layout_v1', '1')")
+      appLog('info', 'migration', 'Applied register utility keyboard layout')
+    }
+  } catch (e) { appLog('error', 'migration', 'Register utility keyboard migration failed', e.message) }
 
   // Merge products from bundled DB if local is missing any
   if (dbExists && fs.existsSync(BUNDLED_DB_PATH)) {
@@ -1373,6 +1481,7 @@ async function initDatabase() {
         storeName: dbGet("SELECT value FROM settings WHERE key = 'store_name'")?.value || DEFAULT_STORE_NAME,
         storeAddress: dbGet("SELECT value FROM settings WHERE key = 'store_address'")?.value || '',
         storePhone: dbGet("SELECT value FROM settings WHERE key = 'store_phone'")?.value || '',
+        storeHours: dbGet("SELECT value FROM settings WHERE key = 'store_hours'")?.value || '',
         storeAbn: dbGet("SELECT value FROM settings WHERE key = 'store_abn'")?.value || '',
       }
       const norm = value => String(value || '')
@@ -1385,9 +1494,10 @@ async function initDatabase() {
         norm(fields.storeName),
         norm(fields.storeAddress),
         norm(fields.storePhone),
+        norm(fields.storeHours),
         norm(fields.storeAbn),
         norm('Tillaroo'),
-        norm('BoundOS'),
+        norm('YieldPOS'),
         norm('WELCOME TO'),
         norm('TAX INVOICE'),
       ].filter(Boolean))
@@ -1474,11 +1584,11 @@ async function initDatabase() {
         let btnCount = 0
         for (const btn of (data.buttons || [])) {
           const id = btn.id || uuid()
-          db.run(`INSERT OR REPLACE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, active, product_id, updated_at)
-            VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,datetime('now'))`,
-            [id, btn.label, btn.type, btn.price || 0, btn.image || null, btn.color || '#fff',
-             btn.bg_color || '#1a3d2a', btn.parent_id || null, btn.category_filter || null,
-             btn.alpha_range || null, btn.sort_order || 0, btn.position || 'grid',
+          db.run(`INSERT OR REPLACE INTO keyboard_buttons (id, label, type, price, image, image_scale, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, active, product_id, updated_at)
+            VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,?20,datetime('now'))`,
+            [id, btn.label, btn.type, btn.price || 0, btn.image || null, Number(btn.image_scale || 100) || 100,
+             btn.color || '#fff', btn.bg_color || '#1a3d2a', btn.parent_id || null,
+             btn.category_filter || null, btn.alpha_range || null, btn.sort_order || 0, btn.position || 'grid',
              btn.page || 1, btn.grid_row || 0, btn.grid_col || 0, btn.col_span || 1,
              btn.row_span || 1, btn.active !== undefined ? btn.active : 1,
              btn.product_id || null])
@@ -1623,6 +1733,48 @@ async function initDatabase() {
     }
   } catch (e) { appLog('error', 'migration', 'Grocery/open-price layout repair failed', e.message) }
 
+  // Keep the Profit Track-style grocery page as 2x2 tiles. The older grocery
+  // repair used 1x1 text buttons, so this repair runs after it.
+  try {
+    const groceryPtDone = dbAll("SELECT value FROM settings WHERE key = 'migration_grocery_profit_track_layout_v2'")
+    if (!groceryPtDone.length || !groceryPtDone[0].value) {
+      const groceryPtButtons = [
+        ['pg6-grocery', 'GROCERY', 'section', null, '#111', '#6ec6df', 'Grocery', null, 1, 0, 0],
+        ['pg6-confectionary', 'CONFECTIONARY', 'section', null, '#111', '#1f9ee8', 'CONFECTIONARY', null, 2, 0, 2],
+        ['pg6-pies-small', 'SIMPLY PIES\n(SMALL)', 'open_price', 'images/products/grocery-pantry-goods.png', '#111', '#fff', '906', 'image:cover', 3, 0, 4],
+        ['pg6-pies-large', 'SIMPLY PIES\n(LARGE)', 'open_price', 'images/products/grocery-pantry-goods.png', '#111', '#fff', '92', 'image:cover', 4, 0, 6],
+        ['pg6-water-12pk', 'WATER 12PK', 'open_price', null, '#111', '#fff', '78', 'image:contain', 5, 0, 8],
+        ['pg6-back', 'BACK', 'back_home', null, '#000', '#39ff14', null, null, 90, 0, 11],
+        ['pg6-salmon-portions', 'SALMON\nPORTIONS', 'open_price', 'images/products/grocery-pantry-goods.png', '#111', '#fff', '3333', 'image:cover', 7, 2, 0],
+        ['pg6-snapper-portions', 'SNAPPER\nPORTIONS', 'open_price', 'images/products/grocery-pantry-goods.png', '#111', '#fff', '22222', 'image:cover', 8, 2, 2],
+        ['pg6-fresh-juice-500', 'FRESH JUICE\n500ML', 'open_price', null, '#111', '#f28c28', '1147', 'image:contain', 9, 2, 5],
+        ['pg6-fresh-juice-1l', 'FRESH JUICE\n1L', 'open_price', 'images/products/grocery-pantry-goods.png', '#111', '#fff', '1148', 'image:cover', 10, 2, 7],
+        ['pg6-fresh-juice-2l', 'FRESH JUICE\n2L', 'open_price', 'images/products/grocery-pantry-goods.png', '#111', '#fff', '1149', 'image:cover', 11, 2, 9],
+        ['pg6-lemon-juice-500', 'LEMON JUICE\n500ML', 'open_price', null, '#111', '#f28c28', '98743', 'image:contain', 12, 2, 11],
+        ['pg6-assorted-spices', 'ASSORTED SPICES', 'open_price', 'images/products/grocery-pantry-goods.png', '#111', '#fff', '501', 'image:cover', 13, 4, 0],
+        ['pg6-mixed-spices', 'SPICES EA', 'open_price', 'images/products/grocery-pantry-goods.png', '#111', '#fff', '4902', 'image:cover', 14, 4, 2],
+        ['pg6-alt-milk', 'MILK LAB &\nALTERNATIVE MILK', 'open_price', 'images/products/grocery-pantry-goods.png', '#111', '#fff', '1234', 'image:contain', 15, 4, 4],
+        ['pg6-coffee-beans', 'COFFEE BEANS\n1KG', 'open_price', 'images/products/pexels-coffee.jpg', '#111', '#fff', '12313', 'image:cover', 16, 4, 9],
+      ]
+      db.run("DELETE FROM keyboard_buttons WHERE id IN ('pg6-grocery-open','pg6-chips','pg6-pies','pg6-water','pg6-salmon','pg6-salmon-fillet','pg6-snapper','pg6-snapper-fillet','pg6-fresh-juice','pg6-juice-1l','pg6-lemon-juice','pg6-spices','pg6-pickles')")
+      for (const [id, label, type, image, color, bg, categoryFilter, alphaRange, sort, row, col] of groceryPtButtons) {
+        db.run(`INSERT INTO keyboard_buttons
+          (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, product_id, active, updated_at)
+          VALUES (?1, ?2, ?3, 0, ?4, ?5, ?6, NULL, ?7, ?8, ?9, 'grid', 6, ?10, ?11, 2, 2, NULL, 1, datetime('now'))
+          ON CONFLICT(id) DO UPDATE SET
+            label = excluded.label, type = excluded.type, price = 0, image = excluded.image,
+            color = excluded.color, bg_color = excluded.bg_color, parent_id = NULL,
+            category_filter = excluded.category_filter, alpha_range = excluded.alpha_range,
+            sort_order = excluded.sort_order, position = 'grid', page = 6,
+            grid_row = excluded.grid_row, grid_col = excluded.grid_col,
+            col_span = 2, row_span = 2, product_id = NULL, active = 1,
+            updated_at = datetime('now')`,
+          [id, label, type, image, color, bg, categoryFilter, alphaRange, sort, row, col])
+      }
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('migration_grocery_profit_track_layout_v2', '1')")
+    }
+  } catch (e) { appLog('error', 'migration', 'Grocery Profit Track layout repair failed', e.message) }
+
   // Product DB is the source of truth for sale behaviour. Sellable keyboard
   // buttons should stay type='product'; open price and weighed-open behaviour
   // lives on products.open_price and products.unit.
@@ -1652,6 +1804,11 @@ async function initDatabase() {
       else if (['btn-meat', 'btn-flowers', 'btn-coffee', 'btn-cheese', 'btn-grocery-open'].includes(btn.id)) categoryId = 'cat-grocery'
 
       const productId = btn.product_id || `p-open-${btn.id.replace(/[^a-zA-Z0-9_-]/g, '-')}`
+      let finalProductId = productId
+      if (plu) {
+        const existingProduct = dbAll("SELECT id FROM products WHERE (plu = ?1 OR barcode = ?1) AND active = 1 LIMIT 1", [plu])
+        if (existingProduct.length) finalProductId = existingProduct[0].id
+      }
       const productName = firstLine
         .replace(/\s+(KG|EA|100G)$/i, '')
         .toLowerCase()
@@ -1671,10 +1828,10 @@ async function initDatabase() {
           image_url = COALESCE(products.image_url, excluded.image_url),
           open_price = 1,
           updated_at = datetime('now')`,
-        [productId, plu, plu, productName, categoryId, unit, btn.image || null])
+        [finalProductId, plu, plu, productName, categoryId, unit, btn.image || null])
       db.run(`UPDATE keyboard_buttons
         SET type = 'product', price = 0, label = ?1, product_id = ?2, updated_at = datetime('now')
-        WHERE id = ?3`, [cleanLabel, productId, btn.id])
+        WHERE id = ?3`, [cleanLabel, finalProductId, btn.id])
       normalised++
     }
     if (normalised) appLog('info', 'migration', `Normalised ${normalised} keyboard open-price buttons to DB products`)
@@ -1706,6 +1863,20 @@ async function initDatabase() {
       db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('migration_main_keyboard_palette_v2_post_import', '1')")
     }
   } catch (e) { appLog('error', 'migration', 'Main keyboard palette post-import failed', e.message) }
+
+  try {
+    const utilityLayoutPostDone = dbAll("SELECT value FROM settings WHERE key = 'migration_register_utility_layout_v2_post_import'")
+    if (!utilityLayoutPostDone.length) {
+      db.run(`UPDATE keyboard_buttons
+        SET label = 'RECEIPT', grid_row = 0, grid_col = 0, col_span = 1, row_span = 1, active = 1,
+            bg_color = '#475569', color = '#fff'
+        WHERE id = 'fn-reprint'`)
+      db.run(`INSERT OR REPLACE INTO keyboard_buttons
+        (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, active, product_id, updated_at)
+        VALUES ('fn-advanced', 'ADVANCED', 'management', 0, NULL, '#fff', '#334155', NULL, NULL, NULL, 6, 'grid', 1, 0, 1, 2, 1, 1, NULL, datetime('now'))`)
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('migration_register_utility_layout_v2_post_import', '1')")
+    }
+  } catch (e) { appLog('error', 'migration', 'Register utility keyboard post-import failed', e.message) }
 
   saveDBSync()
   appLog('info', 'database', 'Database initialized', `Path: ${DB_PATH}`)
@@ -2011,40 +2182,48 @@ const KB_IMAGE_MAP = {
   'pg5-turnip':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/9/6/4966737-zm.jpg' },
   'pg5-zucchini':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/9/1/4910506-zm.jpg' },
   // Subpage: Apples (pg7)
-  'pg7-btn0':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/8/9/5899410-zm.jpg' },
+  'pg7-btn0':          { base: 'direct', file: 'images/products/new-bravo-apple.png' },
   'pg7-btn12':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/2/2/5226011-zm.jpg' },
   'pg7-btn10':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/8/408554-zm.jpg' },
-  'pg7-btn4':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/6/4/2/6427471-zm.jpg' },
+  'pg7-btn4':          { base: 'direct', file: 'images/products/new-jazz-apple.png' },
   'pg7-btn9':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/8/5/5/8559542-zm.jpg' },
   'pg7-btn7':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/8/408554-zm.jpg' },
   'pg7-btn6':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/1/1/5111654-zm.jpg' },
   'pg7-btn8':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/2/2/5226000-zm.jpg' },
   'pg7-btn5':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/9/409251-zm.jpg' },
-  'pg7-btn11':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/9/409251-zm.jpg' },
+  'pg7-btn11':         { base: 'direct', file: 'images/products/new-red-delicious-apple.png' },
   'pg7-btn2':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/8/408554-zm.jpg' },
   'pg7-btn1':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/1/1/5111654-zm.jpg' },
   'pg7-btn3':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/2/2/5226000-zm.jpg' },
   // Subpage: Avocados (pg9)
-  'pg9-btn4':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/9/0/5900530-zm.jpg' },
-  'pg9-btn0':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/9/0/5900530-zm.jpg' },
-  'pg9-btn1':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/3/7/6/3766540-zm.jpg' },
-  'pg9-btn2':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/9/0/5900891-zm.jpg' },
-  'pg9-btn3':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/9/0/5900530-zm.jpg' },
+  'pg9-btn4':          { base: 'direct', file: 'images/products/new-avo-bag.png' },
+  'pg9-btn0':          { base: 'direct', file: 'images/products/new-hass-avo.png' },
+  'pg9-btn1':          { base: 'direct', file: 'images/products/new-reed-avo.png' },
+  'pg9-btn2':          { base: 'direct', file: 'images/products/new-shepherd-avo.png' },
+  'pg9-btn3':          { base: 'direct', file: 'images/products/new-small-avo.png' },
   // Subpage: Bananas (pg10)
   'pg10-btn0':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/9/409499-zm.jpg' },
   'pg10-btn2':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/9/409499-zm.jpg' },
-  'pg10-btn1':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/3/2/132056-zm.jpg' },
-  'pg10-btn3':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/3/2/132056-zm.jpg' },
+  'pg10-btn1':         { base: 'direct', file: 'images/products/new-lady-finger.png' },
+  'pg10-btn3':         { base: 'direct', file: 'images/products/new-lady-finger.png' },
+  // Subpage: Grapes (pg11)
+  'pg11-btn4':         { base: 'direct', file: 'images/products/new-black-muscat.webp' },
+  'pg11-btn2':         { base: 'direct', file: 'images/products/new-black-grapes.png' },
+  'pg11-btn3':         { base: 'direct', file: 'images/products/new-autumn-king.png' },
+  'pg11-btn1':         { base: 'direct', file: 'images/products/new-red-grapes.png' },
+  'pg11-btn0':         { base: 'direct', file: 'images/products/new-white-grapes.png' },
   // Subpage: Lemons (pg13)
   'pg13-btn0':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/3/1/5318302-zm.jpg' },
-  'pg13-btn1':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/9/409728-zm.jpg' },
+  'pg13-btn1':         { base: 'direct', file: 'images/products/new-lemon-bag.png' },
   // Subpage: Limes (pg14)
   'pg14-btn0':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/9/7/197594-zm.jpg' },
-  'pg14-btn1':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/8/1/2/8128020-zm.jpg' },
+  'pg14-btn1':         { base: 'direct', file: 'images/products/new-lime-bag.png' },
   // Subpage: Mandarins (pg15)
-  'pg15-btn5':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/7/1/7/7174994-zm.jpg' },
-  'pg15-btn0':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/9/409750-zm.jpg' },
-  'pg15-btn1':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/2/0/4/204893-zm.jpg' },
+  'pg15-btn5':         { base: 'direct', file: 'images/products/new-afourer.png' },
+  'pg15-btn0':         { base: 'direct', file: 'images/products/new-mandarin-imperial.png' },
+  'pg15-btn1':         { base: 'direct', file: 'images/products/new-honey-murcott.png' },
+  'pg15-btn3':         { base: 'direct', file: 'images/products/new-empress-mandarin.png' },
+  'pg15-btn4':         { base: 'direct', file: 'images/products/new-daisy-mandarin.png' },
   // Catpage fixes
   'pg2-mandarins':     { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/9/409750-zm.jpg' },
   // Subpage: Melons (pg17)
@@ -2056,17 +2235,20 @@ const KB_IMAGE_MAP = {
   'pg17-btn4':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/9/4/5945620-zm.jpg' },
   'pg17-btn5':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/2/5/1252053-zm.jpg' },
   // Subpage: Pears (pg21) â€” Piqa Boo
+  'pg19-btn5':         { base: 'direct', file: 'images/products/new-oranges-valencia-3-kg-bag-fruit-396x298.png' },
+  'pg20-btn1':         { base: 'direct', file: 'images/products/new-golden-peach.png' },
+  'pg21-btn1':         { base: 'direct', file: 'images/products/new-nashi-pear.png' },
   'pg21-btn4':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/3/5/2/3525725-zm.jpg' },
   // Subpage: Plums (pg22)
   'pg22-btn2':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/4/2/5424026-zm.jpg' },
   'pg22-btn0':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/5/6/156382-zm.jpg' },
-  'pg22-btn1':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/7/4/3/7435690-zm.jpg' },
+  'pg22-btn1':         { base: 'direct', file: 'images/products/new-sugar-plum.png' },
   'pg22-btn3':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/3/5/0/3504157-zm.jpg' },
   'pg22-btn4':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/5/6/156382-zm.jpg' },
   // Subpage: Lettuces (pg29)
   'pg29-btn0':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/8/4584071-zm.jpg' },
   'pg29-btn1':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/8/7/9/8791125-zm.jpg' },
-  'pg29-btn2':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/9/4596649-zm.jpg' },
+  'pg29-btn2':         { base: 'direct', file: 'images/products/new-fancy-lettuce.png' },
   // Subpage: Mushrooms (pg30)
   'pg30-btn0':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/9/4594010-zm.jpg' },
   'pg30-btn1':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/9/4590551-zm.jpg' },
@@ -2096,6 +2278,17 @@ const KB_IMAGE_MAP = {
   'pg32-btn5':         { base: 'direct', file: 'images/products/coles-7141758-zm.jpg' },
 }
 
+const KB_WHITE_IMAGE_BUTTONS = new Set([
+  'pg7-btn0', 'pg7-btn4', 'pg7-btn11',
+  'pg9-btn4', 'pg9-btn0', 'pg9-btn1', 'pg9-btn2', 'pg9-btn3',
+  'pg10-btn1', 'pg10-btn3',
+  'pg11-btn4', 'pg11-btn2', 'pg11-btn3', 'pg11-btn1', 'pg11-btn0',
+  'pg13-btn1', 'pg14-btn1',
+  'pg15-btn5', 'pg15-btn0', 'pg15-btn1', 'pg15-btn3', 'pg15-btn4',
+  'pg19-btn5', 'pg20-btn1', 'pg21-btn1', 'pg22-btn1',
+  'pg29-btn2'
+])
+
 // Apply direct image mappings to keyboard buttons
 function relinkKeyboardProducts() {
   const bases = { fv: KB_IMAGE_BASE, deli: KB_IMAGE_BASE_DELI, ext: KB_IMAGE_BASE_EXT, img: KB_IMAGE_BASE_IMG }
@@ -2105,8 +2298,13 @@ function relinkKeyboardProducts() {
       if (!entry) continue
       const imgUrl = entry.base === 'direct' ? entry.file : bases[entry.base] + entry.file
       db.run("UPDATE keyboard_buttons SET image = ? WHERE id = ?", [imgUrl, btnId])
+      if (KB_WHITE_IMAGE_BUTTONS.has(btnId)) {
+        db.run("UPDATE keyboard_buttons SET bg_color = '#ffffff', color = '#111111', alpha_range = 'image:contain' WHERE id = ?", [btnId])
+      }
       linked++
     }
+    db.run("UPDATE keyboard_buttons SET image = NULL, bg_color = '#39ff14', color = '#111111', alpha_range = NULL WHERE upper(label) LIKE '%BUCKET%'")
+    db.run("UPDATE products SET image_url = NULL WHERE category_id = 'cat-bucket-specials' OR upper(name) LIKE '%BUCKET%'")
     if (linked > 0) {
       scheduleSave()
       console.log(`Applied ${linked} keyboard button images`)
@@ -2120,10 +2318,10 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
-    title: isRegisterApp ? 'BoundOS Client - Register' : 'BoundOS Client - Admin',
+    title: isRegisterApp ? 'YieldPOS Client - Register' : 'YieldPOS Client - Admin',
     show: false,
     autoHideMenuBar: true,
-    icon: path.join(__dirname, 'pos', 'boundos.png'),
+    icon: path.join(__dirname, 'pos', 'YieldPOS.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -2196,7 +2394,7 @@ function createCustomerWindow () {
     width: 1024,
     height: 768,
     autoHideMenuBar: true,
-    title: 'BoundOS Client - Customer Display',
+    title: 'YieldPOS Client - Customer Display',
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -2217,8 +2415,9 @@ function createCustomerWindow () {
   customerWindow.webContents.on('did-finish-load', () => {
     const name = dbGet("SELECT value FROM settings WHERE key = 'store_name'")?.value
     const address = dbGet("SELECT value FROM settings WHERE key = 'store_address'")?.value
+    const hours = dbGet("SELECT value FROM settings WHERE key = 'store_hours'")?.value
     if (customerWindow) {
-      customerWindow.webContents.send('customer:update', { items: [], storeName: name || '', storeAddress: address || '' })
+      customerWindow.webContents.send('customer:update', { items: [], storeName: name || '', storeAddress: address || '', storeHours: hours || '' })
     }
   })
 }
@@ -2234,20 +2433,9 @@ async function startLanServerIfUnique(lanPort) {
   return { ok: true }
 }
 
-// Single instance lock â€” focus existing window if already running
-const useSingleInstanceLock = process.argv.includes('--single-instance')
-const gotTheLock = useSingleInstanceLock ? app.requestSingleInstanceLock({ mode: runtimeAppMode }) : true
-if (!gotTheLock) {
-  app.quit()
-} else {
-  app.on('second-instance', () => {
-    if (mainWindow) {
-      if (mainWindow.isMinimized()) mainWindow.restore()
-      mainWindow.focus()
-    }
-  })
-}
-
+// Process lock is per mode: one register and one admin can run at the same time,
+// but a second copy of either mode exits before opening windows or hardware.
+const gotTheLock = gotModeLock
 app.whenReady().then(async () => {
   if (!gotTheLock) return
 
@@ -2270,7 +2458,7 @@ app.whenReady().then(async () => {
     center: true, skipTaskbar: false,
     transparent: true,
     backgroundColor: '#00000000',
-    icon: path.join(__dirname, 'pos', 'boundos.png'),
+    icon: path.join(__dirname, 'pos', 'YieldPOS.png'),
     webPreferences: { nodeIntegration: true, contextIsolation: false }
   })
   try { splashWindow.setAlwaysOnTop(true, 'floating') } catch (_) {}
@@ -2547,7 +2735,7 @@ function setupIPC() {
     })
 
     // Git is not available on client machines. Use the GitHub source ZIP and
-    // apply it after BoundOS exits so hardware handlers are not holding files.
+    // apply it after YieldPOS exits so hardware handlers are not holding files.
     try {
       const zipUrl = 'https://github.com/matthiascamp/mcpos/archive/refs/heads/main.zip'
       const tmpZip = path.join(os.tmpdir(), `mcpos-update-${Date.now()}.zip`)
@@ -2583,7 +2771,7 @@ function setupIPC() {
       createBackup('pre-update')
 
       const relaunchArgs = process.argv.slice(1).filter(arg => !String(arg).includes('--squirrel-'))
-      const updaterScript = path.join(os.tmpdir(), `boundos-update-${Date.now()}.ps1`)
+      const updaterScript = path.join(os.tmpdir(), `yieldpos-update-${Date.now()}.ps1`)
       const script = `
 param(
   [string]$Source,
@@ -2632,7 +2820,7 @@ Start-Process -FilePath $ExePath -ArgumentList $args -WorkingDirectory $Destinat
         app.quit()
         setTimeout(() => app.exit(0), 500)
       }, 800)
-      return { updated: true, staged: true, log: 'Downloaded update from GitHub ZIP.\nBoundOS will close, apply the update after hardware handlers stop, and relaunch.' }
+      return { updated: true, staged: true, log: 'Downloaded update from GitHub ZIP.\nYieldPOS will close, apply the update after hardware handlers stop, and relaunch.' }
     } catch (e) {
       return { error: `Download update failed: ${e.message}`, log: e.message }
     }
@@ -2835,7 +3023,12 @@ Start-Process -FilePath $ExePath -ArgumentList $args -WorkingDirectory $Destinat
         sync_pending: dbGet("SELECT COUNT(*) as c FROM sync_queue WHERE synced=0")?.c || 0,
       }
     } catch (_) {}
-    return { ...appHealth, database: !!db, mode: runtimeAppMode, isRegisterApp, counts }
+    const hardware = {
+      printer: { connected: !!hwPrinter, name: hwPrinter?.name || '', interface: hwPrinter?.interface || '' },
+      scanner: { connected: !!hwScanner, name: hwScanner?.product || '', vendor: hwScanner?.vendor || '' },
+      drawer: { connected: !!hwPrinter, via: hwPrinter ? 'printer DK port' : '' }
+    }
+    return { ...appHealth, database: !!db, mode: runtimeAppMode, isRegisterApp, counts, hardware }
   })
 
   ipcMain.handle('app:getMode', () => ({ mode: runtimeAppMode, isRegisterApp }))
@@ -2916,13 +3109,12 @@ Start-Process -FilePath $ExePath -ArgumentList $args -WorkingDirectory $Destinat
         AND (s.start_date IS NULL OR s.start_date <= date('now'))
         AND (s.end_date IS NULL OR s.end_date >= date('now'))
       WHERE p.active = 1
-        AND (p.name LIKE ?1 OR p.barcode LIKE ?1 OR p.plu LIKE ?1)
+        AND (p.name LIKE ?1 OR p.plu LIKE ?1)
       ORDER BY
         CASE
           WHEN p.plu = ?2 THEN 0
-          WHEN p.barcode = ?2 THEN 1
-          WHEN p.id = ?2 THEN 2
-          WHEN p.name = ?2 THEN 3
+          WHEN p.id = ?2 THEN 1
+          WHEN p.name = ?2 THEN 2
           ELSE 9
         END,
         p.name
@@ -2942,7 +3134,7 @@ Start-Process -FilePath $ExePath -ArgumentList $args -WorkingDirectory $Destinat
         AND (s.start_date IS NULL OR s.start_date <= date('now'))
         AND (s.end_date IS NULL OR s.end_date >= date('now'))
       WHERE p.active = 1
-        AND (p.barcode = ?1 OR p.plu = ?1 OR p.id = ?1)
+        AND (p.plu = ?1 OR p.id = ?1)
     `, [barcode])
   })
 
@@ -2962,6 +3154,26 @@ Start-Process -FilePath $ExePath -ArgumentList $args -WorkingDirectory $Destinat
     `, [categoryId])
   })
 
+  ipcMain.handle('db:products:nextPlu', () => {
+    const rows = dbAll(`
+      SELECT CAST(plu AS INTEGER) AS n
+      FROM products
+      WHERE plu IS NOT NULL
+        AND TRIM(plu) != ''
+        AND plu GLOB '[0-9]*'
+        AND CAST(plu AS TEXT) = CAST(CAST(plu AS INTEGER) AS TEXT)
+      ORDER BY n
+    `)
+    let next = 1
+    for (const row of rows) {
+      const n = Number(row.n || 0)
+      if (n < next) continue
+      if (n === next) next++
+      else break
+    }
+    return String(next)
+  })
+
   ipcMain.handle('db:categories:getAll', () => {
     return dbAll(`SELECT * FROM categories WHERE active = 1 ORDER BY sort_order, name`)
   })
@@ -2972,13 +3184,13 @@ Start-Process -FilePath $ExePath -ArgumentList $args -WorkingDirectory $Destinat
     const id = product.id || uuid()
     const isOpenPrice = !!product.open_price
     const productPrice = isOpenPrice ? 0 : (product.price || 0)
-    const productPlu = String(product.plu || product.barcode || '').trim()
+    const productPlu = String(product.plu || '').trim()
     if (!productPlu) return { error: 'PLU is required for every product' }
 
     // PLU and barcode are the same code; duplicates make scans ambiguous.
     if (productPlu) {
-      const dup = dbGet("SELECT id, name FROM products WHERE (barcode = ?1 OR plu = ?1) AND id != ?2", [productPlu, id])
-      if (dup) return { error: `PLU/barcode "${productPlu}" is already used by "${dup.name}"` }
+      const dup = dbGet("SELECT id, name FROM products WHERE plu = ?1 AND id != ?2", [productPlu, id])
+      if (dup) return { error: `PLU "${productPlu}" is already used by "${dup.name}"` }
     }
 
     dbRun(`
@@ -3016,17 +3228,20 @@ Start-Process -FilePath $ExePath -ArgumentList $args -WorkingDirectory $Destinat
     for (const p of products) {
       if (!p.id || !p.name) continue
       const productPlu = String(p.plu || p.barcode || p.id).trim()
-      dbRun(`INSERT INTO products (id, barcode, plu, name, category_id, price, cost_price, unit, tax_rate, track_stock, stock_qty, active, image_url, updated_at)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, datetime('now'))
+      dbRun(`INSERT INTO products (id, barcode, plu, name, category_id, price, cost_price, unit, tax_rate, track_stock, stock_qty, active, image_url, open_price, updated_at)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, datetime('now'))
         ON CONFLICT(id) DO UPDATE SET
           barcode = excluded.barcode, plu = excluded.plu, name = excluded.name,
           category_id = excluded.category_id, price = excluded.price,
           cost_price = excluded.cost_price, unit = excluded.unit,
           tax_rate = excluded.tax_rate, image_url = excluded.image_url,
+          track_stock = excluded.track_stock, stock_qty = excluded.stock_qty,
+          active = excluded.active, open_price = excluded.open_price,
           updated_at = excluded.updated_at`,
         [p.id, productPlu, productPlu, p.name, p.category_id || null,
          p.price, p.cost_price || 0, p.unit || 'each', p.tax_rate ?? 0.10,
-         p.track_stock ? 1 : 0, p.stock_qty || 0, p.active !== false ? 1 : 0, p.image_url || null])
+         p.track_stock ? 1 : 0, p.stock_qty || 0, p.active !== false ? 1 : 0,
+         p.image_url || null, p.open_price ? 1 : 0])
       count++
     }
     scheduleSave()
@@ -3141,7 +3356,7 @@ Start-Process -FilePath $ExePath -ArgumentList $args -WorkingDirectory $Destinat
 
   ipcMain.handle('db:deals:getProducts', (_e, dealId) => {
     return dbAll(`
-      SELECT dp.*, p.name as product_name, p.price, p.plu, p.barcode
+      SELECT dp.*, p.name as product_name, p.price, p.plu
       FROM deal_products dp
       JOIN products p ON p.id = dp.product_id
       WHERE dp.deal_id = ?1
@@ -3616,6 +3831,13 @@ Start-Process -FilePath $ExePath -ArgumentList $args -WorkingDirectory $Destinat
             ['settings', key, 'update', JSON.stringify({ key, value })])
       lanSync.bumpVersion()
     }
+    if (['store_name', 'store_address', 'store_hours'].includes(key) && customerWindow && !customerWindow.isDestroyed()) {
+      customerWindow.webContents.send('customer:update', {
+        storeName: dbGet("SELECT value FROM settings WHERE key = 'store_name'")?.value || '',
+        storeAddress: dbGet("SELECT value FROM settings WHERE key = 'store_address'")?.value || '',
+        storeHours: dbGet("SELECT value FROM settings WHERE key = 'store_hours'")?.value || ''
+      })
+    }
     return true
   })
 
@@ -3720,9 +3942,29 @@ Start-Process -FilePath $ExePath -ArgumentList $args -WorkingDirectory $Destinat
     }
   })
 
+  ipcMain.handle('db:reports:eodRegisterTotals', (_e, opts = {}) => {
+    const d = opts.date || new Date().toISOString().slice(0, 10)
+    const regRow = dbGet("SELECT value FROM settings WHERE key = 'register_id'")
+    const registerId = opts.register_id || opts.registerId || regRow?.value || 'LANE01'
+    const eftpos = dbGet(`
+      SELECT COALESCE(SUM(p.amount), 0) as total
+      FROM payments p
+      JOIN transactions t ON t.id = p.transaction_id
+      WHERE t.status = 'completed'
+        AND t.register_id = ?1
+        AND date(t.created_at) = ?2
+        AND lower(p.method) IN ('eftpos', 'card')
+    `, [registerId, d])
+    return {
+      date: d,
+      register_id: registerId,
+      eftpos_total: eftpos?.total || 0
+    }
+  })
+
   ipcMain.handle('db:reports:weeklySummary', (_e, weekStartDate) => {
     const ws = weekStartDate || (() => {
-      const d = new Date(); d.setDate(d.getDate() - d.getDay() + 1)
+      const d = new Date(); d.setDate(d.getDate() - ((d.getDay() + 6) % 7))
       return d.toISOString().slice(0, 10)
     })()
     const days = []
@@ -3846,10 +4088,10 @@ Start-Process -FilePath $ExePath -ArgumentList $args -WorkingDirectory $Destinat
       if (deleted) return { id, skipped: true }
     }
     dbRun(`
-      INSERT OR REPLACE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, product_id, active, updated_at)
-      VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, datetime('now'))
-    `, [id, btn.label, buttonType, btn.price || 0, btn.image || null, btn.color || '#fff',
-        btn.bg_color || '#1a3d2a', btn.parent_id || null, btn.category_filter || null,
+      INSERT OR REPLACE INTO keyboard_buttons (id, label, type, price, image, image_scale, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, product_id, active, updated_at)
+      VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, datetime('now'))
+    `, [id, btn.label, buttonType, btn.price || 0, btn.image || null, Number(btn.image_scale || 100) || 100,
+        btn.color || '#fff', btn.bg_color || '#1a3d2a', btn.parent_id || null, btn.category_filter || null,
         btn.alpha_range || null, btn.sort_order || 0, btn.position || 'grid',
         btn.page || 1, btn.grid_row || 0, btn.grid_col || 0,
         btn.col_span || 1, btn.row_span || 1, btn.product_id || null,
@@ -3899,18 +4141,18 @@ Start-Process -FilePath $ExePath -ArgumentList $args -WorkingDirectory $Destinat
     for (const b of buttons) {
       if (!b.id || !b.label) continue
       if (deletedIds.has(b.id)) continue
-      db.run(`INSERT INTO keyboard_buttons (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, product_id, active, updated_at)
-        VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,datetime('now'))
+      db.run(`INSERT INTO keyboard_buttons (id, label, type, price, image, image_scale, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, product_id, active, updated_at)
+        VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,?20,datetime('now'))
         ON CONFLICT(id) DO UPDATE SET
-          label=excluded.label, type=excluded.type, price=excluded.price, image=excluded.image,
+          label=excluded.label, type=excluded.type, price=excluded.price, image=excluded.image, image_scale=excluded.image_scale,
           color=excluded.color, bg_color=excluded.bg_color, parent_id=excluded.parent_id,
           category_filter=excluded.category_filter, alpha_range=excluded.alpha_range,
           sort_order=excluded.sort_order, position=excluded.position, page=excluded.page,
           grid_row=excluded.grid_row, grid_col=excluded.grid_col, col_span=excluded.col_span,
           row_span=excluded.row_span, product_id=excluded.product_id, active=excluded.active,
           updated_at=excluded.updated_at`,
-        [b.id, b.label, b.type, b.price || 0, b.image || null, b.color || '#fff',
-         b.bg_color || '#1a3d2a', b.parent_id || null, b.category_filter || null,
+        [b.id, b.label, b.type, b.price || 0, b.image || null, Number(b.image_scale || 100) || 100,
+         b.color || '#fff', b.bg_color || '#1a3d2a', b.parent_id || null, b.category_filter || null,
          b.alpha_range || null, b.sort_order || 0, b.position || 'grid',
          b.page || 1, b.grid_row || 0, b.grid_col || 0, b.col_span || 1, b.row_span || 1,
          b.product_id || null, b.active !== false ? 1 : 0])
@@ -3932,9 +4174,9 @@ Start-Process -FilePath $ExePath -ArgumentList $args -WorkingDirectory $Destinat
     const buttons = dbAll("SELECT * FROM keyboard_buttons WHERE page = ?1 AND active = 1", [srcPage])
     for (const btn of buttons) {
       const newId = uuid()
-      dbRun(`INSERT INTO keyboard_buttons (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, active, updated_at)
-        VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,1,datetime('now'))`,
-        [newId, btn.label, btn.type, btn.price, btn.image, btn.color, btn.bg_color,
+      dbRun(`INSERT INTO keyboard_buttons (id, label, type, price, image, image_scale, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, active, updated_at)
+        VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,1,datetime('now'))`,
+        [newId, btn.label, btn.type, btn.price, btn.image, btn.image_scale || 100, btn.color, btn.bg_color,
          btn.parent_id, btn.category_filter, btn.alpha_range, btn.sort_order, btn.position || 'grid',
          newPage, btn.grid_row, btn.grid_col, btn.col_span, btn.row_span])
     }
@@ -3990,10 +4232,10 @@ Start-Process -FilePath $ExePath -ArgumentList $args -WorkingDirectory $Destinat
         skipped++; continue
       }
       const id = btn.id || uuid()
-      dbRun(`INSERT OR REPLACE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, active, product_id, updated_at)
-        VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,datetime('now'))`,
-        [id, btn.label, btn.type, btn.price || 0, btn.image || null, btn.color || '#fff',
-         btn.bg_color || '#1a3d2a', btn.parent_id || null, btn.category_filter || null,
+      dbRun(`INSERT OR REPLACE INTO keyboard_buttons (id, label, type, price, image, image_scale, color, bg_color, parent_id, category_filter, alpha_range, sort_order, position, page, grid_row, grid_col, col_span, row_span, active, product_id, updated_at)
+        VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,?20,datetime('now'))`,
+        [id, btn.label, btn.type, btn.price || 0, btn.image || null, Number(btn.image_scale || 100) || 100,
+         btn.color || '#fff', btn.bg_color || '#1a3d2a', btn.parent_id || null, btn.category_filter || null,
          btn.alpha_range || null, btn.sort_order || 0, btn.position || 'grid',
          btn.page || 1, row, col, cs, rs, btn.active !== undefined ? btn.active : 1,
          btn.product_id || null])
@@ -4627,7 +4869,7 @@ Start-Process -FilePath $ExePath -ArgumentList $args -WorkingDirectory $Destinat
   function cleanupDuplicateQueues () {
     try {
       // Only remove queues explicitly created by this app â€” never touch driver-installed queues
-      hwExec(`powershell -NoProfile -NonInteractive -Command "Remove-Printer -Name 'BoundOS Receipt Printer' -ErrorAction SilentlyContinue"`, { timeout: 3000, encoding: 'utf-8' })
+      hwExec(`powershell -NoProfile -NonInteractive -Command "Remove-Printer -Name 'YieldPOS Receipt Printer' -ErrorAction SilentlyContinue"`, { timeout: 3000, encoding: 'utf-8' })
     } catch (_) {}
   }
 
@@ -5423,6 +5665,24 @@ Start-Process -FilePath $ExePath -ArgumentList $args -WorkingDirectory $Destinat
     const text = s => parts.push(Buffer.from(s + '\n', 'latin1'))
     const cmd = buf => parts.push(buf)
     const lr = (l, r) => `${l}${' '.repeat(Math.max(1, W - l.length - r.length))}${r}`
+    const rcptSetting = (key, fallback = '') => {
+      try {
+        const value = dbGet("SELECT value FROM settings WHERE key = ?1", [key])?.value
+        return value == null || value === '' ? fallback : value
+      } catch (_) {
+        return fallback
+      }
+    }
+    const rcptBool = (key, fallback = true) => String(rcptSetting(key, fallback ? '1' : '0')) !== '0'
+    const taxName = rcptSetting('tax_name', 'GST')
+    const welcomeText = rcptSetting('receipt_welcome_text', 'WELCOME TO')
+    const invoiceLabel = rcptSetting('receipt_invoice_label', 'TAX INVOICE')
+    const refundText = rcptSetting('receipt_refund_text', 'Please retain receipt for refunds')
+    const storeHours = receiptData.storeHours || rcptSetting('store_hours', '')
+    const showWelcome = rcptBool('receipt_show_welcome', true)
+    const showRefund = rcptBool('receipt_show_refund', true)
+    const showServedBy = rcptBool('receipt_show_served_by', true)
+    const showBarcode = rcptBool('receipt_show_barcode', true)
     const normaliseReceiptLine = value => String(value || '')
       .replace(/^ph#\s*/i, '')
       .replace(/^abn#\s*/i, '')
@@ -5435,10 +5695,11 @@ Start-Process -FilePath $ExePath -ArgumentList $args -WorkingDirectory $Destinat
         normaliseReceiptLine(data.storePhone),
         normaliseReceiptLine(data.storeAddress),
         normaliseReceiptLine(data.storeAbn),
+        normaliseReceiptLine(storeHours),
         normaliseReceiptLine('Tillaroo'),
-        normaliseReceiptLine('BoundOS'),
-        normaliseReceiptLine('WELCOME TO'),
-        normaliseReceiptLine('TAX INVOICE'),
+        normaliseReceiptLine('YieldPOS'),
+        normaliseReceiptLine(welcomeText),
+        normaliseReceiptLine(invoiceLabel),
       ].filter(Boolean))
       const addressNorm = normaliseReceiptLine(data.storeAddress)
       return String(data.header || '')
@@ -5453,6 +5714,7 @@ Start-Process -FilePath $ExePath -ArgumentList $args -WorkingDirectory $Destinat
     }
     const paymentLabel = method => {
       const raw = String(method || 'payment').trim().toLowerCase()
+      if (receiptData.status === 'eod') return String(method || 'Total')
       if (raw === 'card' || raw === 'eftpos') return 'Payment Eftpos'
       if (raw === 'cash') return 'Payment Cash'
       if (raw === 'gift_card') return 'Payment Gift Card'
@@ -5483,22 +5745,23 @@ Start-Process -FilePath $ExePath -ArgumentList $args -WorkingDirectory $Destinat
 
     // Header block â€” receipt_header is the primary source of store info
     cmd(ESCPOS.BOLD_ON); cmd(ESCPOS.DOUBLE_SIZE)
+    if (showWelcome) text(welcomeText)
     text(receiptData.storeName || SOFTWARE_NAME)
     cmd(ESCPOS.NORMAL_SIZE); cmd(ESCPOS.BOLD_OFF)
     for (const line of receiptHeaderLines(receiptData)) text(line)
     if (receiptData.storeAddress) text(receiptData.storeAddress)
     if (receiptData.storePhone) text(`PH# ${receiptData.storePhone}`)
+    if (storeHours) text(storeHours)
     if (receiptData.storeAbn) text(`ABN# ${receiptData.storeAbn}`)
-    text('Thank you for shopping with us')
-    text('Please retain receipt for refunds')
+    if (showRefund) text(refundText)
     cmd(ESCPOS.BOLD_ON)
-    text('TAX INVOICE')
+    text(invoiceLabel)
     cmd(ESCPOS.BOLD_OFF)
     text('')
 
     // GST / discount legend
     cmd(ESCPOS.ALIGN_LEFT)
-    text('(*) denotes items which attract GST')
+    text(`(*) denotes items which attract ${taxName}`)
     text('(D) denotes Discounted items')
 
     // Date and staff on one line
@@ -5556,7 +5819,7 @@ Start-Process -FilePath $ExePath -ArgumentList $args -WorkingDirectory $Destinat
     const staffRole = rawRole.charAt(0).toUpperCase() + rawRole.slice(1)
     const servedBy = `Served by ${staffRole} ${staffStr}`
     const laneStr = `Lane #${receiptData.registerId || '01'}`
-    text(lr(servedBy, laneStr))
+    if (showServedBy) text(lr(servedBy, laneStr))
 
     // Receipt number
     if (receiptData.receiptNumber) {
@@ -5567,7 +5830,7 @@ Start-Process -FilePath $ExePath -ArgumentList $args -WorkingDirectory $Destinat
 
     // GST summary
     cmd(ESCPOS.ALIGN_CENTER)
-    text(`Total includes GST of $${receiptData.tax.toFixed(2)}`)
+    text(`Total includes ${taxName} of $${receiptData.tax.toFixed(2)}`)
 
     // Surcharge note
     const hasEftposSurcharge = receiptData.eftposSurcharge > 0
@@ -5575,12 +5838,16 @@ Start-Process -FilePath $ExePath -ArgumentList $args -WorkingDirectory $Destinat
 
     text('')
     if (receiptData.footer) {
-      for (const line of receiptData.footer.split('\n')) if (line.trim()) text(line.trim())
+      const hoursNorm = normaliseReceiptLine(storeHours)
+      for (const line of receiptData.footer.split('\n')) {
+        const trimmed = line.trim()
+        if (trimmed && normaliseReceiptLine(trimmed) !== hoursNorm) text(trimmed)
+      }
     }
 
     // Transaction barcode at bottom for normal receipts. Held slips already show
     // the recall barcode at the top where staff can scan it quickly.
-    if (receiptData.barcode && receiptData.status !== 'parked') {
+    if (showBarcode && receiptData.barcode && receiptData.status !== 'parked') {
       text('')
       emitBarcode(receiptData.barcode)
     }
@@ -5772,7 +6039,7 @@ Start-Process -FilePath $ExePath -ArgumentList $args -WorkingDirectory $Destinat
               foundConflicts.add(key)
               issues.push({ type: 'conflict', area: 'software', severity: 'high',
                 message: `${name} is running (${match[1]}) â€” may be locking COM ports or printer queues`,
-                fix: `Close ${name} before using BoundOS, or it will block access to the scale and printer` })
+                fix: `Close ${name} before using YieldPOS, or it will block access to the scale and printer` })
             }
           }
         }
@@ -5802,14 +6069,14 @@ Start-Process -FilePath $ExePath -ArgumentList $args -WorkingDirectory $Destinat
         for (const p of ports) {
           // Skip if this port is already held open by our scale polling
           if (hwScalePort?.isOpen && hwScalePort.path === p.path) {
-            info.push({ type: 'info', area: 'port', message: `${p.path}: in use by BoundOS (scale connected)` })
+            info.push({ type: 'info', area: 'port', message: `${p.path}: in use by YieldPOS (scale connected)` })
             continue
           }
           // Skip if our Python scale bridge has it open â€” otherwise the open
           // attempt below fails with "Access denied" and we wrongly flag our
           // own usage as "another application has exclusive access".
           if (pythonScaleProc && hwScale?.port === p.path) {
-            info.push({ type: 'info', area: 'port', message: `${p.path}: in use by BoundOS scale bridge (Python)` })
+            info.push({ type: 'info', area: 'port', message: `${p.path}: in use by YieldPOS scale bridge (Python)` })
             continue
           }
           let portOpened = false
@@ -6653,7 +6920,7 @@ Start-Process -FilePath $ExePath -ArgumentList $args -WorkingDirectory $Destinat
     }
   })
 
-  ipcMain.handle('hardware:openDrawer', async () => {
+  ipcMain.handle('hardware:openDrawer', async (_e, opts = {}) => {
     try {
       // Try OPOS first (dedicated CashDrawer device â€” more reliable than printer DK port)
       const opos = checkOpos()
@@ -6669,6 +6936,9 @@ Start-Process -FilePath $ExePath -ArgumentList $args -WorkingDirectory $Destinat
 
       // Fallback: ESC/POS drawer kick via printer
       if (!hwPrinter) {
+        if (opts?.skipProbe) {
+          return { error: 'No printer detected - drawer opens via printer DK port.' }
+        }
         appLog('info', 'drawer', 'No printer configured, probing...')
         await probeHardware()
       }

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>BoundOS Client - Admin</title>
+  <title>YieldPOS Client - Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -60,10 +60,35 @@
       margin: 0 -3px;
       padding: 0 3px;
       transition: background .15s ease, box-shadow .15s ease;
+      position: relative;
     }
+    #rcptPreview.receipt-edit-mode .receipt-preview-line[data-rcpt-edit],
     .receipt-preview-line[data-rcpt-edit]:hover {
-      background: rgba(205, 167, 95, .14);
-      box-shadow: inset 0 0 0 1px rgba(205, 167, 95, .34);
+      background: rgba(205, 167, 95, .10);
+      box-shadow: inset 0 0 0 1px rgba(205, 167, 95, .58);
+    }
+    #rcptPreview.receipt-edit-mode .receipt-preview-line[data-rcpt-edit]::after {
+      content: attr(data-rcpt-title);
+      position: absolute;
+      right: 4px;
+      top: 1px;
+      max-width: 130px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      background: #fff8df;
+      color: #07150d;
+      border: 1px solid rgba(205, 167, 95, .65);
+      border-radius: 4px;
+      padding: 0 4px;
+      font: 700 8px/13px Inter, system-ui, sans-serif;
+      letter-spacing: .02em;
+    }
+    .receipt-preview-line.rcpt-locked {
+      color: rgba(0,0,0,.62);
+    }
+    #rcptPreview.receipt-edit-mode .receipt-preview-line.rcpt-locked {
+      background: rgba(0,0,0,.035);
     }
 
     /* ── Sidebar ──────────────────────────────────────────────── */
@@ -271,8 +296,8 @@
       align-items: center;
       gap: 6px;
     }
-    .btn-green { background: linear-gradient(180deg,var(--gold-bright),var(--gold)); color: #07150d; font-weight:800; }
-    .btn-green:hover { background: linear-gradient(180deg,#f7e3af,var(--gold)); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(205,167,95,.28); }
+    .btn-green { background: #15803d; color: #fff; font-weight:800; }
+    .btn-green:hover { background: #15803d; transform: translateY(-1px); box-shadow: none; }
     .btn-blue  { background: var(--blue); color: #fff; }
     .btn-blue:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,.3); }
     .btn-outline { background: rgba(247,240,220,.035); border: 1px solid var(--border); color: var(--cream-soft); }
@@ -430,6 +455,108 @@
     .kb-col-hdr { flex: 1; text-align: center; font-size: 10px; color: var(--text-dim); font-weight: 600; min-width: 0; }
     #kbGrid { display: grid; gap: 3px; min-width: 500px; flex: 1; }
 
+    #kbGrid .pos-grid-btn,
+    #kbPreviewGrid .pos-grid-btn,
+    .kb-live.pos-grid-btn {
+      border:none; border-radius:clamp(8px,1vw,14px); font-weight:600; font-size:clamp(9px,1.1vw,13px);
+      cursor:pointer; text-align:center; line-height:1.2; font-family:'Inter',sans-serif;
+      display:flex; align-items:center; justify-content:center; flex-direction:column;
+      padding:clamp(2px,0.5vh,5px) clamp(3px,0.5vw,6px); word-break:break-word; position:relative; overflow:hidden; user-select:none;
+      box-shadow:0 4px 10px rgba(0,0,0,.35),0 1px 3px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.07);
+    }
+    #kbGrid .pos-grid-btn img,
+    #kbPreviewGrid .pos-grid-btn img,
+    .kb-live.pos-grid-btn img {
+      position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border-radius:inherit;
+      transform:scale(var(--kb-img-scale,1)); transform-origin:center;
+    }
+    #kbGrid .pos-grid-btn.has-img::after,
+    #kbPreviewGrid .pos-grid-btn.has-img::after,
+    .kb-live.pos-grid-btn.has-img::after {
+      content:''; position:absolute; inset:0; border-radius:inherit;
+      background:linear-gradient(to top,rgba(0,0,0,.8) 0%,rgba(0,0,0,.35) 30%,rgba(0,0,0,.08) 55%,transparent 100%);
+      pointer-events:none;
+    }
+    #kbGrid .pos-grid-btn.has-img > span:not(.btn-price-badge):not(.btn-plu-badge):not(.btn-cat-badge),
+    #kbPreviewGrid .pos-grid-btn.has-img > span:not(.btn-price-badge):not(.btn-plu-badge):not(.btn-cat-badge),
+    .kb-live.pos-grid-btn.has-img > span:not(.btn-price-badge):not(.btn-plu-badge):not(.btn-cat-badge) {
+      position:relative; z-index:2; font-size:clamp(10px,1.1vw,13px); font-weight:700; color:#fff;
+      text-shadow:0 2px 8px rgba(0,0,0,.9),0 0 16px rgba(0,0,0,.5); margin-top:auto; padding-bottom:clamp(3px,0.5vh,6px);
+      letter-spacing:-.2px; text-align:center;
+    }
+    #kbGrid .pos-grid-btn.img-cover img,
+    #kbPreviewGrid .pos-grid-btn.img-cover img,
+    .kb-live.pos-grid-btn.img-cover img { inset:0; width:100%; height:100%; max-width:none; max-height:none; object-fit:cover; padding:0; }
+    #kbGrid .pos-grid-btn.img-contain.has-img,
+    #kbPreviewGrid .pos-grid-btn.img-contain.has-img,
+    .kb-live.pos-grid-btn.img-contain.has-img {
+      background:#fff!important; color:#111!important; border-radius:2px; border:1px solid #d6d6d6; padding:0;
+      box-shadow:0 2px 8px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.13),inset 0 -1px 0 rgba(0,0,0,.12);
+      align-items:stretch; justify-content:flex-end;
+    }
+    #kbGrid .pos-grid-btn.img-contain.has-img::after,
+    #kbPreviewGrid .pos-grid-btn.img-contain.has-img::after,
+    .kb-live.pos-grid-btn.img-contain.has-img::after { display:none; }
+    #kbGrid .pos-grid-btn.img-contain.has-img img,
+    #kbPreviewGrid .pos-grid-btn.img-contain.has-img img,
+    .kb-live.pos-grid-btn.img-contain.has-img img {
+      inset:4px 4px 28px 4px; width:auto; height:auto; max-width:calc(100% - 8px); max-height:calc(100% - 32px);
+      margin:auto; object-fit:contain; border-radius:0;
+    }
+    #kbGrid .pos-grid-btn.img-contain.has-img > span:not(.btn-price-badge):not(.btn-plu-badge):not(.btn-cat-badge),
+    #kbPreviewGrid .pos-grid-btn.img-contain.has-img > span:not(.btn-price-badge):not(.btn-plu-badge):not(.btn-cat-badge),
+    .kb-live.pos-grid-btn.img-contain.has-img > span:not(.btn-price-badge):not(.btn-plu-badge):not(.btn-cat-badge) {
+      width:100%; min-height:26px; margin-top:auto; padding:2px 4px 4px; background:rgba(255,255,255,.96); color:#111;
+      text-shadow:none; font-size:clamp(8px,0.95vw,12px); font-weight:800; line-height:1.1; letter-spacing:0; text-align:center;
+    }
+    #kbGrid .pos-grid-btn.dept-key,
+    #kbPreviewGrid .pos-grid-btn.dept-key,
+    .kb-live.pos-grid-btn.dept-key {
+      font-size:clamp(10px,1.2vw,14px); font-weight:700; letter-spacing:-.2px;
+      border:1px solid rgba(255,255,255,.11);
+      box-shadow:0 2px 8px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.13),inset 0 -1px 0 rgba(0,0,0,.12);
+    }
+    #kbGrid .pos-grid-btn.cat-key.has-img::before,
+    #kbPreviewGrid .pos-grid-btn.cat-key.has-img::before,
+    .kb-live.pos-grid-btn.cat-key.has-img::before { display:none; }
+    #kbGrid .pos-grid-btn.cat-key.has-img::after,
+    #kbPreviewGrid .pos-grid-btn.cat-key.has-img::after,
+    .kb-live.pos-grid-btn.cat-key.has-img::after { background:linear-gradient(to top,rgba(0,0,0,.58) 0%,rgba(0,0,0,.18) 42%,transparent 76%); }
+    #kbGrid .pos-grid-btn.cat-key.has-img > span:not(.btn-price-badge):not(.btn-plu-badge):not(.btn-cat-badge),
+    #kbPreviewGrid .pos-grid-btn.cat-key.has-img > span:not(.btn-price-badge):not(.btn-plu-badge):not(.btn-cat-badge),
+    .kb-live.pos-grid-btn.cat-key.has-img > span:not(.btn-price-badge):not(.btn-plu-badge):not(.btn-cat-badge) {
+      text-shadow:none; background:rgba(0,0,0,.45); border-radius:4px; padding:3px 6px; margin-bottom:3px;
+    }
+    #kbGrid .pos-grid-btn.cat-key.img-contain.has-img > span:not(.btn-price-badge):not(.btn-plu-badge):not(.btn-cat-badge),
+    #kbPreviewGrid .pos-grid-btn.cat-key.img-contain.has-img > span:not(.btn-price-badge):not(.btn-plu-badge):not(.btn-cat-badge),
+    .kb-live.pos-grid-btn.cat-key.img-contain.has-img > span:not(.btn-price-badge):not(.btn-plu-badge):not(.btn-cat-badge) {
+      background:rgba(255,255,255,.96); border-radius:0; margin-bottom:0;
+    }
+    #kbGrid .pos-grid-btn.func-key,
+    #kbPreviewGrid .pos-grid-btn.func-key { font-size:clamp(9px,1vw,12px); font-weight:700; letter-spacing:.3px; text-transform:uppercase; border:1px solid rgba(255,255,255,.13); box-shadow:0 2px 7px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.13); }
+    #kbGrid .pos-grid-btn.back-key,
+    #kbPreviewGrid .pos-grid-btn.back-key { font-size:clamp(11px,1.3vw,15px); font-weight:700; letter-spacing:-.2px; background:#15803d!important; color:#fff!important; border:none; border-radius:10px; box-shadow:0 4px 12px rgba(21,128,61,.25),inset 0 1px 0 rgba(255,255,255,.12); }
+    #kbGrid .pos-grid-btn.digit-btn,
+    #kbPreviewGrid .pos-grid-btn.digit-btn { font-size:clamp(18px,2.5vw,28px); font-weight:700; background:linear-gradient(180deg,#ffffff 0%,#f4f5f7 100%)!important; color:#1a1a2e!important; border:1px solid rgba(0,0,0,.06); box-shadow:0 4px 10px rgba(0,0,0,.12),0 2px 3px rgba(0,0,0,.06),inset 0 -3px 0 rgba(0,0,0,.04),inset 0 1px 0 rgba(255,255,255,.95); }
+    #kbGrid .pos-grid-btn.digit-btn.num-action,
+    #kbPreviewGrid .pos-grid-btn.digit-btn.num-action { font-size:clamp(11px,1.1vw,13px); font-weight:800; letter-spacing:.3px; text-transform:uppercase; background:linear-gradient(180deg,#e8eaef 0%,#d5d8e0 100%)!important; color:#4a5068!important; }
+    #kbGrid .pos-grid-btn.digit-btn.num-orange,
+    #kbPreviewGrid .pos-grid-btn.digit-btn.num-orange { background:linear-gradient(135deg,#ff9500 0%,#f97316 50%,#e8650e 100%)!important; color:#fff!important; border:1px solid rgba(255,160,0,.4); }
+    #kbGrid .pos-grid-btn.pay-key,
+    #kbPreviewGrid .pos-grid-btn.pay-key { font-size:clamp(11px,1.43vw,16px); font-weight:800; letter-spacing:-.3px; border:1px solid rgba(255,255,255,.18); box-shadow:0 2px 9px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.18),inset 0 -1px 0 rgba(0,0,0,.12); }
+    #kbGrid .pos-grid-btn.num-display-cell,
+    #kbPreviewGrid .pos-grid-btn.num-display-cell { background:linear-gradient(180deg,#080b10 0%,#0f1318 100%)!important; color:#6ed99b!important; font-family:'JetBrains Mono','Courier New',monospace; font-size:clamp(16px,2.2vw,24px); font-weight:700; text-align:right; justify-content:flex-end; padding:clamp(3px,0.6vh,6px) clamp(8px,1.2vw,16px); border-radius:clamp(8px,1vw,14px); cursor:default; border:2px solid #1e2a35; box-shadow:inset 0 3px 12px rgba(0,0,0,.6),inset 0 0 30px rgba(110,217,155,.04),0 1px 0 rgba(255,255,255,.03); }
+    #kbGrid .btn-price-badge,
+    #kbPreviewGrid .btn-price-badge,
+    .kb-live .btn-price-badge { position:absolute; top:2px; right:3px; z-index:3; font-size:clamp(8px,0.78vw,11px); font-weight:800; color:#111; background:rgba(255,255,255,.92); padding:2px 5px; border-radius:3px; letter-spacing:.1px; pointer-events:none; white-space:nowrap; line-height:1.1; font-family:'JetBrains Mono','Courier New',monospace; }
+    #kbGrid .btn-plu-badge,
+    #kbPreviewGrid .btn-plu-badge,
+    .kb-live .btn-plu-badge { position:absolute; top:2px; left:3px; z-index:3; font-size:clamp(8px,0.78vw,11px); font-weight:600; color:rgba(255,255,255,.66); background:rgba(0,0,0,.44); padding:2px 4px; border-radius:3px; letter-spacing:-.2px; pointer-events:none; font-family:'JetBrains Mono','Courier New',monospace; }
+    #kbGrid .btn-cat-badge,
+    #kbPreviewGrid .btn-cat-badge,
+    .kb-live .btn-cat-badge { position:absolute; top:2px; left:3px; z-index:3; font-size:clamp(7px,0.65vw,9px); font-weight:800; color:#111; background:rgba(255,255,255,.92); padding:1px 4px; border-radius:3px; letter-spacing:.2px; pointer-events:none; font-family:'JetBrains Mono','Courier New',monospace; }
+
     .kb-cell {
       min-height: 0; border-radius: 4px;
       display: flex; align-items: center; justify-content: center; flex-direction: column;
@@ -441,7 +568,44 @@
     }
     .kb-cell:hover { outline: 2px solid var(--green); outline-offset: 1px; }
     .kb-cell.selected { outline: 3px solid #3b82f6; outline-offset: 1px; z-index: 2; }
-    .kb-cell img { width: 20px; height: 20px; border-radius: 3px; object-fit: cover; }
+    .kb-cell img,
+    .kb-live img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border-radius:inherit; transform:scale(var(--kb-img-scale, 1)); transform-origin:center; }
+    .kb-cell.has-img,
+    .kb-live.has-img { position:relative; justify-content:flex-end; }
+    .kb-cell.has-img::after,
+    .kb-live.has-img::after {
+      content:''; position:absolute; inset:0; border-radius:inherit;
+      background:linear-gradient(to top,rgba(0,0,0,.8) 0%,rgba(0,0,0,.35) 30%,rgba(0,0,0,.08) 55%,transparent 100%);
+      pointer-events:none;
+    }
+    .kb-cell.has-img > .kb-main-label,
+    .kb-live.has-img > .kb-main-label {
+      position:relative; z-index:2; color:#fff; text-shadow:0 2px 8px rgba(0,0,0,.9),0 0 16px rgba(0,0,0,.5);
+      margin-top:auto; padding-bottom:4px; font-weight:800; letter-spacing:-.2px;
+    }
+    .kb-cell.img-contain.has-img,
+    .kb-live.img-contain.has-img { background:#fff!important; color:#111!important; border-radius:2px; border:1px solid #d6d6d6; padding:0; align-items:stretch; }
+    .kb-cell.img-contain.has-img::after,
+    .kb-live.img-contain.has-img::after { display:none; }
+    .kb-cell.img-contain.has-img img,
+    .kb-live.img-contain.has-img img { inset:4px 4px 28px 4px; width:auto; height:auto; max-width:calc(100% - 8px); max-height:calc(100% - 32px); margin:auto; object-fit:contain; border-radius:0; }
+    .kb-cell.img-contain.has-img > .kb-main-label,
+    .kb-live.img-contain.has-img > .kb-main-label {
+      width:100%; min-height:26px; margin-top:auto; padding:2px 4px 4px; background:rgba(255,255,255,.96);
+      color:#111; text-shadow:none; font-size:10px; line-height:1.1; letter-spacing:0;
+    }
+    .kb-cell.cat-key.has-img::after,
+    .kb-live.cat-key.has-img::after { background:linear-gradient(to top,rgba(0,0,0,.58) 0%,rgba(0,0,0,.18) 42%,transparent 76%); }
+    .kb-cell.cat-key.has-img > .kb-main-label,
+    .kb-live.cat-key.has-img > .kb-main-label { text-shadow:none; background:rgba(0,0,0,.45); border-radius:4px; padding:3px 6px; margin-bottom:3px; }
+    .kb-cell.cat-key.img-contain.has-img > .kb-main-label,
+    .kb-live.cat-key.img-contain.has-img > .kb-main-label { background:rgba(255,255,255,.96); border-radius:0; margin-bottom:0; }
+    .kb-btn-price-badge,
+    .kb-btn-plu-badge,
+    .kb-btn-cat-badge { position:absolute; z-index:3; pointer-events:none; white-space:nowrap; line-height:1.1; font-family:'JetBrains Mono','Courier New',monospace; }
+    .kb-btn-price-badge { top:2px; right:3px; font-size:10px; font-weight:800; color:#111; background:rgba(255,255,255,.92); padding:2px 5px; border-radius:3px; }
+    .kb-btn-plu-badge { top:2px; left:3px; font-size:10px; font-weight:600; color:rgba(255,255,255,.66); background:rgba(0,0,0,.44); padding:2px 4px; border-radius:3px; letter-spacing:-.2px; }
+    .kb-btn-cat-badge { top:2px; left:3px; font-size:9px; font-weight:800; color:#111; background:rgba(255,255,255,.92); padding:1px 4px; border-radius:3px; letter-spacing:.2px; }
     .kb-cell .kb-cell-type {
       position: absolute; top: 2px; right: 3px;
       font-size: 7px; font-weight: 600; opacity: .6; text-transform: uppercase; letter-spacing: .3px;
@@ -457,6 +621,12 @@
     .kb-cell.multi-selected { outline: 2px solid var(--blue); outline-offset: 1px; opacity: .85; }
     .kb-cell.dragging { opacity: .3; }
     .kb-cell.drag-over { outline: 3px dashed var(--green); outline-offset: 1px; }
+    .kb-drop-preview {
+      pointer-events:none; z-index:10; border:2px dashed rgba(79,189,119,.85);
+      background:rgba(79,189,119,.15); border-radius:4px; display:flex; align-items:center; justify-content:center;
+      font-size:10px; font-weight:800; color:rgba(79,189,119,.9); opacity:.92;
+    }
+    .kb-drop-preview.invalid { border-color:rgba(239,68,68,.85); background:rgba(239,68,68,.1); color:rgba(239,68,68,.9); }
 
     /* Drag size tooltip */
     .kb-drag-tooltip {
@@ -488,7 +658,7 @@
     .kb-color-row input[type="color"] { width: 40px; height: 34px; border: 1px solid var(--border); border-radius: 6px; padding: 2px; cursor: pointer; background: var(--surface2); }
     .kb-color-row .kb-color-label { font-size: 10px; color: var(--text-dim); text-align: center; margin-top: 2px; }
     .kb-preview-bar { display: flex; align-items: center; gap: 10px; margin: 10px 0; padding: 10px; background: var(--surface2); border-radius: 6px; }
-    .kb-preview-bar .kb-live { width: 80px; height: 46px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 11px; text-align: center; line-height: 1.15; border: 1px solid rgba(255,255,255,.1); flex-shrink: 0; }
+    .kb-preview-bar .kb-live { width: 96px; height: 58px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 11px; text-align: center; line-height: 1.15; border: 1px solid rgba(255,255,255,.1); flex-shrink: 0; position:relative; overflow:hidden; padding:3px 4px; }
     .kb-preview-bar .kb-pos-info { font-size: 11px; color: var(--text-dim); flex: 1; }
     .kb-edit-actions { display: flex; gap: 6px; margin-top: 12px; }
     .kb-edit-actions .btn { font-size: 12px; padding: 8px 16px; }
@@ -566,10 +736,63 @@
     body.register-mode [data-tab="labels"],
     body.register-mode [data-tab="stock"],
     body.register-mode [data-tab="insights"] { display: none !important; }
+    body.register-mode #supabaseSection { display: none !important; }
     body.register-mode .sidebar-group-label { display: none; }
     body.register-mode .sidebar-group { padding-top: 6px; }
+    .register-back-top {
+      position: fixed;
+      top: 14px;
+      right: 16px;
+      z-index: 80;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      min-height: 42px;
+      padding: 0 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(7, 21, 13, .16);
+      background: #15803d;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      text-decoration: none;
+      box-shadow: 0 8px 20px rgba(21, 128, 61, .22);
+    }
+    .register-back-top svg {
+      width: 17px;
+      height: 17px;
+      flex-shrink: 0;
+    }
+    #oskOverlay {
+      padding: 16px 18px !important;
+      border-radius: 18px 18px 0 0 !important;
+    }
+    #oskOverlay > div {
+      max-width: 1120px !important;
+      gap: 9px !important;
+    }
+    #oskOverlay > div > div {
+      gap: 9px !important;
+    }
+    #oskOverlay .osk-key {
+      min-width: 76px !important;
+      height: 72px !important;
+      border-radius: 12px !important;
+      font-size: 27px !important;
+      font-weight: 800 !important;
+      touch-action: manipulation;
+    }
+    #oskOverlay .osk-key[data-osk="BKSP"],
+    #oskOverlay .osk-key[data-osk="DONE"] {
+      min-width: 132px !important;
+      font-size: 17px !important;
+    }
+    #oskOverlay .osk-key[data-osk=" "] {
+      max-width: 520px !important;
+      font-size: 17px !important;
+    }
 
-    /* BoundOS admin design pass */
+    /* YieldPOS admin design pass */
     :root {
       --cream: #f7f0dc;
       --cream-soft: #efe4c8;
@@ -797,8 +1020,8 @@
     }
 
     .btn-green {
-      background: linear-gradient(180deg,var(--gold-bright),var(--gold));
-      color: var(--forest);
+      background: #15803d;
+      color: #fff;
     }
 
     .btn-blue {
@@ -919,7 +1142,7 @@
       .page-header h1, h1 { font-size: 26px; }
     }
 
-    /* Beige-first BoundOS admin: warm workspace, green as accent */
+    /* Beige-first YieldPOS admin: warm workspace, green as accent */
     :root {
       --bg: #efe4c8;
       --surface: #fffaf0;
@@ -1007,13 +1230,13 @@
     }
 
     .btn-green {
-      background: #0d2216;
-      color: #f7f0dc;
+      background: #15803d;
+      color: #fff;
     }
 
     .btn-green:hover {
-      background: #07150d;
-      box-shadow: 0 4px 14px rgba(7,21,13,.16);
+      background: #15803d;
+      box-shadow: none;
     }
 
     .btn-blue {
@@ -1466,12 +1689,12 @@
     }
 
     .btn-green {
-      background: #0f3d25;
+      background: #15803d;
       color: #ffffff;
     }
 
     .btn-green:hover {
-      background: #092816;
+      background: #15803d;
       box-shadow: none;
     }
 
@@ -2224,8 +2447,8 @@
 
   <aside class="sidebar">
     <div class="sidebar-brand">
-      <img class="company-logo" src="boundos.png" style="width:24px;height:24px;border-radius:50%;object-fit:cover;flex-shrink:0">
-      <span id="sidebarStoreName">BoundOS</span>
+      <img class="company-logo" src="YieldPOS.png" style="width:24px;height:24px;border-radius:50%;object-fit:cover;flex-shrink:0">
+      <span id="sidebarStoreName">YieldPOS</span>
       <small id="modeBadge">Admin</small>
     </div>
     <script>
@@ -2468,6 +2691,10 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
     Exit full screen
   </button>
+  <a href="index.html" class="register-back-top" id="backToRegisterTopBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Register
+  </a>
 
   <div class="modal-backdrop" id="modalBackdrop"></div>
 
@@ -2621,7 +2848,7 @@
       <div class="section">
         <div class="form-row" style="gap:8px;align-items:flex-end;flex-wrap:wrap">
           <div class="form-field" style="flex:2;min-width:200px">
-            <input type="text" id="productSearch" placeholder="Search by name, barcode, or PLU...">
+            <input type="text" id="productSearch" placeholder="Search by name or PLU...">
           </div>
           <div class="form-field" style="flex:0 0 150px">
             <select id="productCatFilter" style="padding:8px 10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);width:100%;font-size:13px">
@@ -2653,7 +2880,7 @@
         </div>
         <div id="productFilterInfo" style="font-size:12px;color:var(--text-dim);margin:8px 0 4px"></div>
         <table>
-          <thead><tr><th>Name</th><th>PLU / Barcode</th><th>Category</th><th>Price</th><th>Unit</th><th>Stock</th><th style="width:80px"></th></tr></thead>
+          <thead><tr><th>Name</th><th>PLU</th><th>Category</th><th>Price</th><th>Unit</th><th>Stock</th><th style="width:80px"></th></tr></thead>
           <tbody id="productsTable"></tbody>
         </table>
       </div>
@@ -2666,13 +2893,19 @@
         <div class="modal-body">
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
           <div class="form-field"><label>Name</label><input type="text" id="pName"></div>
-          <div class="form-field"><label>PLU <span style="color:var(--red)">*</span></label><input type="text" id="pPlu" required></div>
-          <div class="form-field"><label>Barcode (same as PLU)</label><input type="text" id="pBarcode" readonly style="opacity:.72"></div>
+          <div class="form-field">
+            <label>PLU <span style="color:var(--red)">*</span></label>
+            <div style="display:flex;gap:6px">
+              <input type="text" id="pPlu" required style="flex:1">
+              <button type="button" class="btn btn-outline" id="pNextPluBtn" style="padding:6px 9px;font-size:11px;white-space:nowrap">Next</button>
+            </div>
+          </div>
+          <div class="form-field" style="display:none"><label>Deprecated Barcode</label><input type="text" id="pBarcode" readonly></div>
           <div class="form-field">
             <label>Category</label>
             <select id="pCategory"><option value="">— None —</option></select>
           </div>
-          <div class="form-field"><label>Sell Price ($)</label><input type="number" id="pPrice" step="0.01" min="0"></div>
+          <div class="form-field" style="grid-column:1"><label>Sell Price ($)</label><input type="number" id="pPrice" step="0.01" min="0"></div>
           <div class="form-field"><label>Cost Price ($)</label><input type="number" id="pCost" step="0.01" min="0"></div>
           <div class="form-field">
             <label>Unit</label>
@@ -2741,7 +2974,7 @@
               <button class="btn btn-outline" id="tagResetBtn" style="margin-left:auto;padding:3px 10px;font-size:10px">Reset Layout</button>
             </div>
             <div style="display:flex;gap:14px;align-items:start">
-              <div id="tagCanvas" style="position:relative;background:#fff;border:2px solid var(--border);border-radius:4px;overflow:hidden;cursor:default;flex-shrink:0;width:420px;height:140px"></div>
+              <div id="tagCanvas" style="position:relative;background:#fff;border:2px solid var(--border);border-radius:4px;overflow:hidden;cursor:default;flex-shrink:0;width:420px;height:181px"></div>
               <div style="flex:1;min-width:180px">
                 <div id="tagElementList" style="display:flex;flex-direction:column;gap:3px;margin-bottom:10px"></div>
                 <div id="tagElProps" style="padding:10px;background:var(--surface2);border-radius:6px;border:1px solid var(--border);display:none">
@@ -2751,8 +2984,9 @@
                       <select id="tagElSize" style="width:100%;padding:3px;font-size:11px;border-radius:4px;border:1px solid var(--border);background:var(--surface);color:var(--text)">
                         <option value="6">6pt</option><option value="7">7pt</option><option value="8">8pt</option><option value="9">9pt</option>
                         <option value="10">10pt</option><option value="11">11pt</option><option value="12">12pt</option><option value="14">14pt</option>
-                        <option value="16">16pt</option><option value="18">18pt</option><option value="20">20pt</option><option value="24">24pt</option>
-                        <option value="30">30pt</option><option value="36">36pt</option><option value="42">42pt</option><option value="48">48pt</option>
+                        <option value="16">16pt</option><option value="18">18pt</option><option value="20">20pt</option><option value="22">22pt</option>
+                        <option value="24">24pt</option><option value="26">26pt</option><option value="28">28pt</option><option value="30">30pt</option>
+                        <option value="36">36pt</option><option value="42">42pt</option><option value="48">48pt</option>
                       </select>
                     </div>
                     <div class="form-field" style="flex:1;min-width:70px;margin:0"><label style="font-size:9px">Align</label>
@@ -2785,7 +3019,7 @@
           <div class="section" style="display:flex;flex-direction:column;overflow:hidden;padding:14px;flex:1">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-shrink:0">
               <h2 style="margin:0">A4 Sheet Preview</h2>
-              <span style="font-size:11px;color:var(--text-dim)" id="labelSheetInfo">2 × 10 = 20 tags per page</span>
+              <span style="font-size:11px;color:var(--text-dim)" id="labelSheetInfo">3 x 10 = 30 tags/page on portrait A4</span>
               <button class="btn btn-blue" id="labelPrintBtn" style="margin-left:auto;padding:6px 16px;font-size:12px">Print Sheet</button>
               <button class="btn btn-outline" id="labelClearBtn" style="padding:6px 10px;font-size:11px">Clear All</button>
             </div>
@@ -2809,7 +3043,7 @@
           <!-- Product Search -->
           <div class="section" style="padding:14px;flex:1;display:flex;flex-direction:column;overflow:hidden">
             <h2 style="margin-bottom:8px">Add Products</h2>
-            <input type="text" id="labelProductSearch" placeholder="Search by name, barcode or PLU..." style="padding:8px 10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;margin-bottom:6px;width:100%">
+            <input type="text" id="labelProductSearch" placeholder="Search by name or PLU..." style="padding:8px 10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;margin-bottom:6px;width:100%">
             <select id="labelCatFilter" style="padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12px;margin-bottom:6px;width:100%">
               <option value="">All Categories</option>
             </select>
@@ -3077,15 +3311,16 @@
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
         <h1 style="margin:0">Reports</h1>
         <div style="display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:3px" id="reportTypeTabs">
-          <button class="btn btn-green" style="padding:6px 14px;font-size:12px" data-report-type="daily">Daily Z Report</button>
-          <button class="btn btn-outline" style="padding:6px 14px;font-size:12px" data-report-type="weekly">Weekly Summary</button>
+          <button class="btn btn-green" style="padding:6px 14px;font-size:12px" data-report-type="weekly">Weekly Summary</button>
+          <button class="btn btn-outline" style="padding:6px 14px;font-size:12px" data-report-type="daily">Daily Z Report</button>
+          <button class="btn btn-outline" style="padding:6px 14px;font-size:12px" data-report-type="analysis">Analysis</button>
         </div>
         <div style="flex:1"></div>
         <button class="btn btn-outline" id="rptPrint" style="padding:6px 14px;font-size:12px">Print / PDF</button>
       </div>
 
       <!-- Daily Z Report -->
-      <div id="reportDaily">
+      <div id="reportDaily" style="display:none">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
           <input type="date" id="zDate" style="padding:8px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:14px">
           <button class="btn btn-green" id="zGenerate" style="padding:8px 16px">Generate</button>
@@ -3133,7 +3368,7 @@
       </div>
 
       <!-- Weekly Summary -->
-      <div id="reportWeekly" style="display:none">
+      <div id="reportWeekly">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
           <label style="font-size:13px;color:var(--text-dim)">Week starting:</label>
           <input type="date" id="wkDate" style="padding:8px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:14px">
@@ -3179,9 +3414,57 @@
           </div>
         </div>
       </div>
+
+      <!-- Analysis -->
+      <div id="reportAnalysis" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+          <label style="font-size:13px;color:var(--text-dim)">Period:</label>
+          <select id="analysisDays" style="padding:8px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:14px">
+            <option value="7">Last 7 days</option>
+            <option value="14">Last 14 days</option>
+            <option value="30" selected>Last 30 days</option>
+            <option value="90">Last 90 days</option>
+          </select>
+          <label style="font-size:13px;color:var(--text-dim)">Top products date:</label>
+          <input type="date" id="analysisDate" style="padding:8px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:14px">
+          <button class="btn btn-green" id="analysisGenerate" style="padding:8px 16px">Generate</button>
+        </div>
+
+        <div id="analysisReportContent" style="display:none">
+          <div id="analysisReportPrintable">
+            <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:16px">
+              <div class="stat-card"><div class="stat-label">Period Sales</div><div class="stat-value green" id="analysisTotalSales">$0.00</div></div>
+              <div class="stat-card"><div class="stat-label">Transactions</div><div class="stat-value" id="analysisTxns">0</div></div>
+              <div class="stat-card"><div class="stat-label">Average Day</div><div class="stat-value" id="analysisAvgDay">$0.00</div></div>
+              <div class="stat-card"><div class="stat-label">Best Day</div><div class="stat-value" id="analysisBestDay">$0.00</div></div>
+            </div>
+            <div class="section" style="padding:16px;margin-bottom:16px">
+              <h2 style="margin-bottom:12px">Sales Trend</h2>
+              <div id="analysisTrendChart" style="display:flex;align-items:end;gap:4px;height:180px;padding:10px 0;border-bottom:1px solid var(--border)"></div>
+            </div>
+            <div style="display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:16px;margin-bottom:16px">
+              <div class="section" style="padding:16px">
+                <h2 style="margin-bottom:12px">Top Products</h2>
+                <table>
+                  <thead><tr><th>Product</th><th style="text-align:right">Qty</th><th style="text-align:right">Sales</th></tr></thead>
+                  <tbody id="analysisTopProducts"></tbody>
+                </table>
+              </div>
+              <div class="section" style="padding:16px">
+                <h2 style="margin-bottom:12px">Bought Together</h2>
+                <div id="analysisPairs"></div>
+              </div>
+            </div>
+            <div class="section" style="padding:16px">
+              <h2 style="margin-bottom:12px">Busy Hours</h2>
+              <div id="analysisHeatmap" style="overflow-x:auto"></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- ── Keyboard Layout ───────────────────────────────────────── -->
+    <!-- Keyboard Layout -->
     <div class="tab-content" id="tab-keyboard">
       <!-- Toolbar -->
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
@@ -3358,9 +3641,16 @@
               <div class="kb-pos-info">
                 <div style="font-size:10px;margin-bottom:2px">Image (optional)</div>
                 <input type="file" id="kbImageFile" accept="image/*" style="font-size:10px;width:100%">
+                <button type="button" class="btn btn-outline" id="kbRemoveImageBtn" style="display:none;margin-top:5px;padding:5px 8px;font-size:10px">Remove image</button>
                 <label id="kbImageZoomRow" style="display:flex;align-items:center;gap:5px;margin-top:5px;font-size:10px;color:var(--text);cursor:pointer">
                   <input type="checkbox" id="kbImageZoom" style="width:14px;height:14px;accent-color:#2563eb;cursor:pointer"> Zoom image to fill
                 </label>
+                <div id="kbImageScaleRow" style="display:none;margin-top:7px">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10px;color:var(--text-dim);margin-bottom:3px">
+                    <span>Image size</span><span id="kbImageScaleValue">100%</span>
+                  </div>
+                  <input type="range" id="kbImageScale" min="50" max="220" step="5" value="100" style="width:100%;accent-color:#15803d">
+                </div>
                 <div id="kbImagePreview" style="margin-top:3px"></div>
               </div>
             </div>
@@ -3816,11 +4106,17 @@
               <div class="form-field"><label>Phone</label><input type="text" id="rcptPhone"></div>
             </div>
             <div class="form-field" style="margin-top:8px"><label>Address</label><input type="text" id="rcptAddress"></div>
+            <div class="form-field" style="margin-top:8px"><label>Operating Hours</label><input type="text" id="rcptHours" placeholder="Open 6am - 7pm every day"></div>
             <div class="form-field" style="margin-top:8px"><label>ABN</label><input type="text" id="rcptAbn"></div>
           </div>
 
           <div class="section">
             <h2>Header &amp; Footer</h2>
+            <div class="form-row" style="margin-bottom:10px">
+              <div class="form-field"><label>Welcome Line</label><input type="text" id="rcptWelcomeText" placeholder="WELCOME TO"></div>
+              <div class="form-field"><label>Invoice Label</label><input type="text" id="rcptInvoiceLabel" placeholder="TAX INVOICE"></div>
+            </div>
+            <div class="form-field" style="margin-bottom:10px"><label>Refund Note</label><input type="text" id="rcptRefundText" placeholder="Please retain receipt for refunds"></div>
             <div class="form-field" style="margin-bottom:10px">
               <label>Header Text <span style="color:var(--text-dim);font-size:11px">(after store info)</span></label>
               <textarea id="rcptHeader" rows="3" placeholder="e.g. TAX INVOICE SPECIALIST"></textarea>
@@ -3832,10 +4128,16 @@
           </div>
 
           <div class="section">
-            <h2>Tax</h2>
+            <h2>Receipt Options</h2>
             <div class="form-row">
               <div class="form-field"><label>Tax Name</label><input type="text" id="rcptTaxName" placeholder="GST"></div>
               <div class="form-field"><label>Tax Rate (%)</label><input type="number" id="rcptTaxRate" step="0.1" placeholder="10"></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
+              <label style="display:flex;align-items:center;gap:8px;color:var(--text);font-size:13px"><input type="checkbox" id="rcptShowWelcome" style="width:16px;height:16px;accent-color:var(--gold)"> Show welcome line</label>
+              <label style="display:flex;align-items:center;gap:8px;color:var(--text);font-size:13px"><input type="checkbox" id="rcptShowRefund" style="width:16px;height:16px;accent-color:var(--gold)"> Show refund note</label>
+              <label style="display:flex;align-items:center;gap:8px;color:var(--text);font-size:13px"><input type="checkbox" id="rcptShowServedBy" style="width:16px;height:16px;accent-color:var(--gold)"> Show served by/lane</label>
+              <label style="display:flex;align-items:center;gap:8px;color:var(--text);font-size:13px"><input type="checkbox" id="rcptShowBarcode" style="width:16px;height:16px;accent-color:var(--gold)"> Show transaction barcode</label>
             </div>
           </div>
 
@@ -3847,7 +4149,11 @@
 
         <!-- Right: live preview -->
         <div>
-          <div style="background:#fff;color:#000;font-family:'Courier New',monospace;font-size:11.5px;line-height:1.4;padding:24px 16px;border-radius:8px;min-height:400px;white-space:pre;overflow-x:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.3);position:sticky;top:16px" id="rcptPreview">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;color:var(--text-dim);font-size:12px">
+            <span>Click the receipt to show editable fields.</span>
+            <button class="btn btn-outline" id="rcptEditOverlayBtn" style="padding:5px 9px;font-size:11px">Show Fields</button>
+          </div>
+          <div style="background:#fff;color:#000;font-family:'Courier New',monospace;font-size:11.5px;line-height:1.4;padding:24px 16px;border-radius:8px;min-height:400px;white-space:pre;overflow-x:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.3);position:sticky;top:16px;cursor:pointer" id="rcptPreview">
           </div>
         </div>
       </div>
@@ -3865,6 +4171,7 @@
             <div class="form-field" style="margin-bottom:10px"><label>ABN</label><input type="text" id="setStoreAbn" placeholder="XX XXX XXX XXX"></div>
             <div class="form-field" style="margin-bottom:10px"><label>Address</label><input type="text" id="setStoreAddr"></div>
             <div class="form-field" style="margin-bottom:10px"><label>Phone</label><input type="text" id="setStorePhone"></div>
+            <div class="form-field" style="margin-bottom:10px"><label>Operating Hours</label><input type="text" id="setStoreHours" placeholder="Open 6am - 7pm every day"></div>
             <div class="form-field" style="margin-bottom:10px"><label>Register ID</label><input type="text" id="setRegisterId" placeholder="e.g. LANE01"></div>
             <div class="form-field" style="margin-bottom:10px">
               <label>Company Logo</label>
@@ -3946,6 +4253,10 @@
                 </select>
               </div>
             </div>
+            <label style="display:flex;align-items:center;gap:8px;color:var(--text);font-size:13px;margin-top:12px">
+              <input type="checkbox" id="setShowEftposAccepted" style="width:16px;height:16px;accent-color:var(--gold)">
+              Show EFTPOS Accepted button on subtotal screen
+            </label>
             <p style="color:var(--text-dim);font-size:12px;margin-top:8px;">The app opens as a maximised window by default. Press F11 or use the sidebar control to enter or exit true full screen.</p>
             <button class="btn btn-green" id="saveAppBtn" style="margin-top:8px;">Save App Settings</button>
           </div>
@@ -3953,7 +4264,7 @@
           <div class="section">
             <h2>Software Update</h2>
             <p style="color:var(--text-dim);margin-bottom:10px;font-size:13px;">
-              Download the latest version from GitHub. BoundOS closes first, applies the update, then relaunches so hardware handlers do not block file replacement.
+              Download the latest version from GitHub. YieldPOS closes first, applies the update, then relaunches so hardware handlers do not block file replacement.
             </p>
             <div style="display:flex;gap:8px;align-items:center">
               <button class="btn btn-blue" id="updateAppBtn" style="padding:10px 20px;font-size:14px">Check for Updates</button>
@@ -3976,7 +4287,7 @@
               <span id="linklyStatusText" style="font-size:13px;color:var(--text-dim)">Checking...</span>
             </div>
             <p style="color:var(--text-dim);margin-bottom:14px;font-size:13px;">
-              Linkly Cloud works well with Wi-Fi pinpads: the terminal connects to Linkly over the network, and BoundOS talks to Linkly Cloud using your paired credentials.
+              Linkly Cloud works well with Wi-Fi pinpads: the terminal connects to Linkly over the network, and YieldPOS talks to Linkly Cloud using your paired credentials.
             </p>
             <div class="form-row">
               <div class="form-field">
@@ -4017,7 +4328,7 @@
           <div class="section">
             <h2>Integration Notes</h2>
             <p style="color:var(--text-dim);font-size:13px;margin-bottom:10px">
-              BoundOS uses Linkly Cloud endpoints for pairing, token creation, purchase, refund, settlement, and polling.
+              YieldPOS uses Linkly Cloud endpoints for pairing, token creation, purchase, refund, settlement, and polling.
             </p>
             <div style="font-size:12px;color:var(--text-dim);display:grid;gap:6px">
               <div><strong style="color:var(--text)">Sandbox auth:</strong><br><code>auth.sandbox.cloud.pceftpos.com</code></div>
@@ -4028,6 +4339,7 @@
           </div>
         </div>
       </div>
+
     </div>
 
   </div>
@@ -4469,7 +4781,6 @@
       const product = {
         id: $('#pEditId').value || undefined,
         name,
-        barcode: plu,
         plu,
         category_id: $('#pCategory').value || null,
         price: $('#pOpenPrice').value === '1' ? 0 : (parseFloat($('#pPrice').value) || 0),
@@ -4483,7 +4794,6 @@
       }
       const result = await window.pos.upsertProduct(product)
       if (result.error) { showToast(result.error, 'error'); return }
-      if (result.barcode_warning) showToast(result.barcode_warning, 'error')
       showToast(`Product "${name}" saved`, 'success')
       closeModal('productEditPanel')
       loadProducts($('#productSearch').value)
@@ -4510,13 +4820,25 @@
       $('#productEditTitle').textContent = 'Add Product (Duplicate)'
       $('#pDeleteBtn').style.display = 'none'
       $('#pDuplicateBtn').style.display = 'none'
-      showToast('Editing as new product — change name/barcode and save', 'info')
+      showToast('Editing as new product - change name/PLU and save', 'info')
     })
 
     // ── Categories ─────────────────────────────────────────────────
 
     $('#pPlu').addEventListener('input', () => {
       $('#pBarcode').value = $('#pPlu').value.trim()
+    })
+
+    $('#pNextPluBtn').addEventListener('click', async () => {
+      try {
+        const next = await window.pos.getNextProductPlu()
+        $('#pPlu').value = next || ''
+        $('#pBarcode').value = $('#pPlu').value.trim()
+        $('#pPlu').focus()
+        showToast(`Next available PLU: ${next}`, 'info')
+      } catch (e) {
+        showToast('Could not find next PLU', 'error')
+      }
     })
 
     let catExpanded = false
@@ -4684,14 +5006,13 @@
     let dealTiers = []
 
     function productCodeText (p) {
-      const plu = p?.plu ? `PLU ${p.plu}` : ''
-      const barcode = p?.barcode ? `Barcode ${p.barcode}` : ''
-      return [plu, barcode].filter(Boolean).join(' · ')
+      const code = p?.plu || p?.barcode || ''
+      return code ? `PLU ${code}` : ''
     }
 
     function productCodeHtml (p) {
       const code = productCodeText(p)
-      return code ? `<span style="font-family:monospace;font-size:10px;color:var(--text-dim)">${esc(code)}</span>` : '<span style="font-size:10px;color:var(--text-muted)">No PLU/barcode</span>'
+      return code ? `<span style="font-family:monospace;font-size:10px;color:var(--text-dim)">${esc(code)}</span>` : '<span style="font-size:10px;color:var(--text-muted)">No PLU</span>'
     }
 
     function renderDealTiers () {
@@ -4783,7 +5104,7 @@
         $('#dStartDate').value = deal.start_date || ''
         $('#dEndDate').value = deal.end_date || ''
         const prods = await window.pos.getDealProducts(deal.id)
-        dealProducts = prods.map(p => ({ id: p.product_id, name: p.product_name, price: p.price, plu: p.plu || '', barcode: p.barcode || '' }))
+        dealProducts = prods.map(p => ({ id: p.product_id, name: p.product_name, price: p.price, plu: p.plu || p.barcode || '' }))
         $('#dDeleteBtn').style.display = 'inline-block'
       } else {
         $('#dealEditTitle').textContent = 'New Deal'
@@ -4823,7 +5144,7 @@
       if (q.length < 2) { $('#dealProductResults').innerHTML = ''; return }
       const results = await window.pos.searchProducts(q)
       $('#dealProductResults').innerHTML = results.slice(0, 10).map(p => {
-        return `<div style="padding:6px 8px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;display:flex;align-items:center;gap:8px" data-add-dp="${esc(p.id)}" data-dp-name="${esc(p.name)}" data-dp-price="${p.price}" data-dp-plu="${esc(p.plu || '')}" data-dp-barcode="${esc(p.barcode || '')}">
+        return `<div style="padding:6px 8px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;display:flex;align-items:center;gap:8px" data-add-dp="${esc(p.id)}" data-dp-name="${esc(p.name)}" data-dp-price="${p.price}" data-dp-plu="${esc(p.plu || p.barcode || '')}">
           <span style="flex:1">${esc(p.name)}</span>
           ${productCodeHtml(p)}
           <span style="color:var(--green);font-weight:600;font-size:12px">${money(p.active_price ?? p.price)}</span>
@@ -4836,7 +5157,7 @@
       if (!row) return
       const id = row.dataset.addDp
       if (dealProducts.find(p => p.id === id)) return
-      dealProducts.push({ id, name: row.dataset.dpName, price: parseFloat(row.dataset.dpPrice), plu: row.dataset.dpPlu || '', barcode: row.dataset.dpBarcode || '' })
+      dealProducts.push({ id, name: row.dataset.dpName, price: parseFloat(row.dataset.dpPrice), plu: row.dataset.dpPlu || '' })
       renderDealProducts()
       $('#dealProductSearch').value = ''
       $('#dealProductResults').innerHTML = ''
@@ -4996,7 +5317,7 @@
       if (products.length > 0) {
         box.style.display = 'block'
         box.innerHTML = products.slice(0, 8).map(p => {
-          const code = p.barcode || p.plu || ''
+          const code = p.plu || p.barcode || ''
           return `<div style="padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px" data-txn-suggest="${esc(p.name)}" onmouseover="this.style.background='var(--surface3)'" onmouseout="this.style.background=''">
             <span style="flex:1">${esc(p.name)}</span>
             ${code ? `<span style="font-size:10px;color:var(--text-dim);font-family:monospace">${esc(code)}</span>` : ''}
@@ -5237,11 +5558,19 @@
       $('#rcptStoreName').value = s.store_name || ''
       $('#rcptPhone').value = s.store_phone || ''
       $('#rcptAddress').value = s.store_address || ''
+      $('#rcptHours').value = s.store_hours || ''
       $('#rcptAbn').value = s.store_abn || ''
+      $('#rcptWelcomeText').value = s.receipt_welcome_text || 'WELCOME TO'
+      $('#rcptInvoiceLabel').value = s.receipt_invoice_label || 'TAX INVOICE'
+      $('#rcptRefundText').value = s.receipt_refund_text || 'Please retain receipt for refunds'
       $('#rcptHeader').value = s.receipt_header || ''
       $('#rcptFooter').value = s.receipt_footer || ''
       $('#rcptTaxName').value = s.tax_name || 'GST'
       $('#rcptTaxRate').value = s.tax_rate ? (parseFloat(s.tax_rate) * 100).toFixed(0) : '10'
+      $('#rcptShowWelcome').checked = s.receipt_show_welcome !== '0'
+      $('#rcptShowRefund').checked = s.receipt_show_refund !== '0'
+      $('#rcptShowServedBy').checked = s.receipt_show_served_by !== '0'
+      $('#rcptShowBarcode').checked = s.receipt_show_barcode !== '0'
       renderReceiptPreview()
     }
 
@@ -5261,9 +5590,10 @@
           normalise(fields.storeName),
           normalise(fields.phone),
           normalise(fields.address),
+          normalise(fields.hours),
           normalise(fields.abn),
           normalise('Tillaroo'),
-          normalise('BoundOS'),
+          normalise('YieldPOS'),
           normalise('WELCOME TO'),
           normalise('TAX INVOICE'),
         ].filter(Boolean))
@@ -5279,29 +5609,37 @@
           })
       }
 
-      const storeName = $('#rcptStoreName').value || 'BoundOS'
+      const storeName = $('#rcptStoreName').value || 'YieldPOS'
       const phone = $('#rcptPhone').value
       const address = $('#rcptAddress').value
+      const hours = $('#rcptHours').value
       const abn = $('#rcptAbn').value
       const header = $('#rcptHeader').value
       const footer = $('#rcptFooter').value
+      const welcomeText = $('#rcptWelcomeText').value || 'WELCOME TO'
+      const invoiceLabel = $('#rcptInvoiceLabel').value || 'TAX INVOICE'
+      const refundText = $('#rcptRefundText').value || 'Please retain receipt for refunds'
       const taxName = $('#rcptTaxName').value || 'GST'
       const taxPct = parseFloat($('#rcptTaxRate').value) || 10
+      const showWelcome = $('#rcptShowWelcome').checked
+      const showRefund = $('#rcptShowRefund').checked
+      const showServedBy = $('#rcptShowServedBy').checked
+      const showBarcode = $('#rcptShowBarcode').checked
 
-      lines.push({ text: center('WELCOME TO') })
+      if (showWelcome) lines.push({ text: center(welcomeText), edit: 'rcptWelcomeText', title: 'Welcome line' })
       lines.push({ text: center(storeName), edit: 'rcptStoreName', title: 'Store name' })
       lines.push({ text: '' })
-      for (const l of headerLines(header, { storeName, phone, address, abn })) lines.push({ text: center(l), edit: 'rcptHeader', title: 'Receipt header' })
+      for (const l of headerLines(header, { storeName, phone, address, hours, abn })) lines.push({ text: center(l), edit: 'rcptHeader', title: 'Receipt header' })
       if (phone) lines.push({ text: center('PH# ' + phone), edit: 'rcptPhone', title: 'Phone' })
       if (address) lines.push({ text: center(address), edit: 'rcptAddress', title: 'Address' })
+      if (hours) lines.push({ text: center(hours), edit: 'rcptHours', title: 'Operating hours' })
       if (abn) lines.push({ text: center('ABN# ' + abn), edit: 'rcptAbn', title: 'ABN' })
-      lines.push({ text: center('Thank you for shopping with us') })
-      lines.push({ text: center('Please retain receipt for refunds') })
-      lines.push({ text: center('TAX INVOICE') })
+      if (showRefund) lines.push({ text: center(refundText), edit: 'rcptRefundText', title: 'Refund note' })
+      lines.push({ text: center(invoiceLabel), edit: 'rcptInvoiceLabel', title: 'Invoice label' })
       lines.push({ text: '' })
 
       lines.push({ text: '(*) denotes items which attract ' + taxName, edit: 'rcptTaxName', title: 'Tax name' })
-      lines.push({ text: '(D) denotes Discounted items' })
+      lines.push({ text: '(D) denotes Discounted items', locked: true })
 
       const now = new Date()
       const dateStr = now.toLocaleDateString('en-AU') + ' ' + now.toLocaleTimeString('en-AU', {hour:'2-digit',minute:'2-digit'})
@@ -5317,9 +5655,9 @@
       for (const it of sampleItems) {
         const prefix = it.disc ? 'D ' : it.gst ? '* ' : '  '
         const lineTotal = it.lineTotal ?? (it.qty * it.price)
-        lines.push({ text: lr((prefix + it.name).substring(0, 32), '$' + lineTotal.toFixed(2)) })
-        if (it.qty !== 1) lines.push({ text: '    ' + it.qty + ' x $' + it.price.toFixed(2) })
-        if (it.disc) lines.push({ text: '    Discount: -$' + it.discAmt.toFixed(2) })
+        lines.push({ text: lr((prefix + it.name).substring(0, 32), '$' + lineTotal.toFixed(2)), locked: true })
+        if (it.qty !== 1) lines.push({ text: '    ' + it.qty + ' x $' + it.price.toFixed(2), locked: true })
+        if (it.disc) lines.push({ text: '    Discount: -$' + it.discAmt.toFixed(2), locked: true })
       }
       lines.push({ text: '' })
 
@@ -5328,38 +5666,56 @@
       const total = 13.96
       const taxAmt = (5.50 * 2) * (taxPct / 100) / (1 + taxPct / 100)
 
-      lines.push({ text: lr('Subtotal', '$' + subtotal.toFixed(2)) })
-      lines.push({ text: lr('Discount', '-$' + discount.toFixed(2)) })
-      lines.push({ text: lr('Total (4 Items)', '$' + total.toFixed(2)) })
+      lines.push({ text: lr('Subtotal', '$' + subtotal.toFixed(2)), locked: true })
+      lines.push({ text: lr('Discount', '-$' + discount.toFixed(2)), locked: true })
+      lines.push({ text: lr('Total (4 Items)', '$' + total.toFixed(2)), locked: true })
       lines.push({ text: '' })
-      lines.push({ text: lr('Payment Cash', '$20.00') })
-      lines.push({ text: lr('Change', '$' + (20 - total).toFixed(2)) })
+      lines.push({ text: lr('Payment Cash', '$20.00'), locked: true })
+      lines.push({ text: lr('Change', '$' + (20 - total).toFixed(2)), locked: true })
       lines.push({ text: '' })
-      lines.push({ text: '-'.repeat(W) })
+      lines.push({ text: '-'.repeat(W), locked: true })
 
-      lines.push({ text: lr('Served by Cashier Jane', 'Lane #LANE01') })
-      lines.push({ text: lr('Receipt Number', '00000042') })
+      if (showServedBy) lines.push({ text: lr('Served by Cashier Jane', 'Lane #LANE01'), edit: 'rcptShowServedBy', title: 'Served by/lane visibility' })
+      lines.push({ text: lr('Receipt Number', '00000042'), locked: true })
       lines.push({ text: '' })
       lines.push({ text: center('Total includes ' + taxName + ' of $' + taxAmt.toFixed(2)), edit: 'rcptTaxRate', title: 'Tax rate' })
       lines.push({ text: '' })
-      if (footer) footer.split(/\r?\n/).forEach(l => { if (l.trim()) lines.push({ text: center(l.trim()), edit: 'rcptFooter', title: 'Receipt footer' }) })
-      lines.push({ text: '' })
-      lines.push({ text: center('|||||||||||||||||||||||||||') })
-      lines.push({ text: center('00000042') })
+      if (footer) footer.split(/\r?\n/).forEach(l => {
+        const trimmed = l.trim()
+        if (trimmed && normalise(trimmed) !== normalise(hours)) lines.push({ text: center(trimmed), edit: 'rcptFooter', title: 'Receipt footer' })
+      })
+      if (showBarcode) {
+        lines.push({ text: '' })
+        lines.push({ text: center('|||||||||||||||||||||||||||'), edit: 'rcptShowBarcode', title: 'Barcode visibility' })
+        lines.push({ text: center('00000042'), locked: true })
+      }
 
+      const preview = $('#rcptPreview')
+      const editMode = preview.classList.contains('receipt-edit-mode')
       $('#rcptPreview').innerHTML = lines.map(line => {
-        const attrs = line.edit ? ` data-rcpt-edit="${line.edit}" title="Click to edit ${esc(line.title || 'field')}"` : ''
-        return `<div class="receipt-preview-line"${attrs}>${esc(line.text || '') || '&nbsp;'}</div>`
+        const attrs = line.edit ? ` data-rcpt-edit="${line.edit}" data-rcpt-title="${esc(line.title || 'Field')}" title="Click to edit ${esc(line.title || 'field')}"` : ''
+        const cls = line.locked ? ' receipt-preview-line rcpt-locked' : ' receipt-preview-line'
+        return `<div class="${cls.trim()}"${attrs}>${esc(line.text || '') || '&nbsp;'}</div>`
       }).join('')
+      preview.classList.toggle('receipt-edit-mode', editMode)
     }
 
     // Live update on any input change
-    ;['rcptStoreName','rcptPhone','rcptAddress','rcptAbn','rcptHeader','rcptFooter','rcptTaxName','rcptTaxRate'].forEach(id => {
+    ;['rcptStoreName','rcptPhone','rcptAddress','rcptHours','rcptAbn','rcptWelcomeText','rcptInvoiceLabel','rcptRefundText','rcptHeader','rcptFooter','rcptTaxName','rcptTaxRate'].forEach(id => {
       const el = document.getElementById(id)
       if (el) el.addEventListener('input', renderReceiptPreview)
     })
+    ;['rcptShowWelcome','rcptShowRefund','rcptShowServedBy','rcptShowBarcode'].forEach(id => {
+      const el = document.getElementById(id)
+      if (el) el.addEventListener('change', renderReceiptPreview)
+    })
 
     $('#rcptPreview')?.addEventListener('click', e => {
+      const preview = $('#rcptPreview')
+      if (!preview.classList.contains('receipt-edit-mode')) {
+        preview.classList.add('receipt-edit-mode')
+        $('#rcptEditOverlayBtn').textContent = 'Hide Fields'
+      }
       const target = e.target.closest('[data-rcpt-edit]')
       if (!target) return
       const field = document.getElementById(target.dataset.rcptEdit)
@@ -5368,15 +5724,29 @@
       if (typeof field.select === 'function') field.select()
       field.scrollIntoView({ block: 'center', behavior: 'smooth' })
     })
+    $('#rcptEditOverlayBtn')?.addEventListener('click', () => {
+      const preview = $('#rcptPreview')
+      const on = !preview.classList.contains('receipt-edit-mode')
+      preview.classList.toggle('receipt-edit-mode', on)
+      $('#rcptEditOverlayBtn').textContent = on ? 'Hide Fields' : 'Show Fields'
+    })
 
     $('#rcptSaveBtn').addEventListener('click', async () => {
       await window.pos.setSetting('store_name', $('#rcptStoreName').value)
       await window.pos.setSetting('store_phone', $('#rcptPhone').value)
       await window.pos.setSetting('store_address', $('#rcptAddress').value)
+      await window.pos.setSetting('store_hours', $('#rcptHours').value)
       await window.pos.setSetting('store_abn', $('#rcptAbn').value)
+      await window.pos.setSetting('receipt_welcome_text', $('#rcptWelcomeText').value)
+      await window.pos.setSetting('receipt_invoice_label', $('#rcptInvoiceLabel').value)
+      await window.pos.setSetting('receipt_refund_text', $('#rcptRefundText').value)
       await window.pos.setSetting('receipt_header', $('#rcptHeader').value)
       await window.pos.setSetting('receipt_footer', $('#rcptFooter').value)
       await window.pos.setSetting('tax_name', $('#rcptTaxName').value)
+      await window.pos.setSetting('receipt_show_welcome', $('#rcptShowWelcome').checked ? '1' : '0')
+      await window.pos.setSetting('receipt_show_refund', $('#rcptShowRefund').checked ? '1' : '0')
+      await window.pos.setSetting('receipt_show_served_by', $('#rcptShowServedBy').checked ? '1' : '0')
+      await window.pos.setSetting('receipt_show_barcode', $('#rcptShowBarcode').checked ? '1' : '0')
       const pct = parseFloat($('#rcptTaxRate').value)
       if (!isNaN(pct) && pct >= 0 && pct <= 100) {
         await window.pos.setSetting('tax_rate', String(pct / 100))
@@ -5387,9 +5757,10 @@
     $('#rcptTestPrintBtn').addEventListener('click', async () => {
       const s = await window.pos.getAllSettings()
       const testData = {
-        storeName: s.store_name || 'BoundOS',
+        storeName: s.store_name || 'YieldPOS',
         storePhone: s.store_phone || '',
         storeAddress: s.store_address || '',
+        storeHours: s.store_hours || '',
         storeAbn: s.store_abn || '',
         header: s.receipt_header || '',
         footer: s.receipt_footer || '',
@@ -5449,18 +5820,18 @@
 
     async function refreshBranding() {
       const s = await window.pos.getAllSettings()
-      const name = s.store_name || 'BoundOS'
+      const name = s.store_name || 'YieldPOS'
       const logoFit = normaliseLogoFit(s.company_logo_fit)
       const logoScale = normaliseLogoScale(s.company_logo_scale)
-      document.title = 'BoundOS Client - Admin'
+      document.title = 'YieldPOS Client - Admin'
       const sidebarName = $('#sidebarStoreName')
       if (sidebarName) sidebarName.textContent = name
       $$('.company-logo').forEach(img => {
-        img.src = s.company_logo || 'boundos.png'
+        img.src = s.company_logo || 'YieldPOS.png'
         img.alt = name
       })
       const preview = $('#companyLogoImg')
-      if (preview && pendingLogoDataUrl !== '__remove__') preview.src = pendingLogoDataUrl || s.company_logo || 'boundos.png'
+      if (preview && pendingLogoDataUrl !== '__remove__') preview.src = pendingLogoDataUrl || s.company_logo || 'YieldPOS.png'
       applyCompanyLogoStyle(logoFit, logoScale)
       return s
     }
@@ -5471,6 +5842,7 @@
       $('#setStoreAbn').value = s.store_abn || ''
       $('#setStoreAddr').value = s.store_address || ''
       $('#setStorePhone').value = s.store_phone || ''
+      $('#setStoreHours').value = s.store_hours || ''
       $('#setRegisterId').value = s.register_id || ''
       $('#setTaxName').value = s.tax_name || 'GST'
       $('#setTaxRate').value = s.tax_rate ? (parseFloat(s.tax_rate) * 100).toFixed(1) : '10'
@@ -5479,10 +5851,11 @@
       $('#setFullscreen').value = s.start_fullscreen || '0'
       $('#setFullscreen').querySelector('option[value="0"]').textContent = 'Maximised window'
       $('#setFullscreen').querySelector('option[value="1"]').textContent = 'True full screen'
+      $('#setShowEftposAccepted').checked = s.show_eftpos_accepted_button !== '0'
       $('#setCompanyLogoFit').value = normaliseLogoFit(s.company_logo_fit)
       $('#setCompanyLogoScale').value = Math.round(normaliseLogoScale(s.company_logo_scale) * 100)
       pendingLogoDataUrl = null
-      $('#companyLogoImg').src = s.company_logo || 'boundos.png'
+      $('#companyLogoImg').src = s.company_logo || 'YieldPOS.png'
       applyCompanyLogoStyle(s.company_logo_fit, s.company_logo_scale)
       if (s.lan_mode === 'client') {
         $('#supabaseDesc').textContent = 'This register is in client mode — product data is synced from the main server via LAN. Supabase settings are managed on the server.'
@@ -5514,7 +5887,7 @@
     })
     $('#removeLogoBtn').addEventListener('click', () => {
       pendingLogoDataUrl = '__remove__'
-      $('#companyLogoImg').src = 'boundos.png'
+      $('#companyLogoImg').src = 'YieldPOS.png'
     })
     $('#setCompanyLogoFit').addEventListener('change', () => {
       applyCompanyLogoStyle($('#setCompanyLogoFit').value, parseFloat($('#setCompanyLogoScale').value) / 100)
@@ -5528,6 +5901,7 @@
       await window.pos.setSetting('store_abn', $('#setStoreAbn').value)
       await window.pos.setSetting('store_address', $('#setStoreAddr').value)
       await window.pos.setSetting('store_phone', $('#setStorePhone').value)
+      await window.pos.setSetting('store_hours', $('#setStoreHours').value)
       await window.pos.setSetting('register_id', $('#setRegisterId').value)
       await window.pos.setSetting('company_logo_fit', normaliseLogoFit($('#setCompanyLogoFit').value))
       await window.pos.setSetting('company_logo_scale', normaliseLogoScale(parseFloat($('#setCompanyLogoScale').value) / 100).toString())
@@ -5552,6 +5926,7 @@
 
     $('#saveAppBtn').addEventListener('click', async () => {
       await window.pos.setSetting('start_fullscreen', $('#setFullscreen').value)
+      await window.pos.setSetting('show_eftpos_accepted_button', $('#setShowEftposAccepted').checked ? '1' : '0')
       showToast('App settings saved', 'success')
     })
 
@@ -5569,7 +5944,7 @@
         log.textContent = result.log || ''
         if (result.updated) {
           status.innerHTML = '<span style="color:var(--green)">Update staged. Closing to apply...</span>'
-          showToast('Update downloaded - BoundOS will restart', 'success')
+          showToast('Update downloaded - YieldPOS will restart', 'success')
         } else if (result.upToDate) {
           status.innerHTML = '<span style="color:var(--green)">Already up to date</span>'
           showToast('Already on the latest version', 'info')
@@ -5586,6 +5961,7 @@
     })
 
     $('#saveSupaBtn').addEventListener('click', async () => {
+      if (appModeInfo.isRegisterApp) return
       const url = $('#setSupaUrl').value.trim()
       const key = $('#setSupaKey').value.trim()
       if (!url || !key) {
@@ -5613,13 +5989,14 @@
     // Show Pull Now button if already connected
     {
       const s = await window.pos.getAllSettings()
-      if (s.supabase_url && s.supabase_anon_key && s.lan_mode !== 'client') {
+      if (!appModeInfo.isRegisterApp && s.supabase_url && s.supabase_anon_key && s.lan_mode !== 'client') {
         $('#pullNowBtn').style.display = 'inline-block'
         $('#supaStatus').textContent = 'Connected'
       }
     }
 
     $('#pullNowBtn').addEventListener('click', async () => {
+      if (appModeInfo.isRegisterApp) return
       const s = await window.pos.getAllSettings()
       try {
         const ok = await initSync(s.supabase_url, s.supabase_anon_key)
@@ -5855,6 +6232,8 @@
     async function loadLanSettings () {
       const s = await window.pos.getAllSettings()
       const mode = s.lan_mode || 'off'
+      const showSupabase = !appModeInfo.isRegisterApp
+      if ($('#supabaseSection')) $('#supabaseSection').style.display = showSupabase ? '' : 'none'
       if ($('#setSupaUrl')) $('#setSupaUrl').value = s.supabase_url || ''
       if ($('#setSupaKey')) $('#setSupaKey').value = s.supabase_anon_key || ''
       if ($('#supabaseDesc')) {
@@ -5862,14 +6241,14 @@
           ? 'This app is in client mode. Product data is synced from the main server over LAN, so Supabase is managed on the server.'
           : 'Connect to Supabase for cloud backup. Register clients sync from the main server over LAN.'
       }
-      if ($('#setSupaUrl')) $('#setSupaUrl').disabled = mode === 'client'
-      if ($('#setSupaKey')) $('#setSupaKey').disabled = mode === 'client'
+      if ($('#setSupaUrl')) $('#setSupaUrl').disabled = !showSupabase || mode === 'client'
+      if ($('#setSupaKey')) $('#setSupaKey').disabled = !showSupabase || mode === 'client'
       if ($('#saveSupaBtn')) {
-        $('#saveSupaBtn').disabled = mode === 'client'
+        $('#saveSupaBtn').disabled = !showSupabase || mode === 'client'
         $('#saveSupaBtn').textContent = mode === 'client' ? 'Managed by Server' : 'Save & Connect'
       }
       if ($('#pullNowBtn')) {
-        $('#pullNowBtn').style.display = (s.supabase_url && s.supabase_anon_key && mode !== 'client') ? 'inline-block' : 'none'
+        $('#pullNowBtn').style.display = (showSupabase && s.supabase_url && s.supabase_anon_key && mode !== 'client') ? 'inline-block' : 'none'
       }
       if ($('#supaStatus')) {
         $('#supaStatus').textContent = s.supabase_url && s.supabase_anon_key ? (mode === 'client' ? 'Managed on server' : 'Configured') : 'Not configured'
@@ -6095,6 +6474,13 @@
           .net-node.active { box-shadow: 0 0 12px currentColor; }
           .net-offline { position:relative; }
           .net-offline::after { content:'✕'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:28px; font-weight:900; color:#ef4444; text-shadow: 0 0 8px #ef4444; }
+          .btn-green,
+          .btn-green:hover {
+            background: #15803d !important;
+            color: #fff !important;
+            box-shadow: none !important;
+          }
+
         </style>
         <div style="display:flex;flex-direction:column;align-items:center;gap:0;">
           <!-- Supabase Cloud -->
@@ -6368,13 +6754,22 @@
 
     // ── Reports ─────────────────────────────────────────────────────
 
-    let currentReportType = 'daily'
+    let currentReportType = 'weekly'
+
+    function reportWeekStartDate (date = new Date()) {
+      const d = new Date(date)
+      const daysSinceMonday = (d.getDay() + 6) % 7
+      d.setDate(d.getDate() - daysSinceMonday)
+      return d
+    }
 
     function initZReport () {
       if (!$('#zDate').value) $('#zDate').value = new Date().toISOString().slice(0, 10)
-      const today = new Date()
-      const mon = new Date(today); mon.setDate(mon.getDate() - mon.getDay() + 1)
+      const mon = reportWeekStartDate()
       if (!$('#wkDate').value) $('#wkDate').value = mon.toISOString().slice(0, 10)
+      if (!$('#analysisDate').value) $('#analysisDate').value = new Date().toISOString().slice(0, 10)
+      currentReportType = 'weekly'
+      switchReportType('weekly')
     }
 
     function switchReportType (type) {
@@ -6384,6 +6779,9 @@
       })
       $('#reportDaily').style.display = type === 'daily' ? '' : 'none'
       $('#reportWeekly').style.display = type === 'weekly' ? '' : 'none'
+      $('#reportAnalysis').style.display = type === 'analysis' ? '' : 'none'
+      if (type === 'weekly' && $('#wkReportContent').style.display === 'none' && $('#wkDate').value) $('#wkGenerate').click()
+      if (type === 'analysis' && $('#analysisReportContent').style.display === 'none' && $('#analysisDate').value) $('#analysisGenerate').click()
     }
 
     $$('#reportTypeTabs button').forEach(b => b.addEventListener('click', () => switchReportType(b.dataset.reportType)))
@@ -6398,8 +6796,7 @@
 
     // Weekly presets
     $$('[data-wk-preset]').forEach(btn => btn.addEventListener('click', () => {
-      const today = new Date()
-      const mon = new Date(today); mon.setDate(mon.getDate() - mon.getDay() + 1)
+      const mon = reportWeekStartDate()
       if (btn.dataset.wkPreset === 'last') mon.setDate(mon.getDate() - 7)
       $('#wkDate').value = mon.toISOString().slice(0, 10)
       $('#wkGenerate').click()
@@ -6510,6 +6907,93 @@
       $('#wkReportContent').style.display = 'block'
     })
 
+    function reportHourLabel (hour) {
+      const hr = Number(hour)
+      if (hr === 0) return '12am'
+      if (hr === 12) return '12pm'
+      return hr > 12 ? `${hr - 12}pm` : `${hr}am`
+    }
+
+    function renderReportHeatmap (data) {
+      const el = $('#analysisHeatmap')
+      if (!data || !data.length) { el.innerHTML = '<span style="color:var(--text-dim)">No sales yet</span>'; return }
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+      const maxCount = Math.max(...data.map(d => d.count || 0), 1)
+      const grid = Array.from({ length: 7 }, () => Array(24).fill(0))
+      for (const d of data) grid[d.day][d.hour] = d.count || 0
+      let html = '<table style="min-width:760px;width:100%;border-collapse:separate;border-spacing:2px;font-size:10px"><thead><tr><th style="width:42px"></th>'
+      for (let h = 6; h <= 21; h++) html += `<th style="color:var(--text-dim);font-weight:600;padding:2px">${reportHourLabel(h)}</th>`
+      html += '</tr></thead><tbody>'
+      for (let d = 0; d < 7; d++) {
+        html += `<tr><td style="color:var(--text-dim);padding:3px 5px;text-align:right;font-weight:700">${days[d]}</td>`
+        for (let h = 6; h <= 21; h++) {
+          const v = grid[d][h]
+          const intensity = v / maxCount
+          const bg = v === 0 ? 'var(--surface2)' : `rgba(24, 91, 57, ${0.16 + intensity * 0.72})`
+          html += `<td title="${days[d]} ${reportHourLabel(h)} - ${v} txns"><div style="height:24px;background:${bg};border-radius:5px;border:1px solid rgba(24,91,57,.08)"></div></td>`
+        }
+        html += '</tr>'
+      }
+      html += '</tbody></table>'
+      el.innerHTML = html
+    }
+
+    $('#analysisGenerate').addEventListener('click', async () => {
+      const days = Number($('#analysisDays').value || 30)
+      const date = $('#analysisDate').value || new Date().toISOString().slice(0, 10)
+      try {
+        const [trend, heatmap, pairs, top] = await Promise.all([
+          window.pos.getSalesTrend(days),
+          window.pos.getSalesHeatmap(days),
+          window.pos.getBoughtTogether(),
+          window.pos.topProducts(date)
+        ])
+
+        const totalSales = (trend || []).reduce((s, d) => s + (d.total || 0), 0)
+        const totalTxns = (trend || []).reduce((s, d) => s + (d.count || 0), 0)
+        const best = (trend || []).reduce((best, d) => (d.total || 0) > (best.total || 0) ? d : best, { total: 0, date: '' })
+        $('#analysisTotalSales').textContent = money(totalSales)
+        $('#analysisTxns').textContent = totalTxns
+        $('#analysisAvgDay').textContent = trend?.length ? money(totalSales / trend.length) : '$0.00'
+        $('#analysisBestDay').textContent = best.date ? `${money(best.total)} ${new Date(best.date + 'T00:00:00').toLocaleDateString('en-AU', { weekday: 'short' })}` : '$0.00'
+
+        if (trend?.length) {
+          const maxVal = Math.max(...trend.map(d => d.total || 0), 1)
+          $('#analysisTrendChart').innerHTML = trend.map(d => {
+            const h = Math.max(2, ((d.total || 0) / maxVal) * 100)
+            const label = new Date(d.date + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })
+            return `<div style="flex:1;min-width:5px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px" title="${label}: ${money(d.total || 0)} (${d.count || 0} txns)">
+              <div style="width:100%;height:${h}%;background:linear-gradient(180deg,var(--green),rgba(24,91,57,.42));border-radius:4px 4px 0 0"></div>
+              <span style="font-size:10px;color:var(--text-dim);writing-mode:vertical-rl;max-height:42px;overflow:hidden">${label}</span>
+            </div>`
+          }).join('')
+        } else {
+          $('#analysisTrendChart').innerHTML = '<span style="color:var(--text-dim)">No sales in this period</span>'
+        }
+
+        $('#analysisTopProducts').innerHTML = top?.length ? top.map(p => `
+          <tr>
+            <td>${esc(p.name)}</td>
+            <td style="text-align:right">${p.total_qty}</td>
+            <td style="text-align:right">${money(p.total_revenue)}</td>
+          </tr>
+        `).join('') : '<tr><td colspan="3" style="color:var(--text-dim)">No products sold on this date</td></tr>'
+
+        $('#analysisPairs').innerHTML = pairs?.length ? pairs.slice(0, 10).map((p, i) => `
+          <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)">
+            <span style="width:22px;color:var(--text-dim);font-size:11px;text-align:right">${i + 1}</span>
+            <span style="flex:1;min-width:0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.product1_name)} + ${esc(p.product2_name)}</span>
+            <strong style="font-size:12px">${p.count}x</strong>
+          </div>
+        `).join('') : '<p style="color:var(--text-dim)">Pairs appear after multiple transactions</p>'
+
+        renderReportHeatmap(heatmap)
+        $('#analysisReportContent').style.display = 'block'
+      } catch (e) {
+        showToast('Analysis failed: ' + e.message, 'error')
+      }
+    })
+
     // Print / Export PDF
     $('#rptPrint').addEventListener('click', async () => {
       const printStyles = `body{font-family:sans-serif;padding:20px;color:#333}
@@ -6529,9 +7013,15 @@
         if (!content || $('#zReportContent').style.display === 'none') { showToast('Generate a report first', 'info'); return }
         title = 'Z Report'; subtitle = $('#zDate').value
       } else {
-        content = $('#wkReportPrintable')
-        if (!content || $('#wkReportContent').style.display === 'none') { showToast('Generate a report first', 'info'); return }
-        title = 'Weekly Summary'; subtitle = 'Week of ' + $('#wkDate').value
+        if (currentReportType === 'weekly') {
+          content = $('#wkReportPrintable')
+          if (!content || $('#wkReportContent').style.display === 'none') { showToast('Generate a report first', 'info'); return }
+          title = 'Weekly Summary'; subtitle = 'Week of ' + $('#wkDate').value
+        } else {
+          content = $('#analysisReportPrintable')
+          if (!content || $('#analysisReportContent').style.display === 'none') { showToast('Generate analysis first', 'info'); return }
+          title = 'Analysis Report'; subtitle = `${$('#analysisDays').value} days to ${$('#analysisDate').value}`
+        }
       }
 
       const html = `<html><head><title>${title} - ${subtitle}</title><style>${printStyles}</style>
@@ -7186,6 +7676,53 @@
       return btn && (btn.type === 'open_price' || Number(btn.product_open_price || 0) === 1)
     }
 
+    function kbImageFit (btn) {
+      if (!btn?.image) return ''
+      return btn.alpha_range === 'image:contain' ? 'contain' : 'cover'
+    }
+
+    function kbImageScale (btn) {
+      const scale = Number(btn?.image_scale || 100)
+      return Number.isFinite(scale) && scale > 0 ? Math.max(50, Math.min(220, scale)) : 100
+    }
+
+    function kbIsCategoryButton (btn) {
+      return btn && (btn.type === 'page_link' || btn.type === 'section')
+    }
+
+    function kbCellClass (btn, selected = false) {
+      const imgFit = kbImageFit(btn)
+      const isMerch = ['product', 'fixed_price', 'open_price', 'section', 'page_link', 'weighed_open'].includes(btn.type)
+      let keyClass = ''
+      if (btn.type === 'num_display') keyClass = 'num-display-cell'
+      else if (['digit','clear','qtyx','codeenter'].includes(btn.type)) keyClass = `digit-btn${btn.type === 'clear' || btn.type === 'codeenter' ? ' num-action' : ''}${btn.type === 'qtyx' ? ' num-action num-orange' : ''}`
+      else if (['pay_cash','pay_card','park'].includes(btn.type) || btn.type === 'subtotal') keyClass = 'pay-key'
+      else if (btn.type === 'back_home') keyClass = 'back-key'
+      else if (['void','return','hold','nosale','supervisor','lock','reprint','pricecheck','errcorrect','recall','pctdiscount','pctone','movedrawer','ubereats','viewor','endofday','discount','product_lookup','item_search','management'].includes(btn.type)) keyClass = 'func-key'
+      else keyClass = 'dept-key'
+      return [
+        'kb-cell',
+        'pos-grid-btn',
+        keyClass,
+        selected ? 'selected' : '',
+        btn.image ? `has-img img-${imgFit}` : '',
+        isMerch ? 'cat-key' : '',
+        kbIsOpenPrice(btn) ? 'open-price-key' : ''
+      ].filter(Boolean).join(' ')
+    }
+
+    function kbButtonBadges (btn) {
+      const isCategory = kbIsCategoryButton(btn)
+      const isOpen = kbIsOpenPrice(btn)
+      const isProduct = ['product', 'fixed_price', 'open_price'].includes(btn.type)
+      const productRef = btn.product_plu || (isOpen && /^\d{3,10}$/.test(btn.category_filter || '') ? btn.category_filter : '')
+      const pluBadge = isProduct && productRef ? `<span class="btn-plu-badge kb-btn-plu-badge">${esc(productRef)}</span>` : ''
+      const catBadge = isCategory ? '<span class="btn-cat-badge kb-btn-cat-badge">CAT</span>' : (btn.type === 'weighed_open' ? '<span class="btn-cat-badge kb-btn-cat-badge">KG</span>' : '')
+      const priceText = (!isCategory && isOpen) ? 'O/P' : (!isCategory && Number(btn.active_price || btn.price || 0) > 0 ? kbCornerPrice(btn) : '')
+      const priceBadge = priceText ? `<span class="btn-price-badge kb-btn-price-badge">${esc(priceText)}</span>` : ''
+      return `${pluBadge}${catBadge}${priceBadge}`
+    }
+
     function kbDisplayLabel (btn) {
       let label = labelFromDb(btn.label)
       if (kbIsOpenPrice(btn)) label = label.replace(/\n\$[\d.]+.*$/i, '')
@@ -7213,12 +7750,8 @@
       const previewGrid = panel.querySelector('#kbPreviewGrid')
       previewGrid.innerHTML = pageButtons.map(b => {
         const r = b.grid_row || 0, c = b.grid_col || 0, cs = b.col_span || 1, rs = b.row_span || 1
-        const img = b.image ? `<img src="${esc(b.image)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:${b.alpha_range === 'image:cover' ? 'cover' : 'contain'};opacity:.72">` : ''
-        const isCategory = b.type === 'page_link' || b.type === 'section'
-        const isOpen = kbIsOpenPrice(b)
-        const price = (!isCategory && !isOpen && Number(b.active_price || b.price || 0) > 0) ? `<span style="position:absolute;top:3px;right:3px;background:#fff;color:#111;border-radius:3px;padding:1px 4px;font-size:9px;font-weight:800;white-space:nowrap;line-height:1.1">${kbCornerPrice(b)}</span>` : ''
-        const op = isOpen ? '<span style="position:absolute;top:3px;right:3px;background:#fff;color:#111;border-radius:3px;padding:1px 5px;font-size:10px;font-weight:800">O/P</span>' : ''
-        return `<div style="grid-column:${c+1}/span ${cs};grid-row:${r+1}/span ${rs};position:relative;overflow:hidden;border-radius:6px;background:${esc(b.bg_color || '#1f2937')};color:${esc(b.color || '#fff')};display:flex;align-items:end;justify-content:center;text-align:center;padding:6px;font-weight:800;font-size:12px;line-height:1.05;border:1px solid rgba(255,255,255,.12)">${img}<span style="position:relative;text-shadow:0 1px 5px #000">${esc(kbDisplayLabel(b)).replace(/\n/g, '<br>')}</span>${price}${op}</div>`
+        const imgHtml = b.image ? `<img src="${esc(b.image)}" alt="" style="--kb-img-scale:${kbImageScale(b) / 100}">` : ''
+        return `<div class="${kbCellClass(b)}" style="grid-column:${c+1}/span ${cs};grid-row:${r+1}/span ${rs};background:${esc(b.bg_color || '#1f2937')};color:${esc(b.color || '#fff')}">${imgHtml}<span>${esc(kbDisplayLabel(b)).replace(/\n/g, '<br>')}</span>${kbButtonBadges(b)}</div>`
       }).join('')
       panel.querySelector('#kbPreviewClose').addEventListener('click', () => overlay.remove())
       overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove() })
@@ -7257,23 +7790,16 @@
           const btn = cellMap[key]
           if (btn) {
             const cs = btn.col_span || 1, rs = btn.row_span || 1
-            const sel = btn.id === selectedBtnId ? ' selected' : ''
-            let extra = ''
-            const noPriceTypes = new Set(['section','nav','page_link','back_home','void','return','hold','nosale','supervisor','lock','reprint','pricecheck','errcorrect','recall','pctdiscount','pctone','movedrawer','ubereats','viewor','digit','clear','qtyx','codeenter','subtotal','pay_cash','pay_card','park','num_display','cart_display'])
-            const isOpen = kbIsOpenPrice(btn)
+            let extra = kbButtonBadges(btn)
             if (btn.type === 'page_link' && btn.parent_id) {
               const tgtName = getPageInfo(parseInt(btn.parent_id)).name || `Page ${btn.parent_id}`
-              extra = `<div class="kb-cell-price" style="font-size:8px;opacity:.7">&rarr; ${esc(tgtName)}</div>`
-            } else if (isOpen) {
-              extra = '<div class="kb-cell-price" style="position:absolute;top:3px;right:3px;background:rgba(255,255,255,.92);color:#111;border-radius:3px;padding:1px 4px;font-size:9px;font-weight:800;white-space:nowrap;line-height:1.1">O/P</div>'
-            } else if (Number(btn.active_price || btn.price || 0) > 0 && !noPriceTypes.has(btn.type)) {
-              extra = `<div class="kb-cell-price" style="position:absolute;top:3px;right:3px;background:rgba(255,255,255,.92);color:#111;border-radius:3px;padding:1px 4px;font-size:9px;font-weight:800;white-space:nowrap;line-height:1.1">${kbCornerPrice(btn)}</div>`
+              extra += `<div class="kb-cell-price" style="font-size:8px;opacity:.7">&rarr; ${esc(tgtName)}</div>`
             }
-            html += `<div class="kb-cell${sel}" data-id="${esc(btn.id)}" data-row="${r}" data-col="${c}" draggable="true"
+            const imgHtml = btn.image ? `<img src="${esc(btn.image)}" alt="" style="--kb-img-scale:${kbImageScale(btn) / 100}">` : ''
+            html += `<div class="${kbCellClass(btn, btn.id === selectedBtnId)}" data-id="${esc(btn.id)}" data-row="${r}" data-col="${c}" draggable="true"
               style="background:${esc(btn.bg_color)};color:${esc(btn.color)};grid-column:${c+1}/span ${cs};grid-row:${r+1}/span ${rs}">
-              <span class="kb-cell-type">${typeLabel(btn.type)}</span>
-              ${btn.image ? `<img src="${btn.image}">` : ''}
-              ${esc(kbDisplayLabel(btn)).replace(/\\n/g, '<br>')}
+              ${imgHtml}
+              <span class="kb-main-label">${esc(kbDisplayLabel(btn)).replace(/\n/g, '<br>')}</span>
               ${extra}
             </div>`
           } else if (!occupied.has(key)) {
@@ -7352,21 +7878,19 @@
     function getCellFromPoint (x, y) {
       const grid = $('#kbGrid')
       const rect = grid.getBoundingClientRect()
-      const gapPx = 3
-      const cellW = (rect.width - (gridCols - 1) * gapPx) / gridCols
-      const cellH = (rect.height - (gridRows - 1) * gapPx) / gridRows
-      const col = Math.floor((x - rect.left) / (cellW + gapPx))
-      const row = Math.floor((y - rect.top) / (cellH + gapPx))
+      const styles = getComputedStyle(grid)
+      const gapX = parseFloat(styles.columnGap) || 0
+      const gapY = parseFloat(styles.rowGap) || gapX
+      const cellW = (rect.width - (gridCols - 1) * gapX) / gridCols
+      const cellH = (rect.height - (gridRows - 1) * gapY) / gridRows
+      const col = Math.floor((x - rect.left) / (cellW + gapX))
+      const row = Math.floor((y - rect.top) / (cellH + gapY))
       return { row: Math.max(0, Math.min(row, gridRows - 1)), col: Math.max(0, Math.min(col, gridCols - 1)) }
     }
 
     function showBulkGhosts (dr, dc) {
       removeBulkGhosts()
       const grid = $('#kbGrid')
-      const rect = grid.getBoundingClientRect()
-      const gapPx = 3
-      const cellW = (rect.width - (gridCols - 1) * gapPx) / gridCols
-      const cellH = (rect.height - (gridRows - 1) * gapPx) / gridRows
       const selected = [...multiSelected].map(id => kbButtons.find(b => b.id === id)).filter(Boolean)
 
       // Check if position is valid
@@ -7381,26 +7905,21 @@
       }
       for (const btn of selected) {
         const nr = (btn.grid_row || 0) + dr, nc = (btn.grid_col || 0) + dc
-        if (nr < 0 || nc < 0) { valid = false; break }
+        if (nr < 0 || nc < 0 || nr + (btn.row_span || 1) > gridRows || nc + (btn.col_span || 1) > gridCols) { valid = false; break }
         for (let r = 0; r < (btn.row_span || 1); r++)
           for (let c = 0; c < (btn.col_span || 1); c++)
             if (otherOccupied.has(`${nr + r}-${nc + c}`)) { valid = false; break }
         if (!valid) break
       }
 
-      const borderColor = valid ? 'rgba(79,189,119,.8)' : 'rgba(239,68,68,.8)'
-      const bgColor = valid ? 'rgba(79,189,119,.15)' : 'rgba(239,68,68,.1)'
-
       for (const btn of selected) {
         const nr = (btn.grid_row || 0) + dr, nc = (btn.grid_col || 0) + dc
         const cs = btn.col_span || 1, rs = btn.row_span || 1
         const ghost = document.createElement('div')
-        ghost.style.cssText = `position:absolute;pointer-events:none;z-index:10;border:2px dashed ${borderColor};background:${bgColor};border-radius:4px;transition:left .06s,top .06s;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${borderColor};opacity:.9`
-        ghost.style.left = (nc * (cellW + gapPx)) + 'px'
-        ghost.style.top = (nr * (cellH + gapPx)) + 'px'
-        ghost.style.width = (cs * cellW + (cs - 1) * gapPx) + 'px'
-        ghost.style.height = (rs * cellH + (rs - 1) * gapPx) + 'px'
-        ghost.textContent = btn.label?.split('\n')[0] || ''
+        ghost.className = `kb-drop-preview${valid ? '' : ' invalid'}`
+        ghost.style.gridColumn = `${Math.max(0, nc) + 1} / span ${cs}`
+        ghost.style.gridRow = `${Math.max(0, nr) + 1} / span ${rs}`
+        ghost.textContent = `${cs} x ${rs}`
         grid.appendChild(ghost)
         bulkGhostEls.push(ghost)
       }
@@ -7409,6 +7928,38 @@
     function removeBulkGhosts () {
       bulkGhostEls.forEach(g => g.remove())
       bulkGhostEls = []
+    }
+
+    function canPlaceButtonFootprint (btn, row, col, ignoreIds = []) {
+      const cs = btn.col_span || 1, rs = btn.row_span || 1
+      if (row < 0 || col < 0 || col + cs > gridCols || row + rs > gridRows) return false
+      const ignored = new Set(ignoreIds)
+      const otherButtons = kbButtons.filter(b => (b.page || 1) === currentPage && b.active && !ignored.has(b.id))
+      const occupied = new Set()
+      for (const b of otherButtons) {
+        for (let dr = 0; dr < (b.row_span || 1); dr++)
+          for (let dc = 0; dc < (b.col_span || 1); dc++)
+            occupied.add(`${(b.grid_row || 0) + dr}-${(b.grid_col || 0) + dc}`)
+      }
+      for (let dr = 0; dr < rs; dr++)
+        for (let dc = 0; dc < cs; dc++)
+          if (occupied.has(`${row + dr}-${col + dc}`)) return false
+      return true
+    }
+
+    function showFootprintGhost (btn, row, col, ignoreIds = []) {
+      removeBulkGhosts()
+      const grid = $('#kbGrid')
+      const cs = btn.col_span || 1, rs = btn.row_span || 1
+      const valid = canPlaceButtonFootprint(btn, row, col, ignoreIds)
+      const ghost = document.createElement('div')
+      ghost.className = `kb-drop-preview${valid ? '' : ' invalid'}`
+      ghost.style.gridColumn = `${Math.max(0, col) + 1} / span ${Math.min(cs, gridCols)}`
+      ghost.style.gridRow = `${Math.max(0, row) + 1} / span ${Math.min(rs, gridRows)}`
+      ghost.textContent = `${cs} x ${rs}`
+      grid.appendChild(ghost)
+      bulkGhostEls.push(ghost)
+      return valid
     }
 
     let bulkDragMoved = false
@@ -7501,27 +8052,10 @@
         $('#kbGrid').style.position = 'relative'
       }
       if (singleDragMoved) {
-        removeBulkGhosts()
         const btn = singleDragBtn
         const nr = (btn.grid_row || 0) + dr, nc = (btn.grid_col || 0) + dc
-        const cs = btn.col_span || 1, rs = btn.row_span || 1
-        const valid = nr >= 0 && nc >= 0 && nc + cs <= gridCols && nr + rs <= gridRows
-        const grid = $('#kbGrid')
-        const rect = grid.getBoundingClientRect()
-        const gapPx = 3
-        const cellW = (rect.width - (gridCols - 1) * gapPx) / gridCols
-        const cellH = (rect.height - (gridRows - 1) * gapPx) / gridRows
-        const borderColor = valid ? 'rgba(79,189,119,.8)' : 'rgba(239,68,68,.8)'
-        const bgColor = valid ? 'rgba(79,189,119,.15)' : 'rgba(239,68,68,.1)'
-        const ghost = document.createElement('div')
-        ghost.style.cssText = `position:absolute;pointer-events:none;z-index:10;border:2px dashed ${borderColor};background:${bgColor};border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${borderColor};opacity:.9`
-        ghost.style.left = (nc * (cellW + gapPx)) + 'px'
-        ghost.style.top = (nr * (cellH + gapPx)) + 'px'
-        ghost.style.width = (cs * cellW + (cs - 1) * gapPx) + 'px'
-        ghost.style.height = (rs * cellH + (rs - 1) * gapPx) + 'px'
-        ghost.textContent = btn.label?.split('\n')[0] || ''
-        grid.appendChild(ghost)
-        bulkGhostEls.push(ghost)
+        const swapTarget = kbButtons.find(b => b.id !== btn.id && (b.page || 1) === currentPage && b.active && b.grid_row === nr && b.grid_col === nc)
+        showFootprintGhost(btn, nr, nc, swapTarget ? [btn.id, swapTarget.id] : [btn.id])
       }
     })
 
@@ -7537,10 +8071,9 @@
         if (dr !== 0 || dc !== 0) {
           const btn = singleDragBtn
           const nr = (btn.grid_row || 0) + dr, nc = (btn.grid_col || 0) + dc
-          const cs = btn.col_span || 1, rs = btn.row_span || 1
-          if (nr >= 0 && nc >= 0 && nc + cs <= gridCols && nr + rs <= gridRows) {
+          const tgtBtn = kbButtons.find(b => b.id !== btn.id && (b.page || 1) === currentPage && b.active && b.grid_row === nr && b.grid_col === nc)
+          if (canPlaceButtonFootprint(btn, nr, nc, tgtBtn ? [btn.id, tgtBtn.id] : [btn.id])) {
             // Check if target has a button to swap with
-            const tgtBtn = kbButtons.find(b => b.id !== btn.id && (b.page || 1) === currentPage && b.active && b.grid_row === pos.row && b.grid_col === pos.col)
             pushUndo()
             if (tgtBtn) {
               const sr = btn.grid_row, sc = btn.grid_col
@@ -7696,6 +8229,9 @@
       $('#kbRowSpan').value = 1
       $('#kbImageData').value = ''
       $('#kbImageZoom').checked = false
+      $('#kbImageScale').value = 100
+      $('#kbImageScaleValue').textContent = '100%'
+      $('#kbImageFile').value = ''
       $('#kbImagePreview').innerHTML = ''
       clearProductPicker()
       $('#kbDeleteBtn').style.display = 'none'
@@ -7706,6 +8242,7 @@
       $('#kbEditPanel').dataset.col = col
       updateTypeFields()
       updateLivePreview()
+      updateImageRemoveButton()
     }
 
     function openEditPanel (btn) {
@@ -7724,7 +8261,11 @@
       $('#kbRowSpan').value = btn.row_span || 1
       $('#kbImageData').value = btn.image || ''
       $('#kbImageZoom').checked = btn.alpha_range === 'image:cover' || (!btn.alpha_range && (btn.type === 'page_link' || btn.type === 'section'))
+      $('#kbImageScale').value = kbImageScale(btn)
+      $('#kbImageScaleValue').textContent = `${kbImageScale(btn)}%`
       $('#kbImagePreview').innerHTML = btn.image ? `<img src="${btn.image}" style="width:36px;height:36px;border-radius:6px;object-fit:cover">` : ''
+      $('#kbImageFile').value = ''
+      updateImageRemoveButton()
       // Product picker state
       clearProductPicker()
       const linkedProductId = btn.product_id || (editType === 'product' && btn.category_filter) || null
@@ -7766,23 +8307,46 @@
 
     function updateLivePreview () {
       const preview = $('#kbLivePreview')
-      preview.style.background = $('#kbBgColor').value
-      preview.style.color = $('#kbColor').value
+      const image = $('#kbImageData').value || ''
       let val = $('#kbLabel').value || 'Button'
       const type = $('#kbType').value
       const price = parseFloat($('#kbPrice').value || $('#kbProductPrice').value || '0') || 0
       const isOpen = type === 'product' && $('#kbOpenPrice').checked
       if (isOpen) val = val.replace(/\n\$[\d.]+.*$/i, '')
-      const badge = isOpen ? '<span style="position:absolute;top:2px;right:2px;background:#fff;color:#111;border-radius:3px;padding:1px 4px;font-size:8px">O/P</span>' :
-        (type === 'product' && price > 0 ? `<span style="position:absolute;top:2px;right:2px;background:#fff;color:#111;border-radius:3px;padding:1px 4px;font-size:8px">$${price.toFixed(2)}</span>` : '')
-      preview.style.position = 'relative'
-      preview.innerHTML = esc(val).replace(/\n/g, '<br>') + badge
+      const previewBtn = {
+        label: val,
+        type,
+        image,
+        image_scale: parseFloat($('#kbImageScale').value || '100') || 100,
+        alpha_range: $('#kbImageZoom').checked ? 'image:cover' : 'image:contain',
+        active_price: price,
+        price,
+        color: $('#kbColor').value,
+        bg_color: $('#kbBgColor').value,
+        product_open_price: isOpen ? 1 : 0
+      }
+      preview.className = `kb-live ${kbCellClass(previewBtn).replace('kb-cell', '').replace('selected', '')}`.replace(/\s+/g, ' ').trim()
+      preview.style.background = $('#kbBgColor').value
+      preview.style.color = $('#kbColor').value
+      preview.style.setProperty('--kb-img-scale', String(kbImageScale(previewBtn) / 100))
+      preview.innerHTML = `${image ? `<img src="${esc(image)}" alt="">` : ''}<span class="kb-main-label">${esc(val).replace(/\n/g, '<br>')}</span>${kbButtonBadges(previewBtn)}`
+    }
+
+    function updateImageRemoveButton () {
+      const btn = $('#kbRemoveImageBtn')
+      const hasImage = !!($('#kbImageData').value || '').trim()
+      btn.style.display = hasImage ? 'inline-flex' : 'none'
+      $('#kbImageScaleRow').style.display = hasImage ? 'block' : 'none'
     }
 
     ;['kbLabel', 'kbBgColor', 'kbColor', 'kbPrice', 'kbProductPrice'].forEach(id => {
       $(`#${id}`).addEventListener('input', updateLivePreview)
     })
     $('#kbOpenPrice').addEventListener('change', updateLivePreview)
+    $('#kbImageScale').addEventListener('input', () => {
+      $('#kbImageScaleValue').textContent = `${$('#kbImageScale').value}%`
+      updateLivePreview()
+    })
 
     // Live-update grid cell size when col/row span changes
     ;['kbColSpan', 'kbRowSpan'].forEach(id => {
@@ -7891,10 +8455,22 @@
           const dataUrl = canvas.toDataURL('image/png')
           $('#kbImageData').value = dataUrl
           $('#kbImagePreview').innerHTML = `<img src="${dataUrl}" style="width:36px;height:36px;border-radius:6px;object-fit:cover">`
+          updateImageRemoveButton()
+          updateLivePreview()
         }
         img.src = ev.target.result
       }
       reader.readAsDataURL(file)
+    })
+
+    $('#kbRemoveImageBtn').addEventListener('click', () => {
+      $('#kbImageData').value = ''
+      $('#kbImageFile').value = ''
+      $('#kbImagePreview').innerHTML = ''
+      $('#kbImageScale').value = 100
+      $('#kbImageScaleValue').textContent = '100%'
+      updateImageRemoveButton()
+      updateLivePreview()
     })
 
     $('#kbSaveBtn').addEventListener('click', async () => {
@@ -7933,8 +8509,8 @@
       const isOpenPrice = $('#kbOpenPrice').checked
       const linkedProduct = $('#kbProductId').value || null
       const productPrice = parseFloat($('#kbProductPrice').value || '0') || 0
-      if (btnType === 'product' && !linkedProduct && !isOpenPrice && productPrice <= 0) {
-        showToast('Product buttons need a linked product, a fixed price, or Open Price enabled', 'error'); return
+      if (btnType === 'product' && !linkedProduct) {
+        showToast('Product buttons must be linked to a database product so price/open-price changes are saved', 'error'); return
       }
       if ((btnType === 'section' || btnType === 'page_link') && (parseFloat($('#kbPrice').value) || 0) > 0) {
         $('#kbPrice').value = 0
@@ -7958,23 +8534,28 @@
         page: currentPage,
         position: 'grid',
         image: $('#kbImageData').value || null,
+        image_scale: parseFloat($('#kbImageScale').value || '100') || 100,
         parent_id: btnType === 'page_link' ? ($('#kbTargetPage').value || null) : null,
         product_id: linkedProduct,
         active: true
       }
       pushUndo()
-      await window.pos.upsertButton(btn)
-      // Update the linked product's open_price flag in the DB
-      if (linkedProduct) {
-        try {
-          const p = await window.pos.getProductById(linkedProduct)
-          if (p) {
-            p.open_price = isOpenPrice
-            p.price = isOpenPrice ? 0 : productPrice
-            p.active_price = p.price
-            await window.pos.upsertProduct(p)
-          }
-        } catch (_) {}
+      if (btnType === 'product') {
+        const p = await window.pos.getProductById(linkedProduct)
+        if (!p) {
+          showToast('Linked product was not found in the database', 'error'); return
+        }
+        p.open_price = isOpenPrice
+        p.price = isOpenPrice ? 0 : productPrice
+        p.active_price = p.price
+        const productResult = await window.pos.upsertProduct(p)
+        if (productResult?.error) {
+          showToast(productResult.error, 'error'); return
+        }
+      }
+      const buttonResult = await window.pos.upsertButton(btn)
+      if (buttonResult?.error) {
+        showToast(buttonResult.error, 'error'); return
       }
       showToast('Button saved', 'success')
       kbButtons = await window.pos.getAllButtons()
@@ -8496,17 +9077,58 @@
     const TAG_COLS = 3, TAG_ROWS = 10
 
     const DEFAULT_TAG_LAYOUT = [
-      { type: 'price',   x: 4,  y: 10, w: 38, h: 36, size: 24, bold: true,  align: 'left',   font: 'Arial', visible: true },
-      { type: 'barcode', x: 46, y: 12, w: 50, h: 30, size: 20, bold: false, align: 'center', font: 'Arial', visible: true },
-      { type: 'barcode_text', x: 46, y: 43, w: 50, h: 10, size: 6, bold: false, align: 'center', font: 'Courier New', visible: true },
-      { type: 'name',    x: 4,  y: 62, w: 92, h: 26, size: 8,  bold: false, align: 'left',   font: 'Arial', visible: true },
-      { type: 'unit',    x: 4,  y: 48, w: 38, h: 10, size: 6,  bold: false, align: 'left',   font: 'Arial', visible: false },
+      { type: 'name',    x: 4,  y: 5,  w: 92, h: 20, size: 8,  bold: true,  align: 'left',   font: 'Arial', visible: true },
+      { type: 'price',   x: 4,  y: 27, w: 52, h: 48, size: 30, bold: true,  align: 'left',   font: 'Arial', visible: true },
+      { type: 'unit',    x: 5,  y: 77, w: 50, h: 12, size: 7,  bold: true,  align: 'left',   font: 'Arial', visible: true },
+      { type: 'barcode', x: 58, y: 31, w: 38, h: 33, size: 20, bold: false, align: 'center', font: 'Arial', visible: true },
+      { type: 'barcode_text', x: 58, y: 66, w: 38, h: 10, size: 6, bold: false, align: 'center', font: 'Courier New', visible: true },
     ]
-    const TAG_LAYOUT_STORAGE_KEY = 'boundos_tag_layout_3x10_v1'
-    let tagLayout = JSON.parse(localStorage.getItem(TAG_LAYOUT_STORAGE_KEY) || 'null') || JSON.parse(JSON.stringify(DEFAULT_TAG_LAYOUT))
+    const TAG_LAYOUT_STORAGE_KEY = 'yieldpos_tag_layout_3x10_v3'
+    const TAG_LAYOUT_SETTING_KEY = 'price_tag_layout_3x10'
+    let tagLayout = JSON.parse(JSON.stringify(DEFAULT_TAG_LAYOUT))
     let selectedTagEl = null
 
-    function saveTagLayout () { localStorage.setItem(TAG_LAYOUT_STORAGE_KEY, JSON.stringify(tagLayout)) }
+    function normaliseTagLayout (layout) {
+      if (!Array.isArray(layout)) return JSON.parse(JSON.stringify(DEFAULT_TAG_LAYOUT))
+      return DEFAULT_TAG_LAYOUT.map(def => {
+        const saved = layout.find(el => el && el.type === def.type) || {}
+        return {
+          ...def,
+          ...saved,
+          x: Number.isFinite(Number(saved.x)) ? Number(saved.x) : def.x,
+          y: Number.isFinite(Number(saved.y)) ? Number(saved.y) : def.y,
+          w: Number.isFinite(Number(saved.w)) ? Number(saved.w) : def.w,
+          h: Number.isFinite(Number(saved.h)) ? Number(saved.h) : def.h,
+          size: Number.isFinite(Number(saved.size)) ? Number(saved.size) : def.size,
+          visible: saved.visible !== false,
+          font: safeTagFont(saved.font || def.font),
+          align: ['left', 'center', 'right'].includes(saved.align) ? saved.align : def.align
+        }
+      })
+    }
+
+    async function loadTagLayout () {
+      try {
+        const saved = await window.pos.getSetting(TAG_LAYOUT_SETTING_KEY)
+        if (saved) {
+          tagLayout = normaliseTagLayout(JSON.parse(saved))
+          return
+        }
+      } catch (_) {}
+
+      try {
+        const local = localStorage.getItem(TAG_LAYOUT_STORAGE_KEY)
+        if (local) tagLayout = normaliseTagLayout(JSON.parse(local))
+      } catch (_) {}
+      saveTagLayout()
+    }
+
+    function saveTagLayout () {
+      const payload = JSON.stringify(tagLayout)
+      window.pos.setSetting(TAG_LAYOUT_SETTING_KEY, payload).catch(() => {
+        try { localStorage.setItem(TAG_LAYOUT_STORAGE_KEY, payload) } catch (_) {}
+      })
+    }
 
     const TAG_LABELS = { name: 'Description', price: 'Price', barcode: 'Barcode', barcode_text: 'Barcode #', unit: 'Unit' }
     const SAMPLE = { name: 'Strawberries 250g', price: 4.99, barcode: '9310015241234', plu: '', unit: 'punnet' }
@@ -8706,10 +9328,10 @@
       const sheet = $('#labelSheet')
       const total = TAG_COLS * TAG_ROWS
       const flat = expandQueue()
-      $('#labelSheetInfo').textContent = `${TAG_COLS} × ${TAG_ROWS} = ${total} tags/page · ${flat.length} queued`
+      $('#labelSheetInfo').textContent = `${TAG_COLS} x ${TAG_ROWS} = ${total} tags/page - portrait A4 - ${flat.length} queued`
       $('#labelQueueCount').textContent = `${flat.length} labels`
 
-      const pageW = 240, pageH = 340
+      const pageW = 210, pageH = 297
       const cellW = pageW / TAG_COLS, cellH = pageH / TAG_ROWS
       let html = `<div style="background:#fff;width:${pageW}px;height:${pageH}px;flex-shrink:0;display:grid;grid-template-columns:repeat(${TAG_COLS},1fr);grid-template-rows:repeat(${TAG_ROWS},1fr);border:1px solid #ccc;box-shadow:0 2px 8px rgba(0,0,0,.15)">`
       for (let i = 0; i < total; i++) {
@@ -8802,13 +9424,13 @@
       if (!flat.length) { showToast('Add products to print queue first', 'error'); return }
       const margin = 5, pw = 210, ph = 297
       const uw = pw - margin * 2, uh = ph - margin * 2
-      const cw = Math.floor((uw / TAG_COLS) * 100) / 100
-      const ch = Math.floor((uh / TAG_ROWS) * 100) / 100
+      const cw = uw / TAG_COLS
+      const ch = uh / TAG_ROWS
       const total = TAG_COLS * TAG_ROWS
 
       let html = `<html><head><title>Price Tags</title><style>
         @page { size: A4; margin: ${margin}mm; }
-        body { margin: 0; font-family: Arial, sans-serif; }
+        body { margin: 0; font-family: Arial, Helvetica, sans-serif; }
         .sheet { display: grid; grid-template-columns: repeat(${TAG_COLS}, 1fr); grid-template-rows: repeat(${TAG_ROWS}, 1fr); width: ${uw}mm; height: ${uh}mm; }
         .tag { position: relative; border: 0.3px dashed #ccc; overflow: hidden; box-sizing: border-box; }
         .tag img { image-rendering: crisp-edges; -webkit-print-color-adjust: exact; }
@@ -8833,6 +9455,7 @@
 
     async function initLabelsTab () {
       try {
+        await loadTagLayout()
         const cats = await window.pos.getCategories()
         $('#labelCatFilter').innerHTML = '<option value="">All Categories</option>' + cats.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('')
         await loadLabelProducts()
@@ -9189,6 +9812,8 @@
     if (window.__fromRegisterApp) {
       const back = $('#backToRegisterBtn')
       if (back) back.style.display = ''
+      const backTop = $('#backToRegisterTopBtn')
+      if (backTop) backTop.style.display = 'inline-flex'
     }
 
     window.pos.onDataChanged((info) => {
