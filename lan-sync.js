@@ -41,6 +41,43 @@ function onDataChanged (cb) { _dataChangedCallback = cb }
 
 function bumpVersion () { dataVersion++ }
 
+const MASTER_TABLE_COLUMNS = {
+  products: ['id', 'barcode', 'plu', 'name', 'category_id', 'price', 'cost_price', 'unit', 'tax_rate', 'track_stock', 'stock_qty', 'active', 'image_url', 'open_price', 'updated_at'],
+  categories: ['id', 'name', 'sort_order', 'colour', 'family', 'active', 'updated_at'],
+  specials: ['id', 'product_id', 'special_price', 'start_date', 'end_date', 'active', 'updated_at'],
+  deals: ['id', 'name', 'type', 'config', 'start_date', 'end_date', 'active', 'updated_at'],
+  staff: ['id', 'name', 'pin', 'role', 'active', 'updated_at'],
+  keyboard_buttons: ['id', 'label', 'type', 'price', 'image', 'color', 'bg_color', 'parent_id', 'category_filter', 'alpha_range', 'sort_order', 'position', 'page', 'grid_row', 'grid_col', 'col_span', 'row_span', 'product_id', 'active', 'updated_at'],
+  keyboard_pages: ['page', 'name', 'cols', 'rows']
+}
+
+function upsertWhitelistedRecord (table, payload) {
+  if (table === 'settings') {
+    if (!payload || !payload.key) return false
+    const localOnly = new Set(['lan_mode', 'lan_server_ip', 'lan_port', 'lan_secret', 'register_id',
+      'keyboard_grid_cols', 'keyboard_grid_rows', 'app_mode', 'lan_autostart', 'lan_last_pull'])
+    if (localOnly.has(payload.key)) return false
+    db.dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES (?1, ?2)", [payload.key, payload.value ?? null])
+    return true
+  }
+
+  if (table === 'deal_products') {
+    if (!payload || !payload.deal_id || !payload.product_id) return false
+    db.dbRun("INSERT OR REPLACE INTO deal_products (deal_id, product_id, role) VALUES (?1, ?2, ?3)",
+      [payload.deal_id, payload.product_id, payload.role || 'trigger'])
+    return true
+  }
+
+  const cols = MASTER_TABLE_COLUMNS[table]
+  if (!cols || !payload) return false
+  const present = cols.filter(c => payload[c] !== undefined)
+  if (!present.length) return false
+  const placeholders = present.map((_, i) => `?${i + 1}`).join(', ')
+  db.dbRun(`INSERT OR REPLACE INTO ${table} (${present.join(', ')}) VALUES (${placeholders})`,
+    present.map(c => payload[c]))
+  return true
+}
+
 function getStatus () {
   const now = Date.now()
   state.clients = state.clients.filter(c => {
@@ -340,10 +377,34 @@ async function handleRoute (req, res, url, path) {
           if (!ALLOWED_TABLES.has(r.table_name)) continue
           db.dbRun("INSERT OR IGNORE INTO deleted_records (table_name, record_id) VALUES (?1, ?2)",
                    [r.table_name, r.record_id])
-          db.dbRun(`DELETE FROM ${r.table_name} WHERE id = ?1`, [r.record_id])
+          if (r.table_name === 'keyboard_pages') db.dbRun("DELETE FROM keyboard_pages WHERE page = ?1", [r.record_id])
+          else if (r.table_name === 'deal_products') {
+            const [dealId, productId] = String(r.record_id).split(':')
+            if (dealId && productId) db.dbRun("DELETE FROM deal_products WHERE deal_id = ?1 AND product_id = ?2", [dealId, productId])
+          } else db.dbRun(`DELETE FROM ${r.table_name} WHERE id = ?1`, [r.record_id])
         }
         db.saveDB()
+        bumpVersion()
+        if (_dataChangedCallback) _dataChangedCallback()
         return jsonReply(res, { ok: true, count: records.length })
+      }
+
+      case '/api/master-data': {
+        const records = Array.isArray(body) ? body : body.records || [body]
+        let applied = 0
+        for (const item of records) {
+          const table = item.table_name
+          const action = item.action || 'update'
+          const payload = item.payload || item
+          if (action === 'delete') continue
+          if (upsertWhitelistedRecord(table, payload)) applied++
+        }
+        if (applied > 0) {
+          db.saveDB()
+          bumpVersion()
+          if (_dataChangedCallback) _dataChangedCallback()
+        }
+        return jsonReply(res, { ok: true, count: applied })
       }
 
       default:
@@ -528,11 +589,12 @@ async function doFullSync () {
 
   if (data.products) {
     for (const p of data.products) {
-      db.dbRun(`INSERT OR REPLACE INTO products (id, barcode, plu, name, category_id, price, cost_price, unit, tax_rate, track_stock, stock_qty, active, image_url, updated_at)
-                VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)`,
+      db.dbRun(`INSERT OR REPLACE INTO products (id, barcode, plu, name, category_id, price, cost_price, unit, tax_rate, track_stock, stock_qty, active, image_url, open_price, updated_at)
+                VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15)`,
                [p.id, p.barcode || null, p.plu || null, p.name, p.category_id || null,
                 p.price, p.cost_price || null, p.unit || 'each', p.tax_rate ?? 0.10,
-                p.track_stock || 0, p.stock_qty || 0, p.active ?? 1, p.image_url || null, p.updated_at || null])
+                p.track_stock || 0, p.stock_qty || 0, p.active ?? 1, p.image_url || null,
+                p.open_price ? 1 : 0, p.updated_at || null])
     }
   }
 
@@ -652,8 +714,8 @@ async function doSyncCycle () {
     }
   }
 
-  // Step 1: Push pending transactions to server
-  const pending = db.dbAll("SELECT * FROM sync_queue WHERE synced = 0 AND table_name IN ('transactions', 'cash_drawer') ORDER BY id")
+  // Step 1: Push pending local changes to server
+  const pending = db.dbAll("SELECT * FROM sync_queue WHERE synced = 0 ORDER BY id")
 
   for (const entry of pending) {
     try {
@@ -670,6 +732,13 @@ async function doSyncCycle () {
         await httpPost('/api/transactions', { ...txn, items, payments })
       } else if (entry.table_name === 'cash_drawer') {
         await httpPost('/api/cash_drawer', payload)
+      } else {
+        await httpPost('/api/master-data', {
+          table_name: entry.table_name,
+          record_id: entry.record_id,
+          action: entry.action,
+          payload
+        })
       }
 
       markSynced(entry.id)
@@ -721,11 +790,12 @@ async function doSyncCycle () {
     }
 
     for (const p of products) {
-      db.dbRun(`INSERT OR REPLACE INTO products (id, barcode, plu, name, category_id, price, cost_price, unit, tax_rate, track_stock, stock_qty, active, image_url, updated_at)
-                VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)`,
+      db.dbRun(`INSERT OR REPLACE INTO products (id, barcode, plu, name, category_id, price, cost_price, unit, tax_rate, track_stock, stock_qty, active, image_url, open_price, updated_at)
+                VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15)`,
                [p.id, p.barcode || null, p.plu || null, p.name, p.category_id || null,
                 p.price, p.cost_price || null, p.unit || 'each', p.tax_rate ?? 0.10,
-                p.track_stock || 0, p.stock_qty || 0, p.active ?? 1, p.image_url || null, p.updated_at || null])
+                p.track_stock || 0, p.stock_qty || 0, p.active ?? 1, p.image_url || null,
+                p.open_price ? 1 : 0, p.updated_at || null])
     }
 
     for (const s of specials) {

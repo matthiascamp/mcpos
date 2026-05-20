@@ -1,11 +1,11 @@
--- Tillaroo POS — Local SQLite Schema
+-- Tillaroo POS â€” Local SQLite Schema
 -- This is the offline-first database that lives on each register.
 -- All reads/writes hit this DB. A sync queue pushes changes to Supabase.
 
 PRAGMA journal_mode = WAL;
 PRAGMA foreign_keys = ON;
 
--- ─── Products ───────────────────────────────────────────────────────────────
+-- â”€â”€â”€ Products â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 CREATE TABLE IF NOT EXISTS categories (
   id          TEXT PRIMARY KEY,
@@ -38,7 +38,7 @@ CREATE INDEX IF NOT EXISTS idx_products_plu ON products(plu);
 CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id);
 CREATE INDEX IF NOT EXISTS idx_products_name ON products(name);
 
--- ─── Specials & Deals ───────────────────────────────────────────────────────
+-- â”€â”€â”€ Specials & Deals â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 CREATE TABLE IF NOT EXISTS specials (
   id          TEXT PRIMARY KEY,
@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS deal_products (
   PRIMARY KEY (deal_id, product_id)
 );
 
--- ─── Staff ──────────────────────────────────────────────────────────────────
+-- â”€â”€â”€ Staff â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 CREATE TABLE IF NOT EXISTS staff (
   id          TEXT PRIMARY KEY,
@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS staff (
   updated_at  TEXT DEFAULT (datetime('now'))
 );
 
--- ─── Audit Log ──────────────────────────────────────────────────────────────
+-- â”€â”€â”€ Audit Log â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 CREATE TABLE IF NOT EXISTS audit_log (
   id          TEXT PRIMARY KEY,
@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS audit_log (
 
 CREATE INDEX IF NOT EXISTS idx_audit_log_date ON audit_log(created_at);
 
--- ─── Transactions ───────────────────────────────────────────────────────────
+-- â”€â”€â”€ Transactions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 CREATE TABLE IF NOT EXISTS transactions (
   id            TEXT PRIMARY KEY,
@@ -129,7 +129,7 @@ CREATE TABLE IF NOT EXISTS payments (
   created_at      TEXT DEFAULT (datetime('now'))
 );
 
--- ─── Cash Management ────────────────────────────────────────────────────────
+-- â”€â”€â”€ Cash Management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 CREATE TABLE IF NOT EXISTS cash_drawer (
   id          TEXT PRIMARY KEY,
@@ -141,7 +141,7 @@ CREATE TABLE IF NOT EXISTS cash_drawer (
   created_at  TEXT DEFAULT (datetime('now'))
 );
 
--- ─── Sync Queue ─────────────────────────────────────────────────────────────
+-- â”€â”€â”€ Sync Queue â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 -- Every local write appends here. The sync engine reads and pushes to Supabase.
 
 CREATE TABLE IF NOT EXISTS sync_queue (
@@ -156,7 +156,7 @@ CREATE TABLE IF NOT EXISTS sync_queue (
 
 CREATE INDEX IF NOT EXISTS idx_sync_pending ON sync_queue(synced) WHERE synced = 0;
 
--- ─── Settings ───────────────────────────────────────────────────────────────
+-- â”€â”€â”€ Settings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 CREATE TABLE IF NOT EXISTS settings (
   key   TEXT PRIMARY KEY,
@@ -177,7 +177,7 @@ INSERT OR IGNORE INTO settings (key, value) VALUES
   ('nav_buttons_fixed', '1'),
   ('next_receipt_number', '1');
 
--- ─── Sample Categories & Products ─────────────────────────────────────────
+-- â”€â”€â”€ Sample Categories & Products â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 INSERT OR IGNORE INTO categories (id, name, sort_order, colour) VALUES
   ('cat-fruit',    'Fruit',              1, '#e8a020'),
@@ -230,7 +230,7 @@ INSERT OR IGNORE INTO products (id, barcode, plu, name, category_id, price, cost
   ('p-cashews',     NULL,        NULL,   'Cashews 200g',       'cat-nuts',  10.99, 6.00, 'each',0.10, 1, NULL),
   ('p-bag-reusable',NULL,        NULL,   'Reusable Bag',       'cat-grocery',0.15, 0.05, 'each',0.10, 0, NULL);
 
--- ─── Keyboard Layout ───────────────────────────────────────────────────────
+-- â”€â”€â”€ Keyboard Layout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 -- Configurable POS buttons. Rendered dynamically on the register screen.
 
 CREATE TABLE IF NOT EXISTS keyboard_buttons (
@@ -301,15 +301,15 @@ INSERT OR IGNORE INTO keyboard_pages (page, name, cols, rows) VALUES
   (35, 'Tomatoes', 13, 7),
   (36, 'Zucchini', 13, 7);
 
--- Default Page 1 layout — matches user's working register
+-- Default Page 1 layout â€” matches user's working register
 -- Row 0: Function buttons (cols 0-12)
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, category_filter) VALUES
-  ('fn-reprint',    'REPRINT\nRECEIPT', 'reprint',   '#000', '#9ca3af', 1,  'grid', 1, 0, 0, 3, 1, NULL),
-  ('fn-endofday',   'END OF\nDAY',      'endofday',  '#fff', '#7c3aed', 2,  'grid', 1, 0, 3, 2, 1, NULL),
+  ('fn-reprint',    'REPRINT\nRECEIPT', 'reprint',   '#fff', '#64748b', 1,  'grid', 1, 0, 0, 3, 1, NULL),
+  ('fn-endofday',   'END OF\nDAY',      'endofday',  '#fff', '#6d28d9', 2,  'grid', 1, 0, 3, 2, 1, NULL),
   ('fn-hold',       'HOLD\nSALE',       'hold',      '#fff', '#2563eb', 3,  'grid', 1, 0, 5, 2, 1, NULL),
-  ('fn-itemsearch', 'ITEM\nSEARCH',     'item_search','#fff','#0d9488', 4,  'grid', 1, 0, 7, 2, 1, NULL),
-  ('fn-nosale',     'OPEN\nDRAWER',     'nosale',    '#fff', '#d97706', 5,  'grid', 1, 0, 9, 2, 1, NULL),
-  ('fn-pricecheck', 'PRICE CHECK',      'pricecheck','#000', '#9ca3af', 6,  'grid', 1, 0, 11, 2, 2, NULL);
+  ('fn-itemsearch', 'ITEM\nSEARCH',     'item_search','#fff','#0f766e', 4,  'grid', 1, 0, 7, 2, 1, NULL),
+  ('fn-nosale',     'OPEN\nDRAWER',     'nosale',    '#fff', '#b45309', 5,  'grid', 1, 0, 9, 2, 1, NULL),
+  ('fn-pricecheck', 'PRICE CHECK',      'pricecheck','#fff', '#64748b', 6,  'grid', 1, 0, 11, 2, 2, NULL);
 
 -- Cart display area (cols 0-2, rows 1-6)
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, category_filter) VALUES
@@ -317,28 +317,28 @@ INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_o
 
 -- Row 1: Function buttons (cols 3-12)
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, category_filter) VALUES
-  ('fn-discount',   'DISCOUNT',         'discount',  '#fff', '#d97706', 11, 'grid', 1, 1, 3, 2, 1, NULL),
-  ('fn-movedrawer', 'LOG OUT',          'movedrawer','#fff', '#dc2626', 12, 'grid', 1, 1, 5, 2, 1, NULL),
+  ('fn-discount',   'DISCOUNT',         'discount',  '#fff', '#ca8a04', 11, 'grid', 1, 1, 3, 2, 1, NULL),
+  ('fn-movedrawer', 'LOG OUT',          'movedrawer','#fff', '#be123c', 12, 'grid', 1, 1, 5, 2, 1, NULL),
   ('fn-return',     'RETURN\nITEM',     'return',    '#fff', '#dc2626', 13, 'grid', 1, 1, 7, 2, 1, NULL),
-  ('fn-recall',     'FIND\nSALE',       'recall',    '#fff', '#2563eb', 14, 'grid', 1, 1, 9, 2, 1, NULL);
+  ('fn-recall',     'FIND\nSALE',       'recall',    '#fff', '#1d4ed8', 14, 'grid', 1, 1, 9, 2, 1, NULL);
 
 -- Rows 2-4: Department buttons (cols 3-6) + single items (col 7) + Numpad (cols 8-12)
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, category_filter) VALUES
-  ('btn-meat',    'MEAT',              'section',     0,    '#000', '#d87868', 20, 'grid', 1, 2, 3, 2, 1, 'Meat'),
-  ('btn-flowers', 'FLOWERS',           'section',     0,    '#000', '#ff0095', 21, 'grid', 1, 2, 5, 2, 1, 'Flowers'),
-  ('btn-fv',      'FRUIT & VEG\nOPEN PRICE', 'open_price',  0,    '#000', '#409850', 22, 'grid', 1, 2, 7, 1, 1, NULL),
-  ('btn-coffee',  'COFFEE',            'section',     0,    '#000', '#78b8d0', 23, 'grid', 1, 3, 3, 2, 1, 'Coffee'),
-  ('btn-bread',   'BREAD &\nCROISSAN', 'section',     0,    '#000', '#98c030', 24, 'grid', 1, 3, 5, 2, 1, 'Bread & Croissants'),
-  ('btn-fvkg',    'FRUIT & VEG\n/KG',  'weighed_open',0,    '#fff', '#2d6a4f', 25, 'grid', 1, 3, 7, 1, 1, NULL),
-  ('btn-deli',    'DELI',              'section',     0,    '#000', '#c8a828', 26, 'grid', 1, 4, 3, 2, 1, 'Deli'),
-  ('btn-cheese',  'CHEESE',            'section',     0,    '#000', '#c8c4bc', 27, 'grid', 1, 4, 5, 2, 1, 'Cheese'),
-  ('btn-bags',    'BAG',               'fixed_price', 0.15, '#fff', '#222222', 28, 'grid', 1, 4, 7, 1, 1, NULL);
+  ('btn-meat',    'MEAT',              'section',     0,    '#fff', '#8f2d38', 20, 'grid', 1, 2, 3, 2, 1, 'Meat'),
+  ('btn-flowers', 'FLOWERS',           'section',     0,    '#fff', '#be185d', 21, 'grid', 1, 2, 5, 2, 1, 'Flowers'),
+  ('btn-fv',      'FRUIT & VEG\nOPEN PRICE', 'open_price',  0,    '#fff', '#166534', 22, 'grid', 1, 2, 7, 1, 1, NULL),
+  ('btn-coffee',  'COFFEE',            'section',     0,    '#fff', '#6b4f3f', 23, 'grid', 1, 3, 3, 2, 1, 'Coffee'),
+  ('btn-bread',   'BREAD &\nCROISSAN', 'section',     0,    '#fff', '#92400e', 24, 'grid', 1, 3, 5, 2, 1, 'Bread & Croissants'),
+  ('btn-fvkg',    'FRUIT & VEG\n/KG',  'weighed_open',0,    '#fff', '#047857', 25, 'grid', 1, 3, 7, 1, 1, NULL),
+  ('btn-deli',    'DELI',              'section',     0,    '#fff', '#9f1239', 26, 'grid', 1, 4, 3, 2, 1, 'Deli'),
+  ('btn-cheese',  'CHEESE',            'section',     0,    '#fff', '#a16207', 27, 'grid', 1, 4, 5, 2, 1, 'Cheese'),
+  ('btn-bags',    'BAG',               'fixed_price', 0.15, '#fff', '#334155', 28, 'grid', 1, 4, 7, 1, 1, NULL);
 
 -- Row 5: Navigation + misc (cols 3-12)
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, parent_id, category_filter) VALUES
-  ('btn-grocery',  'GROCERY',   'page_link', 0, '#fff', '#6699cc', 30, 'grid', 1, 5, 3, 2, 1, '6',  NULL),
-  ('btn-nuts',     'NUTS',      'nav',       0, '#000', '#c8b880', 31, 'grid', 1, 5, 5, 2, 1, NULL, 'Nuts'),
-  ('btn-gas',      'GAS',       'section',   0, '#000', '#b0b0b0', 32, 'grid', 1, 5, 7, 1, 1, NULL, 'Gas');
+  ('btn-grocery',  'GROCERY',   'page_link', 0, '#fff', '#2563eb', 30, 'grid', 1, 5, 3, 2, 1, '6',  NULL),
+  ('btn-nuts',     'NUTS',      'nav',       0, '#fff', '#7c2d12', 31, 'grid', 1, 5, 5, 2, 1, NULL, 'Nuts'),
+  ('btn-gas',      'GAS',       'section',   0, '#fff', '#475569', 32, 'grid', 1, 5, 7, 1, 1, NULL, 'Gas');
 
 -- Numpad buttons (rows 2-5, cols 8-12)
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, category_filter) VALUES
@@ -358,16 +358,16 @@ INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_o
 
 -- SUB TOTAL button (rows 5-6, cols 11-12)
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, category_filter) VALUES
-  ('btn-subtotal', 'SUB TOTAL', 'subtotal', '#fff', '#16a34a', 55, 'grid', 1, 5, 11, 2, 2, NULL);
+  ('btn-subtotal', 'SUB TOTAL', 'subtotal', '#fff', '#15803d', 55, 'grid', 1, 5, 11, 2, 2, NULL);
 
 -- Row 6: Bottom navigation (cols 3-10)
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, parent_id, category_filter, alpha_range) VALUES
-  ('btn-fruit-am', 'FRUIT A-M', 'page_link','#000', '#c8a828', 60, 'grid', 1, 6, 3, 2, 1, '2',  NULL, NULL),
-  ('btn-fruit-nz', 'FRUIT N-Z', 'page_link','#000', '#c8a828', 61, 'grid', 1, 6, 5, 2, 1, '3',  NULL, NULL),
-  ('btn-veg-ag',   'VEGE A-G',  'page_link','#000', '#409850', 62, 'grid', 1, 6, 7, 2, 1, '4',  NULL, NULL),
-  ('btn-veg-hz',   'VEGE H-Z',  'page_link','#000', '#409850', 63, 'grid', 1, 6, 9, 2, 1, '5',  NULL, NULL);
+  ('btn-fruit-am', 'FRUIT A-M', 'page_link','#fff', '#65a30d', 60, 'grid', 1, 6, 3, 2, 1, '2',  NULL, NULL),
+  ('btn-fruit-nz', 'FRUIT N-Z', 'page_link','#fff', '#65a30d', 61, 'grid', 1, 6, 5, 2, 1, '3',  NULL, NULL),
+  ('btn-veg-ag',   'VEGE A-G',  'page_link','#fff', '#15803d', 62, 'grid', 1, 6, 7, 2, 1, '4',  NULL, NULL),
+  ('btn-veg-hz',   'VEGE H-Z',  'page_link','#fff', '#15803d', 63, 'grid', 1, 6, 9, 2, 1, '5',  NULL, NULL);
 
--- ═══ Page 2: Fruit A-M ══════════════════════════════════════════════
+-- â•â•â• Page 2: Fruit A-M â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, parent_id) VALUES
   ('pg2-apples',       'APPLES\n$5.99/kg',          'page_link',  5.99,  'images/products/coles-5111654-zm.jpg', '#fff', '#1a3d2a', 1,  'grid', 2, 0, 0, 1, 1, '7'),
   ('pg2-apricots',     'APRICOTS\n$12.99/kg',       'page_link',  12.99, 'images/products/coles-409477-zm.jpg', '#fff', '#1a3d2a', 2,  'grid', 2, 0, 1, 1, 1, '8'),
@@ -393,7 +393,7 @@ INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, image, color, bg
   ('pg2-veg-menu',     'Vegetable\nMenu',           'page_link',  0,     NULL, '#000', '#86efac', 91, 'grid', 2, 1, 7, 3, 1, '4'),
   ('pg2-next-fruit',   'NEXT\nKEYBOARD\nFRUIT>',    'page_link',  0,     NULL, '#000', '#86efac', 92, 'grid', 2, 2, 7, 3, 2, '3');
 
--- ═══ Page 3: Fruit N-Z ══════════════════════════════════════════════
+-- â•â•â• Page 3: Fruit N-Z â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, parent_id) VALUES
   ('pg3-nectarines',   'NECTARINES\n$7.99/kg',      'page_link',  7.99,  NULL, '#fff', '#1a3d2a', 1,  'grid', 3, 0, 0, 1, 1, '18'),
   ('pg3-oranges',      'ORANGES\n$4.99/kg',         'page_link',  4.99,  'images/products/coles-4255717-zm.jpg', '#fff', '#1a3d2a', 2,  'grid', 3, 0, 1, 1, 1, '19'),
@@ -409,12 +409,12 @@ INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, image, color, bg
   ('pg3-plums',        'PLUMS\n$9.99/kg',           'page_link',  9.99,  NULL, '#fff', '#1a3d2a', 12, 'grid', 3, 1, 5, 1, 1, '22'),
   ('pg3-pomegranate',  'POMEGRANATE EA\n$3.99 ea',  'open_price', 3.99,  NULL, '#fff', '#1a3d2a', 13, 'grid', 3, 2, 0, 1, 1, NULL),
   ('pg3-pommelo',      'POMMELO KG\n$6.99/kg',      'open_price', 6.99,  NULL, '#fff', '#1a3d2a', 14, 'grid', 3, 2, 1, 1, 1, NULL),
-  ('pg3-quince',       'QUINCE KG\n$7.99/kg',       'open_price', 7.99,  NULL, '#fff', '#1a3d2a', 15, 'grid', 3, 2, 2, 1, 1, NULL),
+  ('pg3-quince',       'QUINCE KG\n$7.99/kg',       'open_price', 7.99,  'https://cdn0.woolworths.media/content/wowproductimages/large/147315.jpg', '#fff', '#1a3d2a', 15, 'grid', 3, 2, 2, 1, 1, NULL),
   ('pg3-tangello',     'TANGELLO KG\n$4.99/kg',     'open_price', 4.99,  NULL, '#fff', '#1a3d2a', 16, 'grid', 3, 2, 3, 1, 1, NULL),
   ('pg3-back',         'BACK',                      'back_home',  0,     NULL, '#000', '#22c55e', 90, 'grid', 3, 0, 7, 3, 1, NULL),
   ('pg3-prev-fruit',   '<BACK\nKEYBOARD\nFRUIT',    'page_link',  0,     NULL, '#000', '#86efac', 91, 'grid', 3, 2, 7, 3, 1, '2');
 
--- ═══ Page 4: Vegetables A-G ═════════════════════════════════════════
+-- â•â•â• Page 4: Vegetables A-G â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, parent_id) VALUES
   ('pg4-asian-vege',   'ASIAN VEGE EA\n$3.99 ea',   'open_price', 3.99,  NULL, '#fff', '#1a3d2a', 1,  'grid', 4, 0, 0, 1, 1, NULL),
   ('pg4-asparagus',    'ASPARAGUS EA\n$4.99 ea',    'open_price', 4.99,  NULL, '#fff', '#1a3d2a', 2,  'grid', 4, 0, 1, 1, 1, NULL),
@@ -422,15 +422,15 @@ INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, image, color, bg
   ('pg4-beetroot',     'BEETROOT\n$4.99/kg',        'page_link',  4.99,  NULL, '#fff', '#1a3d2a', 4,  'grid', 4, 0, 3, 1, 1, '23'),
   ('pg4-bottle-gourd', 'BOTTLE GOURD\n$5.99/kg',    'open_price', 5.99,  NULL, '#fff', '#1a3d2a', 5,  'grid', 4, 0, 4, 1, 1, NULL),
   ('pg4-broccoli',     'BROCCOLI\n$5.99/kg',        'page_link',  5.99,  'images/products/coles-407755-zm.jpg', '#fff', '#1a3d2a', 6,  'grid', 4, 0, 5, 1, 1, '24'),
-  ('pg4-brussels',     'BRUSSEL SPROUTS KG\n$12.99/kg','open_price',12.99,NULL,'#fff', '#1a3d2a', 7,  'grid', 4, 1, 0, 1, 1, NULL),
-  ('pg4-cabbage',      'CABBAGE\n$3.99 ea',         'page_link',  3.99,  NULL, '#fff', '#1a3d2a', 8,  'grid', 4, 1, 1, 1, 1, '25'),
+  ('pg4-brussels',     'BRUSSEL SPROUTS KG\n$12.99/kg','open_price',12.99,'https://images.pexels.com/photos/11617799/pexels-photo-11617799.jpeg?auto=compress&cs=tinysrgb&w=500','#fff', '#1a3d2a', 7,  'grid', 4, 1, 0, 1, 1, NULL),
+  ('pg4-cabbage',      'CABBAGE\n$3.99 ea',         'page_link',  3.99,  'https://images.pexels.com/photos/13796758/pexels-photo-13796758.jpeg?auto=compress&cs=tinysrgb&w=500', '#fff', '#1a3d2a', 8,  'grid', 4, 1, 1, 1, 1, '25'),
   ('pg4-capsicum',     'CAPSICUM\n$12.99/kg',       'page_link',  12.99, 'images/products/coles-4580208-zm.jpg', '#fff', '#1a3d2a', 9,  'grid', 4, 1, 2, 1, 1, '26'),
   ('pg4-carrots',      'CARROTS LOOSE KG\n$2.49/kg','open_price', 2.49,  'images/products/coles-4223335-zm.jpg', '#fff', '#1a3d2a', 10, 'grid', 4, 1, 3, 1, 1, NULL),
-  ('pg4-carrot-bag',   'CARROT BAG EA\n$2.99 ea',   'open_price', 2.99,  NULL, '#fff', '#1a3d2a', 11, 'grid', 4, 1, 4, 1, 1, NULL),
+  ('pg4-carrot-bag',   'CARROT BAG EA\n$2.99 ea',   'open_price', 2.99,  'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/2/2/4223335-zm.jpg', '#fff', '#1a3d2a', 11, 'grid', 4, 1, 4, 1, 1, NULL),
   ('pg4-cauliflower',  'CAULIFLOWER EA\n$4.99 ea',  'open_price', 4.99,  NULL, '#fff', '#1a3d2a', 12, 'grid', 4, 1, 5, 1, 1, NULL),
   ('pg4-celery',       'WHOLE CELERY EA\n$3.99 ea', 'open_price', 3.99,  NULL, '#fff', '#1a3d2a', 13, 'grid', 4, 2, 0, 1, 1, NULL),
   ('pg4-celeriac',     'CELERIAC EA\n$5.99 ea',     'open_price', 5.99,  NULL, '#fff', '#1a3d2a', 14, 'grid', 4, 2, 1, 1, 1, NULL),
-  ('pg4-chillies',     'CHILLIES\n$29.99/kg',       'page_link',  29.99, NULL, '#fff', '#1a3d2a', 15, 'grid', 4, 2, 2, 1, 1, '27'),
+  ('pg4-chillies',     'CHILLIES\n$29.99/kg',       'page_link',  29.99, 'https://images.pexels.com/photos/7720573/pexels-photo-7720573.jpeg?auto=compress&cs=tinysrgb&w=500', '#fff', '#1a3d2a', 15, 'grid', 4, 2, 2, 1, 1, '27'),
   ('pg4-chokos',       'CHOKOS KG\n$4.99/kg',       'open_price', 4.99,  NULL, '#fff', '#1a3d2a', 16, 'grid', 4, 2, 3, 1, 1, NULL),
   ('pg4-corn',         'CORN EA\n$1.99 ea',         'open_price', 1.99,  NULL, '#fff', '#1a3d2a', 17, 'grid', 4, 2, 4, 1, 1, NULL),
   ('pg4-cucumbers',    'CUCUMBERS\n$2.99 ea',       'open_price', 2.99,  NULL, '#fff', '#1a3d2a', 18, 'grid', 4, 2, 5, 1, 1, NULL),
@@ -443,37 +443,37 @@ INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, image, color, bg
   ('pg4-fruit-menu',   'FRUIT\nMENU',               'page_link',  0,     NULL, '#000', '#86efac', 91, 'grid', 4, 1, 7, 3, 1, '2'),
   ('pg4-next-veg',     'NEXT\nKEYBOARD\nVEGE>',     'page_link',  0,     NULL, '#000', '#86efac', 92, 'grid', 4, 2, 7, 3, 2, '5');
 
--- ═══ Page 5: Vegetables H-Z ═════════════════════════════════════════
+-- â•â•â• Page 5: Vegetables H-Z â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, parent_id) VALUES
-  ('pg5-herbs',        'HERBS\n$2.99 ea',           'open_price', 2.99,  NULL, '#fff', '#1a3d2a', 1,  'grid', 5, 0, 0, 1, 1, NULL),
-  ('pg5-kale',         'KALE EA\n$3.99 ea',         'open_price', 3.99,  NULL, '#fff', '#1a3d2a', 2,  'grid', 5, 0, 1, 1, 1, NULL),
+  ('pg5-herbs',        'HERBS\n$2.99 ea',           'open_price', 2.99,  'https://images.pexels.com/photos/4198019/pexels-photo-4198019.jpeg?auto=compress&cs=tinysrgb&w=500', '#fff', '#1a3d2a', 1,  'grid', 5, 0, 0, 1, 1, NULL),
+  ('pg5-kale',         'KALE EA\n$3.99 ea',         'open_price', 3.99,  'https://images.pexels.com/photos/28930881/pexels-photo-28930881.jpeg?auto=compress&cs=tinysrgb&w=500', '#fff', '#1a3d2a', 2,  'grid', 5, 0, 1, 1, 1, NULL),
   ('pg5-leeks',        'LEEKS EA\n$3.99 ea',        'open_price', 3.99,  NULL, '#fff', '#1a3d2a', 3,  'grid', 5, 0, 2, 1, 1, NULL),
   ('pg5-lettuces',     'LETTUCES\n$2.99 ea',        'page_link',  2.99,  'images/products/coles-4584071-zm.jpg', '#fff', '#1a3d2a', 4,  'grid', 5, 0, 3, 1, 1, '29'),
-  ('pg5-lettuce-bags', 'LETTUCE BAGS EA\n$3.99 ea', 'open_price', 3.99,  NULL, '#fff', '#1a3d2a', 5,  'grid', 5, 0, 4, 1, 1, NULL),
+  ('pg5-lettuce-bags', 'LETTUCE BAGS EA\n$3.99 ea', 'open_price', 3.99,  'https://images.pexels.com/photos/26951809/pexels-photo-26951809.jpeg?auto=compress&cs=tinysrgb&w=500', '#fff', '#1a3d2a', 5,  'grid', 5, 0, 4, 1, 1, NULL),
   ('pg5-lobok',        'LOBOK KG\n$4.99/kg',        'open_price', 4.99,  NULL, '#fff', '#1a3d2a', 6,  'grid', 5, 0, 5, 1, 1, NULL),
-  ('pg5-mushrooms',    'MUSHROOMS\n$12.99/kg',      'page_link',  12.99, 'images/products/coles-4829420-zm.jpg', '#fff', '#1a3d2a', 7,  'grid', 5, 1, 0, 1, 1, '30'),
+  ('pg5-mushrooms',    'MUSHROOMS\n$12.99/kg',      'page_link',  12.99, 'https://images.pexels.com/photos/5950411/pexels-photo-5950411.jpeg?auto=compress&cs=tinysrgb&w=500', '#fff', '#1a3d2a', 7,  'grid', 5, 1, 0, 1, 1, '30'),
   ('pg5-olives',       'OLIVES KG\n$14.99/kg',      'open_price', 14.99, NULL, '#fff', '#1a3d2a', 8,  'grid', 5, 1, 1, 1, 1, NULL),
-  ('pg5-onions',       'ONIONS\n$2.99/kg',          'page_link',  2.99,  'https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Onion_on_White.JPG/150px-Onion_on_White.JPG', '#fff', '#1a3d2a', 9,  'grid', 5, 1, 2, 1, 1, '31'),
-  ('pg5-parsnip',      'PARSNIP KG\n$7.99/kg',      'open_price', 7.99,  NULL, '#fff', '#1a3d2a', 10, 'grid', 5, 1, 3, 1, 1, NULL),
+  ('pg5-onions',       'ONIONS\n$2.99/kg',          'page_link',  2.99,  'https://images.pexels.com/photos/12296935/pexels-photo-12296935.jpeg?auto=compress&cs=tinysrgb&w=500', '#fff', '#1a3d2a', 9,  'grid', 5, 1, 2, 1, 1, '31'),
+  ('pg5-parsnip',      'PARSNIP KG\n$7.99/kg',      'open_price', 7.99,  'https://images.pexels.com/photos/28797269/pexels-photo-28797269.jpeg?auto=compress&cs=tinysrgb&w=500', '#fff', '#1a3d2a', 10, 'grid', 5, 1, 3, 1, 1, NULL),
   ('pg5-peas',         'PEAS KG\n$9.99/kg',         'open_price', 9.99,  NULL, '#fff', '#1a3d2a', 11, 'grid', 5, 1, 4, 1, 1, NULL),
-  ('pg5-potatoes',     'POTATOES\n$3.99/kg',        'page_link',  3.99,  'images/products/coles-3958573-zm.jpg', '#fff', '#1a3d2a', 12, 'grid', 5, 1, 5, 1, 1, '32'),
+  ('pg5-potatoes',     'POTATOES\n$3.99/kg',        'page_link',  3.99,  'https://images.pexels.com/photos/4110456/pexels-photo-4110456.jpeg?auto=compress&cs=tinysrgb&w=500', '#fff', '#1a3d2a', 12, 'grid', 5, 1, 5, 1, 1, '32'),
   ('pg5-pumpkins',     'PUMPKINS\n$2.99/kg',        'page_link',  2.99,  NULL, '#fff', '#1a3d2a', 13, 'grid', 5, 2, 0, 1, 1, '33'),
   ('pg5-radish',       'RADISH BUNCH EA\n$2.99 ea', 'open_price', 2.99,  NULL, '#fff', '#1a3d2a', 14, 'grid', 5, 2, 1, 1, 1, NULL),
   ('pg5-rhubarb',      'RHUBARB EA\n$4.99 ea',      'open_price', 4.99,  NULL, '#fff', '#1a3d2a', 15, 'grid', 5, 2, 2, 1, 1, NULL),
   ('pg5-shallots',     'SHALLOTS EA\n$2.99 ea',     'open_price', 2.99,  NULL, '#fff', '#1a3d2a', 16, 'grid', 5, 2, 3, 1, 1, NULL),
   ('pg5-silverbeet',   'SILVERBEET EA\n$3.99 ea',   'open_price', 3.99,  NULL, '#fff', '#1a3d2a', 17, 'grid', 5, 2, 4, 1, 1, NULL),
   ('pg5-snow-peas',    'SNOW PEAS KG\n$14.99/kg',   'open_price', 14.99, NULL, '#fff', '#1a3d2a', 18, 'grid', 5, 2, 5, 1, 1, NULL),
-  ('pg5-sugar-snap',   'SUGAR SNAP PEAS KG\n$14.99/kg','open_price',14.99,NULL,'#fff', '#1a3d2a', 19, 'grid', 5, 3, 0, 1, 1, NULL),
+  ('pg5-sugar-snap',   'SUGAR SNAP PEAS KG\n$14.99/kg','open_price',14.99,'https://images.pexels.com/photos/7288774/pexels-photo-7288774.jpeg?auto=compress&cs=tinysrgb&w=500','#fff', '#1a3d2a', 19, 'grid', 5, 3, 0, 1, 1, NULL),
   ('pg5-swedes',       'SWEDES KG\n$4.99/kg',       'open_price', 4.99,  NULL, '#fff', '#1a3d2a', 20, 'grid', 5, 3, 1, 1, 1, NULL),
   ('pg5-sweet-potato', 'SWEET POTATOES\n$4.99/kg',  'page_link',  4.99,  NULL, '#fff', '#1a3d2a', 21, 'grid', 5, 3, 2, 1, 1, '34'),
-  ('pg5-tomatoes',     'TOMATOES\n$5.99/kg',        'page_link',  5.99,  'images/products/coles-4835171-zm.jpg', '#fff', '#1a3d2a', 22, 'grid', 5, 3, 3, 1, 1, '35'),
+  ('pg5-tomatoes',     'TOMATOES\n$5.99/kg',        'page_link',  5.99,  'https://images.pexels.com/photos/9816726/pexels-photo-9816726.jpeg?auto=compress&cs=tinysrgb&w=500', '#fff', '#1a3d2a', 22, 'grid', 5, 3, 3, 1, 1, '35'),
   ('pg5-turnip',       'TURNIP KG\n$3.99/kg',       'open_price', 3.99,  NULL, '#fff', '#1a3d2a', 23, 'grid', 5, 3, 4, 1, 1, NULL),
   ('pg5-zucchini',     'ZUCCHINI\n$5.99/kg',        'page_link',  5.99,  NULL, '#fff', '#1a3d2a', 24, 'grid', 5, 3, 5, 1, 1, '36'),
   ('pg5-back',         'BACK',                      'back_home',  0,     NULL, '#000', '#22c55e', 90, 'grid', 5, 0, 7, 3, 1, NULL),
   ('pg5-fruit-menu',   'FRUIT\nMENU',               'page_link',  0,     NULL, '#000', '#86efac', 91, 'grid', 5, 1, 7, 3, 1, '2'),
   ('pg5-prev-veg',     '<BACK\nKEYBOARD\nVEG',      'page_link',  0,     NULL, '#000', '#86efac', 92, 'grid', 5, 2, 7, 3, 1, '4');
 
--- ═══ Pages 7-22: Fruit category sub-pages ═══════════════════════════
+-- â•â•â• Pages 7-22: Fruit category sub-pages â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 -- Page 7: Apples
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, parent_id) VALUES
   ('pg7-pink-lady',    'PINK LADY\n$5.99/kg',       'open_price', 5.99,  NULL, '#fff', '#1a3d2a', 1,  'grid', 7, 0, 0, 2, 1, NULL),
@@ -605,7 +605,7 @@ INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, image, color, bg
   ('pg22-sugar-plum',  'SUGAR PLUM\n$12.99/kg',   'open_price', 12.99, NULL, '#fff', '#1a3d2a', 3,  'grid', 22, 0, 4, 2, 1, NULL),
   ('pg22-back',        'BACK',                      'back_home',  0,     NULL, '#000', '#22c55e', 90, 'grid', 22, 0, 10, 3, 1, NULL);
 
--- ═══ Pages 23-36: Vegetable category sub-pages ══════════════════════
+-- â•â•â• Pages 23-36: Vegetable category sub-pages â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 -- Page 23: Beetroot
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, parent_id) VALUES
   ('pg23-beetroot-kg', 'BEETROOT KG\n$4.99/kg',   'open_price', 4.99,  NULL, '#fff', '#1a3d2a', 1,  'grid', 23, 0, 0, 2, 1, NULL),
@@ -637,8 +637,8 @@ INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, image, color, bg
 
 -- Page 27: Chillies
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, parent_id) VALUES
-  ('pg27-red-chilli',  'RED CHILLI\n$29.99/kg',    'open_price', 29.99, NULL, '#fff', '#1a3d2a', 1,  'grid', 27, 0, 0, 2, 1, NULL),
-  ('pg27-green-chilli','GREEN CHILLI\n$24.99/kg',  'open_price', 24.99, NULL, '#fff', '#1a3d2a', 2,  'grid', 27, 0, 2, 2, 1, NULL),
+  ('pg27-red-chilli',  'RED CHILLI\n$29.99/kg',    'open_price', 29.99, 'https://images.pexels.com/photos/7720573/pexels-photo-7720573.jpeg?auto=compress&cs=tinysrgb&w=500', '#fff', '#1a3d2a', 1,  'grid', 27, 0, 0, 2, 1, NULL),
+  ('pg27-green-chilli','GREEN CHILLI\n$24.99/kg',  'open_price', 24.99, 'https://images.pexels.com/photos/16814702/pexels-photo-16814702.jpeg?auto=compress&cs=tinysrgb&w=500', '#fff', '#1a3d2a', 2,  'grid', 27, 0, 2, 2, 1, NULL),
   ('pg27-birds-eye',   'BIRDS EYE\n$39.99/kg',    'open_price', 39.99, NULL, '#fff', '#1a3d2a', 3,  'grid', 27, 0, 4, 2, 1, NULL),
   ('pg27-jalapeno',    'JALAPENO\n$29.99/kg',     'open_price', 29.99, NULL, '#fff', '#1a3d2a', 4,  'grid', 27, 0, 6, 2, 1, NULL),
   ('pg27-back',        'BACK',                      'back_home',  0,     NULL, '#000', '#22c55e', 90, 'grid', 27, 0, 10, 3, 1, NULL);
@@ -721,7 +721,7 @@ INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, image, color, bg
   ('pg36-baby-zuc',    'BABY ZUCCHINI\n$9.99/kg', 'open_price', 9.99,  NULL, '#fff', '#1a3d2a', 3,  'grid', 36, 0, 4, 2, 1, NULL),
   ('pg36-back',        'BACK',                      'back_home',  0,     NULL, '#000', '#22c55e', 90, 'grid', 36, 0, 10, 3, 1, NULL);
 
--- ═══ Page 6: Grocery ════════════════════════════════════════════════
+-- â•â•â• Page 6: Grocery â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, parent_id, category_filter) VALUES
   ('pg6-grocery',      'GROCERY',                   'section',    0,     NULL, '#fff', '#6699cc', 1,  'grid', 6, 0, 0, 2, 1, NULL, 'Grocery');
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, parent_id) VALUES

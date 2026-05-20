@@ -110,6 +110,7 @@ contextBridge.exposeInMainWorld('pos', {
   clearLogs:          (date)      => ipcRenderer.invoke('app:logs:clear', date),
   exportLogs:         (date)      => ipcRenderer.invoke('app:logs:export', date),
   getHealth:          ()          => ipcRenderer.invoke('app:health'),
+  getMode:            ()          => ipcRenderer.invoke('app:getMode'),
 
   // Audit Log
   logAudit:           (entry)     => ipcRenderer.invoke('db:audit:log', entry),
@@ -200,5 +201,5 @@ contextBridge.exposeInMainWorld('pos', {
   scannerTest:        ()                    => ipcRenderer.invoke('hardware:scannerTest'),
 
   // LAN data changed (server pushed new data)
-  onDataChanged:      (cb)                  => { ipcRenderer.removeAllListeners('lan:data-changed'); ipcRenderer.on('lan:data-changed', () => cb()) },
+  onDataChanged:      (cb)                  => { ipcRenderer.removeAllListeners('lan:data-changed'); ipcRenderer.on('lan:data-changed', (_e, data) => cb(data)) },
 })

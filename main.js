@@ -22,7 +22,7 @@ const SCHEMA_PATH = path.join(__dirname, 'db', 'schema.sql')
 const LOG_DIR = path.join(app.getPath('userData'), 'logs')
 const BACKUP_DIR = path.join(app.getPath('userData'), 'backups')
 
-// ─── App Logging System ──────────────────────────────────────────────────────
+// â”€â”€â”€ App Logging System â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // File-based logging: {userData}/logs/app-YYYY-MM-DD.log
 // Levels: info, warn, error, fatal
 
@@ -55,7 +55,7 @@ function appLog (level, source, message, detail) {
     const logFile = path.join(LOG_DIR, `app-${ts.slice(0, 10)}.log`)
     fs.appendFileSync(logFile, line + '\n')
   } catch (_) {
-    // Last resort — can't even log
+    // Last resort â€” can't even log
   }
 
   if (level === 'error' || level === 'fatal') {
@@ -63,7 +63,7 @@ function appLog (level, source, message, detail) {
   }
 }
 
-// Prune old log files at startup — keep last 14 days
+// Prune old log files at startup â€” keep last 14 days
 try {
   if (fs.existsSync(LOG_DIR)) {
     const files = fs.readdirSync(LOG_DIR).filter(f => f.startsWith('app-') && f.endsWith('.log')).sort()
@@ -80,12 +80,12 @@ process.on('uncaughtException', (err) => {
   appLog('fatal', 'process', 'Uncaught exception', msg)
   // Try to save DB before crashing
   try { if (db) saveDBSync() } catch (_) {}
-  // If it's a serial port / hardware error, don't crash — just log and continue
+  // If it's a serial port / hardware error, don't crash â€” just log and continue
   const isHardwareError = msg.includes('serialport') || msg.includes('SerialPort') || msg.includes('COM') ||
     msg.includes('Access is denied') || msg.includes('port is not open') || msg.includes('EACCES') ||
     msg.includes('node-hid') || msg.includes('HID') || msg.includes('OPOS')
   if (isHardwareError) {
-    appLog('warn', 'process', 'Hardware error caught — app continues running')
+    appLog('warn', 'process', 'Hardware error caught â€” app continues running')
     return  // swallow the error, don't crash
   }
   // For non-hardware errors, still crash (default Node.js behaviour)
@@ -120,7 +120,7 @@ async function initDatabase() {
     try { db.run(stmt) } catch (_) {}
   }
 
-  // Deleted records tracking — prevents sync/seed from resurrecting deleted items
+  // Deleted records tracking â€” prevents sync/seed from resurrecting deleted items
   try { db.run("CREATE TABLE IF NOT EXISTS deleted_records (table_name TEXT NOT NULL, record_id TEXT NOT NULL, deleted_at TEXT DEFAULT (datetime('now')), PRIMARY KEY (table_name, record_id))") } catch (_) {}
 
   // Migrations for existing DBs
@@ -137,10 +137,10 @@ async function initDatabase() {
     "UPDATE keyboard_buttons SET grid_row = 3, grid_col = 2, row_span = 1 WHERE id = 'pg2-melons' AND grid_row = 4",
     // Add product_id column to link keyboard buttons to real products
     "ALTER TABLE keyboard_buttons ADD COLUMN product_id TEXT REFERENCES products(id)",
-    // Remove void, error correct, lock buttons — replace with End of Day
+    // Remove void, error correct, lock buttons â€” replace with End of Day
     "UPDATE keyboard_buttons SET active = 0 WHERE id IN ('fn-void', 'fn-errcorrect', 'fn-lock')",
     "INSERT OR IGNORE INTO keyboard_buttons (id, label, type, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span) VALUES ('fn-endofday', 'END OF\\nDAY', 'endofday', '#fff', '#8b5cf6', 50, 'grid', 1, 0, 0, 1, 1)",
-    // Remove supervisor, viewor, pctone — rename buttons — add unified discount
+    // Remove supervisor, viewor, pctone â€” rename buttons â€” add unified discount
     "UPDATE keyboard_buttons SET active = 0 WHERE id IN ('fn-supervisor', 'fn-viewor', 'fn-pctone', 'fn-pctdisc')",
     "UPDATE keyboard_buttons SET label = 'OPEN\\nDRAWER', bg_color = '#e07020', color = '#fff' WHERE id = 'fn-nosale'",
     "UPDATE keyboard_buttons SET label = 'RETURN\\nITEM' WHERE id = 'fn-return'",
@@ -164,7 +164,7 @@ async function initDatabase() {
     "INSERT OR REPLACE INTO settings (key, value) VALUES ('keyboard_page_sizes', '{\"1\":{\"cols\":13,\"rows\":7},\"2\":{\"cols\":8,\"rows\":5},\"3\":{\"cols\":8,\"rows\":5},\"4\":{\"cols\":8,\"rows\":5},\"5\":{\"cols\":8,\"rows\":5},\"6\":{\"cols\":8,\"rows\":5}}')",
     // Reset Wikimedia images so relinkKeyboardProducts applies GitHub-hosted ones
     "UPDATE keyboard_buttons SET image = NULL WHERE image LIKE '%wikimedia%'",
-    // Clear Wikimedia product images — will be re-set by nav migration
+    // Clear Wikimedia product images â€” will be re-set by nav migration
     "UPDATE products SET image_url = NULL WHERE image_url LIKE '%wikimedia%'",
     // Fix wrong product_id links (buttons incorrectly linked to Bippi Chilli product)
     "UPDATE keyboard_buttons SET product_id = NULL WHERE product_id IN (SELECT id FROM products WHERE name LIKE '%BIPPI%CHILLI%')",
@@ -176,9 +176,9 @@ async function initDatabase() {
     // Upgrade department button images to Pexels high-quality photography
     "UPDATE keyboard_buttons SET image = NULL WHERE id IN ('btn-meat','btn-coffee','btn-fv','btn-cheese','btn-flowers','btn-deli','btn-nuts','btn-grocery','pg2-cherries')",
     "DELETE FROM keyboard_buttons WHERE id = 'fn-ubereats'",
-    // ── Upgrade all fruit/veg button images to Pexels photography ──
+    // â”€â”€ Upgrade all fruit/veg button images to Pexels photography â”€â”€
     "UPDATE keyboard_buttons SET image = NULL WHERE id LIKE 'pg2-%' OR id LIKE 'pg3-%' OR id LIKE 'pg4-%' OR id LIKE 'pg5-%'",
-    // ── Intentional colour scheme for fruit/veg pages ──
+    // â”€â”€ Intentional colour scheme for fruit/veg pages â”€â”€
     // Fruit pages: warm earthy tones (dark olive) instead of flat #1a3d2a
     "UPDATE keyboard_buttons SET bg_color = '#2d3a2e' WHERE (id LIKE 'pg2-%' OR id LIKE 'pg3-%') AND bg_color = '#1a3d2a'",
     // Veg pages: cool forest green
@@ -187,7 +187,7 @@ async function initDatabase() {
     "UPDATE keyboard_buttons SET bg_color = '#16a34a', color = '#fff' WHERE id IN ('pg2-back','pg3-back','pg4-back','pg5-back')",
     "UPDATE keyboard_buttons SET bg_color = '#22c55e', color = '#000' WHERE id IN ('pg2-veg-menu','pg3-prev-fruit','pg4-fruit-menu','pg5-fruit-menu')",
     "UPDATE keyboard_buttons SET bg_color = '#4ade80', color = '#000' WHERE id IN ('pg2-next-fruit','pg4-next-veg','pg5-prev-veg')",
-    // ── Semantic colour scheme for main register page ──
+    // â”€â”€ Semantic colour scheme for main register page â”€â”€
     // Green = selling actions / item search / confirm
     "UPDATE keyboard_buttons SET bg_color = '#16a34a', color = '#fff' WHERE id = 'fn-itemsearch'",
     // Orange = quantity / modifiers / drawer
@@ -204,11 +204,11 @@ async function initDatabase() {
     "UPDATE keyboard_buttons SET bg_color = '#475569', color = '#fff' WHERE id = 'fn-reprint'",
     "UPDATE keyboard_buttons SET bg_color = '#475569', color = '#fff' WHERE id = 'fn-hold'",
     "UPDATE keyboard_buttons SET bg_color = '#475569', color = '#fff' WHERE id = 'fn-endofday'",
-    // Department buttons — uniform dark slate, let product images pop
+    // Department buttons â€” uniform dark slate, let product images pop
     "UPDATE keyboard_buttons SET bg_color = '#1e293b', color = '#fff' WHERE id IN ('btn-meat','btn-flowers','btn-coffee','btn-bread','btn-deli','btn-cheese','btn-bags','btn-grocery','btn-nuts','btn-gas')",
-    // Fruit & veg departments — dark green family
+    // Fruit & veg departments â€” dark green family
     "UPDATE keyboard_buttons SET bg_color = '#14532d', color = '#fff' WHERE id IN ('btn-fv','btn-fvkg')",
-    // Bottom nav — fruit = muted green, veg = muted green (unified fresh produce look)
+    // Bottom nav â€” fruit = muted green, veg = muted green (unified fresh produce look)
     "UPDATE keyboard_buttons SET bg_color = '#15803d', color = '#fff' WHERE id IN ('btn-fruit-am','btn-fruit-nz')",
     "UPDATE keyboard_buttons SET bg_color = '#166534', color = '#fff' WHERE id IN ('btn-veg-ag','btn-veg-hz')",
     // Add family grouping for categories
@@ -226,7 +226,7 @@ async function initDatabase() {
     try { db.run(m) } catch (_) {}
   }
 
-  // ── GST compliance: set correct tax rates per Australian law ──
+  // â”€â”€ GST compliance: set correct tax rates per Australian law â”€â”€
   // Fresh staple foods are GST-free (0%). Prepared foods, beverages, confectionery,
   // snacks, and non-food items attract 10% GST.
   try {
@@ -250,7 +250,7 @@ async function initDatabase() {
       for (const cat of gstCategories) {
         db.run(`UPDATE products SET tax_rate = 0.10 WHERE category_id IN (SELECT id FROM categories WHERE LOWER(name) = LOWER(?1))`, [cat])
       }
-      // Special cases: items sold by weight that are clearly fresh produce → GST-free
+      // Special cases: items sold by weight that are clearly fresh produce â†’ GST-free
       db.run("UPDATE products SET tax_rate = 0.00 WHERE unit IN ('kg', '100g') AND tax_rate = 0.10 AND category_id IN (SELECT id FROM categories WHERE LOWER(name) IN ('fruit', 'vegetables', 'meat', 'deli', 'cheese'))")
       db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('migration_gst_rates_v1', '1')")
       appLog('info', 'migration', 'Applied Australian GST rates to all products')
@@ -258,7 +258,7 @@ async function initDatabase() {
     }
   } catch (e) { appLog('error', 'migration', 'GST rate migration failed', e.message) }
 
-  // ── Repair: restore open_price button labels mangled by previous migration ──
+  // â”€â”€ Repair: restore open_price button labels mangled by previous migration â”€â”€
   try {
     const repairDone = dbAll("SELECT value FROM settings WHERE key = 'migration_repair_labels_v1'")
     if (!repairDone.length) {
@@ -308,9 +308,9 @@ async function initDatabase() {
     }
   } catch (e) { console.error('Label repair error:', e) }
 
-  // ── Create fruit/veg subcategories (one-time) ──
+  // â”€â”€ Create fruit/veg subcategories (one-time) â”€â”€
   // Adds categories like "Apples", "Bananas" etc. so section buttons can navigate to them
-  // Also converts page_link buttons → section and cleans ONLY those labels
+  // Also converts page_link buttons â†’ section and cleans ONLY those labels
   try {
     const done = dbAll("SELECT value FROM settings WHERE key = 'migration_fv_subcats_v1'")
     if (!done.length) {
@@ -362,7 +362,7 @@ async function initDatabase() {
         db.run("UPDATE products SET category_id = ? WHERE category_id = ? AND LOWER(name) LIKE '%' || LOWER(?) || '%'",
           [catId, parentId, catName.replace(/\s+/g, '%')])
 
-        // Convert button: page_link → section, set category_filter, clean label
+        // Convert button: page_link â†’ section, set category_filter, clean label
         db.run("UPDATE keyboard_buttons SET type = 'section', category_filter = ?, label = ? WHERE id = ?",
           [catName, catName, btnId])
       }
@@ -400,7 +400,7 @@ async function initDatabase() {
     db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('layout_v3_shifted', '1')")
   } catch (e) { console.error('Layout v3 migration error:', e.message) }
 
-  // Nav button type fix + product images migration (idempotent — uses absolute values)
+  // Nav button type fix + product images migration (idempotent â€” uses absolute values)
   try {
     const navFixed = db.prepare("SELECT value FROM settings WHERE key = 'nav_buttons_fixed'")
     navFixed.bind([])
@@ -467,7 +467,7 @@ async function initDatabase() {
     const pgRow = pgCheck.step() ? pgCheck.getAsObject() : null
     pgCheck.free()
     if (!pgRow) {
-      // Page 2: Fruit A-M — reflow 20 products into 10-col rows
+      // Page 2: Fruit A-M â€” reflow 20 products into 10-col rows
       const pg2Map = [
         ['pg2-apples',0,0],['pg2-apricots',0,1],['pg2-avocados',0,2],['pg2-bananas',0,3],['pg2-cherries',0,4],
         ['pg2-coconut',0,5],['pg2-custard-apple',0,6],['pg2-dragon-fruit',0,7],['pg2-figs',0,8],['pg2-grapes',0,9],
@@ -481,7 +481,7 @@ async function initDatabase() {
       db.run("UPDATE keyboard_buttons SET label = 'VEG\\nMENU' WHERE id = 'pg2-veg-menu'")
       db.run("UPDATE keyboard_buttons SET label = 'FRUIT\\nN-Z >' WHERE id = 'pg2-next-fruit'")
 
-      // Page 3: Fruit N-Z — reflow 16 products
+      // Page 3: Fruit N-Z â€” reflow 16 products
       const pg3Map = [
         ['pg3-nectarines',0,0],['pg3-oranges',0,1],['pg3-passion-fruit',0,2],['pg3-papaya',0,3],['pg3-pawpaw',0,4],
         ['pg3-peaches',0,5],['pg3-pears',0,6],['pg3-persimmons',0,7],['pg3-pineapple-sm',0,8],['pg3-pineapple-md',0,9],
@@ -493,7 +493,7 @@ async function initDatabase() {
       }
       db.run("UPDATE keyboard_buttons SET label = '< FRUIT\\nA-M' WHERE id = 'pg3-prev-fruit'")
 
-      // Page 4: Veg A-G — reflow 23 products
+      // Page 4: Veg A-G â€” reflow 23 products
       const pg4Map = [
         ['pg4-asian-vege',0,0],['pg4-asparagus',0,1],['pg4-beans',0,2],['pg4-beetroot',0,3],['pg4-bottle-gourd',0,4],
         ['pg4-broccoli',0,5],['pg4-brussels',0,6],['pg4-cabbage',0,7],['pg4-capsicum',0,8],['pg4-carrots',0,9],
@@ -507,7 +507,7 @@ async function initDatabase() {
       }
       db.run("UPDATE keyboard_buttons SET label = 'VEG\\nH-Z >' WHERE id = 'pg4-next-veg'")
 
-      // Page 5: Veg H-Z — reflow 24 products
+      // Page 5: Veg H-Z â€” reflow 24 products
       const pg5Map = [
         ['pg5-herbs',0,0],['pg5-kale',0,1],['pg5-leeks',0,2],['pg5-lettuces',0,3],['pg5-lettuce-bags',0,4],
         ['pg5-lobok',0,5],['pg5-mushrooms',0,6],['pg5-olives',0,7],['pg5-onions',0,8],['pg5-parsnip',0,9],
@@ -550,7 +550,7 @@ async function initDatabase() {
     }
   } catch (e) { console.error('Keyboard layout v4 migration error:', e.message) }
 
-  // V5: Fix duplicate schema seed — old 10-col block was inserted before correct 13-col block
+  // V5: Fix duplicate schema seed â€” old 10-col block was inserted before correct 13-col block
   try {
     const v5Check = db.prepare("SELECT value FROM settings WHERE key = 'layout_v5_fix'")
     v5Check.bind([])
@@ -568,7 +568,7 @@ async function initDatabase() {
         }
       }
       db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('layout_v5_fix', '1')")
-      console.log('Applied keyboard layout fix (v5 — removed old seed conflict)')
+      console.log('Applied keyboard layout fix (v5 â€” removed old seed conflict)')
     }
   } catch (e) { console.error('Keyboard layout v5 fix error:', e.message) }
 
@@ -615,7 +615,7 @@ async function initDatabase() {
     }
   } catch (e) { console.error('Company logo migration error:', e.message) }
 
-  // Enforce deleted_records — remove anything that was intentionally deleted but got re-inserted
+  // Enforce deleted_records â€” remove anything that was intentionally deleted but got re-inserted
   try {
     const deleted = db.exec("SELECT table_name, record_id FROM deleted_records")
     if (deleted.length && deleted[0].values.length) {
@@ -626,7 +626,7 @@ async function initDatabase() {
     }
   } catch (_) {}
 
-  // ── Link keyboard buttons to product records ──
+  // â”€â”€ Link keyboard buttons to product records â”€â”€
   // Creates product records for open_price/fixed_price buttons that lack a product_id,
   // so they appear in deals search and transaction reports with proper PLU codes.
   try {
@@ -721,7 +721,7 @@ async function initDatabase() {
     }
   } catch (e) { appLog('error', 'migration', 'Keyboard-product link migration failed', e.message) }
 
-  // ── Re-link unlinked keyboard buttons on every startup ──
+  // â”€â”€ Re-link unlinked keyboard buttons on every startup â”€â”€
   // Catches buttons added after v1 migration, or buttons whose product_id was cleared.
   try {
     const unlinked = dbAll(`
@@ -781,7 +781,7 @@ async function initDatabase() {
       AND product_id IN (SELECT id FROM products WHERE open_price = 0 OR open_price IS NULL)`)
   } catch (e) { appLog('error', 'startup', 'Keyboard re-link failed', e.message) }
 
-  // ── Intentional color coding for function buttons ──
+  // â”€â”€ Intentional color coding for function buttons â”€â”€
   // Red = destructive (logout, return), Blue = navigation (hold, find sale),
   // Amber = caution (discount, open drawer), Teal = search, Purple = admin,
   // Gray = utility (reprint, price check), Green = payment (subtotal)
@@ -809,6 +809,49 @@ async function initDatabase() {
       appLog('info', 'migration', 'Applied intentional color coding to function buttons')
     }
   } catch (e) { appLog('error', 'migration', 'Button color migration failed', e.message) }
+
+  // Main keyboard palette v2: grouped, calmer colours for the register home page.
+  try {
+    const paletteDone = dbAll("SELECT value FROM settings WHERE key = 'migration_main_keyboard_palette_v2'")
+    if (!paletteDone.length) {
+      const palette = [
+        // Utilities
+        ['fn-reprint',    '#fff', '#64748b'],
+        ['fn-endofday',   '#fff', '#6d28d9'],
+        ['fn-hold',       '#fff', '#2563eb'],
+        ['fn-itemsearch', '#fff', '#0f766e'],
+        ['fn-nosale',     '#fff', '#b45309'],
+        ['fn-pricecheck', '#fff', '#64748b'],
+        ['fn-discount',   '#fff', '#ca8a04'],
+        ['fn-movedrawer', '#fff', '#be123c'],
+        ['fn-return',     '#fff', '#dc2626'],
+        ['fn-recall',     '#fff', '#1d4ed8'],
+        ['btn-subtotal',  '#fff', '#15803d'],
+        // Departments and main navigation
+        ['btn-meat',      '#fff', '#8f2d38'],
+        ['btn-flowers',   '#fff', '#be185d'],
+        ['btn-fv',        '#fff', '#166534'],
+        ['btn-coffee',    '#fff', '#6b4f3f'],
+        ['btn-bread',     '#fff', '#92400e'],
+        ['btn-fvkg',      '#fff', '#047857'],
+        ['btn-deli',      '#fff', '#9f1239'],
+        ['btn-cheese',    '#fff', '#a16207'],
+        ['btn-bags',      '#fff', '#334155'],
+        ['btn-grocery',   '#fff', '#2563eb'],
+        ['btn-nuts',      '#fff', '#7c2d12'],
+        ['btn-gas',       '#fff', '#475569'],
+        ['btn-fruit-am',  '#fff', '#65a30d'],
+        ['btn-fruit-nz',  '#fff', '#65a30d'],
+        ['btn-veg-ag',    '#fff', '#15803d'],
+        ['btn-veg-hz',    '#fff', '#15803d'],
+      ]
+      for (const [id, color, bg] of palette) {
+        db.run("UPDATE keyboard_buttons SET color = ?1, bg_color = ?2 WHERE id = ?3 AND page = 1", [color, bg, id])
+      }
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('migration_main_keyboard_palette_v2', '1')")
+      appLog('info', 'migration', 'Applied main keyboard palette v2')
+    }
+  } catch (e) { appLog('error', 'migration', 'Main keyboard palette migration failed', e.message) }
 
   // Merge products from bundled DB if local is missing any
   if (dbExists && fs.existsSync(BUNDLED_DB_PATH)) {
@@ -855,7 +898,7 @@ async function initDatabase() {
     if (applied > 0) appLog('info', 'database', `Applied ${applied} keyboard sub-page buttons (v${kbSubpages.VERSION})`)
   } catch (e) { appLog('error', 'database', 'Keyboard sub-page apply failed', e.message) }
 
-  // ── Multi-buy deals (one-time) ──
+  // â”€â”€ Multi-buy deals (one-time) â”€â”€
   try {
     const dealsDone = dbAll("SELECT value FROM settings WHERE key = 'deals_v1'")
     if (!dealsDone.length) {
@@ -877,7 +920,7 @@ async function initDatabase() {
     }
   } catch (e) { appLog('error', 'database', 'Deals migration failed', e.message) }
 
-  // ── Price & unit update (May 2026 price list) ──
+  // â”€â”€ Price & unit update (May 2026 price list) â”€â”€
   try {
     const pricesDone = dbAll("SELECT value FROM settings WHERE key = 'migration_prices_may2026_v1'")
     if (!pricesDone.length) {
@@ -931,7 +974,7 @@ async function initDatabase() {
         }
       }
 
-      // Rename Bartlett → William
+      // Rename Bartlett â†’ William
       const bartRow = db.exec("SELECT id FROM products WHERE name = 'Bartlett' AND active = 1")
       if (bartRow.length && bartRow[0].values.length) {
         db.run("UPDATE products SET name = 'William', price = 5.89, updated_at = datetime('now') WHERE id = ?1", [bartRow[0].values[0][0]])
@@ -1007,7 +1050,7 @@ async function initDatabase() {
         }
       }
 
-      // Update deals — add Twin Cos Bag deal, update existing deal product links
+      // Update deals â€” add Twin Cos Bag deal, update existing deal product links
       // Link deals to products by finding product IDs
       const dealDefs = [
         ['deal-carrot-bags-2for5', 'Carrot Bag'],
@@ -1076,14 +1119,14 @@ async function initDatabase() {
 
       let imgUpdated = 0
 
-      // Coles URLs → local
+      // Coles URLs â†’ local
       const colesKb = dbAll("SELECT id, image FROM keyboard_buttons WHERE image LIKE '%shop.coles.com.au%'")
       for (const row of colesKb) {
         const m = row.image.match(/(\d+-zm\.jpg)/)
         if (m) { dbRun("UPDATE keyboard_buttons SET image = ? WHERE id = ?", [`images/products/coles-${m[1]}`, row.id]); imgUpdated++ }
       }
 
-      // Woolworths URLs → local
+      // Woolworths URLs â†’ local
       const woolKb = dbAll("SELECT id, image FROM keyboard_buttons WHERE image LIKE '%woolworths.media%'")
       for (const row of woolKb) {
         const m = row.image.match(/\/large\/(\d+)\.jpg/)
@@ -1114,7 +1157,7 @@ async function initDatabase() {
     }
   } catch (e) { appLog('error', 'migration', 'Local images migration failed', e.message) }
 
-  // ── Migration: Fix receipt_footer literal \\n ────────────────────────
+  // â”€â”€ Migration: Fix receipt_footer literal \\n â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   try {
     const footer = dbGet("SELECT value FROM settings WHERE key = 'receipt_footer'")
     if (footer && footer.value && footer.value.includes('\\n')) {
@@ -1130,7 +1173,7 @@ async function initDatabase() {
     }
   } catch (e) { appLog('error', 'migration', 'Receipt footer fix failed', e.message) }
 
-  // ── Migration: Import all products from products.json ────────────────
+  // â”€â”€ Migration: Import all products from products.json â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   try {
     const importDone = dbAll("SELECT value FROM settings WHERE key = 'migration_import_products_v1'")
     if (!importDone.length || !importDone[0].value) {
@@ -1170,7 +1213,7 @@ async function initDatabase() {
     }
   } catch (e) { appLog('error', 'migration', 'Products import migration failed', e.message) }
 
-  // ── Migration: Import keyboard layout from keyboard-layout.json ──────
+  // â”€â”€ Migration: Import keyboard layout from keyboard-layout.json â”€â”€â”€â”€â”€â”€
   try {
     const kbDone = dbAll("SELECT value FROM settings WHERE key = 'migration_import_keyboard_v2'")
     if (!kbDone.length || !kbDone[0].value) {
@@ -1222,7 +1265,7 @@ async function initDatabase() {
     }
   } catch (e) { appLog('error', 'migration', 'Keyboard import migration failed', e.message) }
 
-  // ── Migration: Convert broccoli/cabbage/chillies/tomatoes to section buttons ──
+  // â”€â”€ Migration: Convert broccoli/cabbage/chillies/tomatoes to section buttons â”€â”€
   try {
     const secDone = dbAll("SELECT value FROM settings WHERE key = 'migration_section_buttons_v1'")
     if (!secDone.length || !secDone[0].value) {
@@ -1279,13 +1322,40 @@ async function initDatabase() {
     }
   } catch (e) { appLog('error', 'migration', 'Grocery pantry image migration failed', e.message) }
 
+  // Re-apply once after keyboard imports/photo migrations, so fresh resets keep the palette too.
+  try {
+    const palettePostDone = dbAll("SELECT value FROM settings WHERE key = 'migration_main_keyboard_palette_v2_post_import'")
+    if (!palettePostDone.length) {
+      const palette = [
+        ['fn-reprint', '#fff', '#64748b'], ['fn-endofday', '#fff', '#6d28d9'],
+        ['fn-hold', '#fff', '#2563eb'], ['fn-itemsearch', '#fff', '#0f766e'],
+        ['fn-nosale', '#fff', '#b45309'], ['fn-pricecheck', '#fff', '#64748b'],
+        ['fn-discount', '#fff', '#ca8a04'], ['fn-movedrawer', '#fff', '#be123c'],
+        ['fn-return', '#fff', '#dc2626'], ['fn-recall', '#fff', '#1d4ed8'],
+        ['btn-subtotal', '#fff', '#15803d'], ['btn-meat', '#fff', '#8f2d38'],
+        ['btn-flowers', '#fff', '#be185d'], ['btn-fv', '#fff', '#166534'],
+        ['btn-coffee', '#fff', '#6b4f3f'], ['btn-bread', '#fff', '#92400e'],
+        ['btn-fvkg', '#fff', '#047857'], ['btn-deli', '#fff', '#9f1239'],
+        ['btn-cheese', '#fff', '#a16207'], ['btn-bags', '#fff', '#334155'],
+        ['btn-grocery', '#fff', '#2563eb'], ['btn-nuts', '#fff', '#7c2d12'],
+        ['btn-gas', '#fff', '#475569'], ['btn-fruit-am', '#fff', '#65a30d'],
+        ['btn-fruit-nz', '#fff', '#65a30d'], ['btn-veg-ag', '#fff', '#15803d'],
+        ['btn-veg-hz', '#fff', '#15803d'],
+      ]
+      for (const [id, color, bg] of palette) {
+        db.run("UPDATE keyboard_buttons SET color = ?1, bg_color = ?2 WHERE id = ?3 AND page = 1", [color, bg, id])
+      }
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('migration_main_keyboard_palette_v2_post_import', '1')")
+    }
+  } catch (e) { appLog('error', 'migration', 'Main keyboard palette post-import failed', e.message) }
+
   saveDBSync()
   appLog('info', 'database', 'Database initialized', `Path: ${DB_PATH}`)
 
   // Auto-backup on startup
   createBackup('startup')
 
-  // Daily backup timer — every 24 hours
+  // Daily backup timer â€” every 24 hours
   dailyBackupTimer = setInterval(() => {
     createBackup('daily')
   }, 24 * 60 * 60 * 1000)
@@ -1381,7 +1451,7 @@ function createBackup(prefix = 'auto') {
     const backupFile = path.join(BACKUP_DIR, `${prefix}-${ts}.sqlite`)
     if (fs.existsSync(DB_PATH)) {
       fs.copyFileSync(DB_PATH, backupFile)
-      // Prune old backups — keep last 14
+      // Prune old backups â€” keep last 14
       const files = fs.readdirSync(BACKUP_DIR).filter(f => f.endsWith('.sqlite')).sort()
       while (files.length > 14) {
         const old = files.shift()
@@ -1408,7 +1478,7 @@ function scheduleSave() {
   }, 150)
 }
 
-// sql.js helpers — wraps the slightly different API to match what we need
+// sql.js helpers â€” wraps the slightly different API to match what we need
 
 function dbAll(sql, params = []) {
   let stmt
@@ -1498,7 +1568,7 @@ const KB_IMAGE_MAP = {
   'pg3-plums':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/5/6/156382-zm.jpg' },
   'pg3-pomegranate':   { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/1/4519320-zm.jpg' },
   'pg3-pommelo':       { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/9/0/5907370-zm.jpg' },
-  'pg3-quince':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/1/0/410115-zm.jpg' },
+  'pg3-quince':        { base: 'direct', file: 'https://cdn0.woolworths.media/content/wowproductimages/large/147315.jpg' },
   'pg3-raspberries':   { base: 'fv', file: 'Raspberries_Punnet.jpg' },
   'pg3-blueberries':   { base: 'fv', file: 'Blueberries_Punnet.jpg' },
   'pg3-rockmelon':     { base: 'fv', file: 'Rockmelon.jpg' },
@@ -1512,15 +1582,15 @@ const KB_IMAGE_MAP = {
   'pg4-beetroot':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/2/8/5288711-zm.jpg' },
   'pg4-broccolini':    { base: 'fv', file: 'Broccolini_Bunch.jpg' },
   'pg4-broccoli':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/7/407755-zm.jpg' },
-  'pg4-brussels':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/9/9/8/9989810-zm.jpg' },
-  'pg4-cabbage':       { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/7/2/3/7233448-zm.jpg' },
+  'pg4-brussels':      { base: 'direct', file: 'https://images.pexels.com/photos/11617799/pexels-photo-11617799.jpeg?auto=compress&cs=tinysrgb&w=500' },
+  'pg4-cabbage':       { base: 'direct', file: 'https://images.pexels.com/photos/13796758/pexels-photo-13796758.jpeg?auto=compress&cs=tinysrgb&w=500' },
   'pg4-capsicum':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/8/4580208-zm.jpg' },
   'pg4-carrots':       { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/2/2/4223335-zm.jpg' },
   'pg4-carrot-bag':    { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/2/2/4223335-zm.jpg' },
   'pg4-cauliflower':   { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/6/0/4601603-zm.jpg' },
   'pg4-celery':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/8/4/4845732-zm.jpg' },
   'pg4-celeriac':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/8/9/4894352-zm.jpg' },
-  'pg4-chillies':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/8/7/6/8760314-zm.jpg' },
+  'pg4-chillies':      { base: 'direct', file: 'https://images.pexels.com/photos/7720573/pexels-photo-7720573.jpeg?auto=compress&cs=tinysrgb&w=500' },
   'pg4-chokos':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/2/2/5229814-zm.jpg' },
   'pg4-corn':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/6/4562603-zm.jpg' },
   'pg4-cucumbers':     { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/7/4575208-zm.jpg' },
@@ -1531,28 +1601,28 @@ const KB_IMAGE_MAP = {
   'pg4-ginger':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/0/3/5034484-zm.jpg' },
   'pg4-bottle-gourd':  { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/6/6/3/6630216-zm.jpg' },
   // Page 5: Vegetables H-Z
-  'pg5-herbs':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/7/4575569-zm.jpg' },
-  'pg5-kale':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/8/6/9/8696598-zm.jpg' },
+  'pg5-herbs':         { base: 'direct', file: 'https://images.pexels.com/photos/4198019/pexels-photo-4198019.jpeg?auto=compress&cs=tinysrgb&w=500' },
+  'pg5-kale':          { base: 'direct', file: 'https://images.pexels.com/photos/28930881/pexels-photo-28930881.jpeg?auto=compress&cs=tinysrgb&w=500' },
   'pg5-leeks':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/9/4595930-zm.jpg' },
   'pg5-lettuces':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/8/4584071-zm.jpg' },
-  'pg5-lettuce-bags':  { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/6/8/8/6885716-zm.jpg' },
-  'pg5-mushrooms':     { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/8/2/4829420-zm.jpg' },
+  'pg5-lettuce-bags':  { base: 'direct', file: 'https://images.pexels.com/photos/26951809/pexels-photo-26951809.jpeg?auto=compress&cs=tinysrgb&w=500' },
+  'pg5-mushrooms':     { base: 'direct', file: 'https://images.pexels.com/photos/5950411/pexels-photo-5950411.jpeg?auto=compress&cs=tinysrgb&w=500' },
   'pg5-olives':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/5/5/5554156-zm.jpg' },
-  'pg5-onions':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/8/0/4803991-zm.jpg' },
-  'pg5-parsnip':       { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/1/0/5108183-zm.jpg' },
+  'pg5-onions':        { base: 'direct', file: 'https://images.pexels.com/photos/12296935/pexels-photo-12296935.jpeg?auto=compress&cs=tinysrgb&w=500' },
+  'pg5-parsnip':       { base: 'direct', file: 'https://images.pexels.com/photos/28797269/pexels-photo-28797269.jpeg?auto=compress&cs=tinysrgb&w=500' },
   'pg5-peas':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/3/8/438409-zm.jpg' },
-  'pg5-potatoes':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/3/9/5/3958573-zm.jpg' },
+  'pg5-potatoes':      { base: 'direct', file: 'https://images.pexels.com/photos/4110456/pexels-photo-4110456.jpeg?auto=compress&cs=tinysrgb&w=500' },
   'pg5-pumpkins':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/1/8/4183558-zm.jpg' },
   'pg5-radish':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/9/1/4911870-zm.jpg' },
   'pg5-rhubarb':       { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/8/408372-zm.jpg' },
   'pg5-shallots':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/1/3/5134809-zm.jpg' },
   'pg5-silverbeet':    { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/8/408383-zm.jpg' },
   'pg5-snow-peas':     { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/2/3/123328-zm.jpg' },
-  'pg5-sugar-snap':    { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/6/1/4619289-zm.jpg' },
+  'pg5-sugar-snap':    { base: 'direct', file: 'https://images.pexels.com/photos/7288774/pexels-photo-7288774.jpeg?auto=compress&cs=tinysrgb&w=500' },
   'pg5-sprouts':       { base: 'fv', file: 'Alfalfa_Sprout_Salad.jpg' },
   'pg5-swedes':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/9/6/4966930-zm.jpg' },
   'pg5-sweet-potato':  { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/1/9/4199503-zm.jpg' },
-  'pg5-tomatoes':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/8/3/4835171-zm.jpg' },
+  'pg5-tomatoes':      { base: 'direct', file: 'https://images.pexels.com/photos/9816726/pexels-photo-9816726.jpeg?auto=compress&cs=tinysrgb&w=500' },
   'pg5-turnip':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/9/6/4966737-zm.jpg' },
   'pg5-zucchini':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/9/1/4910506-zm.jpg' },
   // Subpage: Apples (pg7)
@@ -1600,7 +1670,7 @@ const KB_IMAGE_MAP = {
   'pg17-btn3':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/2/8/428915-zm.jpg' },
   'pg17-btn4':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/9/4/5945620-zm.jpg' },
   'pg17-btn5':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/2/5/1252053-zm.jpg' },
-  // Subpage: Pears (pg21) — Piqa Boo
+  // Subpage: Pears (pg21) â€” Piqa Boo
   'pg21-btn4':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/3/5/2/3525725-zm.jpg' },
   // Subpage: Plums (pg22)
   'pg22-btn2':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/4/2/5424026-zm.jpg' },
@@ -1624,12 +1694,12 @@ const KB_IMAGE_MAP = {
   // Subpage: Zucchini (pg36)
   'pg36-btn0':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/9/1/4910506-zm.jpg' },
   'pg36-btn1':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/9/1/4910506-zm.jpg' },
-  // Subpage: Potatoes (pg32) — not Kipfler
-  'pg32-btn0':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/3/9/5/3958573-zm.jpg' },
-  'pg32-btn1':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/2/0/1206748-zm.jpg' },
-  'pg32-btn2':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/2/4/8/2488485-zm.jpg' },
-  'pg32-btn4':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/7/9/6/7963859-zm.jpg' },
-  'pg32-btn5':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/7/1/4/7141758-zm.jpg' },
+  // Subpage: Potatoes (pg32) â€” not Kipfler
+  'pg32-btn0':         { base: 'direct', file: 'https://images.pexels.com/photos/4110456/pexels-photo-4110456.jpeg?auto=compress&cs=tinysrgb&w=500' },
+  'pg32-btn1':         { base: 'direct', file: 'https://images.pexels.com/photos/35595249/pexels-photo-35595249.jpeg?auto=compress&cs=tinysrgb&w=500' },
+  'pg32-btn2':         { base: 'direct', file: 'https://images.pexels.com/photos/17406378/pexels-photo-17406378.jpeg?auto=compress&cs=tinysrgb&w=500' },
+  'pg32-btn4':         { base: 'direct', file: 'https://images.pexels.com/photos/35595249/pexels-photo-35595249.jpeg?auto=compress&cs=tinysrgb&w=500' },
+  'pg32-btn5':         { base: 'direct', file: 'https://images.pexels.com/photos/4110456/pexels-photo-4110456.jpeg?auto=compress&cs=tinysrgb&w=500' },
 }
 
 // Apply direct image mappings to keyboard buttons
@@ -1684,7 +1754,7 @@ function createWindow() {
   })
 
   // Forward renderer console messages we care about into the main-process log.
-  // Electron only mirrors console.error to stdout by default — this gives us
+  // Electron only mirrors console.error to stdout by default â€” this gives us
   // info-level too, which is what the scale-event diagnostic uses.
   mainWindow.webContents.on('console-message', (_e, level, message) => {
     if (message.startsWith('[RENDERER_SCALE]') || message.startsWith('[RENDERER_DEBUG]')) {
@@ -1748,7 +1818,18 @@ function createCustomerWindow () {
   })
 }
 
-// Single instance lock — focus existing window if already running
+async function startLanServerIfUnique(lanPort) {
+  const existing = await lanSync.discoverServer(1500).catch(() => null)
+  if (existing && existing.ip) {
+    const msg = `Another POS server was found at ${existing.ip}:${existing.port || lanPort}; this app will not start a second server`
+    appLog('warn', 'lan-sync', msg)
+    return { ok: false, error: msg, existing }
+  }
+  lanSync.startServer(lanPort, { dbAll, dbGet, dbRun, saveDB, uuid })
+  return { ok: true }
+}
+
+// Single instance lock â€” focus existing window if already running
 const useSingleInstanceLock = process.argv.includes('--single-instance')
 const gotTheLock = useSingleInstanceLock ? app.requestSingleInstanceLock({ mode: runtimeAppMode }) : true
 if (!gotTheLock) {
@@ -1835,8 +1916,8 @@ app.whenReady().then(async () => {
       if (lanMode === 'server' && !isRegisterApp) {
         appLog('warn', 'lan-sync', 'Admin app cannot run the LAN server; leaving LAN server off in this process')
       } else if (lanMode === 'server') {
-        lanSync.startServer(lanPort, { dbAll, dbGet, dbRun, saveDB, uuid })
-        appLog('info', 'lan-sync', 'Auto-started LAN server on port ' + lanPort)
+        const started = await startLanServerIfUnique(lanPort)
+        if (started.ok) appLog('info', 'lan-sync', 'Auto-started LAN server on port ' + lanPort)
       } else if (lanMode === 'client') {
         const serverIp = dbGet("SELECT value FROM settings WHERE key = 'lan_server_ip'")?.value
         const secret = dbGet("SELECT value FROM settings WHERE key = 'lan_secret'")?.value
@@ -1921,7 +2002,7 @@ app.on('window-all-closed', () => {
   app.quit()
 })
 
-// ─── IPC Handlers ───────���────────────────────────��────────────────────────────
+// â”€â”€â”€ IPC Handlers â”€â”€â”€â”€â”€â”€â”€ï¿½ï¿½ï¿½â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ï¿½ï¿½â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function setupIPC() {
 
@@ -1980,7 +2061,7 @@ function setupIPC() {
     }
   })
 
-  // ── App Update (git pull from GitHub) ──────────────────────────────────
+  // â”€â”€ App Update (git pull from GitHub) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   ipcMain.handle('app:update', async () => {
     const { execSync } = require('child_process')
@@ -2055,7 +2136,7 @@ function setupIPC() {
       }
 
       const extracted = path.join(tmpDir, 'mcpos-main')
-      if (!fs.existsSync(extracted)) return { error: 'Download succeeded but extraction failed — folder not found' }
+      if (!fs.existsSync(extracted)) return { error: 'Download succeeded but extraction failed â€” folder not found' }
 
       const skipDirs = new Set(['node_modules', '.git', 'mcpos'])
       const skipFiles = new Set(['package-lock.json'])
@@ -2086,7 +2167,7 @@ function setupIPC() {
     }
   })
 
-  // ── Backups ─────────────────────────────────────────────────────────────
+  // â”€â”€ Backups â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   ipcMain.handle('db:backup:create', () => {
     return createBackup()
@@ -2120,7 +2201,7 @@ function setupIPC() {
     return true
   })
 
-  // ── App Logs & Health ──────────────────────────────────────────────────
+  // â”€â”€ App Logs & Health â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   ipcMain.handle('app:logs:get', (_e, opts = {}) => {
     try {
@@ -2185,8 +2266,10 @@ function setupIPC() {
         sync_pending: dbGet("SELECT COUNT(*) as c FROM sync_queue WHERE synced=0")?.c || 0,
       }
     } catch (_) {}
-    return { ...appHealth, database: !!db, counts }
+    return { ...appHealth, database: !!db, mode: runtimeAppMode, isRegisterApp, counts }
   })
+
+  ipcMain.handle('app:getMode', () => ({ mode: runtimeAppMode, isRegisterApp }))
 
   ipcMain.handle('app:version', () => {
     try {
@@ -2197,7 +2280,7 @@ function setupIPC() {
     } catch (_) { return 'dev' }
   })
 
-  // ── Audit Log ──────────────────────────────────────────────────────────
+  // â”€â”€ Audit Log â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   ipcMain.handle('db:audit:log', (_e, entry) => {
     const id = uuid()
@@ -2227,7 +2310,7 @@ function setupIPC() {
     return dbAll(sql, params)
   })
 
-  // ── Customer Display ───────────────────────────────────────────────────
+  // â”€â”€ Customer Display â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   ipcMain.handle('customer:update', (_e, data) => {
     if (customerWindow && !customerWindow.isDestroyed()) {
       customerWindow.webContents.send('customer:update', data)
@@ -2248,7 +2331,7 @@ function setupIPC() {
     }
   })
 
-  // ── Products ────────���───────────────────────────��─────────────────────────
+  // â”€â”€ Products â”€â”€â”€â”€â”€â”€â”€â”€ï¿½ï¿½ï¿½â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ï¿½ï¿½â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   ipcMain.handle('db:products:search', (_e, query) => {
     const q = `%${query}%`
@@ -2265,9 +2348,17 @@ function setupIPC() {
         AND (s.end_date IS NULL OR s.end_date >= date('now'))
       WHERE p.active = 1
         AND (p.name LIKE ?1 OR p.barcode LIKE ?1 OR p.plu LIKE ?1)
-      ORDER BY p.name
+      ORDER BY
+        CASE
+          WHEN p.plu = ?2 THEN 0
+          WHEN p.barcode = ?2 THEN 1
+          WHEN p.id = ?2 THEN 2
+          WHEN p.name = ?2 THEN 3
+          ELSE 9
+        END,
+        p.name
       LIMIT ${limit}
-    `, [q])
+    `, [q, query])
   })
 
   ipcMain.handle('db:products:getByBarcode', (_e, barcode) => {
@@ -2306,7 +2397,7 @@ function setupIPC() {
     return dbAll(`SELECT * FROM categories WHERE active = 1 ORDER BY sort_order, name`)
   })
 
-  // ── Product Management ────────────────────────────────────────────────────
+  // â”€â”€ Product Management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   ipcMain.handle('db:products:upsert', (_e, product) => {
     const id = product.id || uuid()
@@ -2343,7 +2434,7 @@ function setupIPC() {
     return { id }
   })
 
-  // Bulk upsert from cloud sync — skips sync queue to avoid circular push
+  // Bulk upsert from cloud sync â€” skips sync queue to avoid circular push
   // Uses INSERT + ON CONFLICT to preserve local active/stock state
   ipcMain.handle('db:products:bulkUpsert', (_e, products) => {
     let count = 0
@@ -2402,7 +2493,7 @@ function setupIPC() {
     `, [id])
   })
 
-  // ── Specials ──────────────────────────────────────────────────────────────
+  // â”€â”€ Specials â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   ipcMain.handle('db:specials:getAll', () => {
     return dbAll(`
@@ -2447,7 +2538,7 @@ function setupIPC() {
     return count
   })
 
-  // ── Deals ─────────────────────────────────────────────────────────────────
+  // â”€â”€ Deals â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   ipcMain.handle('db:deals:getAll', () => {
     return dbAll("SELECT * FROM deals ORDER BY active DESC, name")
@@ -2520,7 +2611,7 @@ function setupIPC() {
     return count
   })
 
-  // ── Transactions ────────��──────────��──────────────────────────────────────
+  // â”€â”€ Transactions â”€â”€â”€â”€â”€â”€â”€â”€ï¿½ï¿½â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ï¿½ï¿½â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   ipcMain.handle('db:transaction:save', (_e, txn) => {
     const txnId = txn.id || uuid()
@@ -2673,7 +2764,7 @@ function setupIPC() {
     `)
   })
 
-  // ── Insights handlers ──────────────────────────────────────────────
+  // â”€â”€ Insights handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   ipcMain.handle('db:insights:salesHeatmap', (_e, opts = {}) => {
     const days = opts.days || 30
@@ -2788,7 +2879,7 @@ function setupIPC() {
     `, [`-${days} days`])
   })
 
-  // ── End Insights handlers ─────────────────────────────────────────
+  // â”€â”€ End Insights handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   ipcMain.handle('db:cash_drawer:log', (_e, entry) => {
     const id = uuid()
@@ -2892,7 +2983,7 @@ function setupIPC() {
     `, [date || new Date().toISOString().slice(0, 10)])
   })
 
-  // ── Staff ─��───────────────────────────────────────────────────────────────
+  // â”€â”€ Staff â”€ï¿½ï¿½â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   ipcMain.handle('db:staff:login', (_e, pin) => {
     return dbGet("SELECT id, name, role FROM staff WHERE pin = ?1 AND active = 1", [pin])
@@ -2929,7 +3020,7 @@ function setupIPC() {
     return count
   })
 
-  // ── Settings ────────────────��───────────────────────────────────────��─────
+  // â”€â”€ Settings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ï¿½ï¿½â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ï¿½ï¿½â”€â”€â”€â”€â”€
 
   ipcMain.handle('db:settings:get', (_e, key) => {
     const row = dbGet("SELECT value FROM settings WHERE key = ?1", [key])
@@ -2963,7 +3054,7 @@ function setupIPC() {
     return count
   })
 
-  // ── Sync Queue ──────────────────────────────────────��─────────────────────
+  // â”€â”€ Sync Queue â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ï¿½ï¿½â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   ipcMain.handle('db:sync:getPending', () => {
     return dbAll("SELECT * FROM sync_queue WHERE synced = 0 ORDER BY id")
@@ -2983,7 +3074,7 @@ function setupIPC() {
     return dbAll("SELECT table_name, record_id FROM deleted_records")
   })
 
-  // ── Reporting ──��──────────────��────────────────────────────────��──────────
+  // â”€â”€ Reporting â”€â”€ï¿½ï¿½â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ï¿½ï¿½â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ï¿½ï¿½â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   ipcMain.handle('db:reports:dailySummary', (_e, date) => {
     return dbGet(`
@@ -3105,7 +3196,7 @@ function setupIPC() {
     `, [date || new Date().toISOString().slice(0, 10)])
   })
 
-  // ── Keyboard Layout ─────────────────────────────────────────────────────
+  // â”€â”€ Keyboard Layout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   ipcMain.handle('db:keyboard:getAll', () => {
     return dbAll(`SELECT kb.*, p.image_url AS product_image_url, p.plu AS product_plu, p.unit AS product_unit,
@@ -3138,15 +3229,21 @@ function setupIPC() {
   ipcMain.handle('db:keyboard:createPage', (_e, opts) => {
     const existing = dbAll("SELECT page FROM keyboard_pages ORDER BY page DESC LIMIT 1")
     const nextPage = (existing.length ? existing[0].page : 0) + 1
+    const pageRow = { page: nextPage, name: opts?.name || 'Untitled', cols: opts?.cols || 13, rows: opts?.rows || 7 }
     dbRun("INSERT INTO keyboard_pages (page, name, cols, rows) VALUES (?1, ?2, ?3, ?4)",
-      [nextPage, opts?.name || 'Untitled', opts?.cols || 13, opts?.rows || 7])
+      [pageRow.page, pageRow.name, pageRow.cols, pageRow.rows])
+    dbRun(`INSERT INTO sync_queue (table_name, record_id, action, payload) VALUES (?1, ?2, ?3, ?4)`,
+      ['keyboard_pages', String(nextPage), 'insert', JSON.stringify(pageRow)])
     saveDBSync()
     lanSync.bumpVersion()
-    return { page: nextPage, name: opts?.name || 'Untitled', cols: opts?.cols || 13, rows: opts?.rows || 7 }
+    return pageRow
   })
 
   ipcMain.handle('db:keyboard:renamePage', (_e, page, name) => {
     dbRun("UPDATE keyboard_pages SET name = ?2 WHERE page = ?1", [page, name])
+    const pageRow = dbGet("SELECT page, name, cols, rows FROM keyboard_pages WHERE page = ?1", [page])
+    if (pageRow) dbRun(`INSERT INTO sync_queue (table_name, record_id, action, payload) VALUES (?1, ?2, ?3, ?4)`,
+      ['keyboard_pages', String(page), 'update', JSON.stringify(pageRow)])
     saveDBSync()
     lanSync.bumpVersion()
     return true
@@ -3154,6 +3251,9 @@ function setupIPC() {
 
   ipcMain.handle('db:keyboard:updatePageSize', (_e, page, cols, rows) => {
     dbRun("INSERT OR REPLACE INTO keyboard_pages (page, name, cols, rows) VALUES (?1, COALESCE((SELECT name FROM keyboard_pages WHERE page = ?1), 'Untitled'), ?2, ?3)", [page, cols, rows])
+    const pageRow = dbGet("SELECT page, name, cols, rows FROM keyboard_pages WHERE page = ?1", [page])
+    if (pageRow) dbRun(`INSERT INTO sync_queue (table_name, record_id, action, payload) VALUES (?1, ?2, ?3, ?4)`,
+      ['keyboard_pages', String(page), 'update', JSON.stringify(pageRow)])
     saveDBSync()
     lanSync.bumpVersion()
     return true
@@ -3360,7 +3460,11 @@ function setupIPC() {
   })
 
   ipcMain.handle('db:keyboard:validate', () => {
-    const buttons = dbAll("SELECT * FROM keyboard_buttons WHERE active = 1 ORDER BY page, sort_order")
+    const buttons = dbAll(`SELECT kb.*, p.id AS linked_product_id, p.open_price AS product_open_price
+      FROM keyboard_buttons kb
+      LEFT JOIN products p ON p.id = kb.product_id
+      WHERE kb.active = 1
+      ORDER BY kb.page, kb.sort_order`)
     const issues = []
     const pages = [...new Set(buttons.map(b => b.page || 1))]
 
@@ -3395,12 +3499,24 @@ function setupIPC() {
             issues.push({ type: 'broken_link', page, button: btn.label, target_page: targetPage })
           }
         }
+        if ((btn.type === 'page_link' || btn.type === 'section') && Number(btn.price || 0) > 0) {
+          issues.push({ type: 'category_has_price', page, button: btn.label, price: btn.price })
+        }
+        if (btn.type === 'product' && !btn.product_id && Number(btn.price || 0) <= 0) {
+          issues.push({ type: 'product_missing_link_or_price', page, button: btn.label })
+        }
+        if (btn.type === 'product' && btn.product_id && !btn.linked_product_id) {
+          issues.push({ type: 'missing_product', page, button: btn.label, product_id: btn.product_id })
+        }
+        if (btn.type === 'open_price' && btn.product_id && Number(btn.product_open_price || 0) !== 1) {
+          issues.push({ type: 'open_button_fixed_product', page, button: btn.label, product_id: btn.product_id })
+        }
       }
     }
     return { issues, button_count: buttons.length, page_count: pages.length }
   })
 
-  // ── Bulk Import ────────────���──────────────────────────────────────────────
+  // â”€â”€ Bulk Import â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ï¿½ï¿½ï¿½â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   ipcMain.handle('db:import:products', (_e, products) => {
     const catMap = {}
@@ -3426,7 +3542,7 @@ function setupIPC() {
     return { imported, categories: Object.keys(catMap).length }
   })
 
-  // ── Hardware — Auto-detecting, cross-platform POS peripherals ───────────────
+  // â”€â”€ Hardware â€” Auto-detecting, cross-platform POS peripherals â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const { execSync: hwExec, spawn: hwSpawn } = require('child_process')
   const net = require('net')
@@ -3436,7 +3552,7 @@ function setupIPC() {
   const RAWPRINT_SCRIPT = path.join(__dirname, 'rawprint.ps1')
   const OPOS_BRIDGE = path.join(__dirname, 'opos-bridge.ps1')
 
-  // 32-bit PowerShell — required for Epson/Datalogic OPOS CCOs which are 32-bit COM
+  // 32-bit PowerShell â€” required for Epson/Datalogic OPOS CCOs which are 32-bit COM
   // On 64-bit Windows: %SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe
   // On 32-bit Windows: plain "powershell" already is 32-bit
   const POSH_X86 = (() => {
@@ -3446,7 +3562,7 @@ function setupIPC() {
     return fs.existsSync(candidate) ? candidate : 'powershell'
   })()
 
-  // ── OPOS COM bridge (via PowerShell) ────────────────────────────────────────
+  // â”€â”€ OPOS COM bridge (via PowerShell) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   let oposAvailable = null  // null = not checked, object = check result
   let oposPrinterName = ''  // logical device name from SetupPOS
@@ -3463,7 +3579,7 @@ function setupIPC() {
     try {
       const cmd = `"${POSH_X86}" ${args.map(a => `"${a}"`).join(' ')}`
       const result = hwExec(cmd, { timeout: opts.timeout || 10000, encoding: 'utf-8' }).trim()
-      // Strip any non-JSON noise (e.g. leaked return values) — keep only the last JSON line
+      // Strip any non-JSON noise (e.g. leaked return values) â€” keep only the last JSON line
       const lines = result.split(/\r?\n/).filter(l => l.trim().startsWith('{'))
       return JSON.parse(lines[lines.length - 1] || result)
     } catch (e) {
@@ -3480,7 +3596,7 @@ function setupIPC() {
       try {
         oposAvailable = JSON.parse(cached)
         if (!oposAvailable.printer && !oposAvailable.drawer && !oposAvailable.scale && !oposAvailable.scanner) {
-          appLog('info', 'hardware', 'OPOS previously checked — not available (skipping)')
+          appLog('info', 'hardware', 'OPOS previously checked â€” not available (skipping)')
           return oposAvailable
         }
       } catch (_) {}
@@ -3506,15 +3622,15 @@ function setupIPC() {
     return oposAvailable
   }
 
-  // ── OPOS Scanner listener (long-running 32-bit PowerShell subprocess) ───────
+  // â”€â”€ OPOS Scanner listener (long-running 32-bit PowerShell subprocess) â”€â”€â”€â”€â”€â”€â”€
   // Reads barcodes via OPOS Scanner CCO and forwards each scan to the renderer
   // as a 'scanner:data' IPC event. Auto-retries claim when another app (Profit
-  // Track) holds the device. Lifecycle is tied to the app — stopped on quit.
+  // Track) holds the device. Lifecycle is tied to the app â€” stopped on quit.
 
   const SCANNER_BRIDGE_EXE = path.join(__dirname, 'scanner-bridge.exe')
   let scannerProc = null
   let scannerLastClaimFailLog = 0  // throttle "claim_failed" log spam
-  let scannerFatalStop = false     // true when OPOS ProgID not registered — no point retrying
+  let scannerFatalStop = false     // true when OPOS ProgID not registered â€” no point retrying
   let scannerRetryCount = 0
   const SCANNER_MAX_RETRIES = 3
 
@@ -3557,12 +3673,12 @@ function setupIPC() {
       scannerProc = null
       if (appShuttingDown) return
       if (scannerFatalStop) {
-        appLog('info', 'scanner', 'OPOS scanner not available on this system — stopped retrying')
+        appLog('info', 'scanner', 'OPOS scanner not available on this system â€” stopped retrying')
         return
       }
       scannerRetryCount++
       if (scannerRetryCount > SCANNER_MAX_RETRIES) {
-        appLog('warn', 'scanner', `Listener failed ${scannerRetryCount} times — stopped retrying (use Hardware tab to restart)`)
+        appLog('warn', 'scanner', `Listener failed ${scannerRetryCount} times â€” stopped retrying (use Hardware tab to restart)`)
         return
       }
       const delay = Math.min(5000 * Math.pow(2, scannerRetryCount - 1), 60000)
@@ -3577,7 +3693,7 @@ function setupIPC() {
         appLog('info', 'scanner', `Listener starting (device='${msg.device}', bitness=${msg.bitness})`)
         break
       case 'opened':
-        appLog('info', 'scanner', `Scanner CLAIMED — ready to scan (device='${msg.device}') props=${JSON.stringify(msg.props || {})}`)
+        appLog('info', 'scanner', `Scanner CLAIMED â€” ready to scan (device='${msg.device}') props=${JSON.stringify(msg.props || {})}`)
         scannerLastClaimFailLog = 0
         scannerRetryCount = 0
         if (mainWindow && !mainWindow.isDestroyed()) {
@@ -3600,7 +3716,7 @@ function setupIPC() {
       case 'claim_failed':
         // Throttle: log once every 30s while PTPOS holds the device
         if (Date.now() - scannerLastClaimFailLog > 30000) {
-          appLog('info', 'scanner', `Scanner busy (rc=${msg.rc}) — ${msg.hint || 'another app holds it'}; retrying every ${msg.retry_in}s`)
+          appLog('info', 'scanner', `Scanner busy (rc=${msg.rc}) â€” ${msg.hint || 'another app holds it'}; retrying every ${msg.retry_in}s`)
           scannerLastClaimFailLog = Date.now()
         }
         if (mainWindow && !mainWindow.isDestroyed()) {
@@ -3668,7 +3784,7 @@ function setupIPC() {
   let SerialPortLib = null
   try { SerialPortLib = require('serialport') } catch (e) { appLog('warn', 'hardware', 'serialport not available', e.message) }
 
-  // ── Vendor ID database (comprehensive, correctly labelled) ─────────────────
+  // â”€â”€ Vendor ID database (comprehensive, correctly labelled) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const PRINTER_VENDORS = {
     0x04B8: 'Epson', 0x0519: 'Star Micronics', 0x1504: 'Bixolon',
@@ -3702,7 +3818,7 @@ function setupIPC() {
   }
   const SERIAL_ADAPTER_VIDS = { 0x0403: 'FTDI', 0x067B: 'Prolific', 0x1A86: 'CH340', 0x10C4: 'Silicon Labs CP210x' }
 
-  // ── ESC/POS command bytes ──────────────────────────────────────────────────
+  // â”€â”€ ESC/POS command bytes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const ESC = 0x1B, GS = 0x1D, DLE = 0x10
   const ESCPOS = {
@@ -3722,7 +3838,7 @@ function setupIPC() {
     BARCODE_HRI_BELOW: Buffer.from([GS, 0x48, 0x02]),
   }
 
-  // ── Hardware state (populated by probe, persisted via settings) ────────────
+  // â”€â”€ Hardware state (populated by probe, persisted via settings) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   let hwPrinter = null  // { name, port, interface, ip, networkPort, vid, pid }
   let hwScale = null     // { path, vid, pid, vendor, product }
@@ -3753,7 +3869,7 @@ function setupIPC() {
     }
   }
 
-  // ── USB device enumeration (multi-source, cross-platform) ──────────────────
+  // â”€â”€ USB device enumeration (multi-source, cross-platform) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   function enumerateDevices () {
     const devices = []
@@ -3783,7 +3899,7 @@ function setupIPC() {
     // Source 2: Serial ports (COM ports for RS-232 scales etc.)
     if (SerialPortLib) {
       try {
-        // SerialPort.list() is async but we need sync here — cache from last probe
+        // SerialPort.list() is async but we need sync here â€” cache from last probe
         // Actual serial enumeration happens in probeHardware() async path
       } catch (e) { appLog('warn', 'hardware', 'Serial port enumeration failed', e.message) }
     }
@@ -3846,7 +3962,7 @@ function setupIPC() {
     return devices
   }
 
-  // ── Classify devices ───────────────────────────────────────────────────────
+  // â”€â”€ Classify devices â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   function classifyDevice (d) {
     if (d.vendorId && PRINTER_VENDORS[d.vendorId]) {
@@ -3864,7 +3980,7 @@ function setupIPC() {
     return { type: 'unknown', vendor: d.manufacturer || '' }
   }
 
-  // ── Printer auto-detection ─────────────────────────────────────────────────
+  // â”€â”€ Printer auto-detection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   // Cache Windows printer queues for 30s. `Get-Printer` via PowerShell can take
   // up to 10s on this box, which froze the Hardware tab whenever the renderer
@@ -3894,7 +4010,7 @@ function setupIPC() {
   }
 
   function clearPrinterQueue (queueName) {
-    // Fire-and-forget — spawning execSync blocks the entire main process when
+    // Fire-and-forget â€” spawning execSync blocks the entire main process when
     // WMI/PowerShell is slow, which freezes the renderer over IPC. We don't need
     // the return value, so spawn async and let it complete in the background.
     try {
@@ -3916,8 +4032,8 @@ function setupIPC() {
     return null
   }
 
-  // ── Resume a printer queue via WMI (clears Error state, no admin needed) ───
-  // Fire-and-forget — execSync here blocks the main thread for the full WMI
+  // â”€â”€ Resume a printer queue via WMI (clears Error state, no admin needed) â”€â”€â”€
+  // Fire-and-forget â€” execSync here blocks the main thread for the full WMI
   // timeout (10s+ in practice), freezing the renderer over IPC. Result isn't used.
   function resumePrinterQueue (queueName) {
     try {
@@ -3937,7 +4053,7 @@ function setupIPC() {
   // Clean up only printer queues that WE created (not system/driver-installed ones)
   function cleanupDuplicateQueues () {
     try {
-      // Only remove queues explicitly created by this app — never touch driver-installed queues
+      // Only remove queues explicitly created by this app â€” never touch driver-installed queues
       hwExec(`powershell -NoProfile -NonInteractive -Command "Remove-Printer -Name 'Tillaroo Receipt Printer' -ErrorAction SilentlyContinue"`, { timeout: 3000, encoding: 'utf-8' })
     } catch (_) {}
   }
@@ -3946,7 +4062,7 @@ function setupIPC() {
     // Clear stuck jobs and resume queue first
     clearPrinterQueue(queueName)
 
-    // Check status — if errored, try sending data then check if job gets stuck
+    // Check status â€” if errored, try sending data then check if job gets stuck
     const tmpFile = path.join(os.tmpdir(), `crisp-test-${Date.now()}.bin`)
     fs.writeFileSync(tmpFile, ESCPOS.INIT)
     try {
@@ -3957,7 +4073,7 @@ function setupIPC() {
       try {
         const post = getQueueStatus(queueName)
         if (post && post.JobCount > 0) {
-          appLog('warn', 'hardware', `Queue "${queueName}" has ${post.JobCount} stuck jobs (status ${post.PrinterStatus}) — printer offline or errored`)
+          appLog('warn', 'hardware', `Queue "${queueName}" has ${post.JobCount} stuck jobs (status ${post.PrinterStatus}) â€” printer offline or errored`)
           clearPrinterQueue(queueName)
           return false
         }
@@ -3983,7 +4099,7 @@ function setupIPC() {
     }
 
     if (!isWin) {
-      // Saved config on non-Windows — trust it (no queue check needed for CUPS)
+      // Saved config on non-Windows â€” trust it (no queue check needed for CUPS)
       if (hwPrinter?.configured && hwPrinter.name) return hwPrinter
       try {
         const raw = hwExec('lpstat -p 2>/dev/null', { timeout: 5000, encoding: 'utf-8' })
@@ -4003,7 +4119,7 @@ function setupIPC() {
     // Windows: get all queues once (used by both saved-config verify and fresh scan)
     const queues = getWindowsQueues()
 
-    // Verify saved config — check the queue still exists
+    // Verify saved config â€” check the queue still exists
     if (hwPrinter?.configured && hwPrinter.name && hwPrinter.interface === 'windows') {
       const match = queues.find(q => q.Name === hwPrinter.name)
       if (match) {
@@ -4011,11 +4127,11 @@ function setupIPC() {
         resumePrinterQueue(hwPrinter.name)
         return hwPrinter
       }
-      // Saved queue gone — check if it was renamed (e.g. "Printer (Copy 1)")
+      // Saved queue gone â€” check if it was renamed (e.g. "Printer (Copy 1)")
       const baseName = hwPrinter.name.replace(/\s*\(Copy \d+\)$/i, '').toLowerCase()
       const renamed = queues.find(q => q.Name.replace(/\s*\(Copy \d+\)$/i, '').toLowerCase() === baseName)
       if (renamed) {
-        appLog('info', 'hardware', `Saved printer renamed: "${hwPrinter.name}" → "${renamed.Name}"`)
+        appLog('info', 'hardware', `Saved printer renamed: "${hwPrinter.name}" â†’ "${renamed.Name}"`)
         hwPrinter.name = renamed.Name
         hwPrinter.port = renamed.PortName || hwPrinter.port
         dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('hw_printer_name', ?1)", [renamed.Name])
@@ -4023,13 +4139,13 @@ function setupIPC() {
         resumePrinterQueue(renamed.Name)
         return hwPrinter
       }
-      appLog('warn', 'hardware', `Saved printer "${hwPrinter.name}" no longer exists — rescanning`)
+      appLog('warn', 'hardware', `Saved printer "${hwPrinter.name}" no longer exists â€” rescanning`)
       hwPrinter = null  // clear stale config
     } else if (hwPrinter?.configured && hwPrinter.interface === 'network') {
       return hwPrinter
     }
 
-    // Scan Windows queues — score by keyword match, USB port, prefer base name over numbered copies
+    // Scan Windows queues â€” score by keyword match, USB port, prefer base name over numbered copies
     const scored = queues.map(q => {
       const name = (q.Name || '').toLowerCase()
       const driver = (q.DriverName || '').toLowerCase()
@@ -4045,7 +4161,7 @@ function setupIPC() {
     // Log all queues for debugging
     appLog('info', 'hardware', `Windows queues: ${scored.map(q => `"${q.Name}" port=${q.PortName} driver=${q.DriverName} score=${q.score}`).join(' | ') || 'none found'}`)
 
-    // Pick the best-scoring receipt queue — NO test sends (they block startup and create stuck jobs)
+    // Pick the best-scoring receipt queue â€” NO test sends (they block startup and create stuck jobs)
     const best = scored.find(q => q.score > 0)
     if (best) {
       // Resume the queue via WMI to clear any error state
@@ -4060,7 +4176,7 @@ function setupIPC() {
     return null
   }
 
-  // ── Send raw bytes to printer (multi-backend) ─────────────────────────────
+  // â”€â”€ Send raw bytes to printer (multi-backend) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   function sendToPrinter (data) {
     if (!hwPrinter) return Promise.resolve({ ok: false, detail: 'No printer detected. Run Probe All Devices in Hardware tab.' })
@@ -4071,7 +4187,7 @@ function setupIPC() {
   }
 
   function sendViaSpooler (data, printerName) {
-    // Async via spawn — execSync blocks the entire main process for the full
+    // Async via spawn â€” execSync blocks the entire main process for the full
     // 15s timeout if the spooler is slow, which freezes the renderer during a sale.
     const tmpFile = path.join(os.tmpdir(), `crisp-receipt-${Date.now()}.bin`)
     fs.writeFileSync(tmpFile, data)
@@ -4136,7 +4252,7 @@ function setupIPC() {
     }
   }
 
-  // ── Scale detection & reading (USB HID + RS-232 serial) ────────────────────
+  // â”€â”€ Scale detection & reading (USB HID + RS-232 serial) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   let hwScalePort = null  // persistent SerialPort instance for serial scales
   let cachedSerialPorts = []  // cached from last async enumeration
@@ -4162,16 +4278,16 @@ function setupIPC() {
   }
 
   async function detectScale (devices, serialPorts) {
-    // Fast path: if scale port is already open and being polled, it's working — skip everything
+    // Fast path: if scale port is already open and being polled, it's working â€” skip everything
     if (hwScale && hwScalePort?.isOpen) {
-      appLog('info', 'hardware', `Scale already connected on ${hwScale.port} — skipping detection`)
+      appLog('info', 'hardware', `Scale already connected on ${hwScale.port} â€” skipping detection`)
       return hwScale
     }
-    // Fast path: Python bridge holds COM2 — never probe over the top of it,
+    // Fast path: Python bridge holds COM2 â€” never probe over the top of it,
     // otherwise testSerialScale gets "Access denied" and we wrongly mark the
     // scale as broken.
     if (hwScale && pythonScaleProc) {
-      appLog('info', 'hardware', `Scale handled by Python bridge on ${hwScale.port} — skipping detection`)
+      appLog('info', 'hardware', `Scale handled by Python bridge on ${hwScale.port} â€” skipping detection`)
       return hwScale
     }
     // Fast path: saved config exists, just verify it works
@@ -4183,9 +4299,9 @@ function setupIPC() {
             appLog('info', 'hardware', `Saved scale verified: ${hwScale.port} (${hwScale.protocol} @ ${hwScale.baud})`)
             return hwScale
           }
-          appLog('warn', 'hardware', `Saved scale config FAILED on ${hwScale.port}: ${verify.error} — scanning...`)
+          appLog('warn', 'hardware', `Saved scale config FAILED on ${hwScale.port}: ${verify.error} â€” scanning...`)
         } catch (e) {
-          appLog('warn', 'hardware', `Saved scale config error on ${hwScale.port}: ${e.message} — scanning...`)
+          appLog('warn', 'hardware', `Saved scale config error on ${hwScale.port}: ${e.message} â€” scanning...`)
         }
         hwScale = null
       } else if (hwScale.type === 'hid' && hwScale.path && HID) {
@@ -4210,7 +4326,7 @@ function setupIPC() {
       }
     }
 
-    // Priority 2: Serial ports — brute-force test all ports with all protocol/baud combos
+    // Priority 2: Serial ports â€” brute-force test all ports with all protocol/baud combos
     if (serialPorts && serialPorts.length > 0 && SerialPortLib) {
       const scaleAdapterVids = new Set([0x0403, 0x10C4])
       // Skip ports that are known non-scale devices (payment terminals, etc.)
@@ -4231,11 +4347,11 @@ function setupIPC() {
         try {
           const quickTest = await testSerialScale(sp.path, 9600, 'sics', 1500)
           if (quickTest.ok) {
-            appLog('info', 'hardware', `Scale auto-detected on ${sp.path} — sics @ 9600 baud`)
+            appLog('info', 'hardware', `Scale auto-detected on ${sp.path} â€” sics @ 9600 baud`)
             return { type: 'serial', port: sp.path, protocol: 'sics', baud: 9600, vendor: sp.manufacturer || 'Serial Scale', product: sp.path, detected: true }
           }
           if (quickTest.error && /access denied|permission|locked|busy|open timeout/i.test(quickTest.error)) {
-            appLog('warn', 'hardware', `${sp.path}: ${quickTest.error} — skipping`)
+            appLog('warn', 'hardware', `${sp.path}: ${quickTest.error} â€” skipping`)
             portErrors.push({ port: sp.path, error: quickTest.error })
             canOpen = false
           }
@@ -4246,13 +4362,13 @@ function setupIPC() {
           }
         }
         if (!canOpen) continue
-        // Port opens but sics@9600 didn't respond — try remaining combos
+        // Port opens but sics@9600 didn't respond â€” try remaining combos
         let found = false
         for (const [protocol, baud] of [['mt8217', 9600], ['sics', 19200], ['mt8217', 19200], ['sics', 4800], ['mt8217', 4800]]) {
           try {
             const result = await testSerialScale(sp.path, baud, protocol, 1500)
             if (result.ok) {
-              appLog('info', 'hardware', `Scale auto-detected on ${sp.path} — ${protocol} @ ${baud} baud`)
+              appLog('info', 'hardware', `Scale auto-detected on ${sp.path} â€” ${protocol} @ ${baud} baud`)
               return { type: 'serial', port: sp.path, protocol, baud, vendor: sp.manufacturer || 'Serial Scale', product: sp.path, detected: true }
             }
             if (result.error && /access denied|permission|locked|busy/i.test(result.error)) {
@@ -4261,9 +4377,9 @@ function setupIPC() {
             }
           } catch (_) {}
         }
-        if (!found) portErrors.push({ port: sp.path, error: 'Port opens but no scale responded — check: is the scale powered on? Is the RS-232 cable connected at both ends? Try a different baud rate in Hardware settings.' })
+        if (!found) portErrors.push({ port: sp.path, error: 'Port opens but no scale responded â€” check: is the scale powered on? Is the RS-232 cable connected at both ends? Try a different baud rate in Hardware settings.' })
       }
-      // No scale found — return error info so probe can display it
+      // No scale found â€” return error info so probe can display it
       if (portErrors.length > 0) {
         return { type: 'none', portErrors, error: portErrors.map(e => `${e.port}: ${e.error}`).join('; ') }
       }
@@ -4281,12 +4397,12 @@ function setupIPC() {
   const SCALE_UNITS = { 0x01: 'mg', 0x02: 'g', 0x03: 'kg', 0x04: 'ct', 0x0B: 'oz', 0x0C: 'lb' }
   const SCALE_STATUSES = { 0x01: 'fault', 0x02: 'zero', 0x03: 'in_motion', 0x04: 'stable', 0x05: 'under_zero', 0x06: 'over_limit', 0x07: 'calibration', 0x08: 'needs_zero' }
 
-  // ── Serial scale communication (SICS + MT 8217 protocols) ──────────────────
+  // â”€â”€ Serial scale communication (SICS + MT 8217 protocols) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   // Protocol-specific serial settings
   const PROTOCOL_SERIAL_OPTS = {
     sics:   { dataBits: 8, stopBits: 1, parity: 'none', rtscts: false },   // MT-SICS (lab balances)
-    mt8217: { dataBits: 7, stopBits: 1, parity: 'even', rtscts: false },   // MT 8217 (Viva, Ariva, bPlus retail scales) — 7-E-1 per protocol spec
+    mt8217: { dataBits: 7, stopBits: 1, parity: 'even', rtscts: false },   // MT 8217 (Viva, Ariva, bPlus retail scales) â€” 7-E-1 per protocol spec
   }
 
   async function openScaleSerialPort (portPath, baud, protocol) {
@@ -4310,7 +4426,7 @@ function setupIPC() {
           appLog('error', 'hardware', `Failed to open scale port ${portPath}`, err.message)
           return reject(err)
         }
-        // Enable DTR (Data Terminal Ready) — matches Profit Track's DTR/DSR handshake setting
+        // Enable DTR (Data Terminal Ready) â€” matches Profit Track's DTR/DSR handshake setting
         port.set({ dtr: true, rts: true }, () => {})
         hwScalePort = port
         appLog('info', 'hardware', `Scale serial port opened: ${portPath} @ ${baud} baud (${protocol || 'sics'}, ${serialOpts.dataBits}-${serialOpts.parity[0].toUpperCase()}-${serialOpts.stopBits})`)
@@ -4318,7 +4434,7 @@ function setupIPC() {
       })
       port.on('error', err => {
         appLog('error', 'hardware', `Scale serial port error: ${err.message}`)
-        // Don't crash — mark port as dead so polling can reconnect
+        // Don't crash â€” mark port as dead so polling can reconnect
         hwScalePort = null
         scaleStreamActive = false
       })
@@ -4328,7 +4444,7 @@ function setupIPC() {
         scaleStreamActive = false
         // Auto-reconnect after 2s if scale is configured
         if (hwScale?.port) {
-          appLog('info', 'hardware', 'Scale port closed unexpectedly — will reconnect on next poll')
+          appLog('info', 'hardware', 'Scale port closed unexpectedly â€” will reconnect on next poll')
         }
       })
     })
@@ -4351,7 +4467,7 @@ function setupIPC() {
         if (!settled) {
           settled = true
           port.removeListener('data', onData)
-          reject(new Error(`Scale timeout (${timeoutMs}ms) — no response to "${command.trim()}"`))
+          reject(new Error(`Scale timeout (${timeoutMs}ms) â€” no response to "${command.trim()}"`))
         }
       }, timeoutMs || 3000)
 
@@ -4369,7 +4485,7 @@ function setupIPC() {
     //   S D      1.230 kg    (dynamic/unstable weight)
     //   S +      0.000 kg    (overload)
     //   S -                  (underload)
-    //   S I                  (command not executable — e.g. scale in motion for too long)
+    //   S I                  (command not executable â€” e.g. scale in motion for too long)
     //   SI responses have same format but with SI prefix
     const m = response.match(/^S[I]?\s+([SDLI+\-])\s+(-?[\d.]+)\s*(mg|g|kg|ct|oz|lb|t)?/i)
     if (!m) return null
@@ -4384,14 +4500,14 @@ function setupIPC() {
     return { weight, unit, status, stable, inMotion, zero: weight === 0 && stable }
   }
 
-  // ── MT 8217 protocol (Viva, Ariva, bPlus retail scales) ─────────────────
+  // â”€â”€ MT 8217 protocol (Viva, Ariva, bPlus retail scales) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   function send8217Command (port, command, timeoutMs) {
     // 8217 protocol: send single ASCII char, response may be:
     //   (a) STX-framed: STX (0x02) + data + CR (0x0D)
     //   (b) Unframed: raw bytes terminated by CR, LF, or ETX (0x03)
     //   (c) Raw data with no framing (collect until silence)
-    // We try all approaches — accept whichever completes first
+    // We try all approaches â€” accept whichever completes first
     return new Promise((resolve, reject) => {
       let settled = false
       const framedBuf = []
@@ -4431,12 +4547,12 @@ function setupIPC() {
           }
         }
 
-        // No framing detected — use silence detection (50ms of no data = response complete)
+        // No framing detected â€” use silence detection (50ms of no data = response complete)
         if (rawBuf.length > 0) {
           if (silenceTimer) clearTimeout(silenceTimer)
           silenceTimer = setTimeout(() => {
             if (!settled && rawBuf.length > 0) {
-              appLog('debug', 'scale', `Silence timeout — accepting ${rawBuf.length} unframed bytes`)
+              appLog('debug', 'scale', `Silence timeout â€” accepting ${rawBuf.length} unframed bytes`)
               finish(rawBuf)
             }
           }, 50)
@@ -4450,10 +4566,10 @@ function setupIPC() {
           port.removeListener('data', onData)
           // If we got some data but no framing, return what we have
           if (rawBuf.length > 0) {
-            appLog('debug', 'scale', `Timeout but got ${rawBuf.length} bytes — returning raw data`)
+            appLog('debug', 'scale', `Timeout but got ${rawBuf.length} bytes â€” returning raw data`)
             resolve(Buffer.from(rawBuf))
           } else {
-            reject(new Error(`Scale timeout (${timeoutMs}ms) — no response to "${command}"`))
+            reject(new Error(`Scale timeout (${timeoutMs}ms) â€” no response to "${command}"`))
           }
         }
       }, timeoutMs || 3000)
@@ -4471,7 +4587,7 @@ function setupIPC() {
     const ascii = data.toString('ascii').replace(/[^\x20-\x7e]/g, '?')
     appLog('debug', 'scale', `8217 parse: hex=[${hex}] ascii=[${ascii}] len=${data.length}`)
 
-    // ── Method 1: Standard MT 8217 binary frame ──────────────────────────────
+    // â”€â”€ Method 1: Standard MT 8217 binary frame â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // Frame between STX and CR: STA + STB + W5 W4 W3 W2 W1 + BCC + ETX
     //   STA (byte 0): bits 0-2 = decimal point position, bit 5 = always 1
     //   STB (byte 1): bit 0 = net, bit 1 = negative, bit 2 = out-of-range,
@@ -4518,7 +4634,7 @@ function setupIPC() {
       }
     }
 
-    // ── Method 2: ECR format — ASCII weight with decimal point ───────────────
+    // â”€â”€ Method 2: ECR format â€” ASCII weight with decimal point â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // Some 8217 configs return formatted strings like " 05.000LB" or "  0.500KG"
     const asciiStr = data.toString('ascii')
     const ecrMatch = asciiStr.match(/(-?\d+\.?\d*)\s*(kg|lb|g|oz)?/i)
@@ -4534,7 +4650,7 @@ function setupIPC() {
       }
     }
 
-    // ── Method 3: Status-only response ("?" + status char) — scale not ready ─
+    // â”€â”€ Method 3: Status-only response ("?" + status char) â€” scale not ready â”€
     if (asciiStr.includes('?')) {
       appLog('debug', 'scale', '8217 status-only response (scale not ready or in motion)')
       return {
@@ -4543,11 +4659,11 @@ function setupIPC() {
       }
     }
 
-    // ── Method 4: Raw digit fallback ─────────────────────────────────────────
+    // â”€â”€ Method 4: Raw digit fallback â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const digitMatch = asciiStr.match(/(-?\d+(?:\.\d+)?)/)
     if (digitMatch) {
       let weight = parseFloat(digitMatch[1])
-      // Raw digits without decimal from a kg scale — assume 3 decimal places
+      // Raw digits without decimal from a kg scale â€” assume 3 decimal places
       if (Number.isInteger(weight) && weight > 100) weight = weight / 1000
       return {
         weight, unit: 'kg', status: 'stable',
@@ -4570,7 +4686,7 @@ function setupIPC() {
     }
   }
 
-  // ── Unified serial scale read ─────────────────────────────────────────────
+  // â”€â”€ Unified serial scale read â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   async function readScaleSerial () {
     if (scaleStreamActive && lastStreamReading) return lastStreamReading
@@ -4633,7 +4749,7 @@ function setupIPC() {
   }
 
   function readScaleHID () {
-    if (!HID) return { error: 'node-hid not available — USB HID scale reading disabled' }
+    if (!HID) return { error: 'node-hid not available â€” USB HID scale reading disabled' }
     if (!hwScale?.path) return { error: 'No HID scale path. Run probe first.' }
     try {
       const device = getHidScale()
@@ -4672,8 +4788,8 @@ function setupIPC() {
       }
       const resp = await sendSerialCommand(hwScalePort, 'Z\r\n', 3000)
       if (resp.startsWith('Z A')) return { ok: true, status: 'Scale zeroed' }
-      if (resp.startsWith('Z I')) return { error: 'Scale busy — cannot zero right now' }
-      if (resp.startsWith('Z +')) return { error: 'Scale overloaded — remove weight first' }
+      if (resp.startsWith('Z I')) return { error: 'Scale busy â€” cannot zero right now' }
+      if (resp.startsWith('Z +')) return { error: 'Scale overloaded â€” remove weight first' }
       return { error: `Unexpected response: ${resp}` }
     } catch (e) { return { error: e.message } }
   }
@@ -4715,7 +4831,7 @@ function setupIPC() {
     }
   }
 
-  // ── Scanner detection (HID keyboard — just identify, no communication) ─────
+  // â”€â”€ Scanner detection (HID keyboard â€” just identify, no communication) â”€â”€â”€â”€â”€
 
   function detectScanner (devices) {
     for (const d of devices) {
@@ -4726,7 +4842,7 @@ function setupIPC() {
     return null
   }
 
-  // ── Build receipt buffer (ESC/POS) ─────────────────────────────────────────
+  // â”€â”€ Build receipt buffer (ESC/POS) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   function buildReceiptBuffer (receiptData) {
     const W = 42
@@ -4739,7 +4855,7 @@ function setupIPC() {
     cmd(Buffer.from([ESC, 0x74, 0x00]))
     cmd(ESCPOS.ALIGN_CENTER)
 
-    // Header block — receipt_header is the primary source of store info
+    // Header block â€” receipt_header is the primary source of store info
     if (receiptData.header) {
       const lines = receiptData.header.split('\n').filter(l => l.trim())
       if (lines.length > 0) {
@@ -4860,7 +4976,7 @@ function setupIPC() {
     return Buffer.concat(parts)
   }
 
-  // ── Full probe (enumerate + detect + test) ─────────────────────────────────
+  // â”€â”€ Full probe (enumerate + detect + test) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   async function probeHardware () {
     const devices = enumerateDevices()
@@ -4957,7 +5073,7 @@ function setupIPC() {
           result.printer.tested = true
           result.printer.status = qs.PrinterStatus === 3 ? 'Idle' : qs.PrinterStatus === 4 ? 'Printing' : qs.PrinterStatus === 5 ? 'Warming Up' : `Status ${qs.PrinterStatus || 0}`
           if ((qs.JobCount || 0) > 0) {
-            result.printer.status += ` (${qs.JobCount} stuck jobs — clearing)`
+            result.printer.status += ` (${qs.JobCount} stuck jobs â€” clearing)`
             clearPrinterQueue(printer.name)
           }
         }
@@ -4966,13 +5082,13 @@ function setupIPC() {
 
     if (scale && scale.type === 'serial' && scale.port && SerialPortLib) {
       if (hwScalePort?.isOpen && lastStreamReading) {
-        // Port is open and polling — use last cached reading (don't conflict with poller)
+        // Port is open and polling â€” use last cached reading (don't conflict with poller)
         result.scale.tested = true
         result.scale.testResult = `${lastStreamReading.weight} ${lastStreamReading.unit} (${lastStreamReading.status})`
         result.scale.reading = lastStreamReading
         result.scale.detected = true
       } else if (hwScalePort?.isOpen) {
-        // Port open but no cached reading yet — do a single read
+        // Port open but no cached reading yet â€” do a single read
         try {
           const reading = await readScaleSerial()
           result.scale.tested = true
@@ -4985,7 +5101,7 @@ function setupIPC() {
           }
         } catch (_) {}
       } else {
-        // Port not open — test fresh
+        // Port not open â€” test fresh
         const test = await testSerialScale(scale.port, scale.baud || 9600, scale.protocol || 'mt8217')
         result.scale.tested = true
         if (test.ok) {
@@ -5006,7 +5122,7 @@ function setupIPC() {
     return result
   }
 
-  // ── Environment diagnostics — detect conflicts, locked ports, missing drivers ──
+  // â”€â”€ Environment diagnostics â€” detect conflicts, locked ports, missing drivers â”€â”€
   async function diagnoseEnvironment () {
     const issues = []
     const info = []
@@ -5015,7 +5131,7 @@ function setupIPC() {
       info.push({ type: 'info', area: 'platform', message: `Platform: ${process.platform} (some checks are Windows-only)` })
     }
 
-    // ── 1. Scan ALL running processes for anything that commonly holds COM ports ──
+    // â”€â”€ 1. Scan ALL running processes for anything that commonly holds COM ports â”€â”€
     if (isWin) {
       const knownConflicts = {
         'profittrack': 'Profit Track', 'pt_pos': 'Profit Track POS', 'ptserver': 'Profit Track Server',
@@ -5041,7 +5157,7 @@ function setupIPC() {
             if (proc.includes(key) && !foundConflicts.has(key)) {
               foundConflicts.add(key)
               issues.push({ type: 'conflict', area: 'software', severity: 'high',
-                message: `${name} is running (${match[1]}) — may be locking COM ports or printer queues`,
+                message: `${name} is running (${match[1]}) â€” may be locking COM ports or printer queues`,
                 fix: `Close ${name} before using Tillaroo, or it will block access to the scale and printer` })
             }
           }
@@ -5057,15 +5173,15 @@ function setupIPC() {
           for (const p of list) {
             if (p.Status && p.Status !== 'OK') {
               issues.push({ type: 'port_status', area: 'port', severity: 'medium',
-                message: `${p.DeviceID}: hardware status is "${p.Status}" — ${p.Description || p.Name || ''}`,
-                fix: `Check Device Manager → Ports → ${p.DeviceID} for errors` })
+                message: `${p.DeviceID}: hardware status is "${p.Status}" â€” ${p.Description || p.Name || ''}`,
+                fix: `Check Device Manager â†’ Ports â†’ ${p.DeviceID} for errors` })
             }
           }
         }
       } catch (_) {}
     }
 
-    // ── 2. COM port access + scale response test ──
+    // â”€â”€ 2. COM port access + scale response test â”€â”€
     if (SerialPortLib) {
       try {
         const ports = await SerialPortLib.SerialPort.list()
@@ -5075,7 +5191,7 @@ function setupIPC() {
             info.push({ type: 'info', area: 'port', message: `${p.path}: in use by Tillaroo (scale connected)` })
             continue
           }
-          // Skip if our Python scale bridge has it open — otherwise the open
+          // Skip if our Python scale bridge has it open â€” otherwise the open
           // attempt below fails with "Access denied" and we wrongly flag our
           // own usage as "another application has exclusive access".
           if (pythonScaleProc && hwScale?.port === p.path) {
@@ -5092,7 +5208,7 @@ function setupIPC() {
             })
             portOpened = true
 
-            // Port opens — try to get a scale response to check if anything is connected
+            // Port opens â€” try to get a scale response to check if anything is connected
             let gotResponse = false
             try {
               const resp = await new Promise((resolve, reject) => {
@@ -5108,7 +5224,7 @@ function setupIPC() {
               gotResponse = true
               info.push({ type: 'info', area: 'port', message: `${p.path}: device responded${p.manufacturer ? ` (${p.manufacturer})` : ''}` })
             } catch (_) {
-              // No response to SICS — try MT 8217
+              // No response to SICS â€” try MT 8217
               try {
                 const resp8217 = await new Promise((resolve, reject) => {
                   const buf = []
@@ -5133,7 +5249,7 @@ function setupIPC() {
               // Port opens but nothing responds
               issues.push({ type: 'no_response', area: 'scale', severity: 'medium',
                 message: `${p.path}: port opens but no device responded`,
-                fix: `Check: (1) Is the scale powered on? (2) Is the RS-232 cable connected to both the scale and this port? (3) Is the cable a straight-through or crossover — the Ariva-S needs a specific pinout` })
+                fix: `Check: (1) Is the scale powered on? (2) Is the RS-232 cable connected to both the scale and this port? (3) Is the cable a straight-through or crossover â€” the Ariva-S needs a specific pinout` })
             }
 
             await new Promise(r => testPort.close(r))
@@ -5149,11 +5265,11 @@ function setupIPC() {
                 } catch (_) {}
               }
               issues.push({ type: 'locked_port', area: 'port', severity: 'high',
-                message: `${p.path}: LOCKED — another application has exclusive access${holder}`,
+                message: `${p.path}: LOCKED â€” another application has exclusive access${holder}`,
                 fix: `Another program is using ${p.path}. Close Profit Track, serial terminals, Device Manager's port monitor, or any other software that connects to serial ports. Then re-scan.` })
             } else if (e.message === 'open_timeout') {
               issues.push({ type: 'port_timeout', area: 'port', severity: 'medium',
-                message: `${p.path}: timed out trying to open — port may be in a bad state`,
+                message: `${p.path}: timed out trying to open â€” port may be in a bad state`,
                 fix: `Try: (1) Unplug and replug the USB-to-Serial adapter (2) Restart the computer if the port is stuck` })
             } else {
               issues.push({ type: 'port_error', area: 'port', severity: 'medium',
@@ -5165,8 +5281,8 @@ function setupIPC() {
         }
         if (ports.length === 0) {
           issues.push({ type: 'no_ports', area: 'port', severity: 'high',
-            message: 'No COM ports found — the RS-232 adapter is not detected',
-            fix: 'Check: (1) Is the USB-to-Serial adapter plugged in? (2) Does it show in Device Manager → Ports? (3) Install the correct driver — common adapters need FTDI, Prolific PL2303, CH340, or Silicon Labs CP210x drivers' })
+            message: 'No COM ports found â€” the RS-232 adapter is not detected',
+            fix: 'Check: (1) Is the USB-to-Serial adapter plugged in? (2) Does it show in Device Manager â†’ Ports? (3) Install the correct driver â€” common adapters need FTDI, Prolific PL2303, CH340, or Silicon Labs CP210x drivers' })
         }
       } catch (e) {
         issues.push({ type: 'serial_error', area: 'port', severity: 'high',
@@ -5174,11 +5290,11 @@ function setupIPC() {
       }
     } else {
       issues.push({ type: 'missing_dep', area: 'driver', severity: 'high',
-        message: 'serialport package not installed — RS-232 communication disabled',
+        message: 'serialport package not installed â€” RS-232 communication disabled',
         fix: 'Run: npm install serialport' })
     }
 
-    // ── 3. USB devices without drivers (yellow triangle in Device Manager) ──
+    // â”€â”€ 3. USB devices without drivers (yellow triangle in Device Manager) â”€â”€
     if (isWin) {
       try {
         const problemDevices = hwExec('powershell -NoProfile -NonInteractive -Command "Get-PnpDevice -Status Error,Degraded,Unknown -ErrorAction SilentlyContinue | Where-Object { $_.Class -in \'Ports\',\'USB\',\'Printer\',\'HIDClass\',\'\' } | Select-Object FriendlyName,InstanceId,Status,Class | ConvertTo-Json -Compress"', { timeout: 5000, encoding: 'utf-8' }).trim()
@@ -5192,13 +5308,13 @@ function setupIPC() {
                 message: `Device "${d.FriendlyName || 'Unknown'}" has status: ${d.Status}${d.Class ? ` (class: ${d.Class})` : ''}`,
                 fix: isUSBSerial
                   ? 'This looks like a USB-to-Serial adapter without a driver. Download and install the driver from the adapter manufacturer (FTDI, Prolific, CH340, or Silicon Labs)'
-                  : 'This device has a driver problem — check Device Manager for details' })
+                  : 'This device has a driver problem â€” check Device Manager for details' })
             }
           } catch (_) {} // JSON parse fail = no problem devices
         }
       } catch (_) {}
 
-      // ── 4. Port driver health ──
+      // â”€â”€ 4. Port driver health â”€â”€
       try {
         const drivers = hwExec('powershell -NoProfile -NonInteractive -Command "Get-WmiObject Win32_PnPSignedDriver -Filter \\"DeviceClass=\'Ports\'\\" -ErrorAction SilentlyContinue | Select-Object DeviceName,DriverVersion,Manufacturer,Status | ConvertTo-Json -Compress"', { timeout: 5000, encoding: 'utf-8' }).trim()
         if (drivers) {
@@ -5208,7 +5324,7 @@ function setupIPC() {
             if (d.Status && d.Status !== 'OK') {
               issues.push({ type: 'driver_error', area: 'driver', severity: 'high',
                 message: `Port driver "${d.DeviceName || 'Unknown'}" has status: ${d.Status}`,
-                fix: 'Right-click the device in Device Manager → Update driver, or uninstall and reinstall' })
+                fix: 'Right-click the device in Device Manager â†’ Update driver, or uninstall and reinstall' })
             } else {
               info.push({ type: 'info', area: 'driver', message: `Driver OK: ${d.DeviceName || 'Unknown'} v${d.DriverVersion || '?'} (${d.Manufacturer || '?'})` })
             }
@@ -5216,43 +5332,43 @@ function setupIPC() {
         }
       } catch (_) {}
 
-      // ── 5. Print Spooler service ──
+      // â”€â”€ 5. Print Spooler service â”€â”€
       try {
         const spoolerStatus = hwExec('powershell -NoProfile -NonInteractive -Command "(Get-Service Spooler -ErrorAction SilentlyContinue).Status"', { timeout: 3000, encoding: 'utf-8' }).trim()
         if (spoolerStatus !== 'Running') {
           issues.push({ type: 'service', area: 'printer', severity: 'high',
-            message: `Print Spooler service is ${spoolerStatus || 'not found'} — receipt printing will not work`,
-            fix: 'Open services.msc → find "Print Spooler" → right-click → Start. Set startup type to Automatic.' })
+            message: `Print Spooler service is ${spoolerStatus || 'not found'} â€” receipt printing will not work`,
+            fix: 'Open services.msc â†’ find "Print Spooler" â†’ right-click â†’ Start. Set startup type to Automatic.' })
         } else {
           info.push({ type: 'info', area: 'printer', message: 'Print Spooler service is running' })
         }
       } catch (_) {}
 
-      // ── 6. Stuck print jobs ──
+      // â”€â”€ 6. Stuck print jobs â”€â”€
       try {
         const jobs = hwExec('powershell -NoProfile -NonInteractive -Command "Get-Printer -ErrorAction SilentlyContinue | ForEach-Object { Get-PrintJob -PrinterName $_.Name -ErrorAction SilentlyContinue } | Measure-Object | Select-Object -ExpandProperty Count"', { timeout: 5000, encoding: 'utf-8' }).trim()
         const jobCount = parseInt(jobs)
         if (jobCount > 0) {
           issues.push({ type: 'stuck_jobs', area: 'printer', severity: 'medium',
-            message: `${jobCount} print job(s) stuck in queue — may block new receipts`,
-            fix: 'Open Printers & Scanners → select the receipt printer → Open queue → Cancel All Documents' })
+            message: `${jobCount} print job(s) stuck in queue â€” may block new receipts`,
+            fix: 'Open Printers & Scanners â†’ select the receipt printer â†’ Open queue â†’ Cancel All Documents' })
         }
       } catch (_) {}
 
-      // ── 7. Check for Bluetooth COM ports (can waste time during detection) ──
+      // â”€â”€ 7. Check for Bluetooth COM ports (can waste time during detection) â”€â”€
       try {
         const btPorts = hwExec('powershell -NoProfile -NonInteractive -Command "Get-PnpDevice -Class Bluetooth -Status OK -ErrorAction SilentlyContinue | Measure-Object | Select-Object -ExpandProperty Count"', { timeout: 3000, encoding: 'utf-8' }).trim()
         const btCount = parseInt(btPorts)
         if (btCount > 0) {
-          info.push({ type: 'info', area: 'port', message: `${btCount} Bluetooth device(s) found — Bluetooth COM ports may slow down hardware detection` })
+          info.push({ type: 'info', area: 'port', message: `${btCount} Bluetooth device(s) found â€” Bluetooth COM ports may slow down hardware detection` })
         }
       } catch (_) {}
     }
 
-    // ── 8. Scale connection status ──
+    // â”€â”€ 8. Scale connection status â”€â”€
     if (hwScale) {
       if (hwScalePort?.isOpen) {
-        info.push({ type: 'info', area: 'scale', message: `Scale connected: ${hwScale.port || hwScale.path} (${hwScale.protocol || 'hid'})${scaleStreamActive ? ' — streaming' : ''}` })
+        info.push({ type: 'info', area: 'scale', message: `Scale connected: ${hwScale.port || hwScale.path} (${hwScale.protocol || 'hid'})${scaleStreamActive ? ' â€” streaming' : ''}` })
       } else if (hwScale.configured) {
         issues.push({ type: 'scale_disconnected', area: 'scale', severity: 'medium',
           message: `Scale configured on ${hwScale.port || hwScale.path} but port is not open`,
@@ -5260,26 +5376,26 @@ function setupIPC() {
       }
     } else {
       issues.push({ type: 'no_scale', area: 'scale', severity: 'medium',
-        message: 'No scale detected — weight-based products will require manual weight entry',
+        message: 'No scale detected â€” weight-based products will require manual weight entry',
         fix: 'Connect the Mettler Toledo Ariva-S via the RS-232 cable, ensure it is powered on, and re-scan' })
     }
 
-    // ── 9. Printer status ──
+    // â”€â”€ 9. Printer status â”€â”€
     if (!hwPrinter) {
       issues.push({ type: 'no_printer', area: 'printer', severity: 'medium',
-        message: 'No receipt printer detected — receipts will not print',
+        message: 'No receipt printer detected â€” receipts will not print',
         fix: 'Connect the receipt printer via USB, ensure it is powered on, and re-scan' })
     }
 
-    // ── 10. Package availability ──
+    // â”€â”€ 10. Package availability â”€â”€
     if (!HID) {
-      info.push({ type: 'info', area: 'driver', message: 'node-hid not available — USB HID scale reading disabled (RS-232 still works)' })
+      info.push({ type: 'info', area: 'driver', message: 'node-hid not available â€” USB HID scale reading disabled (RS-232 still works)' })
     }
 
     return { issues, info, timestamp: new Date().toISOString() }
   }
 
-  // ── Expose cleanup for shutdown handler (module-scope can't see setupIPC locals) ─
+  // â”€â”€ Expose cleanup for shutdown handler (module-scope can't see setupIPC locals) â”€
   hardwareCleanup = () => {
     stopScalePolling()
     if (hwScalePort?.isOpen) try { hwScalePort.close() } catch (_) {}
@@ -5287,8 +5403,8 @@ function setupIPC() {
     try { stopScannerListener() } catch (_) {}
   }
 
-  // ── Load saved config and auto-probe on startup ────────────────────────────
-  // Only run hardware probing/polling in register mode — admin mode doesn't need it
+  // â”€â”€ Load saved config and auto-probe on startup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Only run hardware probing/polling in register mode â€” admin mode doesn't need it
   const isRegisterMode = isRegisterApp
 
   loadSavedHardwareConfig()
@@ -5298,7 +5414,7 @@ function setupIPC() {
   // Returned to caller so the splash sequence can await it
   async function _initHardwareStartup () {
     if (!isRegisterMode) {
-      appLog('info', 'hardware', 'Admin mode — skipping hardware probe and polling')
+      appLog('info', 'hardware', 'Admin mode â€” skipping hardware probe and polling')
       return
     }
 
@@ -5311,12 +5427,12 @@ function setupIPC() {
       try { cleanupDuplicateQueues() } catch (_) {}
 
       if (!initialProbeFoundHardware) {
-        appLog('info', 'hardware', 'No hardware detected — skipping diagnostics')
+        appLog('info', 'hardware', 'No hardware detected â€” skipping diagnostics')
       } else {
         try {
           const diag = await diagnoseEnvironment()
           for (const issue of diag.issues) {
-            appLog('warn', 'hardware', `[DIAG] ${issue.message}${issue.fix ? ' — Fix: ' + issue.fix : ''}`)
+            appLog('warn', 'hardware', `[DIAG] ${issue.message}${issue.fix ? ' â€” Fix: ' + issue.fix : ''}`)
           }
           const critical = diag.issues.filter(i => i.severity === 'high')
           if (critical.length > 0 && mainWindow && !mainWindow.isDestroyed()) {
@@ -5326,7 +5442,7 @@ function setupIPC() {
       }
     } catch (e) { appLog('error', 'hardware', 'Auto-probe failed', e.message) }
 
-    // Auto-reprobe every 120s — also checks printer queue health
+    // Auto-reprobe every 120s â€” also checks printer queue health
     setInterval(async () => {
       try {
         if (!initialProbeFoundHardware && !hwPrinter && !hwScale) return
@@ -5356,14 +5472,14 @@ function setupIPC() {
     }, 120000)
   }
 
-  // ── Continuous scale weight reading ──────────────────────────────────────
+  // â”€â”€ Continuous scale weight reading â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   let scalePollingTimer = null
   let lastScaleWeight = null
   let scaleErrorCount = 0
   let scaleStreamActive = false
   let lastStreamReading = null
 
-  // ── Python scale bridge (scale_reader.py --json) ─────────────────────────
+  // â”€â”€ Python scale bridge (scale_reader.py --json) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // The in-house JS 8217 parser doesn't recognise the Viva ECR weight frame
   // format (STX + ASCII digits including a literal `.` + CR). The Python
   // reference reader handles both, so for mt8217 scales we spawn it and pipe
@@ -5385,7 +5501,7 @@ function setupIPC() {
     const args = [scriptPath, hwScale.port, '--json', '--baud', String(hwScale.baud || 9600), '--poll', '0.2']
     appLog('info', 'scale', `Spawning Python scale bridge: python ${args.join(' ')}`)
     let proc
-    // PYTHONUNBUFFERED=1 forces Python to flush stdout per print() — without
+    // PYTHONUNBUFFERED=1 forces Python to flush stdout per print() â€” without
     // this, Python's pipe buffering can hold JSON lines until the buffer fills
     // (often 4KB), so the bridge appears silent when the scale is idle.
     try { proc = spawn('python', args, { windowsHide: true, env: { ...process.env, PYTHONUNBUFFERED: '1' } }) }
@@ -5393,7 +5509,7 @@ function setupIPC() {
     pythonScaleProc = proc
 
     let stdoutBuf = ''
-    // Diagnostic counters — logged every 20 events so we know events are flowing.
+    // Diagnostic counters â€” logged every 20 events so we know events are flowing.
     let evtCount = { weight: 0, status: 0, error: 0, other: 0, lastLogged: 0 }
     const logEvtStats = () => {
       const total = evtCount.weight + evtCount.status + evtCount.error + evtCount.other
@@ -5435,7 +5551,7 @@ function setupIPC() {
           lastPythonReading = reading
           broadcastScaleWeight(reading)
         } else if (evt.type === 'status') {
-          // No weight available right now — always preserve last good weight so
+          // No weight available right now â€” always preserve last good weight so
           // the status bar doesn't flicker to zero when the scale momentarily
           // reports motion/net/idle status. Modal still won't lock in because
           // we send stable: false.
@@ -5504,7 +5620,7 @@ function setupIPC() {
     if (scalePollingTimer || scaleStreamActive || pythonScaleProc) return
     if (!hwScale) return
 
-    // Prefer the Python bridge for mt8217 — handles Viva ECR-mode frames.
+    // Prefer the Python bridge for mt8217 â€” handles Viva ECR-mode frames.
     const usePyFlag = dbGet("SELECT value FROM settings WHERE key='hw_scale_use_python'")?.value
     const usePy = usePyFlag !== 'false'  // default true
     if (usePy && hwScale.protocol === 'mt8217' && hwScale.port) {
@@ -5524,7 +5640,7 @@ function setupIPC() {
     scaleErrorCount = 0
   }
 
-  // ── MT 8217 continuous streaming ('C' command) ─────────────────────────
+  // â”€â”€ MT 8217 continuous streaming ('C' command) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function startScaleStream () {
     if (scaleStreamActive) return
     if (!hwScale?.port || !SerialPortLib) return
@@ -5551,7 +5667,7 @@ function setupIPC() {
       if (watchdog) clearTimeout(watchdog)
       watchdog = setTimeout(() => {
         if (!scaleStreamActive) return
-        appLog('warn', 'hardware', 'Scale stream timeout — no data for 5s, reconnecting...')
+        appLog('warn', 'hardware', 'Scale stream timeout â€” no data for 5s, reconnecting...')
         broadcastScaleWeight({ error: 'Scale connection lost', connected: false })
         stopScaleStream()
         setTimeout(() => { if (hwScale) startScalePolling() }, 2000)
@@ -5636,7 +5752,7 @@ function setupIPC() {
     }
   }
 
-  // ── Request-response polling (SICS / fallback) ────────────────────────
+  // â”€â”€ Request-response polling (SICS / fallback) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   let scalePollingBusy = false
   let lastGoodWeight = null  // last reading with weight > 0 (persists through in-motion/not-ready)
   async function pollScale () {
@@ -5685,7 +5801,7 @@ function setupIPC() {
       if (scaleErrorCount <= 3) appLog('warn', 'hardware', `Scale poll error: ${e.message}`)
       // If port died, null it out so readScale will try to reopen
       if (hwScalePort && !hwScalePort.isOpen) {
-        appLog('warn', 'hardware', 'Scale port died — clearing for reconnect')
+        appLog('warn', 'hardware', 'Scale port died â€” clearing for reconnect')
         hwScalePort = null
       }
     } finally {
@@ -5699,15 +5815,15 @@ function setupIPC() {
     }
   }
 
-  // ── IPC handlers ───────────────────────────────────────────────────────────
+  // â”€â”€ IPC handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   ipcMain.handle('hardware:probe', () => {
     return Promise.race([
       probeHardware(),
       new Promise(resolve => setTimeout(() => resolve({
         timeout: true,
-        printer: { found: !!hwPrinter, name: hwPrinter?.name || '', error: 'Probe timed out (20s) — serial port scan may be hanging' },
-        scale: { found: false, error: 'Probe timed out — a serial port may be held by another application (e.g. Profit Track)' },
+        printer: { found: !!hwPrinter, name: hwPrinter?.name || '', error: 'Probe timed out (20s) â€” serial port scan may be hanging' },
+        scale: { found: false, error: 'Probe timed out â€” a serial port may be held by another application (e.g. Profit Track)' },
         scanner: { found: !!hwScanner },
         drawer: { found: !!hwPrinter },
         usbDevices: [], serialPorts: [],
@@ -5717,7 +5833,7 @@ function setupIPC() {
 
   ipcMain.handle('hardware:diagnose', () => diagnoseEnvironment())
 
-  // Full hardware diagnostic — dumps everything raw for debugging
+  // Full hardware diagnostic â€” dumps everything raw for debugging
   ipcMain.handle('hardware:diagnostic', async () => {
     const diag = { timestamp: new Date().toISOString(), platform: process.platform, arch: process.arch, nodeVersion: process.version, electronVersion: process.versions.electron || '' }
 
@@ -5786,7 +5902,7 @@ function setupIPC() {
       scanner: hwScanner ? { vendor: hwScanner.vendor, product: hwScanner.product } : null,
     }
 
-    // Brute-force serial scale scan — try every port with both protocols
+    // Brute-force serial scale scan â€” try every port with both protocols
     diag.serialScaleScan = []
     if (SerialPortLib && diag.serialPorts.length > 0) {
       for (const sp of diag.serialPorts) {
@@ -5804,7 +5920,7 @@ function setupIPC() {
       }
     }
 
-    // HID scale attempt — try reading from any device with scale usage page
+    // HID scale attempt â€” try reading from any device with scale usage page
     diag.hidScaleScan = []
     if (HID) {
       const hidDevs = HID.devices()
@@ -5899,7 +6015,7 @@ function setupIPC() {
           oposCut()
           return true
         }
-        appLog('warn', 'printer', `OPOS print failed: ${result.error} — falling back to raw spooler`)
+        appLog('warn', 'printer', `OPOS print failed: ${result.error} â€” falling back to raw spooler`)
       }
 
       // Fallback: raw spooler path
@@ -5907,7 +6023,7 @@ function setupIPC() {
         appLog('info', 'printer', 'No printer configured, probing...')
         await probeHardware()
       }
-      if (!hwPrinter) return { error: 'No printer detected. Go to Admin → Hardware and run Probe All Devices.' }
+      if (!hwPrinter) return { error: 'No printer detected. Go to Admin â†’ Hardware and run Probe All Devices.' }
       appLog('info', 'printer', `Printing receipt via "${hwPrinter.name}" (${hwPrinter.interface})`)
       if (hwPrinter?.name && isWin) resumePrinterQueue(hwPrinter.name)
       const buf = buildReceiptBuffer(receiptData)
@@ -5925,7 +6041,7 @@ function setupIPC() {
 
   ipcMain.handle('hardware:openDrawer', async () => {
     try {
-      // Try OPOS first (dedicated CashDrawer device — more reliable than printer DK port)
+      // Try OPOS first (dedicated CashDrawer device â€” more reliable than printer DK port)
       const opos = checkOpos()
       if (opos.drawer) {
         appLog('info', 'drawer', `Opening drawer via OPOS (device: ${oposDrawerName || 'auto'})`)
@@ -5934,7 +6050,7 @@ function setupIPC() {
           appLog('info', 'drawer', 'OPOS drawer opened OK')
           return true
         }
-        appLog('warn', 'drawer', `OPOS drawer failed: ${result.error} — falling back to ESC/POS`)
+        appLog('warn', 'drawer', `OPOS drawer failed: ${result.error} â€” falling back to ESC/POS`)
       }
 
       // Fallback: ESC/POS drawer kick via printer
@@ -5942,7 +6058,7 @@ function setupIPC() {
         appLog('info', 'drawer', 'No printer configured, probing...')
         await probeHardware()
       }
-      if (!hwPrinter) return { error: 'No printer detected — drawer opens via printer DK port. Go to Admin → Hardware.' }
+      if (!hwPrinter) return { error: 'No printer detected â€” drawer opens via printer DK port. Go to Admin â†’ Hardware.' }
       if (hwPrinter?.name && isWin) resumePrinterQueue(hwPrinter.name)
       appLog('info', 'drawer', `Opening drawer via "${hwPrinter.name}" (${hwPrinter.interface})`)
       const buf = Buffer.concat([ESCPOS.INIT, ESCPOS.DRAWER_KICK])
@@ -6018,14 +6134,14 @@ function setupIPC() {
       scheduleSave()
       return { ok: true, status: `Queue "${queueName}" responds to raw data` }
     }
-    return { ok: false, error: `Queue "${queueName}" did not respond — may be offline, wrong port, or wrong driver` }
+    return { ok: false, error: `Queue "${queueName}" did not respond â€” may be offline, wrong port, or wrong driver` }
   })
 
   ipcMain.handle('hardware:getQueues', () => {
     return getWindowsQueues().map(q => ({ name: q.Name, port: q.PortName, driver: q.DriverName }))
   })
 
-  // ── OPOS IPC handlers ────────────────────────────────────────────────────
+  // â”€â”€ OPOS IPC handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   ipcMain.handle('hardware:oposCheck', () => {
     const result = checkOpos()
     const devices = listOposDevices()
@@ -6100,7 +6216,7 @@ function setupIPC() {
     }
   })
 
-  // ── LAN Sync ────────────────────────────────────────────────────────────────
+  // â”€â”€ LAN Sync â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   ipcMain.handle('lan:getStatus', () => lanSync.getStatus())
   ipcMain.handle('lan:getPeers', () => lanSync.getPeers())
@@ -6123,7 +6239,8 @@ function setupIPC() {
       appLog('warn', 'lan-sync', 'Admin app cannot start the LAN server; only the register app may be the server')
       return { ...lanSync.getStatus(), error: 'Only the register app can run the LAN server' }
     } else if (lanMode === 'server') {
-      lanSync.startServer(lanPort, { dbAll, dbGet, dbRun, saveDB, uuid })
+      const started = await startLanServerIfUnique(lanPort)
+      if (!started.ok) return { ...lanSync.getStatus(), error: started.error, existingServer: started.existing }
       await new Promise(resolve => setTimeout(resolve, 500))
     } else if (lanMode === 'client') {
       const serverIp = dbGet("SELECT value FROM settings WHERE key = 'lan_server_ip'")?.value
@@ -6144,7 +6261,7 @@ function setupIPC() {
     return await lanSync.networkDiagnostic()
   })
 
-  // ── Linkly Payment Terminal ─────────────────────────────────────────────────
+  // â”€â”€ Linkly Payment Terminal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   ipcMain.handle('linkly:getStatus', () => linkly.getStatus())
 
@@ -6226,7 +6343,7 @@ function setupIPC() {
 
   function _initScannerStartup () {
     if (!isRegisterMode) return
-    // Always retry scanner on fresh register-mode startup — clear any previous "unavailable" flag
+    // Always retry scanner on fresh register-mode startup â€” clear any previous "unavailable" flag
     try { dbRun("DELETE FROM settings WHERE key='scanner_opos_unavailable'"); scheduleSave() } catch (_) {}
     scannerFatalStop = false
     scannerRetryCount = 0
@@ -6234,13 +6351,16 @@ function setupIPC() {
   }
 
   // Expose IPC controls for the scanner listener (used by Hardware tab / debug)
-  ipcMain.handle('hardware:scannerRestart', () => { stopScannerListener(); scannerFatalStop = false; scannerRetryCount = 0; try { dbRun("DELETE FROM settings WHERE key='scanner_opos_unavailable'"); scheduleSave() } catch (_) {}; startScannerListener(); return { ok: true } })
+  ipcMain.handle('hardware:scannerRestart', () => {
+    if (!isRegisterApp) return { ok: false, error: 'Scanner polling can only be started by the register app' }
+    stopScannerListener(); scannerFatalStop = false; scannerRetryCount = 0; try { dbRun("DELETE FROM settings WHERE key='scanner_opos_unavailable'"); scheduleSave() } catch (_) {}; startScannerListener(); return { ok: true }
+  })
   ipcMain.handle('hardware:scannerTest', () => oposCall('scanner-test', { deviceName: oposScannerName, timeout: 5000 }))
 
   return { initHardware: _initHardwareStartup, initScanner: _initScannerStartup }
 }
 
-// ─── Sync Queue Helper ───────────���────────────────────────────────────────────
+// â”€â”€â”€ Sync Queue Helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ï¿½ï¿½ï¿½â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function queueSync(table, recordId, action) {
   const row = dbGet(`SELECT * FROM ${table} WHERE id = ?1`, [recordId])

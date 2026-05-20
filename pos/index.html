@@ -103,36 +103,43 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .pos-grid-btn img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit}
 .pos-grid-btn.has-img{position:relative}
 .pos-grid-btn.has-img::after{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(to top,rgba(0,0,0,.8) 0%,rgba(0,0,0,.35) 30%,rgba(0,0,0,.08) 55%,transparent 100%);pointer-events:none}
-.pos-grid-btn.has-img > span:not(.btn-price-badge):not(.btn-plu-badge){position:relative;z-index:2;font-size:clamp(10px,1.1vw,13px);font-weight:700;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.9),0 0 16px rgba(0,0,0,.5);margin-top:auto;padding-bottom:clamp(3px,0.5vh,6px);letter-spacing:-.2px;text-align:center}
+.pos-grid-btn.has-img > span:not(.btn-price-badge):not(.btn-plu-badge):not(.btn-cat-badge){position:relative;z-index:2;font-size:clamp(10px,1.1vw,13px);font-weight:700;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.9),0 0 16px rgba(0,0,0,.5);margin-top:auto;padding-bottom:clamp(3px,0.5vh,6px);letter-spacing:-.2px;text-align:center}
 .pos-grid-btn.img-cover img{inset:0;width:100%;height:100%;max-width:none;max-height:none;object-fit:cover;padding:0}
 .pos-grid-btn.img-contain.has-img{background:#fff!important;color:#111!important;border-radius:2px;border:1px solid #d6d6d6;padding:0;box-shadow:0 2px 6px rgba(0,0,0,.28);align-items:stretch;justify-content:flex-end}
 .pos-grid-btn.img-contain.has-img::after{display:none}
 .pos-grid-btn.img-contain.has-img img{inset:4px 4px 28px 4px;width:auto;height:auto;max-width:calc(100% - 8px);max-height:calc(100% - 32px);margin:auto;object-fit:contain;border-radius:0}
-.pos-grid-btn.img-contain.has-img > span:not(.btn-price-badge):not(.btn-plu-badge){width:100%;min-height:26px;margin-top:auto;padding:2px 4px 4px;background:rgba(255,255,255,.96);color:#111;text-shadow:none;font-size:clamp(8px,0.95vw,12px);font-weight:800;line-height:1.1;letter-spacing:0;text-align:center}
+.pos-grid-btn.img-contain.has-img > span:not(.btn-price-badge):not(.btn-plu-badge):not(.btn-cat-badge){width:100%;min-height:26px;margin-top:auto;padding:2px 4px 4px;background:rgba(255,255,255,.96);color:#111;text-shadow:none;font-size:clamp(8px,0.95vw,12px);font-weight:800;line-height:1.1;letter-spacing:0;text-align:center}
 .pos-grid-btn.open-price-key .btn-plu-badge{top:0;left:0;border-radius:0 0 3px 0;background:rgba(255,255,255,.92);color:#111;font-size:clamp(9px,0.9vw,13px);font-weight:800}
 
 /* ─── Function buttons (utility keys) ────────────────────────────── */
-.pos-grid-btn.func-key{font-size:clamp(8px,0.9vw,11px);font-weight:700;letter-spacing:.3px;text-transform:uppercase;border:1px solid rgba(255,255,255,.1);box-shadow:0 3px 8px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.12)}
-.pos-grid-btn.func-key:active{filter:brightness(.75);box-shadow:0 1px 2px rgba(0,0,0,.3),inset 0 2px 4px rgba(0,0,0,.25)}
+.pos-grid-btn.func-key{font-size:clamp(8px,0.9vw,11px);font-weight:700;letter-spacing:.3px;text-transform:uppercase;border:1px solid rgba(255,255,255,.13);box-shadow:0 2px 7px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.13)}
+.pos-grid-btn.func-key:active{filter:brightness(.78);box-shadow:0 1px 2px rgba(0,0,0,.28),inset 0 2px 4px rgba(0,0,0,.22)}
 
 /* ─── Back / home navigation buttons ────────────────────────────── */
 .pos-grid-btn.back-key{font-size:clamp(11px,1.3vw,15px);font-weight:700;letter-spacing:-.2px;background:linear-gradient(135deg,#4fbd77 0%,#3a9c5e 50%,#2d7a4a 100%);color:#fff;border:none;border-radius:10px;box-shadow:0 4px 12px rgba(58,156,94,.3),inset 0 1px 0 rgba(255,255,255,.2);transition:all .1s}
 .pos-grid-btn.back-key:active{transform:scale(.96);filter:brightness(.8);box-shadow:0 1px 4px rgba(58,156,94,.2)}
 
 /* ─── Department / product buttons ───────────────────────────────── */
-.pos-grid-btn.dept-key{font-size:clamp(10px,1.2vw,14px);font-weight:700;letter-spacing:-.2px;border:1px solid rgba(255,255,255,.12);box-shadow:0 4px 14px rgba(0,0,0,.45),0 2px 4px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.14),inset 0 -1px 0 rgba(0,0,0,.15)}
-.pos-grid-btn.dept-key:active{box-shadow:0 1px 3px rgba(0,0,0,.4),inset 0 2px 6px rgba(0,0,0,.2);filter:brightness(.8)}
+.pos-grid-btn.dept-key{font-size:clamp(10px,1.2vw,14px);font-weight:700;letter-spacing:-.2px;border:1px solid rgba(255,255,255,.11);box-shadow:0 2px 8px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.13),inset 0 -1px 0 rgba(0,0,0,.12)}
+.pos-grid-btn.dept-key:active{box-shadow:0 1px 3px rgba(0,0,0,.34),inset 0 2px 6px rgba(0,0,0,.2);filter:brightness(.82)}
 /* Category color accent on image buttons — subtle glow + bottom tint */
-.pos-grid-btn.dept-key.has-img{border-bottom:3px solid var(--cat-color,transparent);box-shadow:0 4px 16px rgba(0,0,0,.5),0 0 20px var(--cat-glow,transparent)}
-.pos-grid-btn.dept-key.has-img::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,var(--cat-glow,transparent) 0%,transparent 40%);z-index:1;pointer-events:none;opacity:.5}
+.pos-grid-btn.dept-key.has-img{border-bottom:2px solid var(--cat-color,transparent);box-shadow:0 2px 9px rgba(0,0,0,.34),0 0 0 1px rgba(255,255,255,.04)}
+.pos-grid-btn.dept-key.has-img::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,var(--cat-glow,transparent) 0%,transparent 38%);z-index:1;pointer-events:none;opacity:.28}
 .pos-grid-btn.dept-key.img-contain.has-img{border-bottom:1px solid #d6d6d6}
 .pos-grid-btn.dept-key.img-contain.has-img::before{display:none}
+.pos-grid-btn.cat-key{box-shadow:0 1px 4px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.1)}
+.pos-grid-btn.cat-key.has-img{border-bottom:1px solid rgba(255,255,255,.16);box-shadow:0 1px 4px rgba(0,0,0,.22)}
+.pos-grid-btn.cat-key.has-img::before{display:none}
+.pos-grid-btn.cat-key.has-img::after{background:linear-gradient(to top,rgba(0,0,0,.58) 0%,rgba(0,0,0,.18) 42%,transparent 76%)}
+.pos-grid-btn.cat-key.has-img > span:not(.btn-price-badge):not(.btn-plu-badge):not(.btn-cat-badge){text-shadow:none;background:rgba(0,0,0,.45);border-radius:4px;padding:3px 6px;margin-bottom:3px}
+.pos-grid-btn.cat-key.img-contain.has-img > span:not(.btn-price-badge):not(.btn-plu-badge):not(.btn-cat-badge){background:rgba(255,255,255,.96);border-radius:0;margin-bottom:0}
 
 /* ─── Price badge (top-right corner) ────────────────────────────── */
-.btn-price-badge{position:absolute;top:2px;right:3px;z-index:3;font-size:clamp(9px,0.85vw,12px);font-weight:700;color:#4ade80;background:rgba(0,0,0,.62);padding:1px 5px;border-radius:4px;letter-spacing:-.3px;pointer-events:none}
+.btn-price-badge{position:absolute;top:2px;right:3px;z-index:3;font-size:clamp(8px,0.75vw,11px);font-weight:700;color:#4ade80;background:rgba(0,0,0,.62);padding:1px 4px;border-radius:4px;letter-spacing:-.3px;pointer-events:none;white-space:nowrap;line-height:1.1}
 .pos-grid-btn.open-price-key .btn-price-badge{color:#111;background:rgba(255,255,255,.92);font-weight:800}
 /* ─── PLU badge (top-left corner) ───────────────────────────────── */
 .btn-plu-badge{position:absolute;top:2px;left:3px;z-index:3;font-size:clamp(7px,0.65vw,9px);font-weight:600;color:rgba(255,255,255,.6);background:rgba(0,0,0,.4);padding:1px 3px;border-radius:3px;letter-spacing:-.2px;pointer-events:none;font-family:'JetBrains Mono','Courier New',monospace}
+.btn-cat-badge{position:absolute;top:2px;left:3px;z-index:3;font-size:clamp(7px,0.65vw,9px);font-weight:800;color:#111;background:rgba(255,255,255,.92);padding:1px 4px;border-radius:3px;letter-spacing:.2px;pointer-events:none;font-family:'JetBrains Mono','Courier New',monospace}
 
 /* ─── Numpad zone ────────────────────────────────────────────────── */
 .pos-grid-btn.digit-btn{font-size:clamp(18px,2.5vw,28px);font-weight:700;background:linear-gradient(180deg,#ffffff 0%,#f4f5f7 100%);color:#1a1a2e;border:1px solid rgba(0,0,0,.06);border-radius:clamp(8px,1vw,14px);box-shadow:0 4px 10px rgba(0,0,0,.12),0 2px 3px rgba(0,0,0,.06),inset 0 -3px 0 rgba(0,0,0,.04),inset 0 1px 0 rgba(255,255,255,.95)}
@@ -146,8 +153,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .pos-grid-btn.empty-cell{background:transparent;border:none;cursor:default;box-shadow:none}
 
 /* ─── Payment / nav buttons ──────────────────────────────────────── */
-.pos-grid-btn.pay-key{font-size:clamp(10px,1.3vw,14px);font-weight:800;letter-spacing:-.3px;border:1px solid rgba(255,255,255,.2);box-shadow:0 4px 14px rgba(0,0,0,.4),0 2px 4px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.2),inset 0 -1px 0 rgba(0,0,0,.15)}
-.pos-grid-btn.pay-key:active{filter:brightness(.78);transform:scale(.96) translateY(2px);box-shadow:0 1px 3px rgba(0,0,0,.3),inset 0 2px 6px rgba(0,0,0,.2)}
+.pos-grid-btn.pay-key{font-size:clamp(10px,1.3vw,14px);font-weight:800;letter-spacing:-.3px;border:1px solid rgba(255,255,255,.18);box-shadow:0 2px 9px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.18),inset 0 -1px 0 rgba(0,0,0,.12)}
+.pos-grid-btn.pay-key:active{filter:brightness(.8);transform:scale(.96) translateY(2px);box-shadow:0 1px 3px rgba(0,0,0,.28),inset 0 2px 6px rgba(0,0,0,.2)}
 
 /* Cart embedded in grid */
 .cart-panel.cart-in-grid{position:static;width:auto;border-right:none;z-index:2;border-radius:12px;margin:0;box-shadow:0 4px 20px rgba(0,0,0,.35),0 0 0 1px rgba(255,255,255,.05)}
@@ -241,14 +248,16 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .search-modal-item .sr-name{font-size:13px;font-weight:600;color:#1a1a2e;margin-bottom:4px;line-height:1.2}
 .search-modal-item .sr-price{font-size:15px;font-weight:700;color:#3a9c5e}
 .search-modal-item .sr-unit{font-size:11px;color:#888}
-.search-kb{background:#e8eaef;border-radius:14px;padding:12px;flex-shrink:0}
-.search-kb-row{display:flex;gap:5px;justify-content:center;margin-bottom:5px}
-.search-kb-key{border:none;border-radius:10px;background:#fff;font-size:20px;font-weight:700;min-width:56px;height:56px;cursor:pointer;transition:all .08s;box-shadow:0 1px 3px rgba(0,0,0,.12)}
-.search-kb-key:active{transform:scale(.92);background:#ddd}
-.search-kb-key.wide{min-width:80px;font-size:15px}
-.search-kb-key.space{flex:1;max-width:320px}
-.search-kb-key.action{background:#1a3d2a;color:#fff;min-width:80px;font-size:15px}
-.search-kb-key.del{background:#fee2e2;color:#991b1b}
+.search-kb{background:#dfe4ea;border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:12px;flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.5)}
+.search-kb-row{display:flex;gap:6px;justify-content:center;margin-bottom:6px}
+.search-kb-row:last-child{margin-bottom:0}
+.search-kb-key{border:none;border-radius:10px;background:linear-gradient(180deg,#fff,#f3f5f8);color:#1f2937;font-size:20px;font-weight:800;min-width:56px;height:54px;cursor:pointer;transition:all .08s;box-shadow:0 1px 3px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.8);font-family:inherit}
+.search-kb-key:active{transform:scale(.94);background:#d8dde5}
+.search-kb-key.wide{min-width:86px;font-size:14px}
+.search-kb-key.space{flex:1;max-width:360px;font-size:14px;letter-spacing:.4px}
+.search-kb-key.action{background:linear-gradient(180deg,#15803d,#166534);color:#fff;min-width:96px;font-size:14px}
+.search-kb-key.secondary{background:linear-gradient(180deg,#475569,#334155);color:#fff;min-width:86px;font-size:14px}
+.search-kb-key.del{background:linear-gradient(180deg,#fee2e2,#fecaca);color:#991b1b;font-size:14px}
 
 .modal{background:#fff;border:none;border-radius:16px;padding:clamp(16px,2.5vw,28px);width:clamp(320px,35vw,420px);box-shadow:0 20px 60px rgba(0,0,0,.2),0 0 0 1px rgba(0,0,0,.05);animation:modalIn .25s ease-out}
 @keyframes modalIn{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
@@ -376,7 +385,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 
 <!-- ═══ PIN Login ═══════════════════════════════════════════════════ -->
 <div class="login-overlay" id="loginOverlay">
-  <img src="logo-circle.png" class="login-logo company-logo" alt="Tillaroo" style="width:140px;height:140px">
+  <img src="logo-circle.png" class="login-logo company-logo" alt="" style="width:140px;height:140px">
   <div class="login-store" id="loginStoreName"></div>
   <div class="login-subtitle">Enter your PIN to start</div>
   <div class="pin-display" id="pinDisplay"></div>
@@ -412,7 +421,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 <!-- ═══ Status Bar ═════════════════════════════════════════════════ -->
 <div class="status-bar">
   <div class="status-left">
-    <img src="logo-circle.png" alt="" class="company-logo" style="width:28px;height:28px;object-fit:cover;border-radius:50%;flex-shrink:0;object-position:center;transform:scale(1.4);clip-path:circle(50%)">
+    <img src="logo-circle.png" alt="" class="company-logo" style="width:28px;height:28px;object-fit:cover;border-radius:50%;flex-shrink:0;object-position:center">
     <span class="store-name">Tillaroo</span>
     <div style="position:relative">
       <input type="text" id="searchInput" class="scan-input" placeholder="" autofocus style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden">
@@ -1004,10 +1013,10 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
       <button class="search-kb-key" data-k="A">A</button><button class="search-kb-key" data-k="S">S</button><button class="search-kb-key" data-k="D">D</button><button class="search-kb-key" data-k="F">F</button><button class="search-kb-key" data-k="G">G</button><button class="search-kb-key" data-k="H">H</button><button class="search-kb-key" data-k="J">J</button><button class="search-kb-key" data-k="K">K</button><button class="search-kb-key" data-k="L">L</button>
     </div>
     <div class="search-kb-row">
-      <button class="search-kb-key" data-k="Z">Z</button><button class="search-kb-key" data-k="X">X</button><button class="search-kb-key" data-k="C">C</button><button class="search-kb-key" data-k="V">V</button><button class="search-kb-key" data-k="B">B</button><button class="search-kb-key" data-k="N">N</button><button class="search-kb-key" data-k="M">M</button><button class="search-kb-key del" data-k="BKSP">⌫</button>
+      <button class="search-kb-key" data-k="Z">Z</button><button class="search-kb-key" data-k="X">X</button><button class="search-kb-key" data-k="C">C</button><button class="search-kb-key" data-k="V">V</button><button class="search-kb-key" data-k="B">B</button><button class="search-kb-key" data-k="N">N</button><button class="search-kb-key" data-k="M">M</button><button class="search-kb-key del wide" data-k="BKSP">BKSP</button>
     </div>
     <div class="search-kb-row">
-      <button class="search-kb-key space" data-k=" ">SPACE</button><button class="search-kb-key action" data-k="CLEAR">CLEAR</button>
+      <button class="search-kb-key wide secondary" data-k="-">-</button><button class="search-kb-key wide secondary" data-k=".">.</button><button class="search-kb-key space" data-k=" ">SPACE</button><button class="search-kb-key del wide" data-k="CLEAR">CLEAR</button><button class="search-kb-key action" data-k="ENTER">ENTER</button>
     </div>
   </div>
 </div>
@@ -1036,6 +1045,22 @@ let payProcessing = false
 let viewingSaleId = null
 let cashNumBuf = ''
 let autoReceipt = localStorage.getItem('tillaroo_auto_receipt') !== '0'
+
+async function refreshBranding () {
+  const [storeName, companyLogo] = await Promise.all([
+    window.pos.getSetting('store_name'),
+    window.pos.getSetting('company_logo')
+  ])
+  const name = storeName || 'Tillaroo'
+  document.title = `${name} POS`
+  const loginName = document.getElementById('loginStoreName')
+  if (loginName) loginName.textContent = name
+  document.querySelectorAll('.store-name').forEach(el => { el.textContent = name })
+  document.querySelectorAll('.company-logo').forEach(img => {
+    img.src = companyLogo || 'logo-circle.png'
+    img.alt = name
+  })
+}
 function updateReceiptToggle () {
   const btn = $('#receiptToggle')
   btn.textContent = autoReceipt ? 'REC: ON' : 'REC: OFF'
@@ -1180,6 +1205,15 @@ function updateSync () {
   const d = $('#syncDot'), l = $('#syncLabel')
   if (navigator.onLine) { d.classList.remove('offline'); l.textContent = 'Online' }
   else { d.classList.add('offline'); l.textContent = 'Offline' }
+}
+function markDataUpdated (source) {
+  const d = $('#syncDot'), l = $('#syncLabel')
+  if (d) d.classList.remove('offline')
+  if (l) {
+    const time = new Date().toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })
+    l.textContent = `Updated ${time}`
+    l.title = source ? `Last data update: ${source}` : 'Last data update'
+  }
 }
 window.addEventListener('online', updateSync)
 window.addEventListener('offline', updateSync)
@@ -1443,7 +1477,8 @@ function renderPosButton (btn, gridStyle) {
   const effectiveType = (type === 'open_price' && ((btn.product_id && !productOpenPrice) || (!btn.product_id && keyboardPrice > 0))) ? 'product' : type
   const bg = esc(btn.bg_color || '#ddd')
   const color = esc(btn.color || '#000')
-  const label = esc(btn.label || '')
+  const rawLabel = btn.label || ''
+  const label = esc(rawLabel)
   const imgSrc = btn.image || btn.product_image_url || ''
   const explicitImageFit = btn.alpha_range === 'image:cover' ? 'cover' : btn.alpha_range === 'image:contain' ? 'contain' : ''
   const defaultImageFit = (effectiveType === 'fixed_price' || effectiveType === 'open_price' || effectiveType === 'product') ? 'contain' : 'cover'
@@ -1492,30 +1527,36 @@ function renderPosButton (btn, gridStyle) {
   if (type === 'page_link' && btn.parent_id) {
     let dispLabel = label.replace(/\\n/g,'<br>')
     dispLabel = dispLabel.replace(/<br>\$[\d.]+.*$/, '')
-    const pluBadge2 = btn.product_plu ? `<span class="btn-plu-badge">${esc(btn.product_plu)}</span>` : ''
-    return `<div class="pos-grid-btn dept-key${imgClass}" data-type="${esc(type)}" data-page-link="${btn.parent_id}"
-      style="${gridStyle};background:${bg};color:${color}${catColorStyle}">${imgHtml}<span>${dispLabel}</span>${pluBadge2}</div>`
+    return `<div class="pos-grid-btn dept-key cat-key${imgClass}" data-type="${esc(type)}" data-page-link="${btn.parent_id}"
+      style="${gridStyle};background:${bg};color:${color}${catColorStyle}">${imgHtml}<span>${dispLabel}</span><span class="btn-cat-badge">CAT</span></div>`
   }
 
   // Department / product / nav — everything else
   const isItem = effectiveType === 'fixed_price' || effectiveType === 'open_price' || effectiveType === 'product'
   const priceVal = btn.active_price || btn.price || 0
   const showPriceBadge = isItem && effectiveType !== 'open_price' && priceVal > 0
+  const productUnit = String(btn.product_unit || '').toLowerCase()
+  const labelUnit = /\/100g|\b100g\b/i.test(rawLabel)
+    ? '100g'
+    : (/\/kg|\bkg\b/i.test(rawLabel) ? 'kg' : (/\/each|\beach\b|\bea\b/i.test(rawLabel) ? 'each' : ''))
+  const priceUnit = productUnit || labelUnit || 'each'
+  const priceSuffix = priceUnit === 'kg' ? '/kg' : priceUnit === '100g' ? '/100g' : '/each'
   const priceBadge = effectiveType === 'open_price'
     ? '<span class="btn-price-badge">O/P</span>'
-    : (showPriceBadge ? `<span class="btn-price-badge">${money(priceVal)}</span>` : '')
+    : (showPriceBadge ? `<span class="btn-price-badge">${money(priceVal)}${priceSuffix}</span>` : '')
   const btnPlu = btn.product_plu || (effectiveType === 'open_price' && /^\d{3,6}$/.test(btn.category_filter || '') ? btn.category_filter : '')
   const pluBadge = btnPlu ? `<span class="btn-plu-badge">${esc(btnPlu)}</span>` : ''
   // Strip embedded price lines from open-price labels; fixed/product buttons show them as badges.
   let displayLabel = label.replace(/\\n/g,'<br>')
   if (priceBadge || effectiveType === 'open_price') displayLabel = displayLabel.replace(/<br>\$[\d.]+.*$/, '')
   const labelHtml = `<span>${displayLabel}</span>${priceBadge}${pluBadge}`
-  const itemClass = effectiveType === 'open_price' ? ' open-price-key' : ''
+  const itemClass = effectiveType === 'open_price' ? ' open-price-key' : (type === 'section' ? ' cat-key' : '')
+  const catBadge = type === 'section' ? '<span class="btn-cat-badge">CAT</span>' : ''
   const productRef = btn.category_filter || ''
   return `<div class="pos-grid-btn dept-key${imgClass}${itemClass}" data-type="${esc(type)}" data-cat="${esc(productRef)}"
     data-alpha="${esc(btn.alpha_range || '')}" data-label2="${label}" data-price="${priceVal}"
     data-action="${esc(type)}" data-page-link="${btn.parent_id || ''}" data-product-id="${esc(btn.product_id || '')}"
-    style="${gridStyle};background:${bg};color:${color}${catColorStyle}">${imgHtml}${labelHtml}</div>`
+    style="${gridStyle};background:${bg};color:${color}${catColorStyle}">${imgHtml}${labelHtml}${catBadge}</div>`
 }
 
 // ═══ Unified Grid Click Handler ════════════════════════════════════
@@ -3991,17 +4032,32 @@ function closeItemSearch () {
 $('#itemSearchClose').addEventListener('click', closeItemSearch)
 
 // QWERTY keyboard in search modal
-$('#itemSearchKb').addEventListener('click', (e) => {
+$('#itemSearchKb').addEventListener('click', async (e) => {
+  e.preventDefault()
   const key = e.target.closest('.search-kb-key')
   if (!key) return
   const k = key.dataset.k
   const input = $('#itemSearchInput')
+  input.focus()
   if (k === 'BKSP') {
-    input.value = input.value.slice(0, -1)
+    const start = input.selectionStart ?? input.value.length
+    const end = input.selectionEnd ?? input.value.length
+    if (start !== end) {
+      input.setRangeText('', start, end, 'end')
+    } else if (start > 0) {
+      input.setRangeText('', start - 1, start, 'end')
+    }
   } else if (k === 'CLEAR') {
     input.value = ''
+  } else if (k === 'ENTER') {
+    await runItemSearchNow()
+    const firstResult = $('#itemSearchResults .search-modal-item')
+    if (firstResult) firstResult.click()
+    return
   } else {
-    input.value += k.toLowerCase()
+    const start = input.selectionStart ?? input.value.length
+    const end = input.selectionEnd ?? input.value.length
+    input.setRangeText(k.toLowerCase(), start, end, 'end')
   }
   runItemSearch()
 })
@@ -4019,7 +4075,7 @@ $('#itemSearchModal').addEventListener('keydown', (e) => {
   if (e.key === 'Escape') { e.preventDefault(); closeItemSearch() }
 })
 
-const runItemSearch = debounce(async () => {
+async function runItemSearchNow () {
   const query = $('#itemSearchInput').value.trim()
   const catFilter = $('#isFilterCat').value
   const unitFilter = $('#isFilterUnit').value
@@ -4059,7 +4115,8 @@ const runItemSearch = debounce(async () => {
       <div class="sr-unit">${esc(p.unit || 'each')}${p.category_name ? ' · ' + esc(p.category_name) : ''}${p.barcode ? ' · ' + esc(p.barcode) : ''}</div>
     </div>
   `).join('')
-}, 150)
+}
+const runItemSearch = debounce(runItemSearchNow, 150)
 
 // Click a search result to add to cart
 $('#itemSearchResults').addEventListener('click', async (e) => {
@@ -4086,16 +4143,10 @@ async function init () {
 
   try {
     // Critical path — get keyboard interactive ASAP
-    const [storeName, categories, companyLogo] = await Promise.all([
-      window.pos.getSetting('store_name'),
-      window.pos.getCategories(),
-      window.pos.getSetting('company_logo')
+    const [, categories] = await Promise.all([
+      refreshBranding(),
+      window.pos.getCategories()
     ])
-    const loginName = document.getElementById('loginStoreName')
-    if (loginName) loginName.textContent = storeName || ''
-    if (companyLogo) {
-      document.querySelectorAll('.company-logo').forEach(img => { img.src = companyLogo })
-    }
     allCategories = categories
     await renderPosKeyboard()
     loadDeals()
@@ -4168,10 +4219,12 @@ async function init () {
 }
 init()
 
-window.pos.onDataChanged(async () => {
+window.pos.onDataChanged(async (info) => {
+  await refreshBranding()
   allCategories = await window.pos.getCategories()
   await renderPosKeyboard()
   await loadDeals()
+  markDataUpdated(info?.source || 'sync')
 })
 
 // ── Hardware issue warnings from startup diagnostics ────────────────────

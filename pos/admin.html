@@ -774,6 +774,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
         Exit Fullscreen
       </a>
+      <span id="adminSyncStatus" style="color:var(--text-muted);font-size:9px;opacity:0.65;margin-top:4px">Waiting for updates</span>
       <span id="adminVersion" style="color:var(--text-muted);font-size:9px;opacity:0.4;margin-top:4px"></span>
     </div>
   </aside>
@@ -1483,6 +1484,7 @@
         <button class="btn btn-outline" style="padding:4px 8px;font-size:10px" id="kbSortAlphaBtn" title="Sort buttons A-Z">Sort A-Z</button>
         <button class="btn btn-outline" style="padding:4px 8px;font-size:10px" id="selectAllBtn" title="Select all buttons on page">Select All</button>
         <button class="btn btn-outline" style="padding:4px 8px;font-size:10px" id="validateKbBtn" title="Check for issues">Validate</button>
+        <button class="btn btn-outline" style="padding:4px 8px;font-size:10px" id="previewKbBtn" title="Preview this page as the register sees it">Preview</button>
         <button class="btn btn-outline" style="padding:4px 8px;font-size:10px" id="exportKbBtn" title="Export">Export</button>
         <button class="btn btn-outline" style="padding:4px 8px;font-size:10px" id="importKbBtn" title="Import">Import</button>
         <input type="file" id="importKbFile" accept=".json" style="display:none">
@@ -2256,6 +2258,8 @@
   <script type="module">
     import { esc, $, $$, money, showToast, debounce } from './js/ui.js'
     import { initSync, pullAll, pullFull } from './js/sync.js'
+
+    let appModeInfo = { mode: 'admin', isRegisterApp: false }
 
     // ── Modal Helpers ───────────────────────────────────────────────
 
@@ -3522,8 +3526,23 @@
 
     let pendingLogoDataUrl = null
 
-    async function loadSettings() {
+    async function refreshBranding() {
       const s = await window.pos.getAllSettings()
+      const name = s.store_name || 'Tillaroo'
+      document.title = `${name} - Admin`
+      const sidebarName = $('#sidebarStoreName')
+      if (sidebarName) sidebarName.textContent = name
+      $$('.company-logo').forEach(img => {
+        img.src = s.company_logo || 'logo-circle.png'
+        img.alt = name
+      })
+      const preview = $('#companyLogoImg')
+      if (preview && pendingLogoDataUrl !== '__remove__') preview.src = pendingLogoDataUrl || s.company_logo || 'logo-circle.png'
+      return s
+    }
+
+    async function loadSettings() {
+      const s = await refreshBranding()
       $('#setStoreName').value = s.store_name || ''
       $('#setStoreAbn').value = s.store_abn || ''
       $('#setStoreAddr').value = s.store_address || ''
@@ -3535,13 +3554,7 @@
       $('#setSupaKey').value = s.supabase_anon_key || ''
       $('#setFullscreen').value = s.start_fullscreen || '1'
       pendingLogoDataUrl = null
-      if (s.company_logo) {
-        $('#companyLogoImg').src = s.company_logo
-        $$('.company-logo').forEach(img => { img.src = s.company_logo })
-      } else {
-        $('#companyLogoImg').src = 'logo-circle.png'
-      }
-      if (s.store_name) $('#sidebarStoreName').textContent = s.store_name
+      $('#companyLogoImg').src = s.company_logo || 'logo-circle.png'
       if (s.lan_mode === 'client') {
         $('#supabaseDesc').textContent = 'This register is in client mode — product data is synced from the main server via LAN. Supabase settings are managed on the server.'
         $('#setSupaUrl').disabled = true
@@ -3586,12 +3599,8 @@
       } else if (pendingLogoDataUrl) {
         await window.pos.setSetting('company_logo', pendingLogoDataUrl)
       }
-      const savedLogo = pendingLogoDataUrl === '__remove__' ? '' : (pendingLogoDataUrl || await window.pos.getSetting('company_logo') || '')
-      if (savedLogo) $$('.company-logo').forEach(img => { img.src = savedLogo })
-      else $$('.company-logo').forEach(img => { img.src = 'logo-circle.png' })
-      const name = $('#setStoreName').value
-      if (name) $('#sidebarStoreName').textContent = name
       pendingLogoDataUrl = null
+      await refreshBranding()
       showToast('Settings saved', 'success')
     })
 
@@ -3909,6 +3918,12 @@
     async function loadLanSettings () {
       const s = await window.pos.getAllSettings()
       const mode = s.lan_mode || 'off'
+      const serverBtn = $('#lanBecomeServer')
+      if (serverBtn) {
+        serverBtn.disabled = !appModeInfo.isRegisterApp
+        serverBtn.style.opacity = appModeInfo.isRegisterApp ? '1' : '.45'
+        serverBtn.title = appModeInfo.isRegisterApp ? 'Use this register as the only LAN server' : 'Only the register app can run the LAN server'
+      }
 
       updateLanPanel(mode)
 
@@ -3981,7 +3996,7 @@
         icon.textContent = '🖥'
         icon.style.borderColor = 'var(--green)'
         icon.style.background = 'rgba(79,189,119,0.1)'
-        title.textContent = 'Main Server (Host)'
+        title.textContent = appModeInfo.isRegisterApp ? 'Main Server (Register Host)' : 'Server Configured Elsewhere'
         title.style.color = 'var(--green)'
         desc.textContent = status?.connected
           ? `This PC hosts the database. ${status.clients?.length || 0} client register(s) connected.`
@@ -3993,7 +4008,7 @@
         icon.textContent = '💻'
         icon.style.borderColor = 'var(--blue)'
         icon.style.background = 'rgba(59,130,246,0.1)'
-        title.textContent = 'Client Register'
+        title.textContent = appModeInfo.isRegisterApp ? 'Client Register' : 'Admin Client'
         title.style.color = 'var(--blue)'
         desc.textContent = status?.connected
           ? `Connected to server at ${status.serverIp || 'unknown'}. Data syncs automatically.`
@@ -4007,7 +4022,9 @@
         icon.style.background = 'var(--surface2)'
         title.textContent = 'Not Configured'
         title.style.color = 'var(--text)'
-        desc.textContent = 'LAN sync is currently off. Choose a role below to enable multi-register sync.'
+        desc.textContent = appModeInfo.isRegisterApp
+          ? 'LAN sync is currently off. This register can be the single server or connect as a client.'
+          : 'LAN sync is currently off. Admin can connect as a client; only the register app can run the server.'
         banner.style.borderColor = 'var(--border)'
         renderLanDiagram('server', { clients: [], serverIp: 'Not configured', port: '5555' })
       }
@@ -4115,6 +4132,10 @@
 
     // "This is the SERVER" button
     $('#lanBecomeServer').addEventListener('click', async () => {
+      if (!appModeInfo.isRegisterApp) {
+        showToast('Only the register app can run the LAN server. Admin can connect as a client.', 'error')
+        return
+      }
       await window.pos.setSetting('lan_mode', 'server')
       await window.pos.setSetting('lan_port', '5555')
       const status = await window.pos.restartLan()
@@ -4122,6 +4143,8 @@
         $('#lanLocalIp').value = status.serverIp || ''
         $('#lanPort').value = status.port || '5555'
         showToast('Server started! Registers will auto-connect.', 'success')
+      } else if (status.error) {
+        showToast(status.error, 'error')
       } else {
         showToast('Server started (will be ready on next launch)', 'success')
       }
@@ -5103,6 +5126,10 @@
           if (i.type === 'overlap') return `Overlap on page ${i.page} at row ${i.row}, col ${i.col}: ${i.buttons.join(' & ')}`
           if (i.type === 'broken_link') return `"${i.button}" on page ${i.page} links to missing page ${i.target_page}`
           if (i.type === 'out_of_bounds') return `"${i.button}" on page ${i.page} at row ${i.row}, col ${i.col} (${i.span}) exceeds grid bounds`
+          if (i.type === 'category_has_price') return `"${i.button}" on page ${i.page} is a category/page button but has a price`
+          if (i.type === 'product_missing_link_or_price') return `"${i.button}" on page ${i.page} is a product button with no linked product or fixed price`
+          if (i.type === 'missing_product') return `"${i.button}" on page ${i.page} links to missing product ${i.product_id}`
+          if (i.type === 'open_button_fixed_product') return `"${i.button}" on page ${i.page} is open-price but its linked product is fixed-price`
           return JSON.stringify(i)
         })
         alert('Layout issues found:\n\n' + msgs.join('\n'))
@@ -5110,6 +5137,53 @@
     })
 
     // ── Grid Rendering ─────────────────────────────────────────────
+
+    function kbPriceSuffix (btn) {
+      const productUnit = String(btn.product_unit || '').toLowerCase()
+      const rawLabel = btn.label || ''
+      const labelUnit = /\/100g|\b100g\b/i.test(rawLabel)
+        ? '100g'
+        : (/\/kg|\bkg\b/i.test(rawLabel) ? 'kg' : (/\/each|\beach\b|\bea\b/i.test(rawLabel) ? 'each' : ''))
+      const unit = productUnit || labelUnit || 'each'
+      return unit === 'kg' ? '/kg' : unit === '100g' ? '/100g' : '/each'
+    }
+
+    function kbCornerPrice (btn) {
+      const price = Number(btn.active_price || btn.price || 0)
+      if (price <= 0) return ''
+      return `${money(price)}${kbPriceSuffix(btn)}`
+    }
+
+    $('#previewKbBtn').addEventListener('click', () => {
+      const ps = allPages.find(p => p.page === currentPage) || { cols: gridCols, rows: gridRows, name: 'Page ' + currentPage }
+      const cols = ps.cols || gridCols
+      const rows = ps.rows || gridRows
+      const pageButtons = kbButtons.filter(b => (b.page || 1) === currentPage && b.active)
+      const overlay = document.createElement('div')
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:99999;display:flex;align-items:center;justify-content:center;padding:24px'
+      const panel = document.createElement('div')
+      panel.style.cssText = 'background:#111827;border:1px solid #334155;border-radius:10px;width:min(1100px,96vw);max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.5)'
+      panel.innerHTML = `
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #334155;color:#e5e7eb">
+          <strong style="font-size:14px">Register Preview: ${esc(ps.name || 'Page ' + currentPage)}</strong>
+          <span style="font-size:11px;color:#94a3b8">${cols} x ${rows}</span>
+          <button id="kbPreviewClose" style="margin-left:auto;background:#1f2937;color:#e5e7eb;border:1px solid #475569;border-radius:6px;padding:6px 10px;cursor:pointer">Close</button>
+        </div>
+        <div id="kbPreviewGrid" style="display:grid;grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},72px);gap:5px;padding:12px;background:#0f172a;overflow:auto"></div>`
+      overlay.appendChild(panel)
+      document.body.appendChild(overlay)
+      const previewGrid = panel.querySelector('#kbPreviewGrid')
+      previewGrid.innerHTML = pageButtons.map(b => {
+        const r = b.grid_row || 0, c = b.grid_col || 0, cs = b.col_span || 1, rs = b.row_span || 1
+        const img = b.image ? `<img src="${esc(b.image)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:${b.alpha_range === 'image:cover' ? 'cover' : 'contain'};opacity:.72">` : ''
+        const isCategory = b.type === 'page_link' || b.type === 'section'
+        const price = (!isCategory && b.type !== 'open_price' && Number(b.active_price || b.price || 0) > 0) ? `<span style="position:absolute;top:3px;right:3px;background:#fff;color:#111;border-radius:3px;padding:1px 4px;font-size:9px;font-weight:800;white-space:nowrap;line-height:1.1">${kbCornerPrice(b)}</span>` : ''
+        const op = b.type === 'open_price' ? '<span style="position:absolute;top:3px;right:3px;background:#fff;color:#111;border-radius:3px;padding:1px 5px;font-size:10px;font-weight:800">O/P</span>' : ''
+        return `<div style="grid-column:${c+1}/span ${cs};grid-row:${r+1}/span ${rs};position:relative;overflow:hidden;border-radius:6px;background:${esc(b.bg_color || '#1f2937')};color:${esc(b.color || '#fff')};display:flex;align-items:end;justify-content:center;text-align:center;padding:6px;font-weight:800;font-size:12px;line-height:1.05;border:1px solid rgba(255,255,255,.12)">${img}<span style="position:relative;text-shadow:0 1px 5px #000">${esc(labelFromDb(b.label)).replace(/\n/g, '<br>')}</span>${price}${op}</div>`
+      }).join('')
+      panel.querySelector('#kbPreviewClose').addEventListener('click', () => overlay.remove())
+      overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove() })
+    })
 
     function renderGrid () {
       // Column headers
@@ -5150,8 +5224,10 @@
             if (btn.type === 'page_link' && btn.parent_id) {
               const tgtName = getPageInfo(parseInt(btn.parent_id)).name || `Page ${btn.parent_id}`
               extra = `<div class="kb-cell-price" style="font-size:8px;opacity:.7">&rarr; ${esc(tgtName)}</div>`
-            } else if (btn.price > 0 && !noPriceTypes.has(btn.type)) {
-              extra = `<div class="kb-cell-price">$${btn.price.toFixed(2)}</div>`
+            } else if (btn.type === 'open_price') {
+              extra = '<div class="kb-cell-price" style="position:absolute;top:3px;right:3px;background:rgba(255,255,255,.92);color:#111;border-radius:3px;padding:1px 4px;font-size:9px;font-weight:800;white-space:nowrap;line-height:1.1">O/P</div>'
+            } else if (Number(btn.active_price || btn.price || 0) > 0 && !noPriceTypes.has(btn.type)) {
+              extra = `<div class="kb-cell-price" style="position:absolute;top:3px;right:3px;background:rgba(255,255,255,.92);color:#111;border-radius:3px;padding:1px 4px;font-size:9px;font-weight:800;white-space:nowrap;line-height:1.1">${kbCornerPrice(btn)}</div>`
             }
             html += `<div class="kb-cell${sel}" data-id="${esc(btn.id)}" data-row="${r}" data-col="${c}" draggable="true"
               style="background:${esc(btn.bg_color)};color:${esc(btn.color)};grid-column:${c+1}/span ${cs};grid-row:${r+1}/span ${rs}">
@@ -5653,12 +5729,19 @@
       preview.style.background = $('#kbBgColor').value
       preview.style.color = $('#kbColor').value
       const val = $('#kbLabel').value || 'Button'
-      preview.innerHTML = esc(val).replace(/\n/g, '<br>')
+      const type = $('#kbType').value
+      const price = parseFloat($('#kbPrice').value || $('#kbProductPrice').value || '0') || 0
+      const isOpen = type === 'product' && $('#kbOpenPrice').checked
+      const badge = isOpen ? '<span style="position:absolute;top:2px;right:2px;background:#fff;color:#111;border-radius:3px;padding:1px 4px;font-size:8px">O/P</span>' :
+        (type === 'product' && price > 0 ? `<span style="position:absolute;top:2px;right:2px;background:#fff;color:#111;border-radius:3px;padding:1px 4px;font-size:8px">$${price.toFixed(2)}</span>` : '')
+      preview.style.position = 'relative'
+      preview.innerHTML = esc(val).replace(/\n/g, '<br>') + badge
     }
 
-    ;['kbLabel', 'kbBgColor', 'kbColor'].forEach(id => {
+    ;['kbLabel', 'kbBgColor', 'kbColor', 'kbPrice', 'kbProductPrice'].forEach(id => {
       $(`#${id}`).addEventListener('input', updateLivePreview)
     })
+    $('#kbOpenPrice').addEventListener('change', updateLivePreview)
 
     // Live-update grid cell size when col/row span changes
     ;['kbColSpan', 'kbRowSpan'].forEach(id => {
@@ -5679,7 +5762,7 @@
     // Show/hide fields based on type
     function updateTypeFields () {
       const type = $('#kbType').value
-      const isProduct = type === 'product' || type === 'open_price' || type === 'fixed_price'
+      const isProduct = type === 'product'
       const supportsImageFit = isProduct || type === 'page_link' || type === 'section'
       $('#kbPageLinkRow').style.display = type === 'page_link' ? 'flex' : 'none'
       $('#kbProductRow').style.display = isProduct ? 'flex' : 'none'
@@ -5710,8 +5793,8 @@
       if (q.length < 2) { results.style.display = 'none'; return }
       const prods = await window.pos.searchProducts(q)
       if (!prods.length) { results.innerHTML = '<div style="padding:8px;color:var(--text-dim);font-size:11px">No products found</div>'; results.style.display = 'block'; return }
-      results.innerHTML = prods.slice(0, 20).map(p => `<div class="kb-prod-pick" data-id="${esc(p.id)}" data-name="${esc(p.name)}" data-price="${p.active_price || p.price || 0}" data-unit="${esc(p.unit || 'each')}" style="padding:6px 10px;cursor:pointer;font-size:12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
-        <span>${esc(p.name)}</span><span style="color:#4ade80;font-weight:600;font-size:11px">${p.unit === 'kg' ? '$' + (p.active_price||p.price||0).toFixed(2) + '/kg' : p.unit === '100g' ? '$' + (p.active_price||p.price||0).toFixed(2) + '/100g' : '$' + (p.active_price||p.price||0).toFixed(2)}</span>
+      results.innerHTML = prods.slice(0, 20).map(p => `<div class="kb-prod-pick" data-id="${esc(p.id)}" data-name="${esc(p.name)}" data-price="${p.active_price || p.price || 0}" data-unit="${esc(p.unit || 'each')}" data-plu="${esc(p.plu || '')}" style="padding:6px 10px;cursor:pointer;font-size:12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <span>${p.plu ? `<span style="color:var(--text-dim);font-size:10px">${esc(p.plu)}</span> ` : ''}${esc(p.name)}</span><span style="color:#4ade80;font-weight:600;font-size:11px">${p.unit === 'kg' ? '$' + (p.active_price||p.price||0).toFixed(2) + '/kg' : p.unit === '100g' ? '$' + (p.active_price||p.price||0).toFixed(2) + '/100g' : '$' + (p.active_price||p.price||0).toFixed(2)}</span>
       </div>`).join('')
       results.style.display = 'block'
     }, 250))
@@ -5725,7 +5808,7 @@
       $('#kbProductId').value = id
       $('#kbProductResults').style.display = 'none'
       const unitTag = unit === 'kg' ? ' /kg' : unit === '100g' ? ' /100g' : ''
-      showLinkedProduct(`${name}${unitTag}`)
+      showLinkedProduct(`${item.dataset.plu ? item.dataset.plu + ' - ' : ''}${name}${unitTag}`)
       if (!$('#kbLabel').value.trim()) $('#kbLabel').value = name
       $('#kbProductPrice').value = price
       $('#kbPrice').value = price
@@ -5807,9 +5890,16 @@
 
       let btnType = $('#kbType').value
       const isOpenPrice = $('#kbOpenPrice').checked
+      const linkedProduct = $('#kbProductId').value || null
+      const productPrice = parseFloat($('#kbProductPrice').value || '0') || 0
+      if (btnType === 'product' && !linkedProduct && !isOpenPrice && productPrice <= 0) {
+        showToast('Product buttons need a linked product, a fixed price, or Open Price enabled', 'error'); return
+      }
+      if ((btnType === 'section' || btnType === 'page_link') && (parseFloat($('#kbPrice').value) || 0) > 0) {
+        $('#kbPrice').value = 0
+      }
       // Save as open_price type when checkbox is checked
       if (btnType === 'product' && isOpenPrice) btnType = 'open_price'
-      const linkedProduct = $('#kbProductId').value || null
       const catFilter = (btnType === 'product' || btnType === 'open_price') ? linkedProduct : ($('#kbCatFilter').value.trim() || null)
       const imageFitTypes = new Set(['product', 'open_price', 'fixed_price', 'page_link', 'section'])
       const imageFitMode = $('#kbImageZoom').checked ? 'image:cover' : 'image:contain'
@@ -5817,7 +5907,7 @@
         id: editId || undefined,
         label,
         type: btnType,
-        price: parseFloat($('#kbPrice').value) || 0,
+        price: btnType === 'page_link' || btnType === 'section' ? 0 : (parseFloat($('#kbPrice').value) || 0),
         category_filter: catFilter,
         alpha_range: (btnType === 'nav') ? ($('#kbAlphaRange').value.trim() || null) : (imageFitTypes.has(btnType) ? imageFitMode : null),
         color: $('#kbColor').value,
@@ -5868,6 +5958,10 @@
     const TYPE_BADGES = { printer: 'badge-green', scale: 'badge-blue', scanner: 'badge-amber', serial: 'badge-blue', unknown: '' }
 
     async function loadHardware () {
+      if (!appModeInfo.isRegisterApp) {
+        const status = $('#probeStatus')
+        if (status) status.innerHTML = '<span style="color:var(--amber)">Admin can view and save hardware settings, but live scanner/scale polling only runs in the register app.</span>'
+      }
       const cfg = await window.pos.getHardwareConfig()
       if (cfg.printerInterface) $('#hwPrinterInterface').value = cfg.printerInterface
       if (cfg.printerName) $('#hwPrinterName').value = cfg.printerName
@@ -5879,8 +5973,8 @@
       if (cfg.scaleProtocol) $('#hwScaleProtocol').value = cfg.scaleProtocol
       togglePrinterFields()
       refreshSerialPorts()
-      // Auto-detect hardware when tab opens
-      autoProbe()
+      // Auto-detect hardware when tab opens only in the register app.
+      if (appModeInfo.isRegisterApp) autoProbe()
     }
 
     async function autoProbe () {
@@ -6111,7 +6205,13 @@
       }
     }
 
-    $('#probeBtn').addEventListener('click', () => autoProbe())
+    $('#probeBtn').addEventListener('click', () => {
+      if (!appModeInfo.isRegisterApp) {
+        showToast('Hardware polling and probing are register-only. Launch Register to scan devices.', 'info')
+        return
+      }
+      autoProbe()
+    })
 
     $('#testPrinterBtn').addEventListener('click', async () => {
       $('#testPrinterBtn').textContent = 'Printing...'
@@ -7000,13 +7100,27 @@
     // -- Init -----------------------------------------------------------
 
     setDashDate(dashboardDate)
+    window.pos.getMode().then(m => {
+      appModeInfo = m || appModeInfo
+      const syncEl = $('#adminSyncStatus')
+      if (syncEl) syncEl.textContent = appModeInfo.isRegisterApp ? 'Register app - hardware active' : 'Admin app - no hardware polling'
+      loadLanSettings().catch(() => {})
+    }).catch(() => {})
+    refreshBranding().catch(() => {})
     window.pos.getVersion().then(v => { const el = $('#adminVersion'); if (el) el.textContent = v }).catch(() => {})
     if (window.__fromRegisterApp) {
       const back = $('#backToRegisterBtn')
       if (back) back.style.display = ''
     }
 
-    window.pos.onDataChanged(() => {
+    window.pos.onDataChanged((info) => {
+      refreshBranding().catch(() => {})
+      const syncEl = $('#adminSyncStatus')
+      if (syncEl) {
+        const time = new Date().toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })
+        syncEl.textContent = `Updated ${time}`
+        syncEl.title = info?.source ? `Last data update: ${info.source}` : 'Last data update'
+      }
       const active = $('.sidebar a.active')?.dataset.tab
       if (active === 'dashboard') loadDashboard()
       else if (active === 'products') loadProducts()

@@ -43,13 +43,13 @@
     .close-btn:hover { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.06); }
 
     .splash {
-      width: min(52vw, 220px);
+      width: min(62vw, 260px);
       aspect-ratio: 590 / 504;
       position: relative;
       display: grid;
       place-items: center;
       animation: floatLogo 4.8s ease-in-out infinite;
-      margin-bottom: 12px;
+      margin-bottom: 18px;
     }
 
     .splash::before {
@@ -82,14 +82,16 @@
     .brand {
       text-align: center;
       color: rgba(255, 255, 255, 0.9);
-      font-size: 36px;
+      font-size: clamp(40px, 9vw, 58px);
       font-weight: 800;
       letter-spacing: -0.06em;
       opacity: 0;
       transform: translateY(12px);
       animation: brandIn 1.2s ease forwards 0.55s;
-      margin-bottom: 24px;
+      margin-bottom: 14px;
     }
+
+    .brand span { color: var(--tillaroo-green); }
 
     .status {
       font-size: 12px;
@@ -207,8 +209,7 @@
     </svg>
   </main>
 
-  <div class="brand" style="color:var(--tillaroo-green)">Tillaroo</div>
-  <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:-18px;margin-bottom:18px;letter-spacing:0.4px;opacity:0;animation:brandIn 0.8s ease forwards 0.9s">by Matthias Campbell</div>
+  <div class="brand"><span>T</span>illar<span>oo</span></div>
   <div class="status" id="status">Starting up...</div>
   <div class="progress-track"><div class="progress-bar" id="progress"></div></div>
   <div class="error-box" id="errorBox">
@@ -246,9 +247,12 @@
       progressBar.className = 'progress-bar error'
       document.getElementById('errorBox').style.display = 'block'
       document.getElementById('errorMsg').textContent = msg
-      document.querySelector('.kangaroo path').style.fill = '#ef4444'
-      document.querySelector('.kangaroo path').style.filter =
-        'drop-shadow(0 0 12px rgba(239,68,68,0.6)) drop-shadow(0 0 40px rgba(239,68,68,0.3))'
+      const kangarooPath = document.querySelector('.kangaroo path')
+      if (kangarooPath) {
+        kangarooPath.style.fill = '#ef4444'
+        kangarooPath.style.filter =
+          'drop-shadow(0 0 12px rgba(239,68,68,0.6)) drop-shadow(0 0 40px rgba(239,68,68,0.3))'
+      }
     })
 
     // Glow pulse tied to CSS custom properties
