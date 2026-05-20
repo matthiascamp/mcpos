@@ -183,6 +183,7 @@ contextBridge.exposeInMainWorld('pos', {
   // Linkly Payment Terminal
   linklyGetStatus:    ()                    => ipcRenderer.invoke('linkly:getStatus'),
   linklyConfigure:    (opts)                => ipcRenderer.invoke('linkly:configure', opts),
+  linklyTestConnection: ()                  => ipcRenderer.invoke('linkly:testConnection'),
   linklyPair:         (user, pass, code)    => ipcRenderer.invoke('linkly:pair', user, pass, code),
   linklyPurchase:     (amountCents, ref)    => ipcRenderer.invoke('linkly:purchase', amountCents, ref),
   linklyRefund:       (amountCents, ref)    => ipcRenderer.invoke('linkly:refund', amountCents, ref),

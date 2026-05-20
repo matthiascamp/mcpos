@@ -1,4 +1,4 @@
--- Tillaroo POS â€” Local SQLite Schema
+-- BoundOS POS - Local SQLite Schema
 -- This is the offline-first database that lives on each register.
 -- All reads/writes hit this DB. A sync queue pushes changes to Supabase.
 
@@ -164,15 +164,19 @@ CREATE TABLE IF NOT EXISTS settings (
 );
 
 INSERT OR IGNORE INTO settings (key, value) VALUES
-  ('store_name', 'Tillaroo'),
+  ('store_name', 'BoundOS'),
   ('store_address', '1164 Cavendish Rd, Mt Gravatt East QLD 4122'),
   ('store_phone', ''),
   ('store_abn', ''),
-  ('receipt_header', 'Tillaroo\n1164 Cavendish Rd, Mt Gravatt East\nFresh Fruit & Veg'),
+  ('receipt_header', 'BoundOS\n1164 Cavendish Rd, Mt Gravatt East\nFresh Fruit & Veg'),
   ('receipt_footer', 'Thank you for shopping local!\nOpen 6am - 7pm every day'),
   ('register_id', 'LANE01'),
+  ('desired_till_float', '0'),
+  ('till_desired_floats', '{}'),
   ('tax_name', 'GST'),
   ('tax_rate', '0.10'),
+  ('company_logo_fit', 'contain'),
+  ('company_logo_scale', '1'),
   ('layout_v3_shifted', '1'),
   ('nav_buttons_fixed', '1'),
   ('next_receipt_number', '1');
@@ -422,7 +426,7 @@ INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, image, color, bg
   ('pg4-beetroot',     'BEETROOT\n$4.99/kg',        'page_link',  4.99,  NULL, '#fff', '#1a3d2a', 4,  'grid', 4, 0, 3, 1, 1, '23'),
   ('pg4-bottle-gourd', 'BOTTLE GOURD\n$5.99/kg',    'open_price', 5.99,  NULL, '#fff', '#1a3d2a', 5,  'grid', 4, 0, 4, 1, 1, NULL),
   ('pg4-broccoli',     'BROCCOLI\n$5.99/kg',        'page_link',  5.99,  'images/products/coles-407755-zm.jpg', '#fff', '#1a3d2a', 6,  'grid', 4, 0, 5, 1, 1, '24'),
-  ('pg4-brussels',     'BRUSSEL SPROUTS KG\n$12.99/kg','open_price',12.99,'https://images.pexels.com/photos/11617799/pexels-photo-11617799.jpeg?auto=compress&cs=tinysrgb&w=500','#fff', '#1a3d2a', 7,  'grid', 4, 1, 0, 1, 1, NULL),
+  ('pg4-brussels',     'BRUSSEL SPROUTS KG\n$12.99/kg','open_price',12.99,'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Brussels_sprouts_on_white_background_5849.jpg/960px-Brussels_sprouts_on_white_background_5849.jpg','#fff', '#1a3d2a', 7,  'grid', 4, 1, 0, 1, 1, NULL),
   ('pg4-cabbage',      'CABBAGE\n$3.99 ea',         'page_link',  3.99,  'https://images.pexels.com/photos/13796758/pexels-photo-13796758.jpeg?auto=compress&cs=tinysrgb&w=500', '#fff', '#1a3d2a', 8,  'grid', 4, 1, 1, 1, 1, '25'),
   ('pg4-capsicum',     'CAPSICUM\n$12.99/kg',       'page_link',  12.99, 'images/products/coles-4580208-zm.jpg', '#fff', '#1a3d2a', 9,  'grid', 4, 1, 2, 1, 1, '26'),
   ('pg4-carrots',      'CARROTS LOOSE KG\n$2.49/kg','open_price', 2.49,  'images/products/coles-4223335-zm.jpg', '#fff', '#1a3d2a', 10, 'grid', 4, 1, 3, 1, 1, NULL),
@@ -430,7 +434,7 @@ INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, image, color, bg
   ('pg4-cauliflower',  'CAULIFLOWER EA\n$4.99 ea',  'open_price', 4.99,  NULL, '#fff', '#1a3d2a', 12, 'grid', 4, 1, 5, 1, 1, NULL),
   ('pg4-celery',       'WHOLE CELERY EA\n$3.99 ea', 'open_price', 3.99,  NULL, '#fff', '#1a3d2a', 13, 'grid', 4, 2, 0, 1, 1, NULL),
   ('pg4-celeriac',     'CELERIAC EA\n$5.99 ea',     'open_price', 5.99,  NULL, '#fff', '#1a3d2a', 14, 'grid', 4, 2, 1, 1, 1, NULL),
-  ('pg4-chillies',     'CHILLIES\n$29.99/kg',       'page_link',  29.99, 'https://images.pexels.com/photos/7720573/pexels-photo-7720573.jpeg?auto=compress&cs=tinysrgb&w=500', '#fff', '#1a3d2a', 15, 'grid', 4, 2, 2, 1, 1, '27'),
+  ('pg4-chillies',     'CHILLIES\n$29.99/kg',       'page_link',  29.99, 'images/products/coles-8760314-zm.jpg', '#fff', '#1a3d2a', 15, 'grid', 4, 2, 2, 1, 1, '27'),
   ('pg4-chokos',       'CHOKOS KG\n$4.99/kg',       'open_price', 4.99,  NULL, '#fff', '#1a3d2a', 16, 'grid', 4, 2, 3, 1, 1, NULL),
   ('pg4-corn',         'CORN EA\n$1.99 ea',         'open_price', 1.99,  NULL, '#fff', '#1a3d2a', 17, 'grid', 4, 2, 4, 1, 1, NULL),
   ('pg4-cucumbers',    'CUCUMBERS\n$2.99 ea',       'open_price', 2.99,  NULL, '#fff', '#1a3d2a', 18, 'grid', 4, 2, 5, 1, 1, NULL),
@@ -445,25 +449,25 @@ INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, image, color, bg
 
 -- â•â•â• Page 5: Vegetables H-Z â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, parent_id) VALUES
-  ('pg5-herbs',        'HERBS\n$2.99 ea',           'open_price', 2.99,  'https://images.pexels.com/photos/4198019/pexels-photo-4198019.jpeg?auto=compress&cs=tinysrgb&w=500', '#fff', '#1a3d2a', 1,  'grid', 5, 0, 0, 1, 1, NULL),
-  ('pg5-kale',         'KALE EA\n$3.99 ea',         'open_price', 3.99,  'https://images.pexels.com/photos/28930881/pexels-photo-28930881.jpeg?auto=compress&cs=tinysrgb&w=500', '#fff', '#1a3d2a', 2,  'grid', 5, 0, 1, 1, 1, NULL),
+  ('pg5-herbs',        'HERBS\n$2.99 ea',           'open_price', 2.99,  'https://images.pexels.com/photos/4113890/pexels-photo-4113890.jpeg?auto=compress&cs=tinysrgb&w=500', '#fff', '#1a3d2a', 1,  'grid', 5, 0, 0, 1, 1, NULL),
+  ('pg5-kale',         'KALE EA\n$3.99 ea',         'open_price', 3.99,  'images/products/coles-8696598-zm.jpg', '#fff', '#1a3d2a', 2,  'grid', 5, 0, 1, 1, 1, NULL),
   ('pg5-leeks',        'LEEKS EA\n$3.99 ea',        'open_price', 3.99,  NULL, '#fff', '#1a3d2a', 3,  'grid', 5, 0, 2, 1, 1, NULL),
   ('pg5-lettuces',     'LETTUCES\n$2.99 ea',        'page_link',  2.99,  'images/products/coles-4584071-zm.jpg', '#fff', '#1a3d2a', 4,  'grid', 5, 0, 3, 1, 1, '29'),
-  ('pg5-lettuce-bags', 'LETTUCE BAGS EA\n$3.99 ea', 'open_price', 3.99,  'https://images.pexels.com/photos/26951809/pexels-photo-26951809.jpeg?auto=compress&cs=tinysrgb&w=500', '#fff', '#1a3d2a', 5,  'grid', 5, 0, 4, 1, 1, NULL),
-  ('pg5-lobok',        'LOBOK KG\n$4.99/kg',        'open_price', 4.99,  NULL, '#fff', '#1a3d2a', 6,  'grid', 5, 0, 5, 1, 1, NULL),
+  ('pg5-lettuce-bags', 'LETTUCE BAGS EA\n$3.99 ea', 'open_price', 3.99,  'https://images.pexels.com/photos/4519016/pexels-photo-4519016.jpeg?auto=compress&cs=tinysrgb&w=500', '#fff', '#1a3d2a', 5,  'grid', 5, 0, 4, 1, 1, NULL),
+  ('pg5-lobok',        'LOBOK KG\n$4.99/kg',        'open_price', 4.99,  'images/products/coles-6614720-zm.jpg', '#fff', '#1a3d2a', 6,  'grid', 5, 0, 5, 1, 1, NULL),
   ('pg5-mushrooms',    'MUSHROOMS\n$12.99/kg',      'page_link',  12.99, 'https://images.pexels.com/photos/5950411/pexels-photo-5950411.jpeg?auto=compress&cs=tinysrgb&w=500', '#fff', '#1a3d2a', 7,  'grid', 5, 1, 0, 1, 1, '30'),
   ('pg5-olives',       'OLIVES KG\n$14.99/kg',      'open_price', 14.99, NULL, '#fff', '#1a3d2a', 8,  'grid', 5, 1, 1, 1, 1, NULL),
   ('pg5-onions',       'ONIONS\n$2.99/kg',          'page_link',  2.99,  'https://images.pexels.com/photos/12296935/pexels-photo-12296935.jpeg?auto=compress&cs=tinysrgb&w=500', '#fff', '#1a3d2a', 9,  'grid', 5, 1, 2, 1, 1, '31'),
-  ('pg5-parsnip',      'PARSNIP KG\n$7.99/kg',      'open_price', 7.99,  'https://images.pexels.com/photos/28797269/pexels-photo-28797269.jpeg?auto=compress&cs=tinysrgb&w=500', '#fff', '#1a3d2a', 10, 'grid', 5, 1, 3, 1, 1, NULL),
+  ('pg5-parsnip',      'PARSNIP KG\n$7.99/kg',      'open_price', 7.99,  'https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Parsnip.jpg/1024px-Parsnip.jpg', '#fff', '#1a3d2a', 10, 'grid', 5, 1, 3, 1, 1, NULL),
   ('pg5-peas',         'PEAS KG\n$9.99/kg',         'open_price', 9.99,  NULL, '#fff', '#1a3d2a', 11, 'grid', 5, 1, 4, 1, 1, NULL),
-  ('pg5-potatoes',     'POTATOES\n$3.99/kg',        'page_link',  3.99,  'https://images.pexels.com/photos/4110456/pexels-photo-4110456.jpeg?auto=compress&cs=tinysrgb&w=500', '#fff', '#1a3d2a', 12, 'grid', 5, 1, 5, 1, 1, '32'),
+  ('pg5-potatoes',     'POTATOES\n$3.99/kg',        'page_link',  3.99,  'images/products/coles-7141758-zm.jpg', '#fff', '#1a3d2a', 12, 'grid', 5, 1, 5, 1, 1, '32'),
   ('pg5-pumpkins',     'PUMPKINS\n$2.99/kg',        'page_link',  2.99,  NULL, '#fff', '#1a3d2a', 13, 'grid', 5, 2, 0, 1, 1, '33'),
   ('pg5-radish',       'RADISH BUNCH EA\n$2.99 ea', 'open_price', 2.99,  NULL, '#fff', '#1a3d2a', 14, 'grid', 5, 2, 1, 1, 1, NULL),
   ('pg5-rhubarb',      'RHUBARB EA\n$4.99 ea',      'open_price', 4.99,  NULL, '#fff', '#1a3d2a', 15, 'grid', 5, 2, 2, 1, 1, NULL),
   ('pg5-shallots',     'SHALLOTS EA\n$2.99 ea',     'open_price', 2.99,  NULL, '#fff', '#1a3d2a', 16, 'grid', 5, 2, 3, 1, 1, NULL),
   ('pg5-silverbeet',   'SILVERBEET EA\n$3.99 ea',   'open_price', 3.99,  NULL, '#fff', '#1a3d2a', 17, 'grid', 5, 2, 4, 1, 1, NULL),
   ('pg5-snow-peas',    'SNOW PEAS KG\n$14.99/kg',   'open_price', 14.99, NULL, '#fff', '#1a3d2a', 18, 'grid', 5, 2, 5, 1, 1, NULL),
-  ('pg5-sugar-snap',   'SUGAR SNAP PEAS KG\n$14.99/kg','open_price',14.99,'https://images.pexels.com/photos/7288774/pexels-photo-7288774.jpeg?auto=compress&cs=tinysrgb&w=500','#fff', '#1a3d2a', 19, 'grid', 5, 3, 0, 1, 1, NULL),
+  ('pg5-sugar-snap',   'SUGAR SNAP PEAS KG\n$14.99/kg','open_price',14.99,'images/products/coles-123328-zm.jpg','#fff', '#1a3d2a', 19, 'grid', 5, 3, 0, 1, 1, NULL),
   ('pg5-swedes',       'SWEDES KG\n$4.99/kg',       'open_price', 4.99,  NULL, '#fff', '#1a3d2a', 20, 'grid', 5, 3, 1, 1, 1, NULL),
   ('pg5-sweet-potato', 'SWEET POTATOES\n$4.99/kg',  'page_link',  4.99,  NULL, '#fff', '#1a3d2a', 21, 'grid', 5, 3, 2, 1, 1, '34'),
   ('pg5-tomatoes',     'TOMATOES\n$5.99/kg',        'page_link',  5.99,  'https://images.pexels.com/photos/9816726/pexels-photo-9816726.jpeg?auto=compress&cs=tinysrgb&w=500', '#fff', '#1a3d2a', 22, 'grid', 5, 3, 3, 1, 1, '35'),
@@ -637,7 +641,7 @@ INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, image, color, bg
 
 -- Page 27: Chillies
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, parent_id) VALUES
-  ('pg27-red-chilli',  'RED CHILLI\n$29.99/kg',    'open_price', 29.99, 'https://images.pexels.com/photos/7720573/pexels-photo-7720573.jpeg?auto=compress&cs=tinysrgb&w=500', '#fff', '#1a3d2a', 1,  'grid', 27, 0, 0, 2, 1, NULL),
+  ('pg27-red-chilli',  'RED CHILLI\n$29.99/kg',    'open_price', 29.99, 'images/products/coles-8760314-zm.jpg', '#fff', '#1a3d2a', 1,  'grid', 27, 0, 0, 2, 1, NULL),
   ('pg27-green-chilli','GREEN CHILLI\n$24.99/kg',  'open_price', 24.99, 'https://images.pexels.com/photos/16814702/pexels-photo-16814702.jpeg?auto=compress&cs=tinysrgb&w=500', '#fff', '#1a3d2a', 2,  'grid', 27, 0, 2, 2, 1, NULL),
   ('pg27-birds-eye',   'BIRDS EYE\n$39.99/kg',    'open_price', 39.99, NULL, '#fff', '#1a3d2a', 3,  'grid', 27, 0, 4, 2, 1, NULL),
   ('pg27-jalapeno',    'JALAPENO\n$29.99/kg',     'open_price', 29.99, NULL, '#fff', '#1a3d2a', 4,  'grid', 27, 0, 6, 2, 1, NULL),
@@ -682,12 +686,12 @@ INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, image, color, bg
 
 -- Page 32: Potatoes
 INSERT OR IGNORE INTO keyboard_buttons (id, label, type, price, image, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, parent_id) VALUES
-  ('pg32-brushed',     'BRUSHED\n$3.99/kg',       'open_price', 3.99,  NULL, '#fff', '#1a3d2a', 1,  'grid', 32, 0, 0, 2, 1, NULL),
-  ('pg32-washed',      'WASHED\n$4.99/kg',        'open_price', 4.99,  NULL, '#fff', '#1a3d2a', 2,  'grid', 32, 0, 2, 2, 1, NULL),
-  ('pg32-kipfler',     'KIPFLER\n$6.99/kg',       'open_price', 6.99,  NULL, '#fff', '#1a3d2a', 3,  'grid', 32, 0, 4, 2, 1, NULL),
-  ('pg32-desiree',     'DESIREE\n$4.99/kg',       'open_price', 4.99,  NULL, '#fff', '#1a3d2a', 4,  'grid', 32, 0, 6, 2, 1, NULL),
-  ('pg32-chat',        'CHAT\n$5.99/kg',          'open_price', 5.99,  NULL, '#fff', '#1a3d2a', 5,  'grid', 32, 1, 0, 2, 1, NULL),
-  ('pg32-potato-bag',  'POTATO BAG\n$4.99 ea',    'open_price', 4.99,  NULL, '#fff', '#1a3d2a', 6,  'grid', 32, 1, 2, 2, 1, NULL),
+  ('pg32-brushed',     'BRUSHED\n$3.99/kg',       'open_price', 3.99,  'images/products/coles-7141758-zm.jpg', '#fff', '#1a3d2a', 1,  'grid', 32, 0, 0, 2, 1, NULL),
+  ('pg32-washed',      'WASHED\n$4.99/kg',        'open_price', 4.99,  'images/products/coles-7141758-zm.jpg', '#fff', '#1a3d2a', 2,  'grid', 32, 0, 2, 2, 1, NULL),
+  ('pg32-kipfler',     'KIPFLER\n$6.99/kg',       'open_price', 6.99,  'images/products/coles-7141758-zm.jpg', '#fff', '#1a3d2a', 3,  'grid', 32, 0, 4, 2, 1, NULL),
+  ('pg32-desiree',     'DESIREE\n$4.99/kg',       'open_price', 4.99,  'images/products/coles-7141758-zm.jpg', '#fff', '#1a3d2a', 4,  'grid', 32, 0, 6, 2, 1, NULL),
+  ('pg32-chat',        'CHAT\n$5.99/kg',          'open_price', 5.99,  'images/products/coles-7141758-zm.jpg', '#fff', '#1a3d2a', 5,  'grid', 32, 1, 0, 2, 1, NULL),
+  ('pg32-potato-bag',  'POTATO BAG\n$4.99 ea',    'open_price', 4.99,  'images/products/coles-7141758-zm.jpg', '#fff', '#1a3d2a', 6,  'grid', 32, 1, 2, 2, 1, NULL),
   ('pg32-back',        'BACK',                      'back_home',  0,     NULL, '#000', '#22c55e', 90, 'grid', 32, 0, 10, 3, 1, NULL);
 
 -- Page 33: Pumpkins

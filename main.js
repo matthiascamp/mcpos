@@ -16,6 +16,10 @@ let appShuttingDown = false
 
 const runtimeAppMode = process.argv.includes('--admin') ? 'admin' : 'register'
 const isRegisterApp = runtimeAppMode === 'register'
+const SOFTWARE_NAME = 'BoundOS Client'
+const DEFAULT_STORE_NAME = 'BoundOS'
+app.setName(SOFTWARE_NAME)
+if (process.platform === 'win32') app.setAppUserModelId('com.boundos.client')
 const DB_PATH = path.join(app.getPath('userData'), 'crisp-pos.sqlite')
 const BUNDLED_DB_PATH = path.join(__dirname, 'db', 'crisp-pos.sqlite')
 const SCHEMA_PATH = path.join(__dirname, 'db', 'schema.sql')
@@ -211,6 +215,10 @@ async function initDatabase() {
     // Bottom nav â€” fruit = muted green, veg = muted green (unified fresh produce look)
     "UPDATE keyboard_buttons SET bg_color = '#15803d', color = '#fff' WHERE id IN ('btn-fruit-am','btn-fruit-nz')",
     "UPDATE keyboard_buttons SET bg_color = '#166534', color = '#fff' WHERE id IN ('btn-veg-ag','btn-veg-hz')",
+    "INSERT OR IGNORE INTO settings (key, value) VALUES ('company_logo_fit', 'contain')",
+    "INSERT OR IGNORE INTO settings (key, value) VALUES ('company_logo_scale', '1')",
+    "INSERT OR IGNORE INTO settings (key, value) VALUES ('desired_till_float', '0')",
+    "INSERT OR IGNORE INTO settings (key, value) VALUES ('till_desired_floats', '{}')",
     // Add family grouping for categories
     "ALTER TABLE categories ADD COLUMN family TEXT DEFAULT ''",
     // Performance indexes for transaction lookups and reports
@@ -588,32 +596,58 @@ async function initDatabase() {
   // Link keyboard buttons to products by matching names (best image match)
   relinkKeyboardProducts()
 
-  // Rebrand: update store details to Tillaroo / Cavendish Rd
+  // Rebrand: update default store details to BoundOS. Existing custom store names/logos are left alone.
   try {
-    const rebrandDone = dbAll("SELECT value FROM settings WHERE key = 'rebrand_tillaroo_v2'")
+    const rebrandDone = dbAll("SELECT value FROM settings WHERE key = 'rebrand_boundos_v1'")
     if (!rebrandDone.length) {
-      db.run("UPDATE settings SET value = 'Tillaroo' WHERE key = 'store_name'")
-      db.run("UPDATE settings SET value = '1164 Cavendish Rd, Mt Gravatt East QLD 4122' WHERE key = 'store_address'")
-      db.run("UPDATE settings SET value = 'Tillaroo\n1164 Cavendish Rd, Mt Gravatt East\nFresh Fruit & Veg' WHERE key = 'receipt_header'")
-      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('rebrand_tillaroo_v2', '1')")
-      appLog('info', 'migration', 'Rebranded store to Tillaroo / 1164 Cavendish Rd')
+      db.run("UPDATE settings SET value = ?1 WHERE key = 'store_name' AND (value IS NULL OR value = '' OR value = 'Tillaroo')", [DEFAULT_STORE_NAME])
+      db.run("UPDATE settings SET value = ?1 WHERE key = 'receipt_header' AND (value IS NULL OR value = '' OR value LIKE 'Tillaroo%')", [`${DEFAULT_STORE_NAME}\n1164 Cavendish Rd, Mt Gravatt East\nFresh Fruit & Veg`])
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('rebrand_boundos_v1', '1')")
+      appLog('info', 'migration', 'Rebranded default store details to BoundOS')
     }
   } catch (e) { console.error('Rebrand migration error:', e.message) }
 
-  // Set default company logo if not already set
+  // Set/replace the default software logo. Custom uploaded company logos are preserved.
   try {
-    const logoFixed = dbGet("SELECT value FROM settings WHERE key = 'company_logo_v2'")
+    const logoFixed = dbGet("SELECT value FROM settings WHERE key = 'company_logo_boundos_v1'")
     if (!logoFixed || !logoFixed.value) {
-      const logoPath = path.join(__dirname, 'pos', 'logo-circle.png')
-      if (fs.existsSync(logoPath)) {
+      const logoPath = path.join(__dirname, 'pos', 'boundos.png')
+      const oldLogoPath = path.join(__dirname, 'pos', 'logo-circle.png')
+      const currentLogo = dbGet("SELECT value FROM settings WHERE key = 'company_logo'")?.value || ''
+      const oldDefault = fs.existsSync(oldLogoPath)
+        ? 'data:image/png;base64,' + fs.readFileSync(oldLogoPath).toString('base64')
+        : ''
+      if (fs.existsSync(logoPath) && (!currentLogo || currentLogo === oldDefault)) {
         const logoData = fs.readFileSync(logoPath)
         const dataUrl = 'data:image/png;base64,' + logoData.toString('base64')
         db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('company_logo', ?1)", [dataUrl])
-        db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('company_logo_v2', '1')")
-        appLog('info', 'migration', 'Set default company logo')
+        appLog('info', 'migration', 'Set default BoundOS logo')
       }
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('company_logo_boundos_v1', '1')")
     }
   } catch (e) { console.error('Company logo migration error:', e.message) }
+
+  // Upgrade the built-in default logo to boundos.png while preserving uploaded logos.
+  try {
+    const pngLogoDone = dbGet("SELECT value FROM settings WHERE key = 'company_logo_boundos_png_v1'")
+    if (!pngLogoDone || !pngLogoDone.value) {
+      const logoPath = path.join(__dirname, 'pos', 'boundos.png')
+      const previousPaths = [
+        path.join(__dirname, 'pos', 'boundos-logo.png'),
+        path.join(__dirname, 'pos', 'logo-circle.png')
+      ]
+      const currentLogo = dbGet("SELECT value FROM settings WHERE key = 'company_logo'")?.value || ''
+      const previousDefaults = previousPaths
+        .filter(p => fs.existsSync(p))
+        .map(p => 'data:image/png;base64,' + fs.readFileSync(p).toString('base64'))
+      if (fs.existsSync(logoPath) && (!currentLogo || previousDefaults.includes(currentLogo))) {
+        const dataUrl = 'data:image/png;base64,' + fs.readFileSync(logoPath).toString('base64')
+        db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('company_logo', ?1)", [dataUrl])
+        appLog('info', 'migration', 'Updated default app logo to boundos.png')
+      }
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('company_logo_boundos_png_v1', '1')")
+    }
+  } catch (e) { console.error('BoundOS PNG logo migration error:', e.message) }
 
   // Enforce deleted_records â€” remove anything that was intentionally deleted but got re-inserted
   try {
@@ -1079,6 +1113,46 @@ async function initDatabase() {
       appLog('info', 'migration', `Updated ${updCount} product prices/units, added ${addCount} new products`)
     }
   } catch (e) { appLog('error', 'migration', 'Price update migration failed', e.message) }
+
+  try {
+    const applesDone = dbAll("SELECT value FROM settings WHERE key = 'migration_apple_keyboard_repair_v1'")
+    if (!applesDone.length) {
+      const apples = [
+        ['pg7-btn0', 'BRAVO KG', 'Bravo Apple', 7.99, 'kg', '20260', 0, 0],
+        ['pg7-btn12', 'FUJI APPLE KG', 'Fuji Apple', 5.99, 'kg', '20261', 0, 2],
+        ['pg7-btn10', 'GRANNY SMITH BUCKET KG', 'Granny Smith Bucket', 1.99, 'kg', '20231', 0, 4],
+        ['pg7-btn4', 'JAZZ APPLE KG', 'Jazz Apple', 6.99, 'kg', '20262', 0, 6],
+        ['pg7-btn9', 'KANZI KG', 'Kanzi Apple', 7.99, 'kg', '20219', 0, 8],
+        ['pg7-btn7', 'LARGE GRANNY SMITH KG', 'Large Granny Smith Apple', 5.49, 'kg', '4017', 1, 0],
+        ['pg7-btn6', 'LARGE PINK LADY KG', 'Large Pink Lady Apple', 5.99, 'kg', '20263', 1, 2],
+        ['pg7-btn8', 'LARGE ROYAL GALA KG', 'Large Royal Gala Apple', 5.99, 'kg', '4015', 1, 4],
+        ['pg7-btn5', 'RED APPLE BUCKET KG', 'Red Apple Bucket', 1.99, 'kg', '20264', 1, 6],
+        ['pg7-btn11', 'RED DELICIOUS KG', 'Red Delicious Apple', 4.99, 'kg', '20265', 1, 8],
+        ['pg7-btn2', 'SMALL GRANNY SMITH KG', 'Small Granny Smith Apple', 4.99, 'kg', '20266', 2, 0],
+        ['pg7-btn1', 'SMALL PINK LADY KG', 'Small Pink Lady Apple', 4.99, 'kg', '20267', 2, 2],
+        ['pg7-btn3', 'SMALL ROYAL GALA KG', 'Small Royal Gala Apple', 4.99, 'kg', '20268', 2, 4]
+      ]
+      db.run("UPDATE keyboard_buttons SET active = 0 WHERE page = 7 AND id NOT IN ('pg7-back','pg7-btn0','pg7-btn12','pg7-btn10','pg7-btn4','pg7-btn9','pg7-btn7','pg7-btn6','pg7-btn8','pg7-btn5','pg7-btn11','pg7-btn2','pg7-btn1','pg7-btn3')")
+      for (const [btnId, label, name, price, unit, plu, row, col] of apples) {
+        const productId = `p-kb-${btnId}`
+        db.run(`INSERT OR REPLACE INTO products (id, barcode, plu, name, category_id, price, unit, tax_rate, active, updated_at)
+          VALUES (?1, ?2, ?2, ?3, 'cat-apples', ?4, ?5, 0, 1, datetime('now'))`,
+          [productId, plu, name, price, unit])
+        db.run(`INSERT OR REPLACE INTO keyboard_buttons
+          (id, label, type, price, image, color, bg_color, sort_order, position, page, grid_row, grid_col, col_span, row_span, parent_id, product_id, active, updated_at)
+          VALUES (?1, ?2, 'product', ?3, COALESCE((SELECT image FROM keyboard_buttons WHERE id = ?1), NULL), '#fff', '#2d3a2e', ?4, 'grid', 7, ?5, ?6, 2, 1, NULL, ?7, 1, datetime('now'))`,
+          [btnId, `${label}\n$${price.toFixed(2)}/${unit}`, price, row * 10 + col + 1, row, col, productId])
+      }
+      db.run("UPDATE keyboard_buttons SET label = 'BACK', type = 'back_home', price = 0, grid_row = 0, grid_col = 10, col_span = 3, row_span = 1, bg_color = '#22c55e', color = '#000', active = 1, product_id = NULL WHERE id = 'pg7-back'")
+      const pageSizeRow = dbGet("SELECT value FROM settings WHERE key = 'keyboard_page_sizes'")
+      let pageSizes = {}
+      try { pageSizes = JSON.parse(pageSizeRow?.value || '{}') } catch (_) { pageSizes = {} }
+      pageSizes['7'] = { cols: 13, rows: 7 }
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('keyboard_page_sizes', ?1)", [JSON.stringify(pageSizes)])
+      db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('migration_apple_keyboard_repair_v1', '1')")
+      appLog('info', 'migration', 'Repaired Apple keyboard layout and product links')
+    }
+  } catch (e) { appLog('error', 'migration', 'Apple keyboard repair failed', e.message) }
 
   // --- Migration: replace external image URLs with local paths ---
   try {
@@ -1582,7 +1656,7 @@ const KB_IMAGE_MAP = {
   'pg4-beetroot':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/2/8/5288711-zm.jpg' },
   'pg4-broccolini':    { base: 'fv', file: 'Broccolini_Bunch.jpg' },
   'pg4-broccoli':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/7/407755-zm.jpg' },
-  'pg4-brussels':      { base: 'direct', file: 'https://images.pexels.com/photos/11617799/pexels-photo-11617799.jpeg?auto=compress&cs=tinysrgb&w=500' },
+  'pg4-brussels':      { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Brussels_sprouts_on_white_background_5849.jpg/960px-Brussels_sprouts_on_white_background_5849.jpg' },
   'pg4-cabbage':       { base: 'direct', file: 'https://images.pexels.com/photos/13796758/pexels-photo-13796758.jpeg?auto=compress&cs=tinysrgb&w=500' },
   'pg4-capsicum':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/8/4580208-zm.jpg' },
   'pg4-carrots':       { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/2/2/4223335-zm.jpg' },
@@ -1590,7 +1664,7 @@ const KB_IMAGE_MAP = {
   'pg4-cauliflower':   { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/6/0/4601603-zm.jpg' },
   'pg4-celery':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/8/4/4845732-zm.jpg' },
   'pg4-celeriac':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/8/9/4894352-zm.jpg' },
-  'pg4-chillies':      { base: 'direct', file: 'https://images.pexels.com/photos/7720573/pexels-photo-7720573.jpeg?auto=compress&cs=tinysrgb&w=500' },
+  'pg4-chillies':      { base: 'direct', file: 'images/products/coles-8760314-zm.jpg' },
   'pg4-chokos':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/2/2/5229814-zm.jpg' },
   'pg4-corn':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/6/4562603-zm.jpg' },
   'pg4-cucumbers':     { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/7/4575208-zm.jpg' },
@@ -1601,24 +1675,25 @@ const KB_IMAGE_MAP = {
   'pg4-ginger':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/0/3/5034484-zm.jpg' },
   'pg4-bottle-gourd':  { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/6/6/3/6630216-zm.jpg' },
   // Page 5: Vegetables H-Z
-  'pg5-herbs':         { base: 'direct', file: 'https://images.pexels.com/photos/4198019/pexels-photo-4198019.jpeg?auto=compress&cs=tinysrgb&w=500' },
-  'pg5-kale':          { base: 'direct', file: 'https://images.pexels.com/photos/28930881/pexels-photo-28930881.jpeg?auto=compress&cs=tinysrgb&w=500' },
+  'pg5-herbs':         { base: 'direct', file: 'https://images.pexels.com/photos/4113890/pexels-photo-4113890.jpeg?auto=compress&cs=tinysrgb&w=500' },
+  'pg5-kale':          { base: 'direct', file: 'images/products/coles-8696598-zm.jpg' },
   'pg5-leeks':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/9/4595930-zm.jpg' },
   'pg5-lettuces':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/5/8/4584071-zm.jpg' },
-  'pg5-lettuce-bags':  { base: 'direct', file: 'https://images.pexels.com/photos/26951809/pexels-photo-26951809.jpeg?auto=compress&cs=tinysrgb&w=500' },
+  'pg5-lettuce-bags':  { base: 'direct', file: 'https://images.pexels.com/photos/4519016/pexels-photo-4519016.jpeg?auto=compress&cs=tinysrgb&w=500' },
+  'pg5-lobok':         { base: 'direct', file: 'images/products/coles-6614720-zm.jpg' },
   'pg5-mushrooms':     { base: 'direct', file: 'https://images.pexels.com/photos/5950411/pexels-photo-5950411.jpeg?auto=compress&cs=tinysrgb&w=500' },
   'pg5-olives':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/5/5/5554156-zm.jpg' },
   'pg5-onions':        { base: 'direct', file: 'https://images.pexels.com/photos/12296935/pexels-photo-12296935.jpeg?auto=compress&cs=tinysrgb&w=500' },
-  'pg5-parsnip':       { base: 'direct', file: 'https://images.pexels.com/photos/28797269/pexels-photo-28797269.jpeg?auto=compress&cs=tinysrgb&w=500' },
+  'pg5-parsnip':       { base: 'direct', file: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Parsnip.jpg/1024px-Parsnip.jpg' },
   'pg5-peas':          { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/3/8/438409-zm.jpg' },
-  'pg5-potatoes':      { base: 'direct', file: 'https://images.pexels.com/photos/4110456/pexels-photo-4110456.jpeg?auto=compress&cs=tinysrgb&w=500' },
+  'pg5-potatoes':      { base: 'direct', file: 'images/products/coles-7141758-zm.jpg' },
   'pg5-pumpkins':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/1/8/4183558-zm.jpg' },
   'pg5-radish':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/9/1/4911870-zm.jpg' },
   'pg5-rhubarb':       { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/8/408372-zm.jpg' },
   'pg5-shallots':      { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/5/1/3/5134809-zm.jpg' },
   'pg5-silverbeet':    { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/0/8/408383-zm.jpg' },
   'pg5-snow-peas':     { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/2/3/123328-zm.jpg' },
-  'pg5-sugar-snap':    { base: 'direct', file: 'https://images.pexels.com/photos/7288774/pexels-photo-7288774.jpeg?auto=compress&cs=tinysrgb&w=500' },
+  'pg5-sugar-snap':    { base: 'direct', file: 'images/products/coles-123328-zm.jpg' },
   'pg5-sprouts':       { base: 'fv', file: 'Alfalfa_Sprout_Salad.jpg' },
   'pg5-swedes':        { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/9/6/4966930-zm.jpg' },
   'pg5-sweet-potato':  { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/1/9/4199503-zm.jpg' },
@@ -1694,12 +1769,21 @@ const KB_IMAGE_MAP = {
   // Subpage: Zucchini (pg36)
   'pg36-btn0':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/9/1/4910506-zm.jpg' },
   'pg36-btn1':         { base: 'direct', file: 'https://shop.coles.com.au/wcsstore/Coles-CAS/images/4/9/1/4910506-zm.jpg' },
+  // Subpage: Chillies (pg27)
+  'pg27-red-chilli':   { base: 'direct', file: 'images/products/coles-8760314-zm.jpg' },
+  'pg27-green-chilli': { base: 'direct', file: 'https://images.pexels.com/photos/16814702/pexels-photo-16814702.jpeg?auto=compress&cs=tinysrgb&w=500' },
   // Subpage: Potatoes (pg32) â€” not Kipfler
-  'pg32-btn0':         { base: 'direct', file: 'https://images.pexels.com/photos/4110456/pexels-photo-4110456.jpeg?auto=compress&cs=tinysrgb&w=500' },
-  'pg32-btn1':         { base: 'direct', file: 'https://images.pexels.com/photos/35595249/pexels-photo-35595249.jpeg?auto=compress&cs=tinysrgb&w=500' },
-  'pg32-btn2':         { base: 'direct', file: 'https://images.pexels.com/photos/17406378/pexels-photo-17406378.jpeg?auto=compress&cs=tinysrgb&w=500' },
-  'pg32-btn4':         { base: 'direct', file: 'https://images.pexels.com/photos/35595249/pexels-photo-35595249.jpeg?auto=compress&cs=tinysrgb&w=500' },
-  'pg32-btn5':         { base: 'direct', file: 'https://images.pexels.com/photos/4110456/pexels-photo-4110456.jpeg?auto=compress&cs=tinysrgb&w=500' },
+  'pg32-brushed':      { base: 'direct', file: 'images/products/coles-7141758-zm.jpg' },
+  'pg32-washed':       { base: 'direct', file: 'images/products/coles-7141758-zm.jpg' },
+  'pg32-kipfler':      { base: 'direct', file: 'images/products/coles-7141758-zm.jpg' },
+  'pg32-desiree':      { base: 'direct', file: 'images/products/coles-7141758-zm.jpg' },
+  'pg32-chat':         { base: 'direct', file: 'images/products/coles-7141758-zm.jpg' },
+  'pg32-potato-bag':   { base: 'direct', file: 'images/products/coles-7141758-zm.jpg' },
+  'pg32-btn0':         { base: 'direct', file: 'images/products/coles-7141758-zm.jpg' },
+  'pg32-btn1':         { base: 'direct', file: 'images/products/coles-7141758-zm.jpg' },
+  'pg32-btn2':         { base: 'direct', file: 'images/products/coles-7141758-zm.jpg' },
+  'pg32-btn4':         { base: 'direct', file: 'images/products/coles-7141758-zm.jpg' },
+  'pg32-btn5':         { base: 'direct', file: 'images/products/coles-7141758-zm.jpg' },
 }
 
 // Apply direct image mappings to keyboard buttons
@@ -1726,9 +1810,10 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
+    title: isRegisterApp ? 'BoundOS Client - Register' : 'BoundOS Client - Admin',
     show: false,
     autoHideMenuBar: true,
-    icon: path.join(__dirname, 'pos', 'logo-circle.png'),
+    icon: path.join(__dirname, 'pos', 'boundos.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -1791,7 +1876,7 @@ function createCustomerWindow () {
     width: 1024,
     height: 768,
     autoHideMenuBar: true,
-    title: 'Customer Display',
+    title: 'BoundOS Client - Customer Display',
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -1859,14 +1944,16 @@ app.whenReady().then(async () => {
 
   // Show splash screen during startup
   splashWindow = new BrowserWindow({
-    width: 420, height: 480,
+    width: 430, height: 575,
     show: true,
     frame: false, resizable: false,
     center: true, skipTaskbar: false,
-    backgroundColor: '#0f1117',
-    icon: path.join(__dirname, 'pos', 'logo.png'),
+    transparent: true,
+    backgroundColor: '#00000000',
+    icon: path.join(__dirname, 'pos', 'boundos.png'),
     webPreferences: { nodeIntegration: true, contextIsolation: false }
   })
+  try { splashWindow.setAlwaysOnTop(true, 'floating') } catch (_) {}
   splashWindow.loadFile(path.join(__dirname, 'pos', 'splash.html'))
   splashWindow.once('ready-to-show', () => splashWindow.show())
 
@@ -1883,6 +1970,26 @@ app.whenReady().then(async () => {
   }
   ipcMain.on('splash:move', splashMoveHandler)
 
+  const waitForSplashCompletion = () => new Promise(resolve => {
+    const finish = () => {
+      clearTimeout(fallback)
+      ipcMain.removeListener('splash:complete', finish)
+      resolve()
+    }
+    const fallback = setTimeout(finish, 2600)
+    ipcMain.once('splash:complete', finish)
+  })
+
+  const waitForSplashHandoff = () => new Promise(resolve => {
+    const finish = () => {
+      clearTimeout(fallback)
+      ipcMain.removeListener('splash:handoff', finish)
+      resolve()
+    }
+    const fallback = setTimeout(finish, 1200)
+    ipcMain.once('splash:handoff', finish)
+  })
+
   await new Promise(resolve => {
     splashWindow.webContents.on('did-finish-load', () => {
       try { splashSend('splash:version', require('./package.json').version || '1.0.0') } catch (_) {}
@@ -1894,6 +2001,8 @@ app.whenReady().then(async () => {
     if (splashWindow && !splashWindow.isDestroyed()) splashWindow.close()
     splashWindow = null
     ipcMain.removeListener('splash:move', splashMoveHandler)
+    ipcMain.removeAllListeners('splash:complete')
+    ipcMain.removeAllListeners('splash:handoff')
   }
   ipcMain.on('splash:close', () => { closeSplash(); app.quit() })
 
@@ -1962,16 +2071,20 @@ app.whenReady().then(async () => {
       await new Promise(resolve => mainWindow.webContents.on('did-finish-load', resolve))
     }
 
-    splashSend('splash:status', 'Ready!', 100)
-
     const elapsed = Date.now() - splashStart
     if (elapsed < SPLASH_MIN_MS) await wait(SPLASH_MIN_MS - elapsed)
 
-    closeSplash()
+    const splashHandoff = waitForSplashHandoff()
+    const splashComplete = waitForSplashCompletion()
+    splashSend('splash:status', 'Ready!', 100)
+    await splashHandoff
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.show()
       if (!isDevMode) { mainWindow.setFullScreen(true); mainWindow.setKiosk(true) }
     }
+    await splashComplete
+
+    closeSplash()
 
     // Open customer display AFTER splash is gone
     const { screen } = require('electron')
@@ -2114,7 +2227,7 @@ function setupIPC() {
 
       await new Promise((resolve, reject) => {
         const follow = (url) => {
-          https.get(url, { headers: { 'User-Agent': 'Tillaroo' } }, res => {
+          https.get(url, { headers: { 'User-Agent': SOFTWARE_NAME } }, res => {
             if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
               return follow(res.headers.location)
             }
@@ -4054,7 +4167,7 @@ function setupIPC() {
   function cleanupDuplicateQueues () {
     try {
       // Only remove queues explicitly created by this app â€” never touch driver-installed queues
-      hwExec(`powershell -NoProfile -NonInteractive -Command "Remove-Printer -Name 'Tillaroo Receipt Printer' -ErrorAction SilentlyContinue"`, { timeout: 3000, encoding: 'utf-8' })
+      hwExec(`powershell -NoProfile -NonInteractive -Command "Remove-Printer -Name 'BoundOS Receipt Printer' -ErrorAction SilentlyContinue"`, { timeout: 3000, encoding: 'utf-8' })
     } catch (_) {}
   }
 
@@ -4850,10 +4963,28 @@ function setupIPC() {
     const text = s => parts.push(Buffer.from(s + '\n', 'latin1'))
     const cmd = buf => parts.push(buf)
     const lr = (l, r) => `${l}${' '.repeat(Math.max(1, W - l.length - r.length))}${r}`
+    const emitBarcode = value => {
+      const barcodeStr = String(value || '').replace(/-/g, '')
+      if (!barcodeStr) return
+      cmd(ESCPOS.ALIGN_CENTER)
+      cmd(ESCPOS.BARCODE_HEIGHT); cmd(ESCPOS.BARCODE_WIDTH); cmd(ESCPOS.BARCODE_HRI_BELOW)
+      const barcodeData = Buffer.from(`{B${barcodeStr}`, 'ascii')
+      cmd(Buffer.from([GS, 0x6B, 0x49, barcodeData.length])); cmd(barcodeData)
+      text('')
+    }
 
     cmd(ESCPOS.INIT)
     cmd(Buffer.from([ESC, 0x74, 0x00]))
     cmd(ESCPOS.ALIGN_CENTER)
+
+    // Held-sale recall slip: put the scannable transaction code right at the top.
+    if (receiptData.status === 'parked' && receiptData.barcode) {
+      cmd(ESCPOS.BOLD_ON); cmd(ESCPOS.DOUBLE_SIZE)
+      text('HELD SALE')
+      cmd(ESCPOS.NORMAL_SIZE); cmd(ESCPOS.BOLD_OFF)
+      text('SCAN TO RECALL')
+      emitBarcode(receiptData.barcode)
+    }
 
     // Header block â€” receipt_header is the primary source of store info
     if (receiptData.header) {
@@ -4866,7 +4997,7 @@ function setupIPC() {
       }
     } else {
       cmd(ESCPOS.BOLD_ON); cmd(ESCPOS.DOUBLE_SIZE)
-      text(receiptData.storeName || 'Tillaroo')
+      text(receiptData.storeName || SOFTWARE_NAME)
       cmd(ESCPOS.NORMAL_SIZE); cmd(ESCPOS.BOLD_OFF)
       if (receiptData.storeAddress) text(receiptData.storeAddress)
     }
@@ -4962,13 +5093,11 @@ function setupIPC() {
       for (const line of receiptData.footer.split('\n')) if (line.trim()) text(line.trim())
     }
 
-    // Transaction barcode at bottom
-    if (receiptData.barcode) {
+    // Transaction barcode at bottom for normal receipts. Held slips already show
+    // the recall barcode at the top where staff can scan it quickly.
+    if (receiptData.barcode && receiptData.status !== 'parked') {
       text('')
-      cmd(ESCPOS.BARCODE_HEIGHT); cmd(ESCPOS.BARCODE_WIDTH); cmd(ESCPOS.BARCODE_HRI_BELOW)
-      const barcodeStr = receiptData.barcode.replace(/-/g, '').substring(0, 20)
-      const barcodeData = Buffer.from(barcodeStr, 'ascii')
-      cmd(Buffer.from([GS, 0x6B, 0x49, barcodeData.length])); cmd(barcodeData)
+      emitBarcode(receiptData.barcode)
     }
 
     cmd(ESCPOS.FEED_3); cmd(ESCPOS.PARTIAL_CUT)
@@ -5158,7 +5287,7 @@ function setupIPC() {
               foundConflicts.add(key)
               issues.push({ type: 'conflict', area: 'software', severity: 'high',
                 message: `${name} is running (${match[1]}) â€” may be locking COM ports or printer queues`,
-                fix: `Close ${name} before using Tillaroo, or it will block access to the scale and printer` })
+                fix: `Close ${name} before using BoundOS, or it will block access to the scale and printer` })
             }
           }
         }
@@ -5188,14 +5317,14 @@ function setupIPC() {
         for (const p of ports) {
           // Skip if this port is already held open by our scale polling
           if (hwScalePort?.isOpen && hwScalePort.path === p.path) {
-            info.push({ type: 'info', area: 'port', message: `${p.path}: in use by Tillaroo (scale connected)` })
+            info.push({ type: 'info', area: 'port', message: `${p.path}: in use by BoundOS (scale connected)` })
             continue
           }
           // Skip if our Python scale bridge has it open â€” otherwise the open
           // attempt below fails with "Access denied" and we wrongly flag our
           // own usage as "another application has exclusive access".
           if (pythonScaleProc && hwScale?.port === p.path) {
-            info.push({ type: 'info', area: 'port', message: `${p.path}: in use by Tillaroo scale bridge (Python)` })
+            info.push({ type: 'info', area: 'port', message: `${p.path}: in use by BoundOS scale bridge (Python)` })
             continue
           }
           let portOpened = false
@@ -6271,7 +6400,17 @@ function setupIPC() {
     if (opts.password) dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('linkly_password', ?1)", [opts.password])
     if (opts.secret) dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('linkly_secret', ?1)", [opts.secret])
     if (opts.environment) dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('linkly_environment', ?1)", [opts.environment])
+    if (opts.posId) dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('linkly_pos_id', ?1)", [opts.posId])
     return { ok: true }
+  })
+
+  ipcMain.handle('linkly:testConnection', async () => {
+    try {
+      await linkly.getToken()
+      return { ok: true, status: linkly.getStatus() }
+    } catch (e) {
+      return { ok: false, error: e.message, status: linkly.getStatus() }
+    }
   })
 
   ipcMain.handle('linkly:pair', async (_e, username, password, pairCode) => {
@@ -6330,14 +6469,22 @@ function setupIPC() {
     const lkPass = dbGet("SELECT value FROM settings WHERE key = 'linkly_password'")
     const lkSecret = dbGet("SELECT value FROM settings WHERE key = 'linkly_secret'")
     const lkEnv = dbGet("SELECT value FROM settings WHERE key = 'linkly_environment'")
+    let lkPosId = dbGet("SELECT value FROM settings WHERE key = 'linkly_pos_id'")?.value
+    if (!lkPosId) {
+      lkPosId = uuid()
+      dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('linkly_pos_id', ?1)", [lkPosId])
+    }
     if (lkUser?.value || lkSecret?.value) {
       linkly.configure({
         username: lkUser?.value || '',
         password: lkPass?.value || '',
         secret: lkSecret?.value || '',
-        environment: lkEnv?.value || 'sandbox'
+        environment: lkEnv?.value || 'sandbox',
+        posId: lkPosId
       })
       appLog('info', 'linkly', 'Linkly credentials loaded from settings')
+    } else {
+      linkly.configure({ posId: lkPosId, environment: lkEnv?.value || 'sandbox' })
     }
   } catch (_) {}
 

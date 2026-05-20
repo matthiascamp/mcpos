@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tillaroo POS</title>
+<title>BoundOS Client - Register</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
 <style>
@@ -34,7 +34,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 /* ═══ Status Bar ═══════════════════════════════════════════════════ */
 .status-bar{height:clamp(36px,5vh,48px);background:linear-gradient(180deg,#22252f 0%,#1a1d27 100%);display:flex;align-items:center;padding:0 clamp(6px,1vw,12px);gap:clamp(4px,0.8vw,10px);flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.04);box-shadow:0 2px 8px rgba(0,0,0,.2)}
 .status-left{display:flex;align-items:center;gap:10px;flex:1}
-.store-name{color:#a8adb8;font-family:'Inter',sans-serif;font-weight:600;font-size:13px;white-space:nowrap;letter-spacing:-.2px}
+.store-name{color:#4fe37a;font-family:'Inter',sans-serif;font-weight:800;font-size:13px;white-space:nowrap;letter-spacing:-.2px}
 .scan-input{width:clamp(140px,16vw,220px);padding:clamp(6px,0.8vh,10px) clamp(8px,1vw,14px);border:1px solid #3a3d48;border-radius:8px;background:#2a2d38;color:#e0e2e8;font-size:clamp(11px,1.1vw,14px);outline:none;font-family:inherit;min-height:clamp(30px,4vh,40px);transition:border-color .15s}
 .scan-input:focus{border-color:#5b8def;background:#22252f;box-shadow:0 0 0 2px rgba(91,141,239,.2)}
 .scan-input::placeholder{color:#555a68}
@@ -109,7 +109,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .pos-grid-btn.img-contain.has-img::after{display:none}
 .pos-grid-btn.img-contain.has-img img{inset:4px 4px 28px 4px;width:auto;height:auto;max-width:calc(100% - 8px);max-height:calc(100% - 32px);margin:auto;object-fit:contain;border-radius:0}
 .pos-grid-btn.img-contain.has-img > span:not(.btn-price-badge):not(.btn-plu-badge):not(.btn-cat-badge){width:100%;min-height:26px;margin-top:auto;padding:2px 4px 4px;background:rgba(255,255,255,.96);color:#111;text-shadow:none;font-size:clamp(8px,0.95vw,12px);font-weight:800;line-height:1.1;letter-spacing:0;text-align:center}
-.pos-grid-btn.open-price-key .btn-plu-badge{top:0;left:0;border-radius:0 0 3px 0;background:rgba(255,255,255,.92);color:#111;font-size:clamp(9px,0.9vw,13px);font-weight:800}
+.pos-grid-btn.open-price-key .btn-plu-badge{background:rgba(0,0,0,.4);color:rgba(255,255,255,.6);font-size:clamp(7px,0.65vw,9px);font-weight:600}
 
 /* ─── Function buttons (utility keys) ────────────────────────────── */
 .pos-grid-btn.func-key{font-size:clamp(8px,0.9vw,11px);font-weight:700;letter-spacing:.3px;text-transform:uppercase;border:1px solid rgba(255,255,255,.13);box-shadow:0 2px 7px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.13)}
@@ -127,15 +127,15 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .pos-grid-btn.dept-key.has-img::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,var(--cat-glow,transparent) 0%,transparent 38%);z-index:1;pointer-events:none;opacity:.28}
 .pos-grid-btn.dept-key.img-contain.has-img{border-bottom:1px solid #d6d6d6}
 .pos-grid-btn.dept-key.img-contain.has-img::before{display:none}
-.pos-grid-btn.cat-key{box-shadow:0 1px 4px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.1)}
-.pos-grid-btn.cat-key.has-img{border-bottom:1px solid rgba(255,255,255,.16);box-shadow:0 1px 4px rgba(0,0,0,.22)}
+.pos-grid-btn.cat-key{box-shadow:0 1px 2px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08)}
+.pos-grid-btn.cat-key.has-img{border-bottom:1px solid rgba(255,255,255,.12);box-shadow:0 1px 2px rgba(0,0,0,.14)}
 .pos-grid-btn.cat-key.has-img::before{display:none}
 .pos-grid-btn.cat-key.has-img::after{background:linear-gradient(to top,rgba(0,0,0,.58) 0%,rgba(0,0,0,.18) 42%,transparent 76%)}
 .pos-grid-btn.cat-key.has-img > span:not(.btn-price-badge):not(.btn-plu-badge):not(.btn-cat-badge){text-shadow:none;background:rgba(0,0,0,.45);border-radius:4px;padding:3px 6px;margin-bottom:3px}
 .pos-grid-btn.cat-key.img-contain.has-img > span:not(.btn-price-badge):not(.btn-plu-badge):not(.btn-cat-badge){background:rgba(255,255,255,.96);border-radius:0;margin-bottom:0}
 
 /* ─── Price badge (top-right corner) ────────────────────────────── */
-.btn-price-badge{position:absolute;top:2px;right:3px;z-index:3;font-size:clamp(8px,0.75vw,11px);font-weight:700;color:#4ade80;background:rgba(0,0,0,.62);padding:1px 4px;border-radius:4px;letter-spacing:-.3px;pointer-events:none;white-space:nowrap;line-height:1.1}
+.btn-price-badge{position:absolute;top:2px;right:3px;z-index:3;font-size:clamp(7px,0.65vw,9px);font-weight:800;color:#111;background:rgba(255,255,255,.92);padding:1px 4px;border-radius:3px;letter-spacing:.2px;pointer-events:none;white-space:nowrap;line-height:1.1;font-family:'JetBrains Mono','Courier New',monospace}
 .pos-grid-btn.open-price-key .btn-price-badge{color:#111;background:rgba(255,255,255,.92);font-weight:800}
 /* ─── PLU badge (top-left corner) ───────────────────────────────── */
 .btn-plu-badge{position:absolute;top:2px;left:3px;z-index:3;font-size:clamp(7px,0.65vw,9px);font-weight:600;color:rgba(255,255,255,.6);background:rgba(0,0,0,.4);padding:1px 3px;border-radius:3px;letter-spacing:-.2px;pointer-events:none;font-family:'JetBrains Mono','Courier New',monospace}
@@ -218,21 +218,23 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .eod-row-subtotal{min-width:80px;text-align:right;font-weight:700;font-size:15px;color:#2d6a4f}
 
 /* EOD numpad */
-.eod-np-btn{border:none;border-radius:10px;background:#f0f0f0;font-size:22px;font-weight:600;padding:14px;cursor:pointer;transition:all .1s}
+.eod-np-btn{border:none;border-radius:10px;background:#f0f0f0;font-size:24px;font-weight:700;padding:16px;min-height:62px;cursor:pointer;transition:all .1s;touch-action:manipulation}
 .eod-np-btn:active{transform:scale(.93);background:#ddd}
 /* On-screen QWERTY keyboard */
 .osk-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:2500;display:flex;align-items:flex-end;justify-content:center;padding-bottom:20px}
 .osk-overlay:not(.show){display:none}
-.osk-container{background:#e8eaef;border-radius:14px;padding:12px;width:680px;box-shadow:0 -4px 30px rgba(0,0,0,.3)}
-.osk-input-preview{background:#fff;border-radius:8px;padding:10px 14px;font-size:18px;font-weight:500;margin-bottom:10px;min-height:42px;word-break:break-all;border:2px solid #ccc}
-.osk-row{display:flex;gap:5px;justify-content:center;margin-bottom:5px}
-.osk-key{border:none;border-radius:8px;background:#fff;font-size:17px;font-weight:600;min-width:44px;height:44px;cursor:pointer;transition:all .1s;box-shadow:0 1px 3px rgba(0,0,0,.12)}
-.osk-key:active{transform:scale(.93);background:#ddd}
-.osk-key.wide{min-width:70px;font-size:14px}
-.osk-key.space{flex:1;max-width:280px}
-.osk-key.action{background:#2d6a4f;color:#fff;min-width:80px}
+.osk-container{background:#dfe4ea;border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:12px;width:min(760px,96vw);box-shadow:0 -4px 30px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.5)}
+.osk-input-preview{background:#fff;border-radius:10px;padding:10px 14px;font-size:18px;font-weight:700;margin-bottom:10px;min-height:44px;word-break:break-all;border:2px solid #cfd6df;color:#1f2937}
+.osk-row{display:flex;gap:6px;justify-content:center;margin-bottom:6px}
+.osk-row:last-child{margin-bottom:0}
+.osk-key{border:none;border-radius:10px;background:linear-gradient(180deg,#fff,#f3f5f8);color:#1f2937;font-size:20px;font-weight:800;min-width:56px;height:54px;cursor:pointer;transition:all .08s;box-shadow:0 1px 3px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.8);font-family:inherit}
+.osk-key:active{transform:scale(.94);background:#d8dde5}
+.osk-key.wide{min-width:86px;font-size:14px}
+.osk-key.space{flex:1;max-width:360px;font-size:14px;letter-spacing:.4px}
+.osk-key.action{background:linear-gradient(180deg,#15803d,#166534);color:#fff;min-width:96px;font-size:14px}
 .osk-key.action:active{background:#1b4332}
-.osk-key.del{background:#fee2e2;color:#991b1b}
+.osk-key.secondary{background:linear-gradient(180deg,#475569,#334155);color:#fff;min-width:86px;font-size:14px}
+.osk-key.del{background:linear-gradient(180deg,#fee2e2,#fecaca);color:#991b1b;font-size:14px}
 
 /* Item Search modal */
 .search-modal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:3000;display:none;flex-direction:column}
@@ -241,9 +243,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .search-modal-bar{display:flex;gap:10px;align-items:center}
 .search-modal-input{flex:1;font-size:22px;font-weight:600;padding:12px 18px;border-radius:12px;border:2px solid #e2e4e8;background:#fff;outline:none;font-family:inherit}
 .search-modal-input:focus{border-color:#4fbd77}
-.search-modal-close{width:48px;height:48px;border-radius:12px;border:none;background:#ef4444;color:#fff;font-size:22px;font-weight:700;cursor:pointer}
+.search-modal-close{width:56px;height:56px;border-radius:12px;border:none;background:#ef4444;color:#fff;font-size:24px;font-weight:700;cursor:pointer}
 .search-modal-results{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;align-content:start;padding:4px 0}
-.search-modal-item{padding:14px 10px;border-radius:12px;background:#fff;border:1px solid #e2e4e8;cursor:pointer;text-align:center;transition:all .1s}
+.search-modal-item{padding:16px 12px;border-radius:12px;background:#fff;border:1px solid #e2e4e8;cursor:pointer;text-align:center;transition:all .1s;min-height:64px;display:flex;flex-direction:column;justify-content:center}
 .search-modal-item:active{transform:scale(.95);background:#f0fdf4}
 .search-modal-item .sr-name{font-size:13px;font-weight:600;color:#1a1a2e;margin-bottom:4px;line-height:1.2}
 .search-modal-item .sr-price{font-size:15px;font-weight:700;color:#3a9c5e}
@@ -251,35 +253,39 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .search-kb{background:#dfe4ea;border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:12px;flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.5)}
 .search-kb-row{display:flex;gap:6px;justify-content:center;margin-bottom:6px}
 .search-kb-row:last-child{margin-bottom:0}
-.search-kb-key{border:none;border-radius:10px;background:linear-gradient(180deg,#fff,#f3f5f8);color:#1f2937;font-size:20px;font-weight:800;min-width:56px;height:54px;cursor:pointer;transition:all .08s;box-shadow:0 1px 3px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.8);font-family:inherit}
+.search-kb-key{border:none;border-radius:10px;background:linear-gradient(180deg,#fff,#f3f5f8);color:#1f2937;font-size:21px;font-weight:800;min-width:62px;height:60px;cursor:pointer;transition:all .08s;box-shadow:0 1px 3px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.8);font-family:inherit;touch-action:manipulation}
 .search-kb-key:active{transform:scale(.94);background:#d8dde5}
 .search-kb-key.wide{min-width:86px;font-size:14px}
+.search-kb-key.xwide{min-width:116px;font-size:14px}
 .search-kb-key.space{flex:1;max-width:360px;font-size:14px;letter-spacing:.4px}
 .search-kb-key.action{background:linear-gradient(180deg,#15803d,#166534);color:#fff;min-width:96px;font-size:14px}
 .search-kb-key.secondary{background:linear-gradient(180deg,#475569,#334155);color:#fff;min-width:86px;font-size:14px}
 .search-kb-key.del{background:linear-gradient(180deg,#fee2e2,#fecaca);color:#991b1b;font-size:14px}
 
-.modal{background:#fff;border:none;border-radius:16px;padding:clamp(16px,2.5vw,28px);width:clamp(320px,35vw,420px);box-shadow:0 20px 60px rgba(0,0,0,.2),0 0 0 1px rgba(0,0,0,.05);animation:modalIn .25s ease-out}
+.modal{background:#fff;border:none;border-radius:16px;padding:clamp(20px,2.8vw,32px);width:clamp(380px,42vw,560px);min-width:min(92vw,380px);max-width:94vw;box-shadow:0 20px 60px rgba(0,0,0,.2),0 0 0 1px rgba(0,0,0,.05);animation:modalIn .25s ease-out}
 @keyframes modalIn{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
-.modal h2{font-weight:700;font-size:17px;color:#1a1a2e;margin-bottom:16px;text-align:center;letter-spacing:-.3px}
+.modal h2{font-weight:700;font-size:20px;color:#1a1a2e;margin-bottom:18px;text-align:center;letter-spacing:-.3px}
 .modal-total{font-family:'Inter',sans-serif;font-size:2rem;font-weight:800;color:#1a1a2e;text-align:center;margin-bottom:16px;letter-spacing:-1px}
 .tendered-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
 .tendered-row label{font-size:12px;width:60px;color:#8891a5;font-weight:600}
-.tendered-row input{flex:1;padding:12px;border-radius:10px;border:1px solid #e2e4e8;background:#fafbfc;color:#1a1a2e;font-size:1.3rem;font-weight:700;text-align:right;outline:none;font-family:'Inter',sans-serif;transition:border-color .15s}
+.tendered-row input{flex:1;padding:14px;border-radius:10px;border:1px solid #e2e4e8;background:#fafbfc;color:#1a1a2e;font-size:1.35rem;font-weight:700;text-align:right;outline:none;font-family:'Inter',sans-serif;transition:border-color .15s;min-height:56px}
 .tendered-row input:focus{border-color:#5b8def;box-shadow:0 0 0 3px rgba(91,141,239,.12)}
 .quick-cash{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px}
-.quick-cash button{padding:12px;border-radius:10px;border:1px solid #e2e4e8;background:#fafbfc;color:#1a1a2e;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;min-height:48px;transition:all .1s}
+.quick-cash button{padding:14px 12px;border-radius:10px;border:1px solid #e2e4e8;background:#fafbfc;color:#1a1a2e;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;min-height:56px;transition:all .1s;touch-action:manipulation}
 .quick-cash button:active{background:#e2e4e8;transform:scale(.97)}
 .change-display{text-align:center;font-size:18px;margin-bottom:14px;min-height:24px;font-weight:800;font-family:'Inter',sans-serif;letter-spacing:-.3px}
 .change-display.positive{color:#3a9c5e}.change-display.short{color:#ef4444}
 .modal-actions{display:flex;gap:8px}
-.modal-actions button{flex:1;padding:14px;border-radius:10px;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;min-height:48px;transition:all .1s}
+.modal-actions button{flex:1;padding:16px;border-radius:10px;border:none;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;min-height:58px;transition:all .1s;touch-action:manipulation}
 .modal-actions button:active{transform:scale(.97)}
 .modal-cancel{background:#f0f1f3;color:#4a5068;border:1px solid #e2e4e8 !important}.modal-cancel:active{background:#e2e4e8}
 .modal-confirm{background:#3a9c5e;color:#fff;box-shadow:0 2px 8px rgba(58,156,94,.2)}.modal-confirm:active:not(:disabled){background:#2d7a4a}.modal-confirm:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
+.modal-overlay .modal button{min-height:56px;touch-action:manipulation}
+.modal-overlay .modal button[style*="padding:10px"]{min-height:56px!important;padding-top:14px!important;padding-bottom:14px!important}
+.modal-overlay .modal input,.modal-overlay .modal select{min-height:48px;touch-action:manipulation}
 
 .numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px}
-.numpad button{padding:14px;border-radius:10px;border:1px solid #e2e4e8;background:#fafbfc;color:#1a1a2e;font-size:1.2rem;font-weight:600;cursor:pointer;font-family:inherit;min-height:52px;transition:all .1s}
+.numpad button{padding:16px;border-radius:10px;border:1px solid #e2e4e8;background:#fafbfc;color:#1a1a2e;font-size:1.35rem;font-weight:700;cursor:pointer;font-family:inherit;min-height:64px;transition:all .1s;touch-action:manipulation}
 .numpad button:active{background:#e2e4e8;transform:scale(.97)}
 .price-display{font-family:'Inter',sans-serif;font-size:2.4rem;font-weight:800;text-align:center;color:#1a1a2e;margin-bottom:4px;letter-spacing:-1px}
 .price-subtitle{text-align:center;color:#8891a5;margin-bottom:14px;font-size:12px}
@@ -290,7 +296,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 .login-overlay{position:fixed;inset:0;background:#f0f1f3;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200}
 .login-overlay.hidden{display:none}
 .login-logo{width:100px;height:100px;margin-bottom:16px;object-fit:cover;border-radius:50%;filter:drop-shadow(0 4px 12px rgba(0,0,0,.15))}
-.login-store{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:800;color:#1a1a2e;margin-bottom:4px}
+.login-store{font-family:'Inter',system-ui,sans-serif;font-size:1.5rem;font-weight:900;color:#19b85a;margin-bottom:4px;letter-spacing:-.04em}
 .login-subtitle{color:#8891a5;margin-bottom:32px;font-size:13px}
 .pin-display{font-size:2rem;letter-spacing:14px;margin-bottom:24px;min-height:40px;color:#1a1a2e;font-weight:700}
 .pin-pad{display:grid;grid-template-columns:repeat(3,clamp(60px,7vw,80px));gap:clamp(4px,0.8vw,8px)}
@@ -343,7 +349,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 
 /* Cash modal numpad */
 .cash-numpad{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:12px}
-.cash-numpad button{padding:12px;border-radius:10px;border:1px solid #e2e4e8;background:#fafbfc;color:#1a1a2e;font-size:1.1rem;font-weight:600;cursor:pointer;font-family:inherit;min-height:48px;transition:all .1s}
+.cash-numpad button{padding:14px;border-radius:10px;border:1px solid #e2e4e8;background:#fafbfc;color:#1a1a2e;font-size:1.25rem;font-weight:700;cursor:pointer;font-family:inherit;min-height:60px;transition:all .1s;touch-action:manipulation}
 .cash-numpad button:active{background:#e2e4e8;transform:scale(.97)}
 .cash-numpad button.cash-np-clear{background:#fef2f2;color:#ef4444;border-color:#fecaca}
 .cash-numpad button.cash-np-enter{background:#3a9c5e;color:#fff;border-color:#3a9c5e;box-shadow:0 2px 6px rgba(58,156,94,.2)}
@@ -385,7 +391,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 
 <!-- ═══ PIN Login ═══════════════════════════════════════════════════ -->
 <div class="login-overlay" id="loginOverlay">
-  <img src="logo-circle.png" class="login-logo company-logo" alt="" style="width:140px;height:140px">
+  <img src="boundos.png" class="login-logo company-logo" alt="" style="width:140px;height:140px">
   <div class="login-store" id="loginStoreName"></div>
   <div class="login-subtitle">Enter your PIN to start</div>
   <div class="pin-display" id="pinDisplay"></div>
@@ -404,6 +410,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
     <div style="font-size:28px;margin-bottom:8px">💰</div>
     <div style="font-size:18px;font-weight:700;color:#1a1a2e;margin-bottom:4px">Enter Drawer Float</div>
     <div style="font-size:13px;color:#8891a5;margin-bottom:20px">Count the cash in the drawer and enter the total amount.</div>
+    <div id="floatSuggested" style="font-size:12px;font-weight:700;color:#166534;background:#ecfdf5;border:1px solid #bbf7d0;border-radius:8px;padding:8px 10px;margin-bottom:10px">Suggested start float: $0.00</div>
     <div id="floatDisplay" style="font-size:32px;font-weight:700;color:#1a3d2a;background:#f0fdf4;border:2px solid #4fbd77;border-radius:10px;padding:12px;margin-bottom:16px;min-height:48px;letter-spacing:1px">$0.00</div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;" id="floatPad">
       <button class="pin-btn" data-val="1">1</button><button class="pin-btn" data-val="2">2</button><button class="pin-btn" data-val="3">3</button>
@@ -421,8 +428,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 <!-- ═══ Status Bar ═════════════════════════════════════════════════ -->
 <div class="status-bar">
   <div class="status-left">
-    <img src="logo-circle.png" alt="" class="company-logo" style="width:28px;height:28px;object-fit:cover;border-radius:50%;flex-shrink:0;object-position:center">
-    <span class="store-name">Tillaroo</span>
+    <img src="boundos.png" alt="" class="company-logo" style="width:28px;height:28px;object-fit:cover;border-radius:50%;flex-shrink:0;object-position:center">
+    <span class="store-name">BoundOS</span>
     <div style="position:relative">
       <input type="text" id="searchInput" class="scan-input" placeholder="" autofocus style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden">
     </div>
@@ -541,7 +548,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
       <button data-cv="7" style="padding:16px 0;border-radius:10px;border:1px solid #ddd;background:#fff;font-size:22px;font-weight:700;cursor:pointer;font-family:inherit">7</button>
       <button data-cv="8" style="padding:16px 0;border-radius:10px;border:1px solid #ddd;background:#fff;font-size:22px;font-weight:700;cursor:pointer;font-family:inherit">8</button>
       <button data-cv="9" style="padding:16px 0;border-radius:10px;border:1px solid #ddd;background:#fff;font-size:22px;font-weight:700;cursor:pointer;font-family:inherit">9</button>
-      <button data-cv="C" style="padding:16px 0;border-radius:10px;border:none;background:#ef4444;color:#fff;font-size:18px;font-weight:800;cursor:pointer;font-family:inherit">CLR</button>
+      <button data-cv="back" style="padding:16px 0;border-radius:10px;border:1px solid #ddd;background:#f0f1f3;font-size:18px;font-weight:700;cursor:pointer;font-family:inherit">&larr;</button>
       <button data-cv="4" style="padding:16px 0;border-radius:10px;border:1px solid #ddd;background:#fff;font-size:22px;font-weight:700;cursor:pointer;font-family:inherit">4</button>
       <button data-cv="5" style="padding:16px 0;border-radius:10px;border:1px solid #ddd;background:#fff;font-size:22px;font-weight:700;cursor:pointer;font-family:inherit">5</button>
       <button data-cv="6" style="padding:16px 0;border-radius:10px;border:1px solid #ddd;background:#fff;font-size:22px;font-weight:700;cursor:pointer;font-family:inherit">6</button>
@@ -549,7 +556,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
       <button data-cv="1" style="padding:16px 0;border-radius:10px;border:1px solid #ddd;background:#fff;font-size:22px;font-weight:700;cursor:pointer;font-family:inherit">1</button>
       <button data-cv="2" style="padding:16px 0;border-radius:10px;border:1px solid #ddd;background:#fff;font-size:22px;font-weight:700;cursor:pointer;font-family:inherit">2</button>
       <button data-cv="3" style="padding:16px 0;border-radius:10px;border:1px solid #ddd;background:#fff;font-size:22px;font-weight:700;cursor:pointer;font-family:inherit">3</button>
-      <button data-cv="back" style="padding:16px 0;border-radius:10px;border:1px solid #ddd;background:#f0f1f3;font-size:18px;font-weight:700;cursor:pointer;font-family:inherit">&larr;</button>
+      <button data-cv="C" style="padding:16px 0;border-radius:10px;border:none;background:#ef4444;color:#fff;font-size:18px;font-weight:800;cursor:pointer;font-family:inherit">CLR</button>
       <button data-cv="0" style="padding:16px 0;border-radius:10px;border:1px solid #ddd;background:#fff;font-size:22px;font-weight:700;cursor:pointer;font-family:inherit">0</button>
       <button data-cv="." style="padding:16px 0;border-radius:10px;border:1px solid #ddd;background:#fff;font-size:22px;font-weight:700;cursor:pointer;font-family:inherit">.</button>
       <button data-cv="OK" style="padding:16px 0;border-radius:10px;border:none;background:linear-gradient(135deg,#4fbd77,#3a9c5e);color:#fff;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;grid-column:span 2">PAY CASH</button>
@@ -747,11 +754,28 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 </div></div>
 
 <!-- ═══ Price Check Modal ═════════════════════════════════════════ -->
-<div class="modal-overlay" id="priceCheckModal"><div class="modal" style="width:480px">
+<div class="modal-overlay" id="priceCheckModal"><div class="modal" style="width:min(760px,94vw)">
   <h2>Price Check</h2>
   <div style="margin-bottom:12px"><input type="text" id="pcSearchInput" placeholder="Scan barcode or type to search..." style="width:100%;padding:10px;border-radius:6px;border:1px solid #ccc;font-size:14px;outline:none"></div>
   <div id="pcResults" style="max-height:320px;overflow-y:auto"></div>
   <div id="pcResult" class="pricecheck-result" style="display:none"></div>
+  <div class="search-kb" id="pcSearchKb" style="margin-top:12px">
+    <div class="search-kb-row">
+      <button class="search-kb-key" data-k="1">1</button><button class="search-kb-key" data-k="2">2</button><button class="search-kb-key" data-k="3">3</button><button class="search-kb-key" data-k="4">4</button><button class="search-kb-key" data-k="5">5</button><button class="search-kb-key" data-k="6">6</button><button class="search-kb-key" data-k="7">7</button><button class="search-kb-key" data-k="8">8</button><button class="search-kb-key" data-k="9">9</button><button class="search-kb-key" data-k="0">0</button><button class="search-kb-key del xwide" data-k="BKSP">BKSP</button>
+    </div>
+    <div class="search-kb-row">
+      <button class="search-kb-key" data-k="Q">Q</button><button class="search-kb-key" data-k="W">W</button><button class="search-kb-key" data-k="E">E</button><button class="search-kb-key" data-k="R">R</button><button class="search-kb-key" data-k="T">T</button><button class="search-kb-key" data-k="Y">Y</button><button class="search-kb-key" data-k="U">U</button><button class="search-kb-key" data-k="I">I</button><button class="search-kb-key" data-k="O">O</button><button class="search-kb-key" data-k="P">P</button>
+    </div>
+    <div class="search-kb-row">
+      <button class="search-kb-key" data-k="A">A</button><button class="search-kb-key" data-k="S">S</button><button class="search-kb-key" data-k="D">D</button><button class="search-kb-key" data-k="F">F</button><button class="search-kb-key" data-k="G">G</button><button class="search-kb-key" data-k="H">H</button><button class="search-kb-key" data-k="J">J</button><button class="search-kb-key" data-k="K">K</button><button class="search-kb-key" data-k="L">L</button>
+    </div>
+    <div class="search-kb-row">
+      <button class="search-kb-key wide secondary" data-k="SHIFT">SHIFT</button><button class="search-kb-key" data-k="Z">Z</button><button class="search-kb-key" data-k="X">X</button><button class="search-kb-key" data-k="C">C</button><button class="search-kb-key" data-k="V">V</button><button class="search-kb-key" data-k="B">B</button><button class="search-kb-key" data-k="N">N</button><button class="search-kb-key" data-k="M">M</button><button class="search-kb-key wide secondary" data-k="-">-</button>
+    </div>
+    <div class="search-kb-row">
+      <button class="search-kb-key wide secondary" data-k=".">.</button><button class="search-kb-key space" data-k=" ">SPACE</button><button class="search-kb-key del wide" data-k="CLEAR">CLEAR</button><button class="search-kb-key action" data-k="ENTER">ENTER</button>
+    </div>
+  </div>
   <div class="modal-actions"><button class="modal-cancel" id="pcClose">Close</button><button class="modal-confirm" id="pcAddToCart" style="display:none">Add to Cart</button></div>
 </div></div>
 
@@ -837,12 +861,14 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
   <h2 style="margin-bottom:4px;font-size:20px">End of Day — Cash Count</h2>
   <p style="color:#888;font-size:13px;margin-bottom:16px">Count all cash in your drawer</p>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">
     <div style="background:#f0f0f0;padding:14px;border-radius:10px;text-align:center"><div style="font-size:12px;color:#888">Expected</div><div style="font-weight:800;font-size:22px;color:#2d6a4f" id="eodExpected">$0.00</div></div>
     <div style="background:#f0f0f0;padding:14px;border-radius:10px;text-align:center"><div style="font-size:12px;color:#888">Your Count</div><div style="font-weight:800;font-size:22px;color:#1a1a2e" id="eodCounted">$0.00</div></div>
+    <div style="background:#f0fdf4;padding:14px;border-radius:10px;text-align:center"><div style="font-size:12px;color:#5b7f6b">Desired Float</div><div style="font-weight:800;font-size:22px;color:#166534" id="eodDesiredFloat">$0.00</div></div>
   </div>
 
   <div id="eodVariance" style="display:none;text-align:center;padding:12px;border-radius:8px;margin-bottom:14px;font-weight:700;font-size:16px"></div>
+  <div id="eodFloatInstruction" style="display:none;text-align:center;padding:10px 12px;border-radius:8px;margin-bottom:14px;font-weight:700;font-size:14px;background:#f8fafc;color:#334155;border:1px solid #e2e8f0"></div>
 
   <div id="eodRows" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px"></div>
 
@@ -954,7 +980,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
 <div class="osk-container">
   <div class="osk-input-preview" id="oskPreview"></div>
   <div class="osk-row">
-    <button class="osk-key" data-k="1">1</button><button class="osk-key" data-k="2">2</button><button class="osk-key" data-k="3">3</button><button class="osk-key" data-k="4">4</button><button class="osk-key" data-k="5">5</button><button class="osk-key" data-k="6">6</button><button class="osk-key" data-k="7">7</button><button class="osk-key" data-k="8">8</button><button class="osk-key" data-k="9">9</button><button class="osk-key" data-k="0">0</button>
+    <button class="osk-key" data-k="1">1</button><button class="osk-key" data-k="2">2</button><button class="osk-key" data-k="3">3</button><button class="osk-key" data-k="4">4</button><button class="osk-key" data-k="5">5</button><button class="osk-key" data-k="6">6</button><button class="osk-key" data-k="7">7</button><button class="osk-key" data-k="8">8</button><button class="osk-key" data-k="9">9</button><button class="osk-key" data-k="0">0</button><button class="osk-key del wide" data-k="BKSP">BKSP</button>
   </div>
   <div class="osk-row">
     <button class="osk-key" data-k="Q">Q</button><button class="osk-key" data-k="W">W</button><button class="osk-key" data-k="E">E</button><button class="osk-key" data-k="R">R</button><button class="osk-key" data-k="T">T</button><button class="osk-key" data-k="Y">Y</button><button class="osk-key" data-k="U">U</button><button class="osk-key" data-k="I">I</button><button class="osk-key" data-k="O">O</button><button class="osk-key" data-k="P">P</button>
@@ -963,10 +989,10 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
     <button class="osk-key" data-k="A">A</button><button class="osk-key" data-k="S">S</button><button class="osk-key" data-k="D">D</button><button class="osk-key" data-k="F">F</button><button class="osk-key" data-k="G">G</button><button class="osk-key" data-k="H">H</button><button class="osk-key" data-k="J">J</button><button class="osk-key" data-k="K">K</button><button class="osk-key" data-k="L">L</button>
   </div>
   <div class="osk-row">
-    <button class="osk-key" data-k="Z">Z</button><button class="osk-key" data-k="X">X</button><button class="osk-key" data-k="C">C</button><button class="osk-key" data-k="V">V</button><button class="osk-key" data-k="B">B</button><button class="osk-key" data-k="N">N</button><button class="osk-key" data-k="M">M</button><button class="osk-key del" data-k="BKSP">⌫</button>
+    <button class="osk-key wide secondary" data-k="SHIFT">SHIFT</button><button class="osk-key" data-k="Z">Z</button><button class="osk-key" data-k="X">X</button><button class="osk-key" data-k="C">C</button><button class="osk-key" data-k="V">V</button><button class="osk-key" data-k="B">B</button><button class="osk-key" data-k="N">N</button><button class="osk-key" data-k="M">M</button>
   </div>
   <div class="osk-row">
-    <button class="osk-key wide" data-k="SHIFT">⇧</button><button class="osk-key" data-k="-">-</button><button class="osk-key" data-k=".">.</button><button class="osk-key" data-k=",">,</button><button class="osk-key space" data-k=" ">space</button><button class="osk-key" data-k="$">$</button><button class="osk-key action" data-k="DONE">Done</button>
+    <button class="osk-key wide secondary" data-k="-">-</button><button class="osk-key wide secondary" data-k=".">.</button><button class="osk-key wide secondary" data-k=",">,</button><button class="osk-key space" data-k=" ">SPACE</button><button class="osk-key wide secondary" data-k="$">$</button><button class="osk-key action" data-k="DONE">DONE</button>
   </div>
 </div>
 </div>
@@ -1004,7 +1030,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
   </div>
   <div class="search-kb" id="itemSearchKb">
     <div class="search-kb-row">
-      <button class="search-kb-key" data-k="1">1</button><button class="search-kb-key" data-k="2">2</button><button class="search-kb-key" data-k="3">3</button><button class="search-kb-key" data-k="4">4</button><button class="search-kb-key" data-k="5">5</button><button class="search-kb-key" data-k="6">6</button><button class="search-kb-key" data-k="7">7</button><button class="search-kb-key" data-k="8">8</button><button class="search-kb-key" data-k="9">9</button><button class="search-kb-key" data-k="0">0</button>
+      <button class="search-kb-key" data-k="1">1</button><button class="search-kb-key" data-k="2">2</button><button class="search-kb-key" data-k="3">3</button><button class="search-kb-key" data-k="4">4</button><button class="search-kb-key" data-k="5">5</button><button class="search-kb-key" data-k="6">6</button><button class="search-kb-key" data-k="7">7</button><button class="search-kb-key" data-k="8">8</button><button class="search-kb-key" data-k="9">9</button><button class="search-kb-key" data-k="0">0</button><button class="search-kb-key del xwide" data-k="BKSP">BKSP</button>
     </div>
     <div class="search-kb-row">
       <button class="search-kb-key" data-k="Q">Q</button><button class="search-kb-key" data-k="W">W</button><button class="search-kb-key" data-k="E">E</button><button class="search-kb-key" data-k="R">R</button><button class="search-kb-key" data-k="T">T</button><button class="search-kb-key" data-k="Y">Y</button><button class="search-kb-key" data-k="U">U</button><button class="search-kb-key" data-k="I">I</button><button class="search-kb-key" data-k="O">O</button><button class="search-kb-key" data-k="P">P</button>
@@ -1013,17 +1039,17 @@ body{font-family:'Inter',system-ui,sans-serif;background:#12141c;color:#1a1a2e;d
       <button class="search-kb-key" data-k="A">A</button><button class="search-kb-key" data-k="S">S</button><button class="search-kb-key" data-k="D">D</button><button class="search-kb-key" data-k="F">F</button><button class="search-kb-key" data-k="G">G</button><button class="search-kb-key" data-k="H">H</button><button class="search-kb-key" data-k="J">J</button><button class="search-kb-key" data-k="K">K</button><button class="search-kb-key" data-k="L">L</button>
     </div>
     <div class="search-kb-row">
-      <button class="search-kb-key" data-k="Z">Z</button><button class="search-kb-key" data-k="X">X</button><button class="search-kb-key" data-k="C">C</button><button class="search-kb-key" data-k="V">V</button><button class="search-kb-key" data-k="B">B</button><button class="search-kb-key" data-k="N">N</button><button class="search-kb-key" data-k="M">M</button><button class="search-kb-key del wide" data-k="BKSP">BKSP</button>
+      <button class="search-kb-key wide secondary" data-k="SHIFT">SHIFT</button><button class="search-kb-key" data-k="Z">Z</button><button class="search-kb-key" data-k="X">X</button><button class="search-kb-key" data-k="C">C</button><button class="search-kb-key" data-k="V">V</button><button class="search-kb-key" data-k="B">B</button><button class="search-kb-key" data-k="N">N</button><button class="search-kb-key" data-k="M">M</button><button class="search-kb-key wide secondary" data-k="-">-</button>
     </div>
     <div class="search-kb-row">
-      <button class="search-kb-key wide secondary" data-k="-">-</button><button class="search-kb-key wide secondary" data-k=".">.</button><button class="search-kb-key space" data-k=" ">SPACE</button><button class="search-kb-key del wide" data-k="CLEAR">CLEAR</button><button class="search-kb-key action" data-k="ENTER">ENTER</button>
+      <button class="search-kb-key wide secondary" data-k=".">.</button><button class="search-kb-key space" data-k=" ">SPACE</button><button class="search-kb-key del wide" data-k="CLEAR">CLEAR</button><button class="search-kb-key action" data-k="ENTER">ENTER</button>
     </div>
   </div>
 </div>
 </div>
 
 <div class="sale-complete" id="saleComplete"><div class="sale-complete-inner sale-summary">
-  <img src="logo-circle.png" class="sale-check company-logo" alt="">
+  <img src="boundos.png" class="sale-check company-logo" alt="">
   <div class="sale-complete-text" id="saleCompleteTitle">Sale Complete</div>
   <div id="saleSummaryBody"></div>
   <div class="sale-complete-change" id="saleChangeDisplay"></div>
@@ -1046,20 +1072,36 @@ let viewingSaleId = null
 let cashNumBuf = ''
 let autoReceipt = localStorage.getItem('tillaroo_auto_receipt') !== '0'
 
+function normaliseLogoFit(value) {
+  return value === 'cover' ? 'cover' : 'contain'
+}
+function normaliseLogoScale(value) {
+  const n = parseFloat(value)
+  if (!Number.isFinite(n)) return 1
+  return Math.min(1.4, Math.max(0.5, n))
+}
+function applyCompanyLogoStyle(fit, scale) {
+  const safeFit = normaliseLogoFit(fit)
+  const safeScale = normaliseLogoScale(scale)
+  document.querySelectorAll('.company-logo').forEach(img => {
+    img.style.objectFit = safeFit
+    img.style.transform = `scale(${safeScale})`
+    img.style.transformOrigin = 'center'
+  })
+}
+
 async function refreshBranding () {
-  const [storeName, companyLogo] = await Promise.all([
-    window.pos.getSetting('store_name'),
-    window.pos.getSetting('company_logo')
-  ])
-  const name = storeName || 'Tillaroo'
-  document.title = `${name} POS`
+  const settings = await window.pos.getAllSettings()
+  const name = settings.store_name || 'BoundOS'
+  document.title = 'BoundOS Client - Register'
   const loginName = document.getElementById('loginStoreName')
   if (loginName) loginName.textContent = name
   document.querySelectorAll('.store-name').forEach(el => { el.textContent = name })
   document.querySelectorAll('.company-logo').forEach(img => {
-    img.src = companyLogo || 'logo-circle.png'
+    img.src = settings.company_logo || 'boundos.png'
     img.alt = name
   })
+  applyCompanyLogoStyle(settings.company_logo_fit, settings.company_logo_scale)
 }
 function updateReceiptToggle () {
   const btn = $('#receiptToggle')
@@ -1088,6 +1130,36 @@ document.addEventListener('click', e => {
 })
 function refocus () { setTimeout(() => si.focus(), 50) }
 
+async function processScannedCode (code) {
+  const q = (code || '').toString().trim()
+  if (!q) return false
+  si.value = ''
+  if (/^[a-f0-9]{32}$/i.test(q) || /^[a-f0-9-]{36}$/i.test(q)) {
+    const txnId = q.length === 32 ? q.replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, '$1-$2-$3-$4-$5') : q
+    try {
+      const held = await window.pos.getTransaction(txnId)
+      if (held && held.status === 'parked') {
+        cart.clear()
+        cart.loadItems(held.items || [])
+        await window.pos.voidTransaction(txnId)
+        returnToMainKeyboard()
+        showToast('Held sale recalled', 'success')
+        refocus()
+        return true
+      }
+    } catch (_) {}
+  }
+  try {
+    const p = await window.pos.getProductByBarcode(q)
+    if (p) { addToCart(p); return true }
+    showNotFoundAlert(q)
+    return false
+  } catch (e) {
+    showToast(`Scan lookup failed: ${e.message}`, 'error')
+    return false
+  }
+}
+
 // Global barcode capture — redirect typed characters to scan input regardless of focus
 document.addEventListener('keydown', e => {
   // Skip if in a modal, or active element is an input/textarea/select
@@ -1102,7 +1174,9 @@ document.addEventListener('keydown', e => {
     si.value = si.value.slice(0, -1)
     e.preventDefault()
   } else if (e.key === 'Enter') {
-    // Let si's keydown handler fire naturally
+    e.preventDefault()
+    const q = si.value.trim()
+    if (q) processScannedCode(q)
   } else if (e.key.length === 1) {
     si.value += e.key
     e.preventDefault()
@@ -1118,28 +1192,7 @@ if (window.pos && typeof window.pos.onScannerData === 'function') {
   window.pos.onScannerData(async ({ label, raw }) => {
     const code = (label || raw || '').toString().trim()
     if (!code) return
-    // Held-sale barcode (UUID 32 or 36 chars)
-    if (/^[a-f0-9]{32}$/i.test(code) || /^[a-f0-9-]{36}$/i.test(code)) {
-      const txnId = code.length === 32 ? code.replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, '$1-$2-$3-$4-$5') : code
-      try {
-        const held = await window.pos.getTransaction(txnId)
-        if (held && held.status === 'parked') {
-          cart.clear()
-          cart.loadItems(held.items || [])
-          await window.pos.voidTransaction(txnId)
-          showToast('Held sale recalled', 'success')
-          return
-        }
-      } catch (_) {}
-    }
-    // Normal product lookup
-    try {
-      const p = await window.pos.getProductByBarcode(code)
-      if (p) { addToCart(p); return }
-      showNotFoundAlert(code)
-    } catch (e) {
-      showToast(`Scan lookup failed: ${e.message}`, 'error')
-    }
+    processScannedCode(code)
   })
 }
 if (window.pos && typeof window.pos.onScannerStatus === 'function') {
@@ -1311,9 +1364,42 @@ document.addEventListener('keydown', async e => {
 
 // ═══ Float Entry ══════════════════════════════════════════════════
 let floatBuf = ''
-function showFloatPrompt () {
-  floatBuf = ''
-  $('#floatDisplay').textContent = '$0.00'
+function parseTillDesiredFloats (settings) {
+  try {
+    const parsed = JSON.parse(settings?.till_desired_floats || '{}')
+    return parsed && typeof parsed === 'object' ? parsed : {}
+  } catch (_) {
+    return {}
+  }
+}
+function desiredFloatForSettings (settings) {
+  const reg = settings?.register_id || 'LANE01'
+  const tillFloats = parseTillDesiredFloats(settings)
+  const raw = tillFloats[reg] ?? settings?.desired_till_float ?? 0
+  const amount = parseFloat(raw)
+  return Number.isFinite(amount) && amount > 0 ? amount : 0
+}
+function signedMoney (amount) {
+  const abs = Math.abs(amount)
+  return `${amount >= 0 ? '+' : '-'}${money(abs)}`
+}
+function eodDrawerInstruction (counted, desired) {
+  if (!desired || desired <= 0) return 'No desired till float is set.'
+  const diff = counted - desired
+  if (Math.abs(diff) < 0.01) return `Leave ${money(desired)} in the till for the next shift.`
+  if (diff > 0) return `Take out ${money(diff)} to leave ${money(desired)} in the till.`
+  return `Add ${money(Math.abs(diff))} to reach the desired float of ${money(desired)}.`
+}
+async function showFloatPrompt () {
+  let suggested = 0
+  try {
+    suggested = desiredFloatForSettings(await window.pos.getAllSettings())
+  } catch (_) {}
+  floatBuf = suggested > 0 ? String(Math.round(suggested * 100)) : ''
+  $('#floatSuggested').textContent = suggested > 0
+    ? `Suggested start float: ${money(suggested)}`
+    : 'Suggested start float: not set'
+  updateFloatDisplay()
   $('#floatOverlay').classList.remove('hidden')
 }
 function updateFloatDisplay () {
@@ -1472,9 +1558,7 @@ function renderPosGrid () {
 
 function renderPosButton (btn, gridStyle) {
   const type = btn.type
-  const productOpenPrice = Number(btn.product_open_price || 0) === 1
-  const keyboardPrice = Number(btn.active_price || btn.price || 0)
-  const effectiveType = (type === 'open_price' && ((btn.product_id && !productOpenPrice) || (!btn.product_id && keyboardPrice > 0))) ? 'product' : type
+  const effectiveType = type
   const bg = esc(btn.bg_color || '#ddd')
   const color = esc(btn.color || '#000')
   const rawLabel = btn.label || ''
@@ -1529,6 +1613,12 @@ function renderPosButton (btn, gridStyle) {
     dispLabel = dispLabel.replace(/<br>\$[\d.]+.*$/, '')
     return `<div class="pos-grid-btn dept-key cat-key${imgClass}" data-type="${esc(type)}" data-page-link="${btn.parent_id}"
       style="${gridStyle};background:${bg};color:${color}${catColorStyle}">${imgHtml}<span>${dispLabel}</span><span class="btn-cat-badge">CAT</span></div>`
+  }
+
+  if (type === 'weighed_open') {
+    const dispLabel = label.replace(/(?:\\n|\n)\/?KG\b/i, '').replace(/(?:\\n|\n)/g, '<br>')
+    return `<div class="pos-grid-btn dept-key cat-key${imgClass}" data-type="${esc(type)}" data-action="${esc(type)}"
+      style="${gridStyle};background:${bg};color:${color}${catColorStyle}">${imgHtml}<span>${dispLabel}</span><span class="btn-cat-badge">KG</span></div>`
   }
 
   // Department / product / nav — everything else
@@ -1750,12 +1840,31 @@ $('#posGrid').addEventListener('click', async e => {
       const txnP = cart.toTransaction(currentStaff?.id, [])
       txnP.status = 'parked'
       const r = await window.pos.saveTransaction(txnP)
+      try { await printHeldSaleReceipt(r.id, txnP) } catch (_) {}
       cart.clear(); clearCartLocal()
-      showToast(`Sale held (#${r.id.substring(0,6)})`, 'info')
+      showToast('Sale held - recall barcode printed', 'info')
     } catch (e2) { showToast('Failed to hold sale', 'error') }
     return
   }
 })
+
+async function printHeldSaleReceipt (txnId, txnP) {
+  const settings = await window.pos.getAllSettings()
+  await window.pos.printReceipt({
+    storeName: settings.store_name || 'BoundOS',
+    storeAddress: '', storePhone: '', storeAbn: '',
+    header: '*** HELD SALE ***',
+    date: new Date().toLocaleString('en-AU'),
+    txnId,
+    staffName: currentStaff?.name || '',
+    registerId: settings.register_id || 'LANE01',
+    items: txnP.items,
+    subtotal: txnP.subtotal, tax: txnP.tax, discount: txnP.discount, total: txnP.total,
+    payments: [], change: 0, status: 'parked',
+    barcode: txnId,
+    footer: 'Scan barcode to recall this sale'
+  })
+}
 
 async function handleFuncButton (action) {
   switch (action) {
@@ -1775,26 +1884,9 @@ async function handleFuncButton (action) {
         const txnP = cart.toTransaction(currentStaff?.id, [])
         txnP.status = 'parked'
         const r = await window.pos.saveTransaction(txnP)
-        // Print hold receipt with barcode ID
-        try {
-          const settings = await window.pos.getAllSettings()
-          await window.pos.printReceipt({
-            storeName: settings.store_name || 'Tillaroo',
-            storeAddress: '', storePhone: '', storeAbn: '',
-            header: '*** HELD SALE ***',
-            date: new Date().toLocaleString('en-AU'),
-            txnId: r.id,
-            staffName: currentStaff?.name || '',
-            registerId: settings.register_id || 'LANE01',
-            items: txnP.items,
-            subtotal: txnP.subtotal, tax: txnP.tax, discount: txnP.discount, total: txnP.total,
-            payments: [], change: 0, status: 'parked',
-            barcode: r.id,
-            footer: 'Scan barcode to recall this sale'
-          })
-        } catch (_) {}
+        try { await printHeldSaleReceipt(r.id, txnP) } catch (_) {}
         cart.clear(); clearCartLocal()
-        showToast(`Sale held — receipt printed`, 'info')
+        showToast('Sale held - recall barcode printed', 'info')
       } catch (e2) { showToast('Failed to hold sale', 'error') }
       break
     case 'recall': showRecallModal(); break
@@ -2108,25 +2200,7 @@ si.addEventListener('keydown', async e => {
   if (e.key !== 'Enter') return
   e.preventDefault()
   const q = si.value.trim(); if (!q) return
-  si.value = ''
-  // Check if it's a held sale barcode (UUID without dashes, 32 chars)
-  if (/^[a-f0-9]{32}$/i.test(q) || /^[a-f0-9-]{36}$/i.test(q)) {
-    const txnId = q.length === 32 ? q.replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, '$1-$2-$3-$4-$5') : q
-    try {
-      const held = await window.pos.getTransaction(txnId)
-      if (held && held.status === 'parked') {
-        cart.clear()
-        cart.loadItems(held.items || [])
-        await window.pos.voidTransaction(txnId)
-        showToast('Held sale recalled', 'success')
-        return
-      }
-    } catch (_) {}
-  }
-  const p = await window.pos.getProductByBarcode(q)
-  if (p) { addToCart(p); return }
-  // Product not found — show alert
-  showNotFoundAlert(q)
+  processScannedCode(q)
 })
 
 function showNotFoundAlert(code) {
@@ -2733,7 +2807,7 @@ $('#recallList').addEventListener('click', async e => {
       const s = await window.pos.getAllSettings()
       const date = txn?.created_at ? new Date(txn.created_at + (txn.created_at.includes('Z') ? '' : 'Z')).toLocaleString('en-AU') : ''
       const receiptData = {
-        storeName: s.store_name || 'Tillaroo', storeAddress: s.store_address || '',
+        storeName: s.store_name || 'BoundOS', storeAddress: s.store_address || '',
         storePhone: s.store_phone || '', storeAbn: s.store_abn || '',
         header: s.receipt_header || '', date,
         txnId, receiptNumber: txn?.receipt_number || null,
@@ -3025,6 +3099,7 @@ $('#supPinCancel').addEventListener('click', () => { $('#supervisorModal').class
 // ═══ Price Check Modal ════════════════════════════════════════════
 function showPriceCheckModal () {
   pcFoundProduct = null
+  registerQwertyShift = false
   $('#pcResult').style.display = 'none'; $('#pcResults').innerHTML = ''; $('#pcAddToCart').style.display = 'none'
   $('#pcSearchInput').value = ''
   $('#priceCheckModal').classList.add('show')
@@ -3044,6 +3119,31 @@ const pcSearchDebounced = debounce(async () => {
     return `<div class="pc-row" data-id="${esc(p.id)}" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid #eee;cursor:pointer;transition:background .1s"><div><div style="font-weight:600;font-size:14px">${esc(p.name)}${special}</div><div style="color:#888;font-size:11px">${esc(p.barcode || '')} ${esc(p.category_name || '')}</div></div><div style="font-weight:800;font-size:16px;color:#3a9c5e">${money(price)}</div></div>`
   }).join('')
 }, 200)
+let registerQwertyShift = false
+function applyRegisterQwertyKey (input, keyValue, onChange, onEnter) {
+  input.focus()
+  if (keyValue === 'BKSP') {
+    const start = input.selectionStart ?? input.value.length
+    const end = input.selectionEnd ?? input.value.length
+    if (start !== end) input.setRangeText('', start, end, 'end')
+    else if (start > 0) input.setRangeText('', start - 1, start, 'end')
+  } else if (keyValue === 'CLEAR') {
+    input.value = ''
+  } else if (keyValue === 'ENTER') {
+    if (onEnter) onEnter()
+    return
+  } else if (keyValue === 'SHIFT') {
+    registerQwertyShift = !registerQwertyShift
+    return
+  } else {
+    const start = input.selectionStart ?? input.value.length
+    const end = input.selectionEnd ?? input.value.length
+    const char = /^[A-Z]$/.test(keyValue) && !registerQwertyShift ? keyValue.toLowerCase() : keyValue
+    input.setRangeText(char, start, end, 'end')
+    registerQwertyShift = false
+  }
+  if (onChange) onChange()
+}
 $('#pcSearchInput').addEventListener('input', pcSearchDebounced)
 $('#pcSearchInput').addEventListener('keydown', async e => {
   if (e.key !== 'Enter') return
@@ -3061,6 +3161,14 @@ $('#pcResults').addEventListener('mouseover', e => {
 })
 $('#pcResults').addEventListener('mouseout', e => {
   const row = e.target.closest('.pc-row'); if (row) row.style.background = ''
+})
+$('#pcSearchKb').addEventListener('click', e => {
+  e.preventDefault()
+  const key = e.target.closest('.search-kb-key')
+  if (!key) return
+  applyRegisterQwertyKey($('#pcSearchInput'), key.dataset.k, pcSearchDebounced, () => {
+    pcSearchDebounced.flush ? pcSearchDebounced.flush() : pcSearchDebounced()
+  })
 })
 function showPcResult (p) {
   pcFoundProduct = p
@@ -3210,7 +3318,7 @@ function renderSplitPayments () {
 async function buildReceiptData (txn, r) {
   const s = await window.pos.getAllSettings()
   return {
-    storeName: s.store_name || 'Tillaroo', storeAddress: s.store_address || '',
+    storeName: s.store_name || 'BoundOS', storeAddress: s.store_address || '',
     storePhone: s.store_phone || '', storeAbn: s.store_abn || '',
     header: s.receipt_header || '', date: new Date().toLocaleString('en-AU'),
     txnId: r.id, receiptNumber: r.receiptNumber || null,
@@ -3528,7 +3636,7 @@ $('#cashConfirm').addEventListener('click', async () => {
     const r = await window.pos.saveTransaction(txn)
     const s = await window.pos.getAllSettings()
     const receiptData = {
-      storeName: s.store_name || 'Tillaroo', storeAddress: s.store_address || '',
+      storeName: s.store_name || 'BoundOS', storeAddress: s.store_address || '',
       storePhone: s.store_phone || '', storeAbn: s.store_abn || '',
       header: s.receipt_header || '', date: new Date().toLocaleString('en-AU'),
       txnId: r.id, receiptNumber: r.receiptNumber || null,
@@ -3753,6 +3861,7 @@ const EOD_DENOMINATIONS = [
 ]
 
 let eodExpectedAmount = 0
+let eodDesiredFloatAmount = 0
 let eodQuantities = []
 let eodNumpadActiveIdx = -1
 let eodNumpadBuf = ''
@@ -3763,11 +3872,17 @@ async function showEodModal () {
     return
   }
 
-  const summary = await window.pos.getCashDrawerSummary()
+  const [summary, settings] = await Promise.all([
+    window.pos.getCashDrawerSummary(),
+    window.pos.getAllSettings().catch(() => ({}))
+  ])
   eodExpectedAmount = summary.expected || 0
+  eodDesiredFloatAmount = desiredFloatForSettings(settings)
   $('#eodExpected').textContent = money(eodExpectedAmount)
+  $('#eodDesiredFloat').textContent = eodDesiredFloatAmount > 0 ? money(eodDesiredFloatAmount) : 'Not set'
   $('#eodCounted').textContent = '$0.00'
   $('#eodVariance').style.display = 'none'
+  $('#eodFloatInstruction').style.display = 'none'
   $('#eodNotes').value = ''
   eodQuantities = EOD_DENOMINATIONS.map(() => 0)
 
@@ -3860,20 +3975,24 @@ function updateEodTotals () {
 
   const diff = total - eodExpectedAmount
   const varEl = $('#eodVariance')
+  const instructionEl = $('#eodFloatInstruction')
   if (total > 0) {
     varEl.style.display = 'block'
     if (Math.abs(diff) < 0.01) {
       varEl.textContent = '✓ Drawer balanced'
       varEl.style.background = '#d1fae5'; varEl.style.color = '#065f46'
     } else if (diff > 0) {
-      varEl.textContent = `Over by ${money(diff)}`
+      varEl.textContent = `Difference: ${signedMoney(diff)}`
       varEl.style.background = '#dbeafe'; varEl.style.color = '#1e40af'
     } else {
-      varEl.textContent = `Short by ${money(Math.abs(diff))}`
+      varEl.textContent = `Difference: ${signedMoney(diff)}`
       varEl.style.background = '#fee2e2'; varEl.style.color = '#991b1b'
     }
+    instructionEl.style.display = 'block'
+    instructionEl.textContent = eodDrawerInstruction(total, eodDesiredFloatAmount)
   } else {
     varEl.style.display = 'none'
+    instructionEl.style.display = 'none'
   }
 }
 
@@ -3893,13 +4012,14 @@ $('#eodSubmit').addEventListener('click', async () => {
 
   const variance = countedTotal - eodExpectedAmount
   const notes = $('#eodNotes').value.trim()
+  const drawerInstruction = eodDrawerInstruction(countedTotal, eodDesiredFloatAmount)
 
   // Log to cash_drawer
   await window.pos.logCashDrawer({
     staff_id: currentStaff?.id,
     action: 'close',
     amount: countedTotal,
-    note: `EOD count: ${money(countedTotal)} | Expected: ${money(eodExpectedAmount)} | Variance: ${variance >= 0 ? '+' : ''}${money(variance)}${notes ? ' | ' + notes : ''}`
+    note: `EOD count: ${money(countedTotal)} | Expected: ${money(eodExpectedAmount)} | Difference: ${signedMoney(variance)} | Desired Float: ${eodDesiredFloatAmount > 0 ? money(eodDesiredFloatAmount) : 'Not set'}${notes ? ' | ' + notes : ''}`
   })
 
   // Print EOD report
@@ -3907,7 +4027,7 @@ $('#eodSubmit').addEventListener('click', async () => {
     const settings = await window.pos.getAllSettings()
     const zReport = await window.pos.zReport()
     const receiptData = {
-      storeName: settings.store_name || 'Tillaroo',
+      storeName: settings.store_name || 'BoundOS',
       storeAddress: settings.store_address || '',
       storePhone: settings.store_phone || '',
       storeAbn: settings.store_abn || '',
@@ -3924,11 +4044,12 @@ $('#eodSubmit').addEventListener('click', async () => {
       payments: [
         { method: 'Expected in Drawer', amount: eodExpectedAmount },
         { method: 'Counted', amount: countedTotal },
-        { method: variance >= 0 ? 'OVER' : 'SHORT', amount: Math.abs(variance) },
+        { method: 'Difference', amount: Math.abs(variance) },
+        ...(eodDesiredFloatAmount > 0 ? [{ method: 'Desired Float', amount: eodDesiredFloatAmount }] : []),
       ],
       change: 0,
       status: 'eod',
-      footer: `${zReport?.summary?.txn_count || 0} transactions today | Sales: ${money(zReport?.summary?.total_sales || 0)}\n${notes || 'End of Day — Drawer Closed'}`
+      footer: `${zReport?.summary?.txn_count || 0} transactions today | Sales: ${money(zReport?.summary?.total_sales || 0)}\n${drawerInstruction}\n${notes || 'End of Day - Drawer Closed'}`
     }
     await window.pos.printReceipt(receiptData)
     showToast('EOD report printed', 'success')
@@ -4011,6 +4132,7 @@ $('#eodNotes').addEventListener('focus', (e) => {
 
 // ═══ Item Search Modal ════════════════════════════════════════════
 function showItemSearchModal () {
+  registerQwertyShift = false
   $('#itemSearchInput').value = ''
   $('#isFilterCat').value = ''
   $('#isFilterUnit').value = ''
@@ -4038,28 +4160,13 @@ $('#itemSearchKb').addEventListener('click', async (e) => {
   if (!key) return
   const k = key.dataset.k
   const input = $('#itemSearchInput')
-  input.focus()
-  if (k === 'BKSP') {
-    const start = input.selectionStart ?? input.value.length
-    const end = input.selectionEnd ?? input.value.length
-    if (start !== end) {
-      input.setRangeText('', start, end, 'end')
-    } else if (start > 0) {
-      input.setRangeText('', start - 1, start, 'end')
-    }
-  } else if (k === 'CLEAR') {
-    input.value = ''
-  } else if (k === 'ENTER') {
+  if (k === 'ENTER') {
     await runItemSearchNow()
     const firstResult = $('#itemSearchResults .search-modal-item')
     if (firstResult) firstResult.click()
     return
-  } else {
-    const start = input.selectionStart ?? input.value.length
-    const end = input.selectionEnd ?? input.value.length
-    input.setRangeText(k.toLowerCase(), start, end, 'end')
   }
-  runItemSearch()
+  applyRegisterQwertyKey(input, k, runItemSearch)
 })
 
 // Physical keyboard typing

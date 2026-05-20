@@ -1258,8 +1258,8 @@ async function networkDiagnostic () {
     results.firewallHints.push(
       'Windows Firewall may block incoming connections on port ' + port + '.',
       'To allow: Settings > Windows Security > Firewall > Allow an app through firewall > Add Electron.',
-      'Or run in admin PowerShell: netsh advfirewall firewall add rule name="Tillaroo" dir=in action=allow protocol=TCP localport=' + port,
-      'Also add UDP rule: netsh advfirewall firewall add rule name="Tillaroo-UDP" dir=in action=allow protocol=UDP localport=5556'
+      'Or run in admin PowerShell: netsh advfirewall firewall add rule name="BoundOS" dir=in action=allow protocol=TCP localport=' + port,
+      'Also add UDP rule: netsh advfirewall firewall add rule name="BoundOS-UDP" dir=in action=allow protocol=UDP localport=5556'
     )
     // Try to check firewall status
     try {
@@ -1289,7 +1289,7 @@ async function networkDiagnostic () {
     }
   } else if (os.platform() === 'darwin') {
     results.firewallHints.push(
-      'macOS Application Firewall: System Settings > Network > Firewall. If enabled, allow Electron/Tillaroo.',
+      'macOS Application Firewall: System Settings > Network > Firewall. If enabled, allow Electron/BoundOS.',
       'macOS usually prompts "Allow incoming connections?" on first server start — click Allow.'
     )
   }

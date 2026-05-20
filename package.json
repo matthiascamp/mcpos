@@ -1,7 +1,7 @@
 {
-  "name": "tillaroo",
+  "name": "boundos-client",
   "version": "1.0.0",
-  "description": "Tillaroo POS — Electron + SQLite + Supabase",
+  "description": "BoundOS Client - Electron + SQLite + Supabase",
   "main": "main.js",
   "scripts": {
     "start": "electron . --register",
@@ -27,8 +27,8 @@
     "electron-builder": "^25.1.8"
   },
   "build": {
-    "appId": "com.tillaroo.pos",
-    "productName": "Tillaroo",
+    "appId": "com.boundos.client",
+    "productName": "BoundOS Client",
     "directories": {
       "output": "dist2"
     },
@@ -58,14 +58,14 @@
           ]
         }
       ],
-      "icon": "build/icon.png"
+      "icon": "pos/boundos.png"
     },
     "portable": {
-      "artifactName": "Tillaroo-${version}.exe"
+      "artifactName": "BoundOS-Client-${version}.exe"
     },
     "nsis": {
       "oneClick": true,
-      "artifactName": "Tillaroo-Setup-${version}.exe"
+      "artifactName": "BoundOS-Client-Setup-${version}.exe"
     },
     "extraResources": [
       {

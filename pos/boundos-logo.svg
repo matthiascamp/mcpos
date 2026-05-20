@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="BoundOS logo">
+  <defs>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.80 0 0 0 0 0.65 0 0 0 0 0.37 0 0 0 .9 0"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="256" height="256" rx="64" fill="#07150d"/>
+  <circle cx="128" cy="128" r="92" fill="none" stroke="#cda75f" stroke-width="14" opacity=".24"/>
+  <path d="M84 67h55c17 0 31 5 41 14 9 8 13 19 13 31 0 17-9 30-24 37 10 4 18 10 24 18 6 8 9 18 9 30 0 18-7 32-21 42-14 10-33 15-57 15H84V67Zm55 72c13 0 23-3 30-8 7-5 10-13 10-22 0-9-3-16-10-21-7-5-16-8-28-8h-43v59h41Zm-41 13v69h48c13 0 23-3 31-9 7-6 11-14 11-25 0-11-4-20-12-26-8-6-19-9-34-9H98Z" fill="#f7f0dc" filter="url(#glow)"/>
+  <path d="M68 34h120" stroke="#cda75f" stroke-width="10" stroke-linecap="round" opacity=".70"/>
+  <path d="M68 222h120" stroke="#cda75f" stroke-width="10" stroke-linecap="round" opacity=".70"/>
+</svg>

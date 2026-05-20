@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Crisp on Creek — Customer Display</title>
+<title>BoundOS Client - Customer Display</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{width:100%;height:100%;overflow:hidden}
@@ -13,7 +13,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:linear-gradient(160deg,
 
 .header{padding:1.5vh 2.5vw;display:flex;align-items:center;gap:1.2vw;border-bottom:1px solid rgba(79,189,119,.15);background:rgba(0,0,0,.25);flex-shrink:0}
 .brand-circle-img{width:5.5vh;height:5.5vh;border-radius:50%;object-fit:cover;box-shadow:0 2px 12px rgba(79,189,119,.2)}
-.store-name{font-family:'Playfair Display',serif;font-weight:700;font-size:2.8vmin;color:#f5f0e8}
+.store-name{font-family:'Inter',system-ui,sans-serif;font-weight:900;font-size:2.8vmin;color:#4fe37a;letter-spacing:-.04em}
 .store-sub{font-size:1.6vmin;color:rgba(245,240,232,.5);margin-top:.3vh;letter-spacing:.5px;text-transform:uppercase}
 
 .content{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;min-height:0}
@@ -47,6 +47,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:linear-gradient(160deg,
 .idle-footer-left{display:flex;align-items:center;gap:1vw}
 .idle-footer-logo{width:4.5vh;height:4.5vh;border-radius:50%;object-fit:cover}
 .idle-footer-text{font-size:1.8vmin;color:rgba(245,240,232,.5)}
+.powered-by{font-size:1.35vmin;color:rgba(79,227,122,.72);font-weight:800;letter-spacing:.02em;white-space:nowrap}
 
 /* ═══ Active Sale — Split Layout ═══════════════════════════════════════════ */
 .sale-view{flex:1;display:none;flex-direction:row;overflow:hidden;animation:fadeIn .3s ease;min-height:0}
@@ -143,60 +144,61 @@ body{background:
 .store-name{font-size:3vmin;letter-spacing:-.03em}
 .store-sub{font-size:1.35vmin;color:rgba(245,240,232,.58)}
 .header-status{margin-left:auto;text-align:right}
-.header-status-label{font-size:1.2vmin;text-transform:uppercase;letter-spacing:.12em;color:rgba(245,240,232,.34);font-weight:800}
-.header-clock{font-size:2.1vmin;color:#dff7e7;font-weight:800;letter-spacing:-.03em}
-.idle-screen{padding:3vh 3.4vw 2.2vh;gap:2.2vh}
-.idle-hero{display:flex;align-items:center;justify-content:center;gap:1.4vw;min-height:14vh}
-.idle-hero-logo{width:9vh;height:9vh;border-radius:50%;object-fit:cover;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 18px 45px rgba(0,0,0,.32)}
-.deals-title{font-size:6vmin;letter-spacing:-.055em;line-height:.95;text-align:left}
+.header-datetime{font-size:2vmin;color:#dff7e7;font-weight:800;letter-spacing:-.03em;white-space:nowrap}
+.idle-screen{padding:2vh 2.6vw 1.6vh;gap:1.4vh}
+.idle-hero{display:flex;align-items:center;justify-content:center;gap:1.1vw;min-height:10vh}
+.idle-hero-logo{width:6.8vh;height:6.8vh;border-radius:50%;object-fit:cover;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 12px 30px rgba(0,0,0,.28)}
+.deals-title{font-size:4.8vmin;letter-spacing:-.055em;line-height:.95;text-align:left}
 .deals-subtitle{text-align:left;color:rgba(245,240,232,.56);font-weight:800}
-.deals-grid{align-content:stretch;grid-template-columns:repeat(5,minmax(0,1fr));gap:1.2vmin}
-.deal-card{min-height:21vh;border-radius:1.1vmin;padding:1.8vmin;background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,255,255,.025));border:1px solid rgba(255,255,255,.09);box-shadow:0 12px 34px rgba(0,0,0,.22)}
+.deals-grid{align-content:start;grid-template-columns:repeat(5,minmax(0,1fr));gap:.85vmin}
+.deal-card{min-height:13.5vh;border-radius:.8vmin;padding:1.15vmin;background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,255,255,.025));border:1px solid rgba(255,255,255,.09);box-shadow:0 8px 22px rgba(0,0,0,.18)}
 .deal-card::before{height:.35vmin;background:linear-gradient(90deg,#66d58d,#f6c453)}
 .deal-card-top{align-items:flex-start;gap:1vmin}
-.deal-emoji{font-size:5.8vmin;filter:drop-shadow(0 8px 18px rgba(0,0,0,.22))}
-.deal-name{font-size:2.35vmin;line-height:1.05;letter-spacing:-.03em}
-.deal-badge{border-radius:999px;font-size:1.05vmin;background:rgba(102,213,141,.14);color:#a7f3c1;border:1px solid rgba(102,213,141,.22)}
+.deal-emoji{font-size:4.2vmin;filter:drop-shadow(0 6px 14px rgba(0,0,0,.2))}
+.deal-name{font-size:1.75vmin;line-height:1.08;letter-spacing:-.03em}
+.deal-badge{border-radius:999px;font-size:.85vmin;background:rgba(102,213,141,.14);color:#a7f3c1;border:1px solid rgba(102,213,141,.22)}
 .deal-pricing{margin-top:auto}
-.deal-special-price,.deal-special-text{font-size:3.5vmin;color:#86efac;letter-spacing:-.05em}
+.deal-special-price,.deal-special-text{font-size:2.65vmin;color:#86efac;letter-spacing:-.05em}
 .idle-footer{padding-top:1.2vh;border-top:1px solid rgba(255,255,255,.07)}
 .idle-footer-logo{box-shadow:0 0 0 1px rgba(255,255,255,.10)}
 .idle-footer-text{color:rgba(245,240,232,.58);font-weight:600}
+.powered-by{color:rgba(79,227,122,.75)}
 .sale-view{background:linear-gradient(90deg,rgba(255,255,255,.025),transparent)}
 .sale-left{background:rgba(255,255,255,.02)}
-.items-header{display:flex;align-items:center;justify-content:space-between;padding:1.8vh 2.2vw;color:#f5f0e8;border-bottom:1px solid rgba(255,255,255,.07);font-size:2.15vmin;letter-spacing:.04em}
-.items-header span:last-child{color:#8ee6aa;font-size:1.8vmin;text-transform:none;letter-spacing:0}
-.items-list{padding:1.6vh 1.8vw 2vh}
-.item-row{padding:1.5vh 1.6vw;margin-bottom:1vh;border-radius:1vmin;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.075);box-shadow:0 8px 24px rgba(0,0,0,.16)}
+.items-header{display:flex;align-items:center;justify-content:space-between;padding:1.25vh 1.7vw;color:#f5f0e8;border-bottom:1px solid rgba(255,255,255,.07);font-size:1.75vmin;letter-spacing:.04em}
+.items-header span:last-child{color:#8ee6aa;font-size:1.45vmin;text-transform:none;letter-spacing:0}
+.items-list{padding:1.1vh 1.25vw 1.4vh}
+.item-row{padding:1vh 1.15vw;margin-bottom:.7vh;border-radius:.75vmin;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.075);box-shadow:0 6px 18px rgba(0,0,0,.14)}
 .item-row.item-new{background:linear-gradient(90deg,rgba(79,189,119,.24),rgba(255,255,255,.075));border-color:rgba(134,239,172,.22)}
-.item-emoji{width:5.4vmin;font-size:4.2vmin}
-.item-qty{background:rgba(134,239,172,.14);color:#9ff3b9;border:1px solid rgba(134,239,172,.18);font-size:2.45vmin;min-width:5.2vmin;padding:.8vmin 1.1vmin}
-.item-name{font-size:2.9vmin;font-weight:800;letter-spacing:-.035em}
-.item-unit-price{font-size:1.65vmin;color:rgba(245,240,232,.48);font-weight:600}
-.item-price{font-size:3.15vmin;color:#95f0ae;letter-spacing:-.045em}
+.item-emoji{width:4vmin;font-size:3.1vmin}
+.item-qty{background:rgba(134,239,172,.14);color:#9ff3b9;border:1px solid rgba(134,239,172,.18);font-size:1.8vmin;min-width:4vmin;padding:.5vmin .75vmin}
+.item-name{font-size:2.25vmin;font-weight:800;letter-spacing:-.035em}
+.item-unit-price{font-size:1.3vmin;color:rgba(245,240,232,.48);font-weight:600}
+.item-price{font-size:2.45vmin;color:#95f0ae;letter-spacing:-.045em}
 .sale-right{width:29vw;max-width:none;background:rgba(4,9,7,.52);border-left:1px solid rgba(255,255,255,.08);box-shadow:-18px 0 45px rgba(0,0,0,.18)}
-.sidebar-header{padding:1.8vh 1.6vw;border-bottom:1px solid rgba(255,255,255,.07)}
-.sidebar-header-small{padding:1.2vh 1.6vw}
-.sidebar-title{font-size:2.55vmin;letter-spacing:-.04em}
+.sidebar-header{padding:1.25vh 1.25vw;border-bottom:1px solid rgba(255,255,255,.07)}
+.sidebar-header-small{padding:.9vh 1.25vw}
+.sidebar-title{font-size:2vmin;letter-spacing:-.04em}
 .sidebar-sub{color:rgba(245,240,232,.46)}
-.latest-card{margin:1.3vh 1.3vw;padding:1.6vmin;border-radius:1.2vmin;background:linear-gradient(160deg,rgba(79,189,119,.18),rgba(255,255,255,.05));border:1px solid rgba(134,239,172,.18);box-shadow:0 14px 32px rgba(0,0,0,.22)}
-.latest-label{font-size:1.15vmin;text-transform:uppercase;letter-spacing:.14em;color:rgba(245,240,232,.46);font-weight:900;margin-bottom:1vmin}
+.latest-card{margin:.9vh 1vw;padding:1.05vmin;border-radius:.85vmin;background:linear-gradient(160deg,rgba(79,189,119,.18),rgba(255,255,255,.05));border:1px solid rgba(134,239,172,.18);box-shadow:0 9px 24px rgba(0,0,0,.18)}
+.latest-label{font-size:.95vmin;text-transform:uppercase;letter-spacing:.14em;color:rgba(245,240,232,.46);font-weight:900;margin-bottom:.65vmin}
 .latest-main{display:flex;align-items:center;gap:1vmin}
-.latest-emoji{font-size:5.5vmin;line-height:1}
+.latest-emoji{font-size:4vmin;line-height:1}
 .latest-info{min-width:0;flex:1}
-.latest-name{font-size:2.25vmin;font-weight:900;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.latest-meta{font-size:1.35vmin;color:rgba(245,240,232,.52);margin-top:.35vmin}
-.latest-price{font-size:3.3vmin;color:#9ff3b9;font-weight:900;letter-spacing:-.05em;margin-top:1vmin;text-align:right}
-.totals-bar{margin:0 1.3vw 1.3vh;padding:1.8vmin;background:rgba(0,0,0,.34);border:1px solid rgba(255,255,255,.08);border-radius:1.2vmin;box-shadow:0 14px 34px rgba(0,0,0,.22)}
-.total-row{font-size:1.85vmin;color:rgba(245,240,232,.62);margin-bottom:.8vh}
-.total-row.grand{display:block;margin-top:1vh;padding-top:1.2vh;border-top:1px solid rgba(255,255,255,.10);font-size:1.8vmin;text-transform:uppercase;letter-spacing:.08em;color:rgba(245,240,232,.58)}
-.total-row.grand .total-amount{display:block;margin-top:.2vh;font-family:'Inter',system-ui,sans-serif;font-size:7.8vmin;line-height:.95;color:#9ff3b9;letter-spacing:-.08em}
-.sidebar-deals{padding:1.1vh 1.3vw;gap:.8vmin}
-.mini-deal{border-radius:.9vmin;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.07);padding:1.1vmin}
-.mini-deal-emoji{font-size:3vmin}
-.mini-deal-name{font-size:1.55vmin}
-.mini-deal-price{font-size:1.85vmin;color:#9ff3b9}
+.latest-name{font-size:1.75vmin;font-weight:900;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.latest-meta{font-size:1.1vmin;color:rgba(245,240,232,.52);margin-top:.25vmin}
+.latest-price{font-size:2.5vmin;color:#9ff3b9;font-weight:900;letter-spacing:-.05em;margin-top:.65vmin;text-align:right}
+.totals-bar{margin:0 1vw .9vh;padding:1.15vmin;background:rgba(0,0,0,.34);border:1px solid rgba(255,255,255,.08);border-radius:.85vmin;box-shadow:0 9px 24px rgba(0,0,0,.18)}
+.total-row{font-size:1.45vmin;color:rgba(245,240,232,.62);margin-bottom:.5vh}
+.total-row.grand{display:block;margin-top:.7vh;padding-top:.8vh;border-top:1px solid rgba(255,255,255,.10);font-size:1.35vmin;text-transform:uppercase;letter-spacing:.08em;color:rgba(245,240,232,.58)}
+.total-row.grand .total-amount{display:block;margin-top:.15vh;font-family:'Inter',system-ui,sans-serif;font-size:5.6vmin;line-height:.95;color:#9ff3b9;letter-spacing:-.08em}
+.sidebar-deals{padding:.8vh 1vw;gap:.55vmin}
+.mini-deal{border-radius:.7vmin;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.07);padding:.75vmin}
+.mini-deal-emoji{font-size:2.3vmin}
+.mini-deal-name{font-size:1.25vmin}
+.mini-deal-price{font-size:1.45vmin;color:#9ff3b9}
 .sidebar-footer{border-top:1px solid rgba(255,255,255,.07)}
+.sidebar-footer .powered-by{margin-top:.45vh;font-size:1.05vmin;color:rgba(79,227,122,.62)}
 .sale-complete{background:
   radial-gradient(circle at 50% 40%,rgba(79,189,119,.22),transparent 35%),
   rgba(4,9,7,.82)}
@@ -209,19 +211,576 @@ body{background:
   .deals-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
   .sale-right{width:34vw}
 }
+
+/* BoundOS gourmet palette */
+:root{
+  --cream:#f7f0dc;
+  --cream-soft:#efe4c8;
+  --forest:#07150d;
+  --forest-2:#0d2216;
+  --forest-3:#142b1c;
+  --sage:#78916b;
+  --gold:#cda75f;
+  --gold-bright:#f0d89c;
+  --gold-soft:rgba(205,167,95,.46);
+}
+body{
+  color:var(--cream);
+  background:
+    radial-gradient(circle at 50% 28%, rgba(241,214,143,.20), transparent 24%),
+    radial-gradient(circle at 52% 28%, rgba(247,240,220,.10), transparent 16%),
+    radial-gradient(circle at 18% 10%, rgba(137,159,115,.13), transparent 30%),
+    linear-gradient(180deg,#102418 0%,#08150f 58%,#020604 100%);
+}
+.header{
+  background:rgba(7,21,13,.78);
+  border-bottom:1px solid rgba(205,167,95,.22);
+  box-shadow:0 10px 34px rgba(0,0,0,.26), inset 0 -1px 0 rgba(247,240,220,.04);
+}
+.brand-circle-img,.idle-hero-logo,.idle-footer-logo{
+  background:var(--forest);
+  box-shadow:
+    0 0 0 1px rgba(205,167,95,.30),
+    0 0 18px rgba(205,167,95,.24),
+    0 8px 26px rgba(0,0,0,.28);
+}
+.store-name{
+  font-family:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  color:var(--cream);
+  letter-spacing:-.074em;
+  font-weight:700;
+}
+.store-sub,.deals-subtitle,.sidebar-sub,.latest-label,.items-header,.sidebar-footer-text,.idle-footer-text{
+  color:rgba(239,228,200,.62);
+}
+.header-datetime,.powered-by{
+  color:var(--gold);
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+.powered-by{
+  font-family:Inter,system-ui,sans-serif;
+  font-size:1.12vmin;
+  font-weight:800;
+}
+.deals-title,.sidebar-title,.thank-you{
+  font-family:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  color:var(--cream);
+  letter-spacing:-.074em;
+  text-shadow:0 0 22px rgba(205,167,95,.18);
+}
+.deal-card,.item-row,.mini-deal,.latest-card,.totals-bar{
+  background:linear-gradient(160deg,rgba(247,240,220,.075),rgba(13,34,22,.32));
+  border-color:rgba(205,167,95,.20);
+  box-shadow:0 10px 28px rgba(0,0,0,.18), inset 0 1px 0 rgba(247,240,220,.055);
+}
+.deal-card::before{
+  background:linear-gradient(90deg,transparent,var(--gold),var(--gold-bright),transparent);
+  opacity:.74;
+}
+.deal-name,.item-name,.mini-deal-name,.latest-name,.total-paid{
+  color:var(--cream);
+}
+.deal-special-price,.deal-special-text,.item-price,.mini-deal-price,.latest-price,.change-display,.total-row.grand .total-amount{
+  color:var(--gold-bright);
+}
+.deal-unit,.item-unit-price,.mini-deal-unit,.latest-meta,.goodbye,.thank-store{
+  color:rgba(239,228,200,.58);
+}
+.badge-special,.badge-today,.badge-fresh,.badge-popular,.mini-deal-badge{
+  background:rgba(205,167,95,.14);
+  border-color:rgba(205,167,95,.28);
+  color:var(--gold-bright);
+}
+.item-qty{
+  background:rgba(120,145,107,.18);
+  border-color:rgba(120,145,107,.35);
+  color:var(--cream-soft);
+}
+.item-row.item-new{
+  background:linear-gradient(90deg,rgba(205,167,95,.18),rgba(247,240,220,.06));
+  border-color:rgba(205,167,95,.30);
+}
+.sale-right{
+  background:rgba(7,21,13,.66);
+  border-left-color:rgba(205,167,95,.20);
+}
+.sidebar-header,.items-header,.idle-footer,.sidebar-footer{
+  border-color:rgba(205,167,95,.18);
+}
+.check-circle{
+  background:linear-gradient(135deg,var(--gold-bright),var(--gold));
+  box-shadow:0 0 0 1px rgba(247,240,220,.28),0 0 46px rgba(205,167,95,.36);
+}
+.check-circle svg{stroke:var(--forest)}
+.sale-complete{
+  background:
+    radial-gradient(circle at 50% 40%,rgba(205,167,95,.24),transparent 35%),
+    rgba(7,21,13,.86);
+}
+
+/* BoundOS customer display design pass */
+:root{
+  --bo-cream:#f7f0dc;
+  --bo-cream-soft:#efe4c8;
+  --bo-forest:#07150d;
+  --bo-forest-2:#0d2216;
+  --bo-forest-3:#142b1c;
+  --bo-sage:#78916b;
+  --bo-gold:#cda75f;
+  --bo-gold-bright:#f0d89c;
+  --bo-line:rgba(205,167,95,.18);
+  --bo-panel:rgba(247,240,220,.055);
+}
+body{
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  color:var(--bo-cream);
+  background:
+    radial-gradient(circle at 50% 22%,rgba(240,216,156,.14),transparent 28%),
+    radial-gradient(circle at 12% 8%,rgba(120,145,107,.12),transparent 24%),
+    linear-gradient(180deg,#102418 0%,#07150d 56%,#020604 100%);
+}
+.header{
+  min-height:8.4vh;
+  padding:1.15vh 2.4vw;
+  background:rgba(5,14,9,.82);
+  border-bottom:1px solid var(--bo-line);
+  box-shadow:none;
+}
+.brand-circle-img{
+  width:5.2vh;
+  height:5.2vh;
+  border-radius:14px;
+  box-shadow:0 0 0 1px rgba(205,167,95,.24);
+}
+.store-name{
+  font-family:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  font-size:3.25vmin;
+  line-height:.9;
+  letter-spacing:-.064em;
+  font-weight:700;
+}
+.store-sub{
+  margin-top:.55vh;
+  font-size:1.18vmin;
+  letter-spacing:.16em;
+  color:rgba(239,228,200,.58);
+}
+.header-datetime{
+  font-size:1.42vmin;
+  letter-spacing:.11em;
+  color:var(--bo-gold-bright);
+  font-weight:700;
+}
+.content::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(90deg,rgba(247,240,220,.035),transparent 18%,transparent 82%,rgba(205,167,95,.04));
+}
+.idle-screen{
+  padding:2.2vh 3vw 1.8vh;
+  gap:1.6vh;
+}
+.idle-hero{
+  justify-content:flex-start;
+  min-height:9.5vh;
+  gap:1.35vw;
+}
+.idle-hero-logo{
+  width:7.4vh;
+  height:7.4vh;
+  border-radius:18px;
+  box-shadow:0 0 0 1px rgba(205,167,95,.22);
+}
+.deals-title{
+  font-size:5.35vmin;
+  line-height:.86;
+  letter-spacing:-.065em;
+  text-shadow:none;
+}
+.deals-subtitle{
+  margin-top:.7vh;
+  font-size:1.25vmin;
+  letter-spacing:.16em;
+  color:rgba(239,228,200,.60);
+}
+.deals-grid{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:1.05vmin;
+  align-content:stretch;
+}
+.deal-card{
+  min-height:14vh;
+  border-radius:8px;
+  padding:1.25vmin;
+  background:linear-gradient(180deg,rgba(247,240,220,.07),rgba(13,34,22,.46));
+  border:1px solid rgba(205,167,95,.16);
+  box-shadow:none;
+}
+.deal-card::before{
+  height:2px;
+  opacity:.68;
+}
+.deal-emoji{
+  font-size:4.4vmin;
+  filter:none;
+}
+.deal-name{
+  font-size:1.78vmin;
+  font-weight:800;
+  letter-spacing:-.025em;
+}
+.deal-badge{
+  padding:.34vmin .78vmin;
+  border-radius:5px;
+  font-size:.78vmin;
+  letter-spacing:.12em;
+  color:var(--bo-gold-bright);
+}
+.deal-special-price,.deal-special-text{
+  color:var(--bo-gold-bright);
+  font-size:2.75vmin;
+}
+.idle-footer{
+  border-top:1px solid var(--bo-line);
+  padding-top:1.1vh;
+}
+.idle-footer-logo{display:none}
+.idle-footer-text{
+  font-size:1.32vmin;
+  color:rgba(239,228,200,.66);
+}
+.powered-by{
+  color:var(--bo-gold);
+  font-size:1.04vmin;
+  letter-spacing:.16em;
+}
+.sale-view{
+  background:transparent;
+  gap:0;
+}
+.sale-left{
+  background:rgba(247,240,220,.018);
+}
+.items-header{
+  min-height:6.5vh;
+  padding:1.25vh 2vw;
+  background:rgba(7,21,13,.38);
+  border-bottom:1px solid var(--bo-line);
+  font-size:1.28vmin;
+  letter-spacing:.15em;
+}
+.items-header span:last-child{
+  color:var(--bo-gold-bright);
+  font-size:1.18vmin;
+}
+.items-list{
+  padding:1.2vh 1.4vw;
+}
+.item-row{
+  min-height:8vh;
+  padding:1.05vh 1.25vw;
+  margin-bottom:.8vh;
+  border-radius:8px;
+  background:rgba(247,240,220,.055);
+  border:1px solid rgba(205,167,95,.13);
+  box-shadow:none;
+}
+.item-row.item-new{
+  background:linear-gradient(90deg,rgba(205,167,95,.16),rgba(247,240,220,.055));
+}
+.item-emoji{
+  width:4.3vmin;
+  font-size:3.5vmin;
+}
+.item-qty{
+  min-width:4.6vmin;
+  border-radius:6px;
+  background:rgba(120,145,107,.18);
+  border:1px solid rgba(120,145,107,.28);
+  color:var(--bo-cream-soft);
+}
+.item-name{
+  font-size:2.35vmin;
+}
+.item-unit-price{
+  color:rgba(239,228,200,.54);
+}
+.item-price{
+  color:var(--bo-gold-bright);
+  font-size:2.7vmin;
+}
+.sale-right{
+  width:30vw;
+  background:rgba(4,11,7,.64);
+  border-left:1px solid var(--bo-line);
+  box-shadow:none;
+}
+.sidebar-header{
+  padding:1.25vh 1.4vw;
+  border-bottom:1px solid var(--bo-line);
+}
+.sidebar-title{
+  font-size:2.35vmin;
+  line-height:.9;
+  text-shadow:none;
+}
+.sidebar-sub{
+  margin-top:.5vh;
+  letter-spacing:.13em;
+}
+.latest-card,.totals-bar,.mini-deal{
+  border-radius:8px;
+  background:rgba(247,240,220,.055);
+  border:1px solid rgba(205,167,95,.15);
+  box-shadow:none;
+}
+.latest-card{
+  margin:1vh 1.1vw;
+  padding:1.2vmin;
+}
+.latest-label{
+  color:rgba(239,228,200,.55);
+}
+.latest-price{
+  color:var(--bo-gold-bright);
+}
+.totals-bar{
+  margin:0 1.1vw 1vh;
+  padding:1.2vmin;
+}
+.total-row{
+  color:rgba(239,228,200,.62);
+}
+.total-row.grand{
+  color:rgba(239,228,200,.68);
+}
+.total-row.grand .total-amount{
+  color:var(--bo-gold-bright);
+  font-size:5.9vmin;
+  letter-spacing:-.065em;
+}
+.sidebar-deals{
+  padding:.85vh 1.1vw;
+}
+.sidebar-footer{
+  border-top:1px solid var(--bo-line);
+}
+.sale-complete{
+  background:
+    radial-gradient(circle at 50% 38%,rgba(205,167,95,.18),transparent 32%),
+    rgba(7,21,13,.90);
+}
+.check-circle{
+  width:11.5vmin;
+  height:11.5vmin;
+  box-shadow:0 0 0 1px rgba(247,240,220,.25);
+}
+.thank-you{
+  font-size:6.4vmin;
+  text-shadow:none;
+}
+.thank-store,.goodbye{
+  color:rgba(239,228,200,.62);
+}
+@media (max-width:1100px){
+  .deals-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (orientation:portrait){
+  .deals-grid{grid-template-columns:1fr}
+  .idle-hero{justify-content:center;text-align:center}
+}
+
+/* Reference-led redesign: customer display as clear order review */
+body{
+  background:
+    radial-gradient(circle at 82% 10%,rgba(205,167,95,.18),transparent 28%),
+    linear-gradient(180deg,#f7f0dc 0%,#efe4c8 100%);
+  color:#07150d;
+}
+.header{
+  min-height:7.4vh;
+  background:#07150d;
+  border-bottom:1px solid rgba(7,21,13,.18);
+  padding:1vh 2.2vw;
+}
+.brand-circle-img{
+  width:4.8vh;
+  height:4.8vh;
+  border-radius:10px;
+}
+.store-name{
+  font-family:Inter,ui-sans-serif,system-ui,sans-serif;
+  font-size:2.35vmin;
+  letter-spacing:-.035em;
+  font-weight:850;
+}
+.store-sub,.header-datetime{
+  font-size:1.15vmin;
+  letter-spacing:.12em;
+}
+.idle-screen{
+  padding:3vh 3.2vw 2vh;
+}
+.idle-hero{
+  align-items:flex-end;
+  min-height:auto;
+  margin-bottom:1.2vh;
+}
+.idle-hero-logo{display:none}
+.deals-title{
+  font-family:Inter,ui-sans-serif,system-ui,sans-serif;
+  font-size:4.1vmin;
+  letter-spacing:-.055em;
+  line-height:.95;
+  color:#07150d;
+}
+.deals-subtitle{
+  font-size:1.35vmin;
+  letter-spacing:.08em;
+  text-transform:none;
+  color:rgba(7,21,13,.58);
+}
+.deals-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:1.35vmin;
+}
+.deal-card{
+  min-height:16vh;
+  border-radius:10px;
+  background:#f7f0dc;
+  color:#07150d;
+  border:1px solid rgba(205,167,95,.26);
+  padding:1.5vmin;
+}
+.deal-card::before{display:none}
+.deal-name{
+  color:#07150d;
+  font-size:1.95vmin;
+}
+.deal-emoji{
+  font-size:4.8vmin;
+}
+.deal-badge{
+  background:rgba(120,145,107,.16);
+  border-color:rgba(120,145,107,.30);
+  color:#0d2216;
+}
+.deal-special-price,.deal-special-text{
+  color:#0d2216;
+  font-size:3.15vmin;
+}
+.deal-normal-price,.deal-unit{
+  color:rgba(7,21,13,.52);
+}
+.idle-footer{
+  border-top:1px solid rgba(7,21,13,.12);
+}
+.idle-footer-text{color:rgba(7,21,13,.58)}
+.powered-by{color:#0d2216}
+.sale-view{
+  padding:2vh 2vw;
+  gap:1.4vw;
+}
+.sale-left{
+  background:#fffaf0;
+  border-radius:12px;
+  border:1px solid rgba(7,21,13,.10);
+  color:#07150d;
+  overflow:hidden;
+}
+.items-header{
+  min-height:6.2vh;
+  background:#f0ead9;
+  border-bottom:1px solid rgba(7,21,13,.10);
+  color:#07150d;
+}
+.items-header span:last-child{
+  color:#657c5b;
+}
+.items-list{
+  padding:1.25vh 1.25vw;
+}
+.item-row{
+  min-height:7.4vh;
+  background:#fffaf0;
+  border:1px solid rgba(7,21,13,.08);
+  color:#07150d;
+  border-radius:8px;
+}
+.item-row.item-new{
+  background:#f0ead9;
+  border-color:rgba(205,167,95,.32);
+}
+.item-name{
+  color:#07150d;
+}
+.item-unit-price{
+  color:rgba(7,21,13,.52);
+}
+.item-qty{
+  background:#0d2216;
+  color:#f7f0dc;
+  border-color:#0d2216;
+}
+.item-price{
+  color:#07150d;
+}
+.sale-right{
+  width:31vw;
+  background:#07150d;
+  border:1px solid rgba(205,167,95,.22);
+  border-radius:12px;
+  overflow:hidden;
+}
+.sidebar-header{
+  background:#0d2216;
+}
+.sidebar-title{
+  font-family:Inter,ui-sans-serif,system-ui,sans-serif;
+  font-size:1.85vmin;
+  letter-spacing:-.035em;
+}
+.latest-card,.totals-bar,.mini-deal{
+  background:rgba(247,240,220,.07);
+  border-color:rgba(205,167,95,.18);
+}
+.total-row.grand .total-amount{
+  color:#f0d89c;
+  font-size:6.4vmin;
+}
+.mini-deal-name,.latest-name,.total-paid{color:#f7f0dc}
+.mini-deal-price,.latest-price{color:#f0d89c}
+.sale-complete{
+  background:
+    radial-gradient(circle at 50% 24%,rgba(120,145,107,.18),transparent 30%),
+    linear-gradient(180deg,#f7f0dc,#efe4c8);
+  color:#07150d;
+}
+.check-circle{
+  background:#07150d;
+}
+.check-circle svg{stroke:#f7f0dc}
+.thank-you{
+  font-family:Inter,ui-sans-serif,system-ui,sans-serif;
+  letter-spacing:-.055em;
+  color:#07150d;
+}
+.thank-store,.goodbye{color:rgba(7,21,13,.58)}
 </style>
 </head>
 <body>
 
 <div class="header">
-  <img src="logo-circle.png" alt="C" class="brand-circle-img company-logo">
+  <img src="boundos.png" alt="BoundOS" class="brand-circle-img company-logo">
   <div>
-    <div class="store-name" id="storeName">Tillaroo</div>
+    <div class="store-name" id="storeName">BoundOS</div>
     <div class="store-sub" id="storeSub">Fresh Fruit & Veg</div>
   </div>
   <div class="header-status">
-    <div class="header-status-label">Now serving</div>
-    <div class="header-clock" id="customerClock"></div>
+    <div class="header-datetime" id="customerClock"></div>
   </div>
 </div>
 
@@ -229,7 +788,7 @@ body{background:
   <!-- Idle screen with Today's Deals -->
   <div class="idle-screen" id="idleScreen">
     <div class="idle-hero">
-      <img src="logo-circle.png" alt="" class="idle-hero-logo company-logo">
+      <img src="boundos.png" alt="" class="idle-hero-logo company-logo">
       <div>
         <div class="deals-title">Fresh picks today</div>
         <div class="deals-subtitle">Specials, staples, and seasonal favourites</div>
@@ -238,9 +797,10 @@ body{background:
     <div class="deals-grid" id="dealsGrid"></div>
     <div class="idle-footer">
       <div class="idle-footer-left">
-        <img src="logo-circle.png" alt="C" class="idle-footer-logo company-logo">
+        <img src="boundos.png" alt="BoundOS" class="idle-footer-logo company-logo">
         <div class="idle-footer-text" id="storeAddress">1164 Cavendish Rd, Mt Gravatt East QLD 4122</div>
       </div>
+      <div class="powered-by">Powered by BoundOS</div>
     </div>
   </div>
 
@@ -248,7 +808,7 @@ body{background:
   <div class="sale-view" id="saleView">
     <div class="sale-left">
       <div class="items-header">
-        <span>Your order</span>
+        <span>Your items</span>
         <span id="itemsHeaderCount">0 items</span>
       </div>
       <div class="items-list" id="itemsList"></div>
@@ -279,7 +839,8 @@ body{background:
       </div>
       <div class="sidebar-deals" id="sidebarDeals"></div>
       <div class="sidebar-footer">
-        <div class="sidebar-footer-text">Crisp on Creek<br>Fresh Fruit & Veg Daily</div>
+        <div class="sidebar-footer-text" id="activeStoreAddress">1164 Cavendish Rd, Mt Gravatt East QLD 4122</div>
+        <div class="powered-by">Powered by BoundOS</div>
       </div>
     </div>
   </div>
@@ -314,7 +875,13 @@ body{background:
   function updateClock() {
     const el = document.getElementById('customerClock')
     if (!el) return
-    el.textContent = new Date().toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })
+    el.textContent = new Date().toLocaleString('en-AU', {
+      weekday: 'short',
+      day: '2-digit',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
   }
 
   function emojiForProduct(name) {
@@ -406,22 +973,47 @@ body{background:
     return { special: 'SPECIAL', today: 'TODAY ONLY', fresh: 'FRESH PICK', popular: 'POPULAR' }[badge] || ''
   }
 
+  function normaliseLogoFit(value) {
+    return value === 'cover' ? 'cover' : 'contain'
+  }
+
+  function normaliseLogoScale(value) {
+    const n = parseFloat(value)
+    if (!Number.isFinite(n)) return 1
+    return Math.min(1.4, Math.max(0.5, n))
+  }
+
+  function applyCompanyLogoStyle(fit, scale) {
+    const safeFit = normaliseLogoFit(fit)
+    const safeScale = normaliseLogoScale(scale)
+    document.querySelectorAll('.company-logo').forEach(img => {
+      img.style.objectFit = safeFit
+      img.style.transform = `scale(${safeScale})`
+      img.style.transformOrigin = 'center'
+    })
+  }
+
   async function refreshBranding() {
-    const [storeName, storeAddress, companyLogo] = await Promise.all([
+    const [storeName, storeAddress, companyLogo, companyLogoFit, companyLogoScale] = await Promise.all([
       ipcRenderer.invoke('db:settings:get', 'store_name'),
       ipcRenderer.invoke('db:settings:get', 'store_address'),
-      ipcRenderer.invoke('db:settings:get', 'company_logo')
+      ipcRenderer.invoke('db:settings:get', 'company_logo'),
+      ipcRenderer.invoke('db:settings:get', 'company_logo_fit'),
+      ipcRenderer.invoke('db:settings:get', 'company_logo_scale')
     ])
-    const name = storeName || 'Tillaroo'
-    document.title = `${name} - Customer Display`
+    const name = storeName || 'BoundOS'
+    document.title = 'BoundOS Client - Customer Display'
     document.getElementById('storeName').textContent = name
     document.querySelector('.thank-store').textContent = `Thank you for shopping at ${name}`
-    document.querySelector('.sidebar-footer-text').innerHTML = `${esc(name)}<br>Fresh Fruit & Veg Daily`
-    if (storeAddress) document.getElementById('storeAddress').textContent = storeAddress
+    const address = storeAddress || '1164 Cavendish Rd, Mt Gravatt East QLD 4122'
+    if (storeAddress) document.getElementById('storeAddress').textContent = address
+    const activeAddress = document.getElementById('activeStoreAddress')
+    if (activeAddress) activeAddress.textContent = address
     document.querySelectorAll('.company-logo').forEach(img => {
-      img.src = companyLogo || 'logo-circle.png'
+      img.src = companyLogo || 'boundos.png'
       img.alt = name
     })
+    applyCompanyLogoStyle(companyLogoFit, companyLogoScale)
   }
 
   // ═══ Render Functions ═══════════════════════════════════════════════════════
@@ -430,7 +1022,7 @@ body{background:
     const deals = getActiveDeals()
     if (!deals.length) {
       document.getElementById('dealsGrid').innerHTML = `
-        <div class="deal-card" style="grid-column:1/-1;align-items:center;justify-content:center;text-align:center;min-height:32vh">
+        <div class="deal-card" style="grid-column:1/-1;align-items:center;justify-content:center;text-align:center;min-height:20vh">
           <div class="deal-emoji">🧺</div>
           <div class="deal-name">Welcome in</div>
           <div class="deal-unit">Your items will appear here when the sale starts.</div>
@@ -492,7 +1084,11 @@ body{background:
     const { items, total, tax, count, storeName } = data
 
     if (storeName) document.getElementById('storeName').textContent = storeName
-    if (data.storeAddress) document.getElementById('storeAddress').textContent = data.storeAddress
+    if (data.storeAddress) {
+      document.getElementById('storeAddress').textContent = data.storeAddress
+      const activeAddress = document.getElementById('activeStoreAddress')
+      if (activeAddress) activeAddress.textContent = data.storeAddress
+    }
 
     if (!items || items.length === 0) {
       document.getElementById('idleScreen').style.display = 'flex'

@@ -23,6 +23,7 @@ let state = {
   environment: 'sandbox',
   username: '',
   password: '',
+  posId: null,
   lastTxn: null,
   polling: false
 }
@@ -85,9 +86,9 @@ async function getToken () {
 
   const result = await request(authHost(), 'POST', '/v1/tokens/cloudpos', {
     secret: state.secret,
-    posName: 'Tillaroo POS',
+    posName: 'BoundOS Client',
     posVersion: '1.0.0',
-    posId: genuuid(),
+    posId: state.posId || genuuid(),
     posVendorId: 'b8f0e2a0-1234-4abc-9def-567890abcdef'
   })
 
@@ -309,6 +310,7 @@ function getStatus () {
     paired: state.paired,
     hasCredentials: !!(state.username && state.secret),
     environment: state.environment,
+    posId: state.posId,
     sessionActive: !!(state.token && Date.now() < (state.tokenExpiry || 0)),
     lastTxn: state.lastTxn
   }
@@ -318,6 +320,7 @@ function configure (opts) {
   if (opts.environment) state.environment = opts.environment
   if (opts.username) state.username = opts.username
   if (opts.password) state.password = opts.password
+  if (opts.posId) state.posId = opts.posId
   if (opts.secret) { state.secret = opts.secret; state.paired = true }
 }
 
